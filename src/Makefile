@@ -1,4 +1,4 @@
-NAME=DobCert
+NAME=DopCert
 BUILD=.build
 
 CP=cp
