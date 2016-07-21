@@ -7,20 +7,6 @@ Require Import UnivalentSemantics.
 
 Open Scope type.
 
-(*
-
-HoTT/theories/Basics/Overture.v
-
-HoTT/theories/UnivalenceAxiom.v
-
-HoTT/theories/Types/Prod.v
-
-HoTT/theories/hit/Truncations.v
-
-HoTT/theories/UnivalenceImpliesFunext.v
-
-*)
-
 Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T S).
   Import T S R A.
   Module SQL_TSRA := SQL T S R A.
