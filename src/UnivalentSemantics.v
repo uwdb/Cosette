@@ -243,7 +243,11 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Notation "'FALSE'" := (false) (at level 45).
   Notation "'TRUE'" := (true) (at level 45).
   Notation "'DISTINCT' s" := (distinct s) (at level 45).
-  
+ 
+  Instance isHSetSQL `{forall s (r:relation s) t, IsHSet (⟦ r ⟧ t)} Γ s q g t : IsHSet (⟦ Γ ⊢ q : s ⟧ g t).
+    induction q; refine (_).
+  Defined.
+
   Definition GroupByProjection Γ s C T := SQL (Γ ++ s) s -> Column C s -> Expr (Γ ++ s) T.
 
   Definition plainGroupByProjection {Γ s C T} (e : Expr (Γ ++ s) T) : GroupByProjection Γ s C T := fun _ _ => e.
