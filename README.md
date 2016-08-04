@@ -4,6 +4,9 @@ Our website: http://dopcert.cs.washington.edu/.
 
 Our coq code has been tested with coq 8.5pl1, you need to install [HoTT](https://github.com/HoTT/HoTT) library as well. So we recommend users to use the docker development environment as described below.
 
+## Install Docker
+A detailed documentation could be found [here](https://docs.docker.com/engine/understanding-docker/).
+
 ## Build Project
 
 Build project and call it `dopcert` with:
