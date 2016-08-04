@@ -2,7 +2,7 @@
 DopCert is a framework for formally verifying query optimization. 
 Our website: http://dopcert.cs.washington.edu/.
 
-Our coq code has been tested with coq 8.5pl1, you need to install [HoTT](https://github.com/HoTT/HoTT) library as well. So we recommend users to use the docker development environment as described below.
+Our coq code has been tested using [HoTT](https://github.com/HoTT/HoTT) library with Coq 8.5pl1. To save from building HoTT library and Coq, we recommend docker based development environment described below:
 
 ## Install Docker
 A detailed documentation could be found [here](https://docs.docker.com/engine/understanding-docker/).
