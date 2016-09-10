@@ -1,7 +1,7 @@
 (**
 SQL is the lingua franca for retrieving structured data. Existing semantics for SQL, however, either do not model crucial features of the language (e.g., relational algebra lacks bag semantics, correlated subqueries, and aggregation), or make it hard to formally reason about SQL query rewrites (e.g., the SQL standard's English is too informal). This post focuses on the ways that HoTT concepts (e.g., Homotopy Types, the Univalence Axiom, and Truncation) enabled us to develop HoTTSQL — a new SQL semantics that makes it easy to formally reason about SQL query rewrites. Our #<a href="https://arxiv.org/abs/1607.04822">paper</a># also details the rich set of SQL features supported by HoTTSQL.
 
-You can download this #<a href="https://github.com/uwdb/DopCert/blob/master/src/BlogPost.v">blog post's source</a># (implemented in Coq using the #<a href="https://github.com/HoTT/HoTT">HoTT library</a>#). Learn more about HoTTSQL by visiting our #<a href="http://dopcert.cs.washington.edu/">website</a>#.
+You can download this #<a href="https://github.com/uwdb/DopCert/blob/master/src/BlogPost.v">blog post's source</a># (implemented in Coq using the #<a href="https://github.com/HoTT/HoTT">HoTT library</a>#). Learn more about HoTTSQL by visiting our #<a href="http://cosette.cs.washington.edu/">website</a>#.
 **)
 
 (* begin hide *)
@@ -352,7 +352,7 @@ We model bags of type [A] as a function [A -> Type].  Bags can be proven equal u
 
 Duplicate elimination in SQL is implemented using (-1)-truncation, which leads to clean and easily automatable deductive proofs.  Many of our proofs could be further simplified with a [ring] tactic for the homotopy type semi-ring.
 
-Visit our #<a href="http://dopcert.cs.washington.edu/">website</a># to access our source code, learn how we denote other advanced SQL features such as correlated subqueries, aggregation, advanced projections, etc, and how we proved complex rewrite rules (e.g., magic set rewrites). 
+Visit our #<a href="http://cosette.cs.washington.edu/">website</a># to access our source code, learn how we denote other advanced SQL features such as correlated subqueries, aggregation, advanced projections, etc, and how we proved complex rewrite rules (e.g., magic set rewrites). 
 
 #<a href="http://goo.gl/JTZLgq">Contact us</a># if you have any question, feedback, or know how to improve HoTTSQL (e.g., you know how to use more concepts from HoTT to extend HoTTSQL).
 **)
