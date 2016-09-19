@@ -22,9 +22,9 @@ For example, the bag [numbers = {| 7, 42, 7 |}] can be represented as:
 
 Definition numbers : Bag nat :=
   fun n => match n with
-  | 7 => Bool
+  | 7 =>  Bool
   | 42 => Unit
-  | _ => Empty
+  | _ =>  Empty
   end.
 
 (**
@@ -50,15 +50,58 @@ Proof.
 Qed.
 
 (**
-Note that homotopy types form a commutative semi-ring with [+], [*], [Empty], and [Unit]. Just like the above rewrite rule, many SQL rewrite rules are expressions built using the operators of this semi-ring, and could thus be solved or simplified using a [ring] tactic (#<a href="https://coq.inria.fr/refman/Reference-Manual028.html">see</a>#). Unfortunately, Coq's [ring] tactic does not currently play well with HoTT's implementation of [=]. Lifting this restriction would dramatically simplify many of our proofs (Anyone interested in fixing the [ring] tactic? Let us know). 
+Note that it is reasonable to assume that SQL relations are bags that map tuples only to 0-truncated types (types with no higher homotopical information), because real-world databases' input relations only contain tuples with finite multiplicity ([Fin n] is 0-truncated), and because SQL queries only use type operators that preserve 0-truncation. 
 
+0-trucated types form a commutative semi-ring with [+], [*], [Empty], and [Unit]. Just like the above proof, the proof of many rewrite rules simplify to an expressions built using the operators of this semi-ring, and could thus be solved or simplified using a [ring] tactic (#<a href="https://coq.inria.fr/refman/Reference-Manual028.html">see</a>#). Unfortunately, Coq's [ring] tactic is not yet ported to the HoTT library. Porting [ring] would dramatically simplify many of our proofs (Anyone interested in porting the [ring] tactic? Let us know). 
+**)
+
+(* begin hide *)
+Section Algebra.
+  Class SemiRing : Type := {
+    T : Type;
+    O : T;
+    I : T;
+    plus : T -> T -> T;
+    times : T -> T -> T;
+  
+    plusO n : plus O n = n;
+    plusSym n m : plus n m = plus m n;
+    plusAssoc n m p : plus n (plus m p) = plus (plus n m) p;
+    timesI n : times I n = n;
+    timesO n : times O n = O;
+    timesSym n m : times n m = times m n;
+    timesAssoc n m p : times n (times m p) = times (times n m) p;
+    distr n m p : times (plus n m) p = plus (times n p) (times m p)
+  }.
+  
+  Instance SemiRingHSet : SemiRing. 
+    refine {|
+      T := hSet;
+      O := BuildhSet Empty;
+      I := BuildhSet Unit;
+      plus x y := BuildhSet (x + y);
+      times x y := BuildhSet (x * y)
+    |}.
+  Proof.
+    all: intros; simpl; apply path_trunctype.
+    - apply sum_empty_l.
+    - apply equiv_sum_symm. 
+    - symmetry. apply equiv_sum_assoc.
+    - apply prod_unit_l.
+    - apply prod_empty_l. 
+    - apply equiv_prod_symm.
+    - apply equiv_prod_assoc.
+    - apply sum_distrib_r.
+  Defined.
+End Algebra.
+(* end hide *)
+
+(**
 How to model bags is a fundamental design decision for mechanizing formal proofs of SQL query equivalences. Our formalization of bags is unconventional but effective for reasoning about SQL query rewrites, as we will see.
 
 Previous work has modeled bags as _lists_ (e.g., as done by #<a href="https://dl.acm.org/citation.cfm?doid=1707801.1706329">Malecha et al.</a>#), where SQL queries are recursive functions over input lists, and two bags are equal iff their underlying lists are equal up to element reordering. Proving two queries equal thus requires induction on input lists (including coming up with induction hypothesis) and reasoning about list permutations. In contrast, by modeling bags as functions from tuples to types, proving two queries equal just requires proving the equality of two HoTT types.
 
 In the database research community, prior work has modeled bags as _functions to natural numbers_ (e.g., as done by #<a href="https://dl.acm.org/citation.cfm?doid=1265530.1265535">Green et al.</a>#). Using this approach, one cannot define the potentially infinite sum [∑ a, r a] that counts the number of elements in a bag [r]. This is important since a basic operation in SQL, projection, requires counting all tuples in a bag that match a certain predicate. In contrast, by modeling bags as functions from tuples to types, we can count the number of elements in a bag using the sigma type [∑], where the cardinality of the sigma type [∑ a, r a] is equal to the sum of the cardinalities of [r a] for all [a].
-
-Note that it is reasonable to assume that SQL relations only map to 0-truncated types (types with no higher homotopical information), because real-world databases only store a finite number of tuples in input relation to SQL queries ([Fin n] is 0-truncated), and because SQL queries only use type operators that preserve 0-truncation. However, HoTTSQL does not requires this assumption, and as future work, it will be interesting to understand what the "cardinality" of a type with higher homotopical information means.
 **)
 
 (** ** Schemas
@@ -350,7 +393,7 @@ We have shown how concepts from HoTT have enabled us to develop HoTTSQL, a SQL s
 
 We model bags of type [A] as a function [A -> Type].  Bags can be proven equal using the univalence axiom.  In contrast to models of bags as [list A], we require no inductive or permutation proofs.  In contrast to models of bags as [A -> nat], we can count the number of elements in any bag.
 
-Duplicate elimination in SQL is implemented using (-1)-truncation, which leads to clean and easily automatable deductive proofs.  Many of our proofs could be further simplified with a [ring] tactic for the homotopy type semi-ring.
+Duplicate elimination in SQL is implemented using (-1)-truncation, which leads to clean and easily automatable deductive proofs.  Many of our proofs could be further simplified with a [ring] tactic for the 0-trucated type semi-ring.
 
 Visit our #<a href="http://cosette.cs.washington.edu/">website</a># to access our source code, learn how we denote other advanced SQL features such as correlated subqueries, aggregation, advanced projections, etc, and how we proved complex rewrite rules (e.g., magic set rewrites). 
 
