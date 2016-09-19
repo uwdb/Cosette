@@ -37,7 +37,7 @@ To connect to the docker process on another machine, run:
 
 Remove development environment with:
     
-    docker rm -f dopcert
+    docker rm -f cosette
 
 Remove all old docker containers with:
 
