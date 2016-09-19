@@ -19,11 +19,11 @@ Build project and call it `cosette` with:
  
 Run development environment named `cosette` with:
 
-    docker run -d --name cosette -v $(pwd)/src/:/src/ cosette sleep infinity
+    docker run -d --name cosette -v $(pwd)/hott/:/hott/ cosette sleep infinity
  
 Build changes to the project with:
 
-    docker exec cosette make -C src
+    docker exec cosette make -C hott
 
 Connect to the docker process with emacs and edit Coq files using ProofGeneral.
 Emacs must have `docker-tramp` installed, and `enable-remote-dir-locals` enabled.
