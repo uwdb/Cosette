@@ -28,6 +28,11 @@ Emacs must have `docker-tramp` installed, and `enable-remote-dir-locals` enabled
 
     emacs /docker:dopcert:/hott/UnivalentSemantics.v
 
+To connect to the docker process on another machine, run:
+
+    emacs "/ssh:user@machine|docker:dopcert:/hott/UnivalentSemantics.v"
+
+
 Remove development environment with:
     
     docker rm -f dopcert
