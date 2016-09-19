@@ -17,7 +17,7 @@ Module RewriteOptimization (T : Types) (S : Schemas T) (R : Relations T S) (A : 
     ⟦ Γ ⊢ (SELECT * FROM1 a WHERE slct0) : s ⟧ =
     ⟦ Γ ⊢ (SELECT * FROM1 a WHERE slct1) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     intro e.
     rewrite e.
     reflexivity.

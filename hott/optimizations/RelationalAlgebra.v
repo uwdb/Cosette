@@ -16,7 +16,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM1 (SELECT * FROM1 a WHERE slct1) WHERE slct0) : s ⟧ =
     ⟦ Γ ⊢ (SELECT * FROM1 (SELECT * FROM1 a WHERE slct0) WHERE slct1) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -33,7 +33,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM1 (SELECT * FROM1 a WHERE slct) WHERE slct) : s ⟧ =
     ⟦ Γ ⊢ (SELECT * FROM1 a WHERE slct) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -49,7 +49,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM1 a WHERE slct0 AND slct1) : s ⟧ =
     ⟦ Γ ⊢ (SELECT * FROM1 (SELECT * FROM1 a WHERE slct0) WHERE slct1) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -66,7 +66,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM r, s WHERE
            castPred (combine left (right⋅right)) slct) : _ ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
@@ -86,7 +86,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (DISTINCT SELECT * FROM1 a WHERE slct0 OR slct1) : s ⟧ =
     ⟦ Γ ⊢ (DISTINCT ((SELECT * FROM1 a WHERE slct0) UNION ALL (SELECT * FROM1 a WHERE slct1))) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -115,7 +115,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM1 (a0 UNION ALL a1) WHERE slct) : s ⟧ =
     ⟦ Γ ⊢ ((SELECT * FROM1 a0 WHERE slct) UNION ALL (SELECT * FROM1 a1 WHERE slct)) : s ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -130,7 +130,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     ⟦ Γ ⊢ (SELECT * FROM2 a, (a0 UNION ALL a1)) : (s ++ s01) ⟧ = 
     ⟦ Γ ⊢ ((SELECT * FROM2 a, a0) UNION ALL (SELECT * FROM2 a, a1)) : (s ++ s01) ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     match goal with
@@ -146,7 +146,7 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
                               (FROM b, a) ) : (s1 ++ s2) ⟧ =
               ⟦ Γ ⊢ (FROM a, b) : (s1 ++ s2) ⟧.
   Proof.
-    cbn.
+    simpl.
     by_extensionality g.
     by_extensionality t.
     symmetry.
@@ -192,40 +192,4 @@ Module RelationalAlgebraOptimization (T : Types) (S : Schemas T) (R : Relations 
     exact tt.
   Qed.
 
-  Lemma doubleUnitNeqUnit :
-    ~(forall Γ s a, ⟦ Γ ⊢ a : s ⟧ = ⟦ Γ ⊢ a UNION ALL a : s ⟧).
-  Proof.
-    assert (exists Γ s a, ~⟦ Γ ⊢ a : s ⟧ = ⟦ Γ ⊢ a UNION ALL a : s ⟧) as h. {
-      refine (exist _ (leaf sqlUnit) _).
-      refine (exist _ (leaf sqlUnit) _).
-      refine (exist _ (table unitTable) _).
-      cbn.
-      intros h.
-      assert (forall t, (⟦ unitTable ⟧ t) = (⟦ unitTable ⟧ t + ⟦ unitTable ⟧ t)) as h'. {
-        intros t.
-        assert (⟦ sqlUnit ⟧) as tt. {
-          rewrite denoteSqlUnit.
-          exact tt.
-        }
-        apply happly in h.
-        specialize (h tt).
-        apply happly in h.
-        specialize (h t).
-        apply h.
-      }
-      clear h.
-      rewrite denoteUnitTable in h'.
-      unfold Tuple in *.
-      rewrite denoteSqlUnit in h'.
-      specialize (h' tt).
-      apply onePlusOneNeqOne.
-      apply equiv_path.
-      assumption.
-    }
-    intros h'.
-    destruct h as [Γ [s [a h]]].
-    specialize (h' Γ s a).
-    apply h.
-    assumption.
-  Qed.    
 End RelationalAlgebraOptimization.

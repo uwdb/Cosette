@@ -1,4 +1,4 @@
-NAME=DopCert
+NAME=Cosette
 BUILD=.build
 
 CP=cp

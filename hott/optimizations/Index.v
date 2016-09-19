@@ -18,7 +18,8 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
 
   
   Definition isUnique {s τ} (k: Column τ s) (R: SQL empty s) :=
-    forall t, denoteSQL R tt t -> ⟦ empty ⊢ (SELECT1 right⋅k FROM1 R) : _ ⟧ tt (⟦k⟧ t) = Unit.
+    forall t, denoteSQL R tt t ->
+         denoteSQL (SELECT1 right⋅k FROM1 R) tt (⟦k⟧ t) = Unit.
      
   Definition isKey {s t} (k: Column t s) (R: SQL empty s) :=
     forall t1 t2, denoteSQL R tt t1 -> denoteSQL R tt t2 -> ⟦k⟧ t1 = ⟦k⟧ t2 -> t1 = t2.
@@ -178,8 +179,9 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     + intros [[[e1 e2] e3] e4].
       destruct e3.
       refine (_,( _, _)); try reflexivity.
-    - refine (_; _).
-      refine (denoteProj k ta, (⟦l⟧, tt)).
+    - simple refine (_; _). {
+        refine (denoteProj k ta, (⟦l⟧, tt)).
+        }
       cbn.
       destruct e2.
       refine (_, (_, _)); reflexivity.
