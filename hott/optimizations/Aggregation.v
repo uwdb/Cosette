@@ -14,28 +14,26 @@ Module AggregationOptimization (T : Types) (S : Schemas T) (R : Relations T S)  
 
   Parameter integer : type.
   Parameter count : forall {T}, aggregator T integer.
-  Notation "'COUNT' ( e )" := (aggregatorGroupByProjection count e).
+  Notation "'COUNT' ( e )" := (aggregatorGroupByProj count e).
   
   Definition AggregationQuery : Type.
     refine (forall (Γ : Schema) s (a : relation s) C0 (value : Column C0 s) C1 (label: Column C1 s) (l : constant C1), _).
     pose (@variable C1 (Γ ++ s) (right⋅label)) as lbl.
     pose (@variable C0 (Γ ++ s) (right⋅value)) as val.
-    pose  (@variable C1 (Γ ++ singleton C1 ++ singleton integer ++ empty) (right⋅left⋅star)) as lbl'. 
+    pose (@variable C1 (Γ ++ (singleton C1 ++ singleton integer)) (right⋅left)) as lbl'. 
     refine (⟦ Γ ⊢ (SELECT *
                   FROM1
-                  (SELECT PLAIN(lbl), COUNT(val) FROM1 table a GROUP BY label ) 
+                  (SELECT (combineGroupByProj PLAIN(lbl) COUNT(val)) FROM1 table a GROUP BY (right⋅label)) 
                   WHERE equal lbl' (constantExpr l)) : _ ⟧ = 
-            ⟦ Γ ⊢ SELECT PLAIN(lbl), COUNT(val)
+            ⟦ Γ ⊢ SELECT (combineGroupByProj PLAIN(lbl) COUNT(val))
                   FROM1 table a
                   WHERE equal lbl (constantExpr l) 
-                  GROUP BY label : _ ⟧).
+                  GROUP BY (right⋅label) : _ ⟧).
   Defined.
   Arguments AggregationQuery /.
   
   Lemma aggregationQuery : AggregationQuery. 
-    cbn.  
-    by_extensionality g.
-    by_extensionality t.
+    start.
     apply path_universe_uncurried.  
     apply equiv_iff_hprop_uncurried.
     constructor.
@@ -86,4 +84,3 @@ Module AggregationOptimization (T : Types) (S : Schemas T) (R : Relations T S)  
   Qed.
   
 End AggregationOptimization.
-

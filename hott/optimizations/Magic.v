@@ -14,7 +14,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
 
   Parameter integer : type.
   Parameter count : forall {T}, aggregator T integer.
-  Notation "'COUNT' ( e )" := (aggregatorGroupByProjection count e).
+  Notation "'COUNT' ( e )" := (aggregatorGroupByProj count e).
 
   Definition SelfJoin0 : Type.
     refine (forall (Γ : Schema) s (a : relation s), _).
@@ -145,20 +145,18 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
     refine (forall (Γ : Schema) s1 s2 (e1: SQL Γ s1) (e2: SQL Γ s2) ta (a1: Column ta s1) (a2: Column ta s2) tb (b1: Column tb s1), _).
     pose (@variable ta (Γ ++ s1) (right⋅a1)) as a1'.
     pose (@variable tb (Γ ++ s1) (right⋅b1)) as b1'.
-    refine (⟦ Γ ⊢ (SELECT PLAIN(a1'), COUNT(b1') FROM1 e1 GROUP BY a1)
+    refine (⟦ Γ ⊢ (SELECT (combineGroupByProj PLAIN(a1') COUNT(b1')) FROM1 e1 GROUP BY (right⋅a1))
                   SEMI_JOIN1 e2 ON SEQ (left⋅star), a2: _ ⟧
             =
-            ⟦ Γ ⊢ (SELECT PLAIN(a1'), COUNT(b1')
+            ⟦ Γ ⊢ (SELECT (combineGroupByProj PLAIN(a1') COUNT(b1'))
                   FROM1 (e1 SEMI_JOIN1 e2 ON SEQ a1, a2 )
-                  GROUP BY a1 ) : _ ⟧).
+                  GROUP BY (right⋅a1) ) : _ ⟧).
    Defined.
   
   Arguments PushSemiJoinThrAgg /.
 
   Lemma pushSemiJoinThrAgg: PushSemiJoinThrAgg.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     apply path_universe_uncurried.
     apply equiv_iff_hprop_uncurried.
     constructor. 
@@ -241,9 +239,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments θ_SemiJoinIntro /.
 
   Lemma θ_semiJoinIntro: θ_SemiJoinIntro.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
@@ -279,9 +275,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments θ_SemiJoinIntro' /.
 
   Lemma θ_semiJoinIntro': θ_SemiJoinIntro'.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
@@ -320,9 +314,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments push_θ_semiJoinThroughJoin /.
 
   Lemma Push_θ_semiJoinThroughJoin : push_θ_semiJoinThroughJoin.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     symmetry.
     repeat rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).

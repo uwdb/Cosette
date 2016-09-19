@@ -37,17 +37,10 @@ Module SQLDenotation (T : Types).
           schemas etc as they wish. All this structure is useful 
           though because it introduces more computation in our
           proofs, and thus leads to much simpler proofs. *)
-  (* NOTE schemas should probably not have an empty and leaf constructor, but
-          instead a leaf constructor with a list of types. The advantage is that
-          this matches the fact that projections are lists of expressions *)
   Definition Schema := Tree type.
   Definition singleton := @leaf type.
-
   Notation "s0 ++ s1" := (node s0 s1).
 
-  (* NOTE we could have `Tuple s -> nat` for the bag semantics,
-          but this is more general as we support infinite types.
-          this is useful for projection *)
   Fixpoint Tuple (s:Schema) : Type.
     refine (match s with
     | node t0 t1 => (Tuple t0) * (Tuple t1)
@@ -60,22 +53,19 @@ Module SQLDenotation (T : Types).
     induction s; refine (_).
   Defined. 
 
+  (* NOTE we could have `Tuple s -> nat` for the bag semantics,
+          but this is more general as we support infinite types.
+          this is useful for projection *)
   Definition Relation s := Tuple s -> Type.
   Definition Query Γ s := Tuple Γ -> Relation s.
 End SQLDenotation.
 
-(* universe stuff is needed because of Coq bug (fixed with 8.5pl1)
-   https://groups.google.com/forum/#!topic/hott-cafe/YY5MF5O1288 *)
-Unset Universe Polymorphism.
 Module Type Schemas (T : Types).
   Import T.
   Module TD := SQLDenotation T.
   Import TD.
   Export TD.
-
-  (* this module can be deleted *)
 End Schemas.
-Set Universe Polymorphism.
 
 Module Type Relations (T : Types) (S : Schemas T).
   Import T S.
@@ -165,22 +155,15 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
       | castPred _ _ f slct => fun g => denotePred _ slct (denoteProj _ _ f g)
       end).
     - refine (
-      match cast with
-      | combine _ _ _ c c' => _
-      | left _ _ => _
-      | right _ _ => _
-      | compose _ _ _ c c' => _
-      | star _ => _
-      | e2p _ _ e => _ 
-      | erase _ => _
+      match cast in Proj s s' return Tuple s -> Tuple s' with
+      | combine _ _ _ c c' => fun t => (denoteProj _ _ c t, denoteProj _ _ c' t)
+      | left _ _ => fst
+      | right _ _ => snd
+      | compose _ _ _ c c' => fun t => denoteProj _ _ c' (denoteProj _ _ c t)
+      | star _ => fun t => t
+      | e2p _ _ e => fun t => denoteExpr _ _ e t
+      | erase _ => fun _ => tt
       end).
-      + exact (fun t => (denoteProj _ _ c t, denoteProj _ _ c' t)).
-      + exact fst.
-      + exact snd.
-      + exact (fun t => denoteProj _ _ c' (denoteProj _ _ c t)).
-      + exact (fun t => t).
-      + exact (fun t => denoteExpr _ _ e t).
-      + exact (fun _ => tt).
     - refine (
       match e in Expr Γ T return Tuple Γ -> ⟦T⟧ with
       | variable T _ c => fun g => denoteProj _ _ c g
@@ -192,8 +175,9 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
       end).
   Defined.
 
-  Global Instance denotationProj {Γ Γ'} : Denotation (Proj Γ Γ') (Tuple Γ -> Tuple Γ') :=
-    {| denote := denoteProj |}.
+  Global Instance denotationProj {Γ Γ'} : Denotation (Proj Γ Γ') (Tuple Γ -> Tuple Γ') := {| 
+    denote := denoteProj 
+  |}.
 
   Global Instance denotationSQL Γ s : Denotation (SQL Γ s) _ := {| 
     denote := denoteSQL 
@@ -243,44 +227,57 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Notation "'FALSE'" := (false) (at level 45).
   Notation "'TRUE'" := (true) (at level 45).
   Notation "'DISTINCT' s" := (distinct s) (at level 45).
- 
+
   Instance isHSetSQL `{forall s (r:relation s) t, IsHSet (⟦ r ⟧ t)} Γ s q g t : IsHSet (⟦ Γ ⊢ q : s ⟧ g t).
     induction q; refine (_).
   Defined.
 
-  Definition GroupByProjection Γ s C T := SQL (Γ ++ s) s -> Column C s -> Expr (Γ ++ s) T.
+  (* A group by projection has access to the context, a selected tuple t, 
+     and a query that returns all tuples that match t *)
+  Definition GroupByProj Γ s s' := SQL (Γ ++ s) s -> Proj (Γ ++ s) s'.
 
-  Definition plainGroupByProjection {Γ s C T} (e : Expr (Γ ++ s) T) : GroupByProjection Γ s C T := fun _ _ => e.
-  Arguments plainGroupByProjection [_ _ _ _] _ / _ _.
+  Definition combineGroupByProj {Γ s s' s''} 
+    (p1:GroupByProj Γ s s') (p2:GroupByProj Γ s s'') : GroupByProj Γ s (s' ++ s'') :=
+    fun a => combine (p1 a) (p2 a).
 
-  Definition aggregatorGroupByProjection {Γ s C S T} : aggregator S T -> Expr (Γ ++ s) S -> GroupByProjection Γ s C T.
-    intros agg e a c.
-    refine (aggregate agg (SELECT1 (e2p (castExpr left e))
-                           FROM1 a WHERE (equal (variable (left⋅right⋅c)) 
-                                                (variable (right⋅c))))).
+  Definition plainGroupByProj {Γ s s'} (p:Proj (Γ ++ s) s') : GroupByProj Γ s s' := fun _ => p.
+  Arguments plainGroupByProj [_ _ _] _ / _.
+
+  Definition aggregatorGroupByProj {Γ s S T} : aggregator S T -> Expr (Γ ++ s) S -> GroupByProj Γ s (leaf T).
+    intros agg e a.
+    refine (e2p (aggregate agg (SELECT1 (e2p _) FROM1 a))).
+    refine (castExpr (combine (left⋅left) right) e). 
   Defined. 
-  Arguments aggregatorGroupByProjection [_ _ _ _ _] _ _ / _ _.
+  Arguments aggregatorGroupByProj [_ _ _ _] _ _ / _.
 
-  (* TODO, can we add more projections to groupby *)
-  Definition groupBy {Γ s C T0 T1} (a : SQL Γ s) (c : Column C s) 
-                     (proj0 : GroupByProjection Γ s C T0) (proj1 : GroupByProjection Γ s C T1) : 
-                     SQL Γ (singleton T0 ++ singleton T1 ++ empty).
-    refine (let a' : SQL (Γ ++ s) s := castSQL left a in _). 
-    refine (DISTINCT SELECT2 (proj0 a' c), (proj1 a' c) FROM1 a).
+  Fixpoint tupleEqual {Γ s} : Proj Γ s -> Proj Γ s -> Pred Γ :=
+    match s with
+    | s0 ++ s1 => fun p0 p1 =>
+        tupleEqual (p0 ⋅ left)  (p1 ⋅ left) AND
+        tupleEqual (p0 ⋅ right) (p1 ⋅ right)
+    | leaf T => fun p0 p1 => 
+        equal (variable p0) (variable p1)
+    | empty => fun _ _ => TRUE
+    end.
+
+  Definition groupBy {Γ s s' C} (proj : GroupByProj Γ s s') 
+                     (a : SQL Γ s) (c : Proj (Γ ++ s) C) : SQL Γ s'.
+    refine (DISTINCT SELECT1 proj (
+              SELECT * FROM1 castSQL left a 
+              WHERE tupleEqual (left ⋅ c) ((combine (left⋅left) right) ⋅ c))
+            FROM1 a).
   Defined.
 
-  Arguments groupBy [_ _ _ _ _] _ _ _ _ /.
+  Arguments groupBy [_ _ _ _] _ _ _ /.
 
-  (*
-    Semi-join with single equality predicate.
-   *)
+  (* Semi-join with single equality predicate. *)
   Definition semiJoin1 {Γ s1 s2 ty} (a: SQL Γ s1)
              (b: SQL Γ s2) (c1: Column ty s1)
              (c2: Column ty s2) : SQL Γ s1.
-  pose (c1' := @variable ty ((Γ ++ s1) ++ s2) (left⋅right⋅c1)).
-  pose (c2' := @variable ty ((Γ ++ s1) ++ s2) (right⋅c2)).
-  refine (SELECT * FROM1 a WHERE EXISTS (SELECT * FROM1 _ WHERE (equal c1' c2'))).
-  refine (castSQL left b).
+    pose (c1' := @variable ty ((Γ ++ s1) ++ s2) (left⋅right⋅c1)).
+    pose (c2' := @variable ty ((Γ ++ s1) ++ s2) (right⋅c2)).
+    refine (SELECT * FROM1 a WHERE EXISTS (SELECT * FROM1 _ WHERE (equal c1' c2'))).
+    refine (castSQL left b).
   Defined.
 
   Definition semiJoin {Γ s1 s2} (a: SQL Γ s1) (b: SQL Γ s2)
@@ -295,7 +292,7 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   (* SEMI JOIN with predicate *)
   Notation "a 'SEMI_JOIN' b 'ON' slct " := (semiJoin a b slct) (at level 45).
   
-  Notation "'PLAIN' ( e )" := (plainGroupByProjection e).
-  Notation "'SELECT' proj0 , proj1 'FROM1' a 'GROUP' 'BY' v " := (groupBy a v proj0 proj1) (at level 45).
+  Notation "'PLAIN' ( e )" := (plainGroupByProj (e2p e)).
+  Notation "'SELECT' proj 'FROM1' a 'GROUP' 'BY' v " := (groupBy proj a v) (at level 45).
 
 End SQL.
