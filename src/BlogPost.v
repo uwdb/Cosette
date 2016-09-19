@@ -50,9 +50,11 @@ Proof.
 Qed.
 
 (**
-Note that it is reasonable to assume that SQL relations are bags that map tuples only to 0-truncated types (types with no higher homotopical information), because real-world databases' input relations only contain tuples with finite multiplicity ([Fin n] is 0-truncated), and because SQL queries only use type operators that preserve 0-truncation. 
+Note that [+] and [*] on homotopy types are _like_ the operations of a commutative semi-ring, [Empty] and [Unit] are _like_ the identity elements of a commutative semi-ring, and there are paths witnessing the commutative semi-ring axioms for these operations and identity elements. We use the terminology _like_ here, because algebraic structures over higher-dimensional types in HoTT are usually defined using coherence conditions between the equalities witnessing the structure's axioms, which we have not yet attempted to prove.
 
-0-trucated types form a commutative semi-ring with [+], [*], [Empty], and [Unit]. Just like the above proof, the proof of many rewrite rules simplify to an expressions built using the operators of this semi-ring, and could thus be solved or simplified using a [ring] tactic (#<a href="https://coq.inria.fr/refman/Reference-Manual028.html">see</a>#). Unfortunately, Coq's [ring] tactic is not yet ported to the HoTT library. Porting [ring] would dramatically simplify many of our proofs (Anyone interested in porting the [ring] tactic? Let us know). 
+Many SQL rewrite rules simplify to an expressions built using the operators of this semi-ring (e.g. [r1 a + r1 a = r2 a + r2 a] above), and could thus be potentially solved or simplified using a [ring] tactic (#<a href="https://coq.inria.fr/refman/Reference-Manual028.html">see</a>#). Unfortunately, Coq's [ring] tactic is not yet ported to the HoTT library. Porting [ring] may dramatically simplify many of our proofs (Anyone interested in porting the [ring] tactic? Let us know). 
+
+It is reasonable to assume that SQL relations are bags that map tuples only to 0-truncated types (types with no higher homotopical information), because real-world databases' input relations only contain tuples with finite multiplicity ([Fin n] is 0-truncated), and because SQL queries only use type operators that preserve 0-truncation. However, HoTTSQL does not requires this assumption, and as future work, it may be interesting to understand what the "cardinality" of a type with higher homotopical information means.
 **)
 
 (* begin hide *)
