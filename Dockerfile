@@ -16,6 +16,9 @@ RUN apt-get update && \
       wget \
       fish
 
+RUN apt-get update && \
+    apt-get install -y automake 
+
 RUN git clone https://github.com/HoTT/HoTT.git && \
     cd HoTT && \
     git checkout 93cedccd3c31fe3bb2d774c9acedd2d0923dc958 && \
@@ -38,3 +41,6 @@ RUN curl -O https://coq.inria.fr/distrib/V8.5pl1/files/coq-8.5pl1.tar.gz && \
                        -coqdocdir /usr/local/share/texmf/tex/latex/misc && \
                      make -j `nproc` && \ 
                      make install
+
+# ADD hott /hott
+# RUN make -C /hott
