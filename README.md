@@ -1,11 +1,10 @@
 Cosette
 =======
 
-Cosette is an automated SQL solver. See the Cosette [website][WEB] for more details.
+Cosette is an automated SQL solver. See the Cosette [website][web] for more details.
 
 This repository contains Cosette's Coq code. We will release the Rosette code later.
 
-[WEB]: http://cosette.cs.washington.edu/.
 
 ### Running Cosette
 
@@ -57,3 +56,7 @@ If `user` started Docker on a different `machine`, you can connect your local `e
 
 Make sure your emacs has `ProofGeneral` and `docker-tramp` installed, and
 `enable-remote-dir-locals` must be set.
+
+
+[web]: http://cosette.cs.washington.edu/.
+[docker]: https://docs.docker.com/engine/understanding-docker/
