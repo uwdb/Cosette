@@ -84,3 +84,4 @@ Module AggregationOptimization (T : Types) (S : Schemas T) (R : Relations T S)  
   Qed.
   
 End AggregationOptimization.
+

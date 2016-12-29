@@ -16,11 +16,10 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   Definition Index {s t0 t1} (R: SQL empty s) (k: Column t0 s) (ic: Column t1 s) :=
     SELECT2 (variable (right⋅k)), (variable (right⋅ic)) FROM1 R.
 
-  
   Definition isUnique {s τ} (k: Column τ s) (R: SQL empty s) :=
     forall t, denoteSQL R tt t ->
          denoteSQL (SELECT1 right⋅k FROM1 R) tt (⟦k⟧ t) = Unit.
-     
+  
   Definition isKey {s t} (k: Column t s) (R: SQL empty s) :=
     forall t1 t2, denoteSQL R tt t1 -> denoteSQL R tt t2 -> ⟦k⟧ t1 = ⟦k⟧ t2 -> t1 = t2.
 
@@ -29,6 +28,111 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     ⟦ empty ⊢ ((project (right⋅left)) (FROM R, R
                 WHERE equal (variable (right⋅left⋅k))
                 (variable (right⋅right⋅k)))): _ ⟧.
+
+  Lemma sum_pair_split' {A B C}:
+    {ab: A * B & C ab} <~> {a:A & {b:B & C (a, b)}}.
+  Proof.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [[a b] c].
+      exists a.
+      exists b.
+      exact c. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [a [b c]].
+      exists (a, b).
+      exact c. }
+    + unfold Sect.
+      intros.
+      reflexivity.
+    + unfold Sect.
+      intros.
+      reflexivity.
+    + reflexivity.
+  Qed.
+
+  Lemma sum_commute {A B C}:
+    {a:A & {b: B & C (a, b)}} <~> {b:B & {a:A & C (a, b)}}.
+  Proof.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a [b c]].
+      exists b.
+      exists a.
+      exact c. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [b [a c]].
+      exists a.
+      exists b.
+      exact c. }
+    + unfold Sect.
+      reflexivity.
+    + unfold Sect.
+      reflexivity.
+    + reflexivity.
+  Qed.
+
+  Lemma equiv_prod_sigma_nested {A B C D}:
+    {a: A & {b:B & C a b * D a}} <~> {a:A & {b:B & C a b} * D a}.
+  Admitted.
+
+  Lemma equiv_prod_sigma_assoc {A B C D}:
+    {a: A & B a * C a * D a} <~> {a: A & B a * (C a * D a)}.
+  Admitted.
+
+  Lemma equiv_prod_unit {A B}:
+    (A -> (B = Unit)) ->  (A * B <~> A).
+  Proof.
+    intros h.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a b].
+      exact a. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intro a.
+      (*try equiv_hprop_allpath *)
+      rewrite (h a).
+      exact (a, tt). }
+    - unfold Sect.
+      intros.
+      unfold Overture.internal_paths_rew_r.
+  Abort.
+  
+  Lemma isKeyProof: forall s t (k:Column t s) (R: SQL empty s),
+      isUnique k R -> isKey2 k R.
+  Proof.
+    intros s t k R h.
+    unfold isKey2.
+    simpl.
+    by_extensionality g.
+    by_extensionality t'.    
+    unfold isKey in h.
+    match goal with
+    |  |- _ = ∑ a, @?C a  => rewrite (path_universe_uncurried (@sum_pair_split' (Tuple s) (Tuple s) C))
+    end.
+    cbn.
+    rewrite (path_universe_uncurried (equiv_prod_sigma_nested)).
+    rewrite <- (path_universe_uncurried eqSum).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    rewrite (path_universe_uncurried equiv_prod_sigma_assoc).
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    unfold isUnique in h.
+    cbn in h.
+    specialize (h t').
+    match goal with
+    | |- _ = ?A * ?B => assert (A -> B) as h1 end.
+    { rewrite (unit_eq g).
+      intro h2.
+      specialize (h h2).
+      exists t'.
+      refine (h2, _).
+      reflexivity. }
+    { symmetry.
+      apply path_universe_uncurried.
+      rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+      match goal with
+      | |- ?A * ?B <~> _ => assert (IsHProp A) as h3 end.
+      admit.
+      apply hprop_prod_l'.
+      exact h1.
+  Abort.
     
   Definition IntroProj: Type.
     refine (forall r (R: SQL empty r) t0 (l: constant t0)
@@ -52,9 +156,7 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   Arguments IntroProj /.
 
   Definition IntroProjProof: IntroProj.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
     match goal with
    | |- ∑ a, @?A a * (@?B a * @?C a * (@?D a * @?E a)) = _ =>
@@ -181,7 +283,7 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
       refine (_,( _, _)); try reflexivity.
     - simple refine (_; _). {
         refine (denoteProj k ta, (⟦l⟧, tt)).
-        }
+      }
       cbn.
       destruct e2.
       refine (_, (_, _)); reflexivity.
@@ -206,8 +308,7 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
 
   Definition IndexTransProjProof: IndexTransProj.
     unfold IndexTransProj.
-    by_extensionality g.
-    by_extensionality t.
+    start.
     f_ap.
     by_extensionality t2.
     destruct t2 as [ta tb].

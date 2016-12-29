@@ -4,6 +4,7 @@ Require Import UnivalenceAxiom.
 Require Import HoTTEx.
 Require Import Denotation.
 Require Import UnivalentSemantics.
+Require Import AutoTactics.
 
 Open Scope type.
 
@@ -11,6 +12,8 @@ Module SubqueryOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A 
   Import T S R A.
   Module SQL_TSRA := SQL T S R A.
   Import SQL_TSRA.
+  Module AutoTac := AutoTactics T S R A.
+  Import AutoTac.
 
   Definition InlineCorrelatedSubquery : Type.
     refine (forall (Γ s: Schema) (a : relation s) ty (c : Column ty s), _).
@@ -20,15 +23,10 @@ Module SubqueryOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A 
             ⟦ Γ ⊢ (SELECT * FROM1 table a) : s ⟧); revgoals.
   Defined.
   Arguments InlineCorrelatedSubquery /. 
-  
+
   Lemma inlineCorrelatedSubquery : InlineCorrelatedSubquery.
-    cbn.
-    intros.
-    by_extensionality g.
-    by_extensionality t.
-    apply path_universe_uncurried.
-    refine (hprop_prod_l _).
-    refine (fun a => tr (t ; (idpath, a))).
+    solve_summation.
+    
   Defined.
   
   (* 
@@ -54,32 +52,6 @@ Module SubqueryOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A 
   Arguments PullUpSubqueryInFrom /.
    
   Lemma pullUpSubqueryInFrom : PullUpSubqueryInFrom.
-    cbn.
-    intros. 
-    by_extensionality g.
-    by_extensionality t. 
-    match goal with
-    | |- _ = ?X * _ * (?Y * ?Z) => 
-      generalize X Y Z; clear; intros x y z
-    end.
-    apply path_universe_uncurried.
-    rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
-    apply equiv_functor_prod'. {
-      apply equiv_path.
-      reflexivity.
-    }
-    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
-    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
-    apply equiv_functor_prod'; revgoals. {
-      apply equiv_path.
-      reflexivity.
-    }
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    apply equiv_functor_prod'; revgoals. {
-      apply equiv_path.
-      reflexivity.
-    }
-    apply equiv_path.
-    f_ap.
+    hott_ring. 
   Qed.
 End SubqueryOptimization.

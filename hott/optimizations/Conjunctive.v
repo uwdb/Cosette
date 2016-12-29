@@ -33,7 +33,7 @@ Module ConjuctiveQuery (T : Types) (S : Schemas T) (R : Relations T S)  (A : Agg
   Arguments CQExample0 /.
 
   Lemma CQExample0Proof : CQExample0.
-    conjuctiveQueryProof.
+    conjunctiveQueryProof.
   Qed.
   
   Definition CQExample1 : Type.
@@ -57,7 +57,7 @@ Module ConjuctiveQuery (T : Types) (S : Schemas T) (R : Relations T S)  (A : Agg
   Arguments CQExample1 /.
 
   Lemma CQExample1Proof : CQExample1.
-    conjuctiveQueryProof.
+    conjunctiveQueryProof.
   Qed.
  
 End ConjuctiveQuery.

@@ -4,6 +4,8 @@ Require Import UnivalenceAxiom.
 Require Import HoTTEx.
 Require Import Denotation.
 Require Import UnivalentSemantics.
+Require Import CQTactics.
+Require Import AutoTactics.
 
 Open Scope type.
 
@@ -11,6 +13,8 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Import T S R A.
   Module SQL_TSRA := SQL T S R A.
   Import SQL_TSRA.
+  Module CQTac := CQTactics T S R A.
+  Import CQTac.
 
   Parameter integer : type.
   Parameter count : forall {T}, aggregator T integer.
@@ -24,9 +28,10 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments SelfJoin0 /.
 
   Lemma selfJoin0 : SelfJoin0.
-    cbn.
-    by_extensionality g.
-    by_extensionality t.
+    conjunctiveQueryProof.
+  Qed.
+  (*Original Proof:
+    start.
     apply path_universe_uncurried.
     apply equiv_iff_hprop_uncurried. 
     constructor.
@@ -45,7 +50,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
       refine ((t0, t0); _).
       refine (_, _); [|reflexivity].
       refine (a0, a0). 
-  Qed.
+  *)
 
   Definition SelfJoin1 : Type.
     refine (forall (Γ : Schema) s (a : relation s) ty (c0 : Column ty s), _).
@@ -57,9 +62,10 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments SelfJoin1 /.
 
   Lemma selfJoin1 : SelfJoin1.
-    cbn.
-    by_extensionality g.
-    by_extensionality t. 
+    conjunctiveQueryProof.
+  Qed.
+  (* Original Proof:
+    start.
     apply path_universe_uncurried.
     apply equiv_iff_hprop_uncurried.
     constructor.
@@ -80,7 +86,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
       refine (_, _); [| reflexivity].
       refine (_, _); [reflexivity |].
       refine (a0, a0).
-  Qed.
+  *)
 
   Definition SelfJoin2 : Type.
     refine (forall (Γ : Schema) s (a : relation s) ty0 ty1 (c0: Column ty0 s) (c1 : Column ty1 s), _).
@@ -96,9 +102,10 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
   Arguments SelfJoin2 /.
     
   Lemma selfJoin2 : SelfJoin2.
-    cbn. 
-    by_extensionality g.
-    by_extensionality t.
+    conjunctiveQueryProof.
+  Qed.
+  (* Original Proof:
+    start. 
     apply path_universe_uncurried.
     apply equiv_iff_hprop_uncurried. 
     constructor.
@@ -120,7 +127,7 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
       refine (_, _); [| reflexivity].
       refine ((_,_), _); [reflexivity|reflexivity| ].
       refine (a0, a0).
-  Qed.
+   *)
 
   (*
    Push θ-semijoin through aggregation.
@@ -146,12 +153,12 @@ Module MagicOptimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : A
     pose (@variable ta (Γ ++ s1) (right⋅a1)) as a1'.
     pose (@variable tb (Γ ++ s1) (right⋅b1)) as b1'.
     refine (⟦ Γ ⊢ (SELECT (combineGroupByProj PLAIN(a1') COUNT(b1')) FROM1 e1 GROUP BY (right⋅a1))
-                  SEMI_JOIN1 e2 ON SEQ (left⋅star), a2: _ ⟧
+                  SEMI_JOIN1 e2 ON SEQ left, a2: _ ⟧
             =
             ⟦ Γ ⊢ (SELECT (combineGroupByProj PLAIN(a1') COUNT(b1'))
                   FROM1 (e1 SEMI_JOIN1 e2 ON SEQ a1, a2 )
-                  GROUP BY (right⋅a1) ) : _ ⟧).
-   Defined.
+                  GROUP BY (right⋅a1)) : _ ⟧).
+  Defined.
   
   Arguments PushSemiJoinThrAgg /.
 

@@ -1,5 +1,7 @@
 Require Import HoTT.
 Require Import UnivalenceAxiom.
+
+Require Import HoTTEx.
 Require Import UnivalentSemantics.
 
 Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T S).
@@ -19,7 +21,7 @@ Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregato
            end.
 
   Ltac solveInstantiatedConjuctiveQuery :=
-    cbn;
+    simpl;
     repeat constructor;
     try apply tr;
     rewriteall;
@@ -33,11 +35,7 @@ Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregato
     end.
 
   Ltac prepareDistinctSQLProof :=
-    let g := fresh "g" in
-    let t := fresh "t" in
-    cbn;
-    by_extensionality g;
-    by_extensionality t;
+    start;
     apply path_universe_uncurried;
     apply equiv_iff_hprop_uncurried;
     constructor.
@@ -52,9 +50,9 @@ Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregato
            | h:?A * ?B |- _ => destruct h
            end;
     apply tr;
-    cbn in *.
+    simpl in *.
 
-  Ltac conjuctiveQueryProof :=
+  Ltac conjunctiveQueryProof :=
     prepareDistinctSQLProof;
     prepareConjuctiveQueryProof;  
     searchInstantiation solveInstantiatedConjuctiveQuery.
