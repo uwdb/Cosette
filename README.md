@@ -25,7 +25,7 @@ time may take over an hour):
     cd Cosette
     docker build -t konne/cosette .
 
-Once built, Cosette can be run just like the downloaded and compiled version of Cosette with `dcoker run konne/cosette`.
+Once built, Cosette can be run just like the downloaded and compiled version of Cosette with `docker run konne/cosette`.
 
 If you prefer to build Cosette without Docker, you must install the [HoTT](https://github.com/HoTT/HoTT) library with Coq 8.5pl1. For more precise instructions, consult the `Dockerfile`.
 
