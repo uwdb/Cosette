@@ -1,0 +1,11 @@
+schema s1(x:ty, y:ty, z:ty, ??);
+
+table a(s1);
+
+query q1
+`select distinct * from a x where x.x = x.z and x.y = x.z`;
+
+query q2
+`select distinct * from a x where x.x = x.z and x.x = x.y`;
+
+verify q1 q2;

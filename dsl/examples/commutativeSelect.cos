@@ -1,0 +1,14 @@
+schema s(??);
+
+table a(s);
+
+predicate b0(s);
+predicate b1(s);
+
+query q1
+`select * from (select * from a x where b1(x)) y where b0(y)`;
+
+query q2
+`select * from (select * from a x where b0(x)) y where b1(y)`;
+
+verify q1 q2;

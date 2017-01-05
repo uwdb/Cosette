@@ -1,0 +1,15 @@
+schema s1(??);
+schema s2(??);
+
+table r(s1);
+table s(s2);
+
+predicate b(s2);
+
+query q1
+`select * from r x, (select * from s y where b(y)) z`;
+
+query q2
+`select * from r x, s y where b(y)`;
+
+verify q1 q2;

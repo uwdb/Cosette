@@ -1,0 +1,13 @@
+schema s(??);
+
+table a(s);
+
+predicate b(s);
+
+query q1
+`select * from (select * from a x where b(x)) y where b(y)`;
+
+query q2
+`select * from a x where b(x)`;
+
+verify q1 q2;
