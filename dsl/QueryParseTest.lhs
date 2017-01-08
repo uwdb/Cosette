@@ -11,51 +11,51 @@
 
 > testQuery1 :: QueryExpr
 > testQuery1 = Select [DStar "x", Proj (DIden "x" "a") "a"]
->              (Just [(TRBase "a" "x"), (TRQuery (Select [Star] Nothing Nothing False) "y")])
+>              (Just [(TR (TRBase "a") "x"), TR (TRQuery (Select [Star] Nothing Nothing False)) "y"])
 >              (Just TRUE)
 >              False
 
 > testQuery2 :: QueryExpr
 > testQuery2 = Select [Proj (DIden "t2" "c1") "tc1",Proj (DIden "t2" "c2") "tc2",Proj (DIden "t2" "c3") "tc3"]
->            (Just [(TRQuery (Select [Proj (DIden "t1" "c1") "c1",Proj (DIden "t1" "c2") "c2",Proj (DIden "t1" "c3") "c3"]
->                           (Just [(TRBase "t1" "t1")])
->                           (Just (Vlt (DIden "t1" "c1") (DIden "t1" "c2"))) False) "t2")])
+>            (Just [TR (TRQuery (Select [Proj (DIden "t1" "c1") "c1",Proj (DIden "t1" "c2") "c2",Proj (DIden "t1" "c3") "c3"]
+>                           (Just [TR (TRBase "t1") "t1"])
+>                           (Just (Vlt (DIden "t1" "c1") (DIden "t1" "c2"))) False)) "t2"])
 >            (Just (Vlt (DIden "t2" "c1") (DIden "t2" "c3")))
 >            False
 
 > testQuery3 :: QueryExpr
 > testQuery3 = Select [Proj (DIden "t1" "c1") "tc1",Proj (DIden "t1" "c2") "tc2",Proj (DIden "t1" "c3") "tc3"]
->              (Just [(TRBase "t1" "t1")])
+>              (Just [TR (TRBase "t1") "t1"])
 >              (Just (And (Vlt (DIden "t1" "c1") (DIden "t1" "c2")) (Vlt (DIden "t1" "c1") (DIden "t1" "c3"))))
 >              False
 
 > testQuery4 :: QueryExpr
-> testQuery4 = Select [Star] (Just [TRBase "a" "a"]) (Just (Exists (Select [Star] (Just [TRBase "a" "a"]) Nothing False))) False
+> testQuery4 = Select [Star] (Just [TR (TRBase "a") "a"]) (Just (Exists (Select [Star] (Just [TR (TRBase "a") "a"]) Nothing False))) False
 
 > testQuery5 :: QueryExpr
 > testQuery5 = Select [Proj (Constant "a") "a"] Nothing Nothing False
 
 > testQuery6 :: QueryExpr
-> testQuery6 = Select [Star] (Just [TRBase "a" "x"]) (Just (PredVar "e" ["x"])) False
+> testQuery6 = Select [Star] (Just [TR (TRBase "a") "x"]) (Just (PredVar "e" ["x"])) False
 
 > testQuery7 :: QueryExpr
 > testQuery7 = Select [Star]
->                     (Just [TRBase "a" "x",
->                            TRQuery (Select [Star] (Just [TRBase "b" "y"]) (Just (PredVar "b0" ["y"])) False) "z"])
+>                     (Just [TR (TRBase "a") "x",
+>                            TR (TRQuery (Select [Star] (Just [TR (TRBase "b") "y"]) (Just (PredVar "b0" ["y"])) False)) "z"])
 >                     (Just (PredVar "b1" ["x", "z"]))
 >                     False
 
 > testQuery8 :: QueryExpr
 > testQuery8 = Select [Proj (DIden "x1" "a") "x1a"]
->                 (Just [TRQuery (Select [Proj (DIden "x" "a") "a", Proj (DIden "x" "k") "k"]
->                                (Just [TRBase "x" "x"]) Nothing False) "x1",
->                        TRBase "y" "y"])
+>                 (Just [TR (TRQuery (Select [Proj (DIden "x" "a") "a", Proj (DIden "x" "k") "k"]
+>                                (Just [TR (TRBase "x") "x"]) Nothing False)) "x1",
+>                        TR (TRBase "y") "y"])
 >                 (Just (Veq (DIden "x1" "k") (DIden "y" "k")))
 >                 False
 
 > testQuery9 :: QueryExpr
 > testQuery9 = Select [Proj (DIden "x" "x") "ax"]
->                     (Just [TRBase "a" "x", TRBase "b" "y"])
+>                     (Just [TR (TRBase "a") "x", TR (TRBase "b") "y"])
 >                     (Just (Veq (DIden "x" "ya") (DIden "y" "yb")))
 >                     True
 
@@ -63,7 +63,12 @@
 > testQuery10 = UnionAll
 >               (Select [Star] Nothing Nothing False)
 >               (UnionAll (Select [Star] Nothing Nothing False)
->                         (Select [Star] (Just [TRBase "a" "a"]) Nothing False))
+>                         (Select [Star] (Just [TR (TRBase "a") "a"]) Nothing False))
+
+> testQuery11 :: QueryExpr
+> testQuery11 = Select [Star]
+>               (Just [TR (TRUnion (TRBase "a") (TRUnion (TRBase "b") (TRBase "c"))) "x"])
+>               Nothing False
 
 > queryParseTests :: [(String, QueryExpr)]
 > queryParseTests =
@@ -77,7 +82,8 @@
 >    ("select x1.a as x1a from (select x.a as a, x.k as k from x x) x1, y y where x1.k = y.k",
 >     testQuery8),
 >    ("select distinct x.x as ax from a x, b y where x.ya = y.yb", testQuery9),
->    ("select * union all (select * union all select * from a a)", testQuery10)]
+>    ("select * union all (select * union all select * from a a)", testQuery10),
+>    ("select * from (a union all b union all c) x", testQuery11)]
 
 > main :: IO H.Counts
 > main =  H.runTestTT $ H.TestList $ makeTest queryExpr <$> queryParseTests

@@ -18,6 +18,28 @@ Syntax and Parser for Cosette.
 > import FunctionsAndTypesForParsing
 > import Debug.Trace
 
+== SQL keywords
+
+> sqlKeywords :: [String]                      
+> sqlKeywords = [--join keywords
+>                "natural"
+>                ,"inner"
+>                ,"outer"
+>                ,"cross"
+>                ,"left"
+>                ,"right"
+>                ,"full"
+>                ,"join"
+>                ,"on"
+>                ,"using"
+>                  -- subsequent clause keywords
+>                ,"select"
+>                ,"where"
+>                ,"group"
+>                ,"having"
+>                ,"order"
+>                ]
+
 == Abstract Syntax
 
 === value expression
@@ -52,16 +74,18 @@ Syntax and Parser for Cosette.
 
 === table ref (in from clause)
 
-> data TableRef = TRBase String String              -- TRbase tname alias
->               | TRUnamed String                   -- No alias. (used in Union)
->               | TRUnion TableRef TableRef String  -- TRUnion t1 t2 alias
->               | TRQuery QueryExpr String          -- TRQuery query alias
+TODO: add Left Join, Semi join etc to table expression
+
+> data TableExpr = TRBase String                -- base table
+>                | TRUnion TableExpr TableExpr  -- union
+>                | TRQuery QueryExpr            -- query
+>                deriving (Eq, Show)
+
+> data TableRef = TR TableExpr String           -- table expr, alias
 >                 deriving (Eq, Show)
 
 > getAlias :: TableRef -> String
-> getAlias (TRBase _ s)    = s
-> getAlias (TRQuery _ s)   = s
-> getAlias (TRUnion _ _ s) = s
+> getAlias (TR _ s)    = s
 
 === query expression
 
@@ -146,7 +170,6 @@ valueExpr
 > selectItem :: Parser SelectItem
 > selectItem = star <|> try dstar <|> proj
 
-
 == parsing predicate 
 
 negation
@@ -223,36 +246,26 @@ exists clause
 
 === from clause
 
-> unionTr :: Parser TableRef
-> unionTr = (TRUnion <$> unionTr <*> (unionall *> unionTr))
->       <|> (TRUnamed <$> identifier)   
+TODO: for now, only base relations can be unioned in from clause.
+
+> tableExpr :: Parser TableExpr
+> tableExpr = try unionTe
+>         <|> (TRQuery <$> queryExpr)
+
+> baseTe :: Parser TableExpr
+> baseTe = TRBase <$> identifier
+>      <|> (parens unionTe)
+
+> unionTe :: Parser TableExpr
+> unionTe = try (TRUnion <$> baseTe <*> (unionall *> unionTe))
+>       <|> baseTe
 
 > fromItem :: Parser TableRef
-> fromItem =  try unionTr  
->             <|> (TRBase <$> identifier <*> aliasIdentifier)
->             <|> (TRQuery <$> parens queryExpr <*> aliasIdentifier)             
->   where aliasIdentifier = identifierBlacklist
->                       [-- join keywords
->                        "natural"
->                       ,"inner"
->                       ,"outer"
->                       ,"cross"
->                       ,"left"
->                       ,"right"
->                       ,"full"
->                       ,"join"
->                       ,"on"
->                       ,"using"
->                        -- subsequent clause keywords
->                       ,"where"
->                       ,"group"
->                       ,"having"
->                       ,"order"
->                       ]
+> fromItem =  TR <$> tableExpr <*> aliasIdentifier             
+>   where aliasIdentifier = identifierBlacklist sqlKeywords
 
 > fromList :: Parser [TableRef]
 > fromList = keyword_ "from" *> commaSep1 fromItem
-
 
 === queryExpr
 
