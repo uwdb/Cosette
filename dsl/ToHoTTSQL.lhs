@@ -65,6 +65,7 @@ table reference
 >                 | HSTRQuery HSQueryExpr
 >                 | HSUnitTable                      -- Unit table
 >                 | HSProduct HSTableRef HSTableRef
+>                 | HSTableUnion HSTableRef HSTableRef
 >                   deriving (Eq, Show)
 
 HoTTSQL query
@@ -84,19 +85,18 @@ TODO delete the example
 
 > query1 :: QueryExpr
 > query1 = Select [Star]
->                 (Just [TRBase "a" "x",
->                        TRQuery (Select [Star] (Just [TRBase "b" "y"]) (Just (PredVar "b0" ["y"])) False) "z"])
->                 (Just (PredVar "b1" ["x", "z"]))
->                 False     
+>                     (Just [TR (TRBase "a") "x",
+>                            TR (TRQuery (Select [Star] (Just [TR (TRBase "b") "y"]) (Just (PredVar "b0" ["y"])) False)) "z"])
+>                     (Just (PredVar "b1" ["x", "z"]))
+>                     False
 
 "select x1.a as x1a from (select x.a as a, x.k as k from x x) x1, y y where x1.k = y.k"
 
 > query2 :: QueryExpr
 > query2 = Select [Proj (DIden "x1" "a") "x1a"]
->                 (Just [TRQuery (Select [Proj (DIden "x" "a") "a",
->                                         Proj (DIden "x" "k") "k"]
->                               (Just [TRBase "x" "x"]) Nothing False) "x1",
->                        TRBase "y" "y"])
+>                 (Just [TR (TRQuery (Select [Proj (DIden "x" "a") "a", Proj (DIden "x" "k") "k"]
+>                                (Just [TR (TRBase "x") "x"]) Nothing False)) "x1",
+>                        TR (TRBase "y") "y"])
 >                 (Just (Veq (DIden "x1" "k") (DIden "y" "k")))
 >                 False
 
@@ -119,9 +119,10 @@ get output schema
 > getFromSchema :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String [(String, String)]
 > getFromSchema env ctx Nothing = Right []
 > getFromSchema env ctx (Just []) = Right []
-> getFromSchema env ctx (Just (h:t)) =  (++) <$> getScm env h <*> getFromSchema env ctx (Just t)
->   where getScm env (TRBase tn al) = hsAttrs <$> lkUpSchema env tn
->         getScm env (TRQuery q al) = getOutput env ctx q 
+> getFromSchema env ctx (Just (h:t)) =  (++) <$> getScm env (getTe h) <*> getFromSchema env ctx (Just t)
+>   where getScm env (TRBase tn) = hsAttrs <$> lkUpSchema env tn
+>         getScm env (TRQuery q) = getOutput env ctx q
+>         getScm env (TRUnion t1 t2) = getScm env t1
 
 look up a schema in FROM clause by alias
 
@@ -130,12 +131,12 @@ look up a schema in FROM clause by alias
 > lkUpSchemaInFrom env ctx (Just []) a = Left $ "cannot find " ++ a
 > lkUPSchemaInFrom env ctx (Just (h:t)) a =
 >   if scm h == a
->   then case h of
->     TRBase tn al -> hsAttrs <$> lkUpSchema env tn
->     TRQuery q al -> getOutput env ctx q
+>   then lkUpSchemaInTe (getTe h)
 >   else lkUpSchemaInFrom env ctx (Just t) a
->   where scm (TRBase tn al) = al
->         scm (TRQuery q al) = al
+>   where scm (TR _ al) = al
+>         lkUpSchemaInTe (TRBase tn) = hsAttrs <$> lkUpSchema env tn
+>         lkUpSchemaInTe (TRQuery q) = getOutput env ctx q
+>         lkUpSchemaInTe (TRUnion t1 _) = lkUpSchemaInTe t1
 
 get output schema of a query
 
@@ -163,8 +164,10 @@ convert from clause, it does the following things:
 2. get rid of table alias
 
 > convertFromItem :: HSEnv -> HSContext -> TableRef -> Either String HSTableRef
-> convertFromItem env ctx (TRBase tn _) = Right $ HSTRBase tn
-> convertFromItem env ctx (TRQuery q _) = HSTRQuery <$> toHSQuery env ctx q
+> convertFromItem env ctx tr = cte env ctx (getTe tr)
+>   where cte env ctx (TRBase tn) = Right $ HSTRBase tn
+>         cte env ctx (TRUnion t1 t2) = HSTableUnion <$> cte env ctx t1 <*> cte env ctx t2
+>         cte env ctx (TRQuery q) = HSTRQuery <$> toHSQuery env ctx q
 
 > convertFrom :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String HSTableRef
 > convertFrom env ctx Nothing = Right HSUnitTable
@@ -178,9 +181,11 @@ convert from clause, it does the following things:
 generate context from FROM clause
 
 > getCtxNode :: HSEnv -> HSContext -> TableRef -> Either String HSContext
-> getCtxNode env _ (TRBase tn al) = HSLeaf al <$> lkUpSchema env tn
-> getCtxNode env ctx (TRQuery q al) = do at <- getOutput env ctx q
->                                        return (HSLeaf al (MakeSchema al at))
+> getCtxNode env ctx (TR tr al) = gcn tr
+>   where gcn (TRBase tn) = HSLeaf al <$> lkUpSchema env tn
+>         gcn (TRQuery q) = do at <- getOutput env ctx q
+>                              return (HSLeaf al (MakeSchema al at))
+>         gcn (TRUnion t1 t2) = gcn t1
 
 > getCtx :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String HSContext
 > getCtx env ctx Nothing = Right HSEmpty

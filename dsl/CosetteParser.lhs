@@ -84,8 +84,12 @@ TODO: add Left Join, Semi join etc to table expression
 > data TableRef = TR TableExpr String           -- table expr, alias
 >                 deriving (Eq, Show)
 
+> getTe :: TableRef -> TableExpr
+> getTe (TR t _) = t
+> 
+
 > getAlias :: TableRef -> String
-> getAlias (TR _ s)    = s
+> getAlias (TR _ s) = s
 
 === query expression
 
