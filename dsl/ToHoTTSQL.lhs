@@ -267,11 +267,16 @@ convert where
 convert Cosette AST to HoTTSQL AST 
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
-> toHSQuery env ctx q = do ctx' <- getCtx env ctx (qFrom q)
->                          ft <- convertFrom env ctx (qFrom q)
->                          sl <- convertSelect (HSNode ctx ctx') (qSelectList q)
->                          wh <- convertWhere env (HSNode ctx ctx') (qWhere q)
->                          return (HSSelect sl ft wh (qDistinct q))
+> toHSQuery env ctx q = case q of
+>                         Select sl fr wh ds ->
+>                           do ctx' <- getCtx env ctx fr
+>                              ft <- convertFrom env ctx fr
+>                              sl <- convertSelect (HSNode ctx ctx') sl
+>                              wh <- convertWhere env (HSNode ctx ctx') wh
+>                              return (HSSelect sl ft wh ds)
+>                         UnionAll q1 q2 ->
+>                              HSUnionAll <$>
+>                              toHSQuery env ctx q1 <*>(toHSQuery env ctx q2)
 
 convert HoTTSQL AST to string (Coq program)
 
@@ -309,6 +314,7 @@ delimit strings with space
 >   toCoq (HSTRQuery q) = addParen $ toCoq q
 >   toCoq HSUnitTable = "unit"
 >   toCoq (HSProduct t1 t2) = addParen $ uw ["product", toCoq t1, toCoq t2]
+>   toCoq (HSTableUnion t1 t2) = addParen $ uw [toCoq t1, "UNION ALL", toCoq t2]
 
 > instance Coqable HSSelectItem where
 >   toCoq HSStar = "*"

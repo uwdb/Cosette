@@ -294,7 +294,7 @@ Query with distinct
 Query expression
 
 > spjQueryExpr :: Parser QueryExpr
-> spjQueryExpr = try bagQuery <|> setQuery
+> spjQueryExpr = try bagQuery <|> setQuery <|> (parens queryExpr)
 
 > unionQueryExpr :: Parser QueryExpr
 > unionQueryExpr = UnionAll <$>
