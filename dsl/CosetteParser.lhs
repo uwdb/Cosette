@@ -48,6 +48,8 @@ Syntax and Parser for Cosette.
 >                | DIden String String              -- a.b
 >                | BinOp ValueExpr String ValueExpr -- a.b + b.c etc
 >                | Constant String                  -- constant variable
+>                | VQE QueryExpr                    -- query expressions
+>                | Agg String ValueExpr             -- aggregation function
 >                  deriving (Eq, Show)
 
 === predicate
@@ -93,12 +95,14 @@ TODO: add Left Join, Semi join etc to table expression
 
 === query expression
 
+TODO: currently, grouping only supports columns rather than arbitrary value expressions
+
 > data QueryExpr = Select
 >                {qSelectList :: [SelectItem]
 >                ,qFrom :: Maybe [TableRef]
 >                ,qWhere :: Maybe Predicate
->                ,qDistinct:: Bool
->                }
+>                ,qGroup :: Maybe [ValueExpr]
+>                ,qDistinct:: Bool}
 >                | UnionAll QueryExpr QueryExpr
 >                deriving (Eq, Show)
 
@@ -132,6 +136,8 @@ term
 
 > term :: [String] -> Parser ValueExpr
 > term blackList = try dIden
+>              <|> (VQE <$> queryExpr)
+>              <|> (Agg <$> identifier <*> parens dIden)
 >              <|> num
 >              <|> constant
 >              <|> parens (valueExpr [])
@@ -271,6 +277,14 @@ TODO: for now, only base relations can be unioned in from clause.
 > fromList :: Parser [TableRef]
 > fromList = keyword_ "from" *> commaSep1 fromItem
 
+=== grouping clause
+
+> groupby :: Parser ()
+> groupby = keyword_ "group" *> keyword_ "by"
+
+> groupList :: Parser [ValueExpr]
+> groupList = groupby *> commaSep1 dIden
+
 === queryExpr
 
 Query without distinct
@@ -280,6 +294,7 @@ Query without distinct
 >            <$> selectList
 >            <*> optionMaybe fromList
 >            <*> optionMaybe whereClause
+>            <*> optionMaybe groupList
 >            <*> (do return False)
 
 Query with distinct
@@ -289,6 +304,7 @@ Query with distinct
 >            <$> distSelectList
 >            <*> optionMaybe fromList
 >            <*> optionMaybe whereClause
+>            <*> optionMaybe groupList
 >            <*> (do return True)
 
 Query expression
@@ -477,6 +493,7 @@ Parse cosette program
 > makeSelect = Select {qSelectList = []
 >                     ,qFrom = Nothing
 >                     ,qWhere = Nothing
+>                     ,qGroup = Nothing
 >                     ,qDistinct = False}
 
 > makeTest :: (Eq a, Show a) => Parser a -> (String,a) -> H.Test
@@ -485,4 +502,3 @@ Parse cosette program
 >     case gote of
 >       Left e -> H.assertFailure $ show e
 >       Right got -> H.assertEqual src expected got
-

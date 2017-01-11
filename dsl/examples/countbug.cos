@@ -14,8 +14,8 @@ query q1
 query q2
 `select x.pnum as xp
  from parts x, (select y.pnum as suppnum, count(y.shipdate) as ct
-               from supply y where shipdate < 10
-	       group by y.pnum) temp
+                from supply y where shipdate < 10
+	        group by y.pnum) temp
  where x.qoh = temp.ct AND x.pnum = temp.suppnum`;
 
 verify q1 q2;
