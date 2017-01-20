@@ -6,7 +6,7 @@ table pic(p);
 
 query q1
 `select x.uid as xu, x.uname as xn,
- 	(select count(*) from pic y from x.uid = y.uid and y.size > 100000) as cnt
+ 	(select count(*) as ct from pic y from x.uid = y.uid and y.size > 100000) as cnt
  from usr x
  where x.city = 3`;
 
