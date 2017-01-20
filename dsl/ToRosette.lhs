@@ -11,27 +11,32 @@
 
 > testQuery2 :: QueryExpr
 > testQuery2 = Select [Proj (DIden "t2" "c1") "tc1",Proj (DIden "t2" "c2") "tc2",Proj (DIden "t2" "c3") "tc3"]
->            (Just [(TRQuery (Select [Proj (DIden "t1" "c1") "c1",Proj (DIden "t1" "c2") "c2",Proj (DIden "t1" "c3") "c3"]
->                           (Just [(TRBase "t1" "t1")])
->                           (Just (Vlt (DIden "t1" "c1") (DIden "t1" "c2")))) "t2")])
+>            (Just [TR (TRQuery (Select [Proj (DIden "t1" "c1") "c1",Proj (DIden "t1" "c2") "c2",Proj (DIden "t1" "c3") "c3"]
+>                           (Just [TR (TRBase "t1") "t1"])
+>                           (Just (Vlt (DIden "t1" "c1") (DIden "t1" "c2")))
+>                           Nothing False)) "t2"])
 >            (Just (Vlt (DIden "t2" "c1") (DIden "t2" "c3")))
+>            Nothing False
 
 > testQuery3 :: QueryExpr
 > testQuery3 = Select [Proj (DIden "t1" "c1") "tc1",Proj (DIden "t1" "c2") "tc2",Proj (DIden "t1" "c3") "tc3"]
->              (Just [(TRBase "t1" "t1")])
+>              (Just [TR (TRBase "t1") "t1"])
 >              (Just (And (Vlt (DIden "t1" "c1") (DIden "t1" "c2")) (Vlt (DIden "t1" "c1") (DIden "t1" "c3"))))
+>              Nothing False
 
 == Rosette Abstract Syntax
 
 > data RosTableRef = RosTRBase String String
 >                  | RosTRQuery RosQueryExpr String
 >                  | RosJoin RosTableRef RosTableRef
+>                  | RosUnion RosTableRef RosTableRef
 >                    deriving (Eq, Show)
 
 > data RosQueryExpr = RosQuery {rosSelectList :: [ValueExpr]
 >                              ,rosFrom :: Maybe [RosTableRef]
 >                              ,rosWhere :: Maybe Predicate
 >                              ,rosSchema :: (String, [String])
+>                              ,rosGroup :: Maybe [ValueExpr]
 >                              } deriving (Eq, Show)
 
 === convert select

@@ -49,8 +49,12 @@ Syntax and Parser for Cosette.
 >                | BinOp ValueExpr String ValueExpr -- a.b + b.c etc
 >                | Constant String                  -- constant variable
 >                | VQE QueryExpr                    -- query expressions
->                | Agg String ValueExpr             -- aggregation function
+>                | Agg String AggExpr             -- aggregation function
 >                  deriving (Eq, Show)
+
+> data AggExpr = AV ValueExpr
+>              | AStar
+>                deriving (Eq, Show)
 
 === predicate
 
@@ -136,8 +140,6 @@ term
 
 > term :: [String] -> Parser ValueExpr
 > term blackList = try dIden
->              <|> (VQE <$> queryExpr)
->              <|> (Agg <$> identifier <*> parens dIden)
 >              <|> num
 >              <|> constant
 >              <|> parens (valueExpr [])
@@ -156,8 +158,20 @@ operators on values
 
 valueExpr
 
+currently, only supporting "agg(*)" or "agg(a.b)"
+
+> aggExpr :: Parser AggExpr
+> aggExpr = AV <$> dIden
+>       <|> AStar <$ symbol "*"
+
+> valueExpr' :: [String] -> Parser ValueExpr
+> valueExpr' blackList = E.buildExpressionParser vtable (term blackList)
+
 > valueExpr :: [String] -> Parser ValueExpr
-> valueExpr blackList = E.buildExpressionParser vtable (term blackList)
+> valueExpr blacklist = try (Agg <$> identifier <*> parens aggExpr)
+>                   <|> try (VQE <$> queryExpr)
+>                   <|> valueExpr' blacklist
+
 
 == parsing select item
 
