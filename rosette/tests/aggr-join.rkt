@@ -9,8 +9,8 @@
 ; (define ta (Table "R" (list "A" "B") concrete-table-2-col))
 ; (define tb (Table "S" (list "C" "D") concrete-table-2-col))
 
-(define ta (Table "R" (list "A" "B") (gen-sym-schema 2 num-rows-in-sym-table)))
-(define tb (Table "S" (list "C" "D") (gen-sym-schema 2 num-rows-in-sym-table)))
+(define ta (Table "R" (list "A" "B") (gen-sym-schema 2 2)))
+(define tb (Table "S" (list "C" "D") (gen-sym-schema 2 2)))
 
 (define (aggr-sum l)
   (foldl + 0 (map (lambda (x) (* (car (car x)) (cdr x)))

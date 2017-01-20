@@ -2,3 +2,4 @@
 *.vo
 #*#
 *.glob
+*.DS_Store

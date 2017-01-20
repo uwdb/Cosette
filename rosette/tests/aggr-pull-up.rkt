@@ -5,9 +5,7 @@
 (define (same q1 q2)
     (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
 
-
-
-(define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 num-rows-in-sym-table)))
+(define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 3)))
 ; (define t1 (Table "t1" (list "c1" "c2" "c3") concrete-table-3-col))
 
 (define (aggr-sum l)
@@ -71,16 +69,15 @@
 (define model (time (verify (same subq-aggr-1 subq-aggr-2))))
 (define model2 (verify (same subq-aggr-1 subq-aggr-wrong-2)))
 
-model
-
+;model
 model2
 
-(evaluate t1 model2)
-(evaluate (run subq-aggr-1) model2)
+;(evaluate t1 model2)
+;(evaluate (run subq-aggr-1) model2)
 ;(evaluate (run subq-aggr-wrong-2) model2)
-(println "========")
-(println "========")
-(denote-sql subq-aggr-1 (make-hash))
+;(println "========")
+;(println "========")
+;(denote-sql subq-aggr-1 (make-hash))
 
 ;(evaluate (Table-content t1) model)
 ;(evaluate (run subq-aggr-1) model)
