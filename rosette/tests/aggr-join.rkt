@@ -1,9 +1,6 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
-
-(define (same q1 q2)
-    (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
+(require "../util.rkt" "../cosette.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ; (define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 3)))
 ; (define ta (Table "R" (list "A" "B") concrete-table-2-col))
@@ -11,10 +8,6 @@
 
 (define ta (Table "R" (list "A" "B") (gen-sym-schema 2 2)))
 (define tb (Table "S" (list "C" "D") (gen-sym-schema 2 2)))
-
-(define (aggr-sum l)
-  (foldl + 0 (map (lambda (x) (* (car (car x)) (cdr x)))
-       (get-content l))))
 
 (define subq-aggr-1
   (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 

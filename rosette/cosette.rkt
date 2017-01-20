@@ -9,6 +9,17 @@
 (provide cosette-sol->json 
          cosette-solve)
 
+; format cosette solution into a json string
+; {
+;    "status": ... // "eq" or "neq"
+;    "counter-example": [ 
+;       {
+;        "table-name": ..., // a string representing table name
+;        "table-content": ...// a list of lists representing the table content, first list is schema
+;       },
+;    .....
+;    ]
+; }
 (define (cosette-sol->json solution)
   (let ([status (car solution)]
         [tables (cdr solution)])

@@ -1,16 +1,8 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
-
-(define (same q1 q2)
-    (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
 (current-bitwidth 5)
-
-; TODO: move to a separate file
-; count aggregation function
-(define (aggr-count l)
-  (foldl + 0 (map cdr (get-content l))))
 
 ; ------- actual tables (only for test) -------
 

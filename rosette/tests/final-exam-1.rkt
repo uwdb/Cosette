@@ -1,14 +1,6 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
-
-(define (same q1 q2)
-    (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
-
-; TODO: move to a separate file
-; count aggregation function
-(define (aggr-count l)
-  (foldl + 0 (map cdr (get-content l))))
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ; ------- actual tables (only for test) -------
 
@@ -61,12 +53,12 @@
 (define q1
   (SELECT 
     (VALS "Usr.uid" "Usr.uname" 
-    	(AGGR aggr-count 
-	  (SELECT 
-	    (VALS "Picture.uid" "Picture.size")
-	    FROM (NAMED Picture)
-	    WHERE (AND (BINOP "Usr.uid" = "Picture.uid")
-		       (BINOP "Picture.size" > 1000000)))))
+          (AGGR aggr-count 
+                (SELECT 
+                  (VALS "Picture.uid" "Picture.size")
+                  FROM (NAMED Picture)
+                  WHERE (AND (BINOP "Usr.uid" = "Picture.uid")
+                             (BINOP "Picture.size" > 1000000)))))
     FROM (NAMED Usr)
     WHERE (BINOP "Usr.city" = 3)))
 

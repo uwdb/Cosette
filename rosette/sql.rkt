@@ -56,7 +56,7 @@
     [(query-union-all? query)
      (let* 
        ([q1 `(,(denote-sql (query-union-all-query1 query) index-map) e)]
-	[q2 `(,(denote-sql (query-union-all-query2 query) index-map) e)])
+        [q2 `(,(denote-sql (query-union-all-query2 query) index-map) e)])
        `(lambda (e) (union-all ,q1 ,q2)))]
     ; denote rename table and schema
     [(query-rename? query)
@@ -140,7 +140,10 @@
     [(val-column-ref? value)
      `(lambda (e) (list-ref e ,(hash-ref nmap (val-column-ref-column-name value))))]
     [(val-agg? value)
-     `(lambda (e) (,(val-agg-agg-func value) (,(denote-sql (val-agg-query value) nmap) e)))]))
+     `(lambda (e) 
+        (,(val-agg-agg-func value) 
+          (map (lambda (r) (cons (car (car r)) (cdr r))) 
+               (get-content (,(denote-sql (val-agg-query value) nmap) e)))))]))
 
 ;;; filters
 (struct filter-binop (op val1 val2) #:transparent)
@@ -168,13 +171,29 @@
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
     [(filter-empty? f) `(lambda (e) #t)]))
 
+
+;; aggregation functions
+;; input to these functions:
+;;    [(v1 . m1), (v2 . m2), ..., (vn . mn)]
+;; output is the aggregation result of the list
+
+(define (aggr-count l)
+    (foldl + 0 (map cdr l)))
+
+(define (aggr-sum l)
+    (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
+
+(define (aggr-max l)
+    (max (map (lambda (x) (car x)) l)))
+
+(define (aggr-min l)
+    (min (map (lambda (x) (car x)) l)))
+
+;; the interface to run sql
+
 (define (run q)
-  (let ([racket-q (denote-sql q (make-hash))])
-    ((eval racket-q ns) '())))
-
-;;; for test purpose
-
-;; (print (denote-sql part-of-q3 '()))
+  (let ([racket-query (denote-sql q (make-hash))])
+    ((eval racket-query ns) '())))
 
 ;; easy syntax rules to write sql queries
 

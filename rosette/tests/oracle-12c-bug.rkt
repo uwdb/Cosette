@@ -2,12 +2,6 @@
 
 (require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
-(define (same q1 q2)
-    (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
-
-(define (query-eq q1 q2)
-    (bag-equal (get-content (run q1)) (get-content (run q2))))
-
 ; ------- actual tables (only for test) -------
 
 (define c-t
@@ -139,7 +133,6 @@
 ; (run count-bug-q1)
 ; (run q1)
 ;(run q1-2)
-;(query-eq q1 q1-2)
 ;(remove-zero (get-content (run q4)))
 ;(remove-zero (get-content (run q4-r)))
 ; (solve count-bug-q2)
