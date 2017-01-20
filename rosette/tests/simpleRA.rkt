@@ -1,8 +1,8 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
-(define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 num-rows-in-sym-table)))
+(define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 2)))
 
 ; commutativity of selection query 1
 (define push-selection-q1

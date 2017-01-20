@@ -1,11 +1,8 @@
 #lang rosette
 
-(require "../test-util.rkt" "../../table.rkt" "../../sql.rkt" "../../evaluator.rkt" "../../equal.rkt")
+(require  "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ;(current-bitwidth 32)
-
-(define (aggr-count l)
-  (foldl + 0 (map cdr (get-content l))))
 
 (define t (Table "t" (list "v") (gen-sym-schema 1 8)))
 (define ct (Table "t" (list "v") (list (cons (list 1) 10) (cons (list 2) 12))))
@@ -39,8 +36,8 @@
 
 (define q4 (NAMED t4))
 
-;(run cq1)
-;(run cq2)
+(run cq1)
+(run cq2)
 ;(run q4)
 
 ;(time (verify (same cq2 q4)))
@@ -49,6 +46,6 @@
 ;(get-content (run q3))
 ;(get-content (run q4))
 
-(time (verify (same q2 q4)))
-(time (verify (neq q2 q4)))
+;(time (verify (same q2 q4)))
+;(time (verify (neq q2 q4)))
 

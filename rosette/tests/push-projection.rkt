@@ -1,12 +1,9 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
-(define x (Table "x" (list "a" "k" "g") concrete-table-3-col))
-(define y (Table "y" (list "a" "k" "g") concrete-table-3-col))
-
-(define sx (Table "x" (list "a" "k" "g") (gen-sym-schema 3 num-rows-in-sym-table)))
-(define sy (Table "y" (list "a" "k" "g") (gen-sym-schema 3 num-rows-in-sym-table)))
+(define sx (Table "x" (list "a" "k" "g") (gen-sym-schema 3 2)))
+(define sy (Table "y" (list "a" "k" "g") (gen-sym-schema 3 2)))
 
 ; push projection query 1
 (define push-projection-q1

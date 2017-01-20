@@ -1,17 +1,6 @@
 #lang rosette
 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
-
-(define (same q1 q2)
-    (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
-
-; count aggregation function
-(define (aggr-count l)
-  (foldl + 0 (map cdr (get-content l))))
-
-(define (aggr-sum l)                                                                                                                                          
-    (foldl + 0 (map (lambda (x) (* (car (car x)) (cdr x)))       
-		    (get-content l))))
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
 ; ------- actual tables (only for test) -------
 

@@ -1,11 +1,8 @@
 #lang rosette                                                                                                                                                 
-(require "test-util.rkt" "../table.rkt"  "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../table.rkt"  "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
-(define symbolic-t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 num-rows-in-sym-table)))    
-(define symbolic-t2 (Table "t2" (list "c4" "c5" "c6") (gen-sym-schema 3 num-rows-in-sym-table)))    
-
-(define t1 (Table "t1" (list "c1" "c2" "c3") concrete-table-3-col))
-(define t2 (Table "t2" (list "c4" "c5" "c6") concrete-table-3-col))
+(define symbolic-t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 2)))    
+(define symbolic-t2 (Table "t2" (list "c4" "c5" "c6") (gen-sym-schema 3 2)))    
 
 (define q1
     (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t3.c4" "t3.c5" "t3.c6")

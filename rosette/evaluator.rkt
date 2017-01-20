@@ -19,7 +19,8 @@
 	 extend-each-row
          xproduct
          xproduct-raw
-	 sqlnull)
+	 sqlnull
+         aggr-raw)
 
 (define sqlnull "null-symbol")
 
@@ -80,6 +81,36 @@
 
 (define (sym-tab-constrain table)
   (foldl && #t (map (lambda (p) (> (cdr p) 0)) table)))
+
+; perform aggregation on a table :table
+; Arguments:
+;     table: the table to be aggregated, which contains only table-content but not schema
+;     aggr-field-indices: indices of the fields to be aggregated, reprented in a list
+;     raw-aggr-fun: the aggregation function to be used; it takes in a list of pairs [(v1 . mul1), ..., (vn . muln)] and
+;                returns a single aggregation value
+;     target-index: the target field to be used in aggregation
+(define (aggr-raw table aggr-field-indices raw-aggr-fun target-index)
+  (cond 
+    [(equal? '() table) '()]
+    [else 
+      (let* ([row (car table)]
+             [aggr-key-vals (map (lambda (i) (list-ref (car row) i)) aggr-field-indices)]
+             [target-val (list-ref (car row) target-index)])
+        (cons
+         (cons (append aggr-key-vals
+                       (list (raw-aggr-fun
+                              (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
+                                   (filter (lambda (r) (equal? aggr-key-vals
+                                                       (map (lambda (i) (list-ref (car r) i))
+                                                            aggr-field-indices)))
+                                           table))))) 1)
+         (aggr-raw (filter (lambda (r) (not (equal? aggr-key-vals
+                                                    (map (lambda (i) (list-ref (car r) i))
+                                                         aggr-field-indices))))
+                           (cdr table))
+                   aggr-field-indices
+                   raw-aggr-fun
+                   target-index)))]))
 
 (define (dedup table)
   (cond
@@ -231,7 +262,10 @@
 (define content-b
   (list
     (cons (list 1 2 3) 1)
-    (cons (list 2 1 0) 3)))
+    (cons (list 1 2 4) 2)
+    (cons (list 2 1 0) 3)
+    (cons (list 1 2 1) 3)
+    (cons (list 2 1 3) 3)))
 
 (define content-d
   (list
@@ -254,8 +288,11 @@
 (define table-ab
   (Table "ab" (list "a" "b" "c" "a" "b" "c") content-ab))
 
+(define (raw-aggr-sum l)
+  (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
+
 ; tests
-; (println (xproduct table-a table-b 'c))
+; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2)))
 ; (println (xproduct-raw content-a content-b))
 ; (println (get-content (left-outer-join table-a table-b 2 2)))
 ; (left-outer-join-raw content-c content-c 0 0 3 3)

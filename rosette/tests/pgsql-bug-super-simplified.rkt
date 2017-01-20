@@ -36,13 +36,7 @@
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
 #lang rosette                                                                                                                                                 
-(require "test-util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
-
-(define (same q1 q2)
-      (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
-
-(define (aggr-count l)
-    (foldl + 0 (map cdr (get-content l))))
+(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 
