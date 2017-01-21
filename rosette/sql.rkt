@@ -21,6 +21,7 @@
 (struct query-left-outer-join (query1 query2 key1 key2) #:transparent)
 (struct query-left-outer-join-2 (query1 query2 join-result) #:transparent)
 (struct query-union-all (query1 query2))
+(struct query-aggr (query aggr-fields aggr-fun target) #:transparent)
 
 ;; query: the sql query to denote to
 ;; index-map: the mapping of the names to their index in the context, which is a hash map
@@ -78,9 +79,7 @@
                   [from-table `(,from-clause e)]
                   [row-funcs (map (lambda (arg) (eval (denote-value arg name-hash) ns))
                                   (query-select-select-args query))]
-                  [row-func-wrap (lambda (r)
-                                   (map (lambda (f) (f r))
-                                        row-funcs))])
+                  [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
              `(let ([content (map (lambda (r) (cons (,row-func-wrap (car r)) (cdr r)))
                                   (filter (lambda (r) (,where-clause (car r)))
                                           (map (lambda (r) (cons (append e (car r)) (cdr r)))
@@ -88,6 +87,23 @@
                     [new-name "dummy-name"]
                     [new-schema (,extract-schema ,query)])
                 (Table new-name new-schema (dedup-accum content))))))]
+    ; denote aggregation query
+    [(query-aggr? query)
+     (let* ([inner-q (query-aggr-query query)]
+             [schema (extract-schema inner-q)]
+             [name-hash (hash-copy index-map)])
+        (map (lambda (col-name idx)
+               (hash-set! name-hash col-name (+ idx (hash-count index-map))))
+             schema (range (length schema)))
+          `(lambda (e) 
+             (let ([content (aggr-raw 
+                              (get-content (,(denote-sql (query-aggr-query query) index-map) e)) 
+                              ;;; it is very tricky below, we need to pass down single quote ' to make the list a list to make it runnable 
+                              ',(map (lambda (x) (hash-ref name-hash x)) (query-aggr-aggr-fields query)) 
+                              ,(query-aggr-aggr-fun query) 
+                              ,(hash-ref name-hash (query-aggr-target query)))])
+               (Table "dummy" ',(extract-schema query) content))))]
+    ; denote select distinct query
     [(query-select-distinct? query)
      (let ([args (query-select-distinct-select-args query)]
            [from (query-select-distinct-from-query query)]
@@ -122,7 +138,9 @@
            [cnames (query-rename-column-names query)])
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
-     (map (lambda (x) "dummy") (query-select-select-args query))]))
+     (map (lambda (x) "dummy") (query-select-select-args query))]
+    [(query-aggr? query)
+     (append (query-aggr-aggr-fields query) (list (query-aggr-target query)))]))
 
 ;;; values
 (struct val-const (val)
