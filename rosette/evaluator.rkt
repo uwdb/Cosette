@@ -4,22 +4,22 @@
 
 (provide gen-sym-schema
          gen-pos-sym-schema
-	 sym-tab-constrain
+         sym-tab-constrain
          dedup
          dedup-accum
-	 projection
-	 cross-prod
-	 get-row-count
-	 equi-join
-	 left-outer-join
-	 left-outer-join-2
-	 left-outer-join-raw
-	 table-diff
-	 union-all
-	 extend-each-row
+         projection
+         cross-prod
+         get-row-count
+         equi-join
+         left-outer-join
+         left-outer-join-2
+         left-outer-join-raw
+         table-diff
+         union-all
+         extend-each-row
          xproduct
          xproduct-raw
-	 sqlnull
+         sqlnull
          aggr-raw)
 
 (define sqlnull "null-symbol")
@@ -29,11 +29,11 @@
   (let ([imr (cartes-prod a b)])
     (map 
       (lambda (x)
-	(cons 
-	  (append (car (car x)) 
-		  (car (second x))) 
-	  (* (cdr (car x)) 
-	     (cdr (second x))))) 
+        (cons 
+          (append (car (car x)) 
+                  (car (second x))) 
+          (* (cdr (car x)) 
+             (cdr (second x))))) 
       imr)))
 
 (define (cartes-prod a b)
@@ -43,8 +43,7 @@
 
 ;; Table -> Table -> Table
 (define (xproduct a b name)
-  (Table name (schema-join a b) (xproduct-raw (Table-content a) (Table-content b))) 
-)
+  (Table name (schema-join a b) (xproduct-raw (Table-content a) (Table-content b))))
 
 ; generate a symbolic value
 (define (gen-sv)
@@ -97,52 +96,45 @@
              [aggr-key-vals (map (lambda (i) (list-ref (car row) i)) aggr-field-indices)]
              [target-val (list-ref (car row) target-index)])
         (cons
-         (cons (append aggr-key-vals
-                       (list (raw-aggr-fun
-                              (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
-                                   (filter (lambda (r) (equal? aggr-key-vals
-                                                       (map (lambda (i) (list-ref (car r) i))
-                                                            aggr-field-indices)))
-                                           table))))) 1)
-         (aggr-raw (filter (lambda (r) (not (equal? aggr-key-vals
-                                                    (map (lambda (i) (list-ref (car r) i))
-                                                         aggr-field-indices))))
-                           (cdr table))
-                   aggr-field-indices
-                   raw-aggr-fun
-                   target-index)))]))
+          (cons (append aggr-key-vals
+                        (list (raw-aggr-fun
+                                (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
+                                     (filter (lambda (r) (equal? aggr-key-vals
+                                                                 (map (lambda (i) (list-ref (car r) i))
+                                                                      aggr-field-indices)))
+                                             table))))) 1)
+          (aggr-raw (filter (lambda (r) (not (equal? aggr-key-vals
+                                                     (map (lambda (i) (list-ref (car r) i))
+                                                          aggr-field-indices))))
+                            (cdr table))
+                    aggr-field-indices
+                    raw-aggr-fun
+                    target-index)))]))
 
 (define (dedup table)
   (cond
     [(equal? '() table) '()]
     [else 
       (let ([ele (car table)])
-	(cond 
-	  [(equal? (cdr ele) 0)
-	   (dedup (cdr table))]
-	  [else 
-	    (cons (cons (car ele) 1)
-	      (dedup 
-		(filter 
-		  (lambda (x)
-		    (not (equal? (car ele) (car x))))
-		  (cdr table))))]))]))
+        (cond 
+          [(equal? (cdr ele) 0)
+           (dedup (cdr table))]
+          [else 
+            (cons (cons (car ele) 1)
+                  (dedup (filter (lambda (x)(not (equal? (car ele) (car x))))
+                                 (cdr table))))]))]))
 
 (define (dedup-accum table)
   (cond 
     [(equal? '() table) '()]
     [else 
       (let ([ele (car table)])
-	(cons 
-	  (cons 
-	    (car ele)
-	    (foldl + 0
-		   (map cdr (filter (lambda (x) (equal? (car ele) (car x))) table))))
-	  (dedup-accum 
-	    (filter 
-	      (lambda (x)
-		(not (equal? (car ele) (car x))))
-	      (cdr table)))))]))
+        (cons 
+          (cons (car ele)
+                (foldl + 0 (map cdr (filter (lambda (x) (equal? (car ele) (car x))) table))))
+          (dedup-accum 
+            (filter (lambda (x) (not (equal? (car ele) (car x))))
+                    (cdr table)))))]))
 
 (define (projection indices table)
   (let ([proj-single (lambda (r)
@@ -158,28 +150,28 @@
   (let ([t1 (dedup-accum table1)])
     (map 
       (lambda (r) 
-	(cons (car r) 
-	      (let ([cnt (- (cdr r) (get-row-count (car r) table2))])
-		(cond [(> cnt 0) cnt]
-		      [else 0])))) 
+        (cons (car r) 
+              (let ([cnt (- (cdr r) (get-row-count (car r) table2))])
+                (cond [(> cnt 0) cnt]
+                      [else 0])))) 
       t1)))
 
 ; Given a row and a table, count 
 (define (get-row-count row-content table-content)
   (foldl + 0
-    (map 
-      (lambda (r) 
-	(cond 
-	  [(equal? (car r) row-content) (cdr r)]
-	  [else 0]))
-      table-content)))
+         (map 
+           (lambda (r) 
+             (cond 
+               [(equal? (car r) row-content) (cdr r)]
+               [else 0]))
+           table-content)))
 
 (define (union-all table1 table2)
   (Table (get-table-name table1) 
-	 (get-schema table1) 
-	 (union-all-raw
-	   (Table-content table1)
-	   (Table-content table2))))
+         (get-schema table1) 
+         (union-all-raw
+           (Table-content table1)
+           (Table-content table2))))
 
 (define (union-all-raw content1 content2)
   (append content1 content2))
@@ -189,36 +181,36 @@
 (define (equi-join content1 content2 index-pairs schema-size-1)
   (let ([join-result (xproduct-raw content1 content2)])
     (map (lambda (r)   
-	   (cons (car r)
-		 (cond [(foldl && #t
-			       (map
-				 (lambda (p)
-				   (equal? 
-				     (list-ref (car r) (car p)) 
-				     (list-ref (car r) (+ (cdr p) schema-size-1)))) 
-				 index-pairs)) 
-			(cdr r)]
-		       [else 0])))
-	 join-result)))
+           (cons (car r)
+                 (cond [(foldl && #t
+                               (map
+                                 (lambda (p)
+                                   (equal? 
+                                     (list-ref (car r) (car p)) 
+                                     (list-ref (car r) (+ (cdr p) schema-size-1)))) 
+                                 index-pairs)) 
+                        (cdr r)]
+                       [else 0])))
+         join-result)))
 
 ; left outer join on two tables
 (define (left-outer-join table1 table2 index1 index2)
   (let* ([content1 (Table-content table1)]
-	 [content2 (Table-content table2)])
+         [content2 (Table-content table2)])
     (Table 
       (string-append (get-table-name table1)
-		     (get-table-name table2))
+                     (get-table-name table2))
       (schema-join table1 table2) 
       (left-outer-join-raw content1 content2 index1 index2 (length (get-schema table1)) (length (get-schema table2))))))
 
 ; another version of left-outer-join
 (define (left-outer-join-2 table1 table2 table12)
   (let* ([content1 (Table-content table1)]
-	 [content2 (Table-content table2)]
-	 [content12 (Table-content table12)])
+         [content2 (Table-content table2)]
+         [content12 (Table-content table12)])
     (Table
       (string-append (get-table-name table1)
-		     (get-table-name table2))
+                     (get-table-name table2))
       (schema-join table1 table2)
       (adding-null-rows content1 content2 content12 (length (get-schema table1)) (length (get-schema table2))))))
 
@@ -233,10 +225,11 @@
 (define (adding-null-rows content1 content2 content12 schema-size-1 schema-size-2)
   (let ([null-cols (map (lambda (x) sqlnull) (build-list schema-size-2 values))])
     (let ([diff-keys (dedup (table-diff (dedup content1) (dedup (projection (build-list schema-size-1 values) content12))))])
-      (let ([extra-rows (projection (build-list schema-size-1 values) (equi-join content1 diff-keys (build-list schema-size-1 (lambda (x) (cons x x))) schema-size-1))])
+      (let ([extra-rows (projection (build-list schema-size-1 values) 
+                                    (equi-join content1 diff-keys (build-list schema-size-1 (lambda (x) (cons x x))) schema-size-1))])
         (union-all-raw 
-	  content12
-	  (map (lambda (r) (cons (append (car r) null-cols) (cdr r))) extra-rows))))))
+          content12
+          (map (lambda (r) (cons (append (car r) null-cols) (cdr r))) extra-rows))))))
 
 ; extend each row in the table with extended-element-list,
 ; e.g. each row will be (row ++ eel)
@@ -273,11 +266,9 @@
     (cons (list 2 3 3) 3)))
 
 (define content-ab
-  (list
-    (cons (list 1 1 2 2 1 0) 6)))
+  (list (cons (list 1 1 2 2 1 0) 6)))
 
-(define content-c
-  (list))
+(define content-c (list))
 
 (define table-a
   (Table "a" (list "a" "b" "c") content-a))
