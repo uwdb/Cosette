@@ -29,28 +29,28 @@
   (cond 
     ; denote named table
     [(query-named? query) 
-       `(lambda (e) ,(query-named-table-ref query))]
+     `(lambda (e) ,(query-named-table-ref query))]
     ; denote join to a racket program
     [(query-join? query) 
      `(lambda (e) 
-       (xproduct	
-       	(,(denote-sql (query-join-query1 query) index-map) e)
-       	(,(denote-sql (query-join-query2 query) index-map) e)
-       "anonymous"))]
+        (xproduct	
+          (,(denote-sql (query-join-query1 query) index-map) e)
+          (,(denote-sql (query-join-query2 query) index-map) e)
+          "anonymous"))]
     ; denote left-outer-join table
     [(query-left-outer-join? query)
      (let* 
        ([q1 `(,(denote-sql (query-left-outer-join-query1 query) index-map) e)]
-	[q2 `(,(denote-sql (query-left-outer-join-query2 query) index-map) e)]
-	[k1 (query-left-outer-join-key1 query)]
-	[k2 (query-left-outer-join-key2 query)])
+        [q2 `(,(denote-sql (query-left-outer-join-query2 query) index-map) e)]
+        [k1 (query-left-outer-join-key1 query)]
+        [k2 (query-left-outer-join-key2 query)])
        `(lambda (e) (left-outer-join ,q1 ,q2 ,k1 ,k2)))]
     ; denote left-outer-join table
     [(query-left-outer-join-2? query)
      (let* 
        ([q1 `(,(denote-sql (query-left-outer-join-2-query1 query) index-map) e)]
-	[q2 `(,(denote-sql (query-left-outer-join-2-query2 query) index-map) e)]
-	[jq `(,(denote-sql (query-left-outer-join-2-join-result query) index-map) e)])
+        [q2 `(,(denote-sql (query-left-outer-join-2-query2 query) index-map) e)]
+        [jq `(,(denote-sql (query-left-outer-join-2-join-result query) index-map) e)])
        `(lambda (e) (left-outer-join-2 ,q1 ,q2 ,jq)))]
     ; query union all
     [(query-union-all? query)
@@ -73,8 +73,8 @@
                 schema (range (length schema)))
            (let* ([from-clause (eval (denote-sql table index-map) ns)]
                   [where-clause (eval (denote-filter
-                                       (query-select-where-filter query)
-                                       name-hash) ns)]
+                                        (query-select-where-filter query)
+                                        name-hash) ns)]
                   [from-table `(,from-clause e)]
                   [row-funcs (map (lambda (arg) (eval (denote-value arg name-hash) ns))
                                   (query-select-select-args query))]
@@ -99,12 +99,11 @@
                  [t-content (Table-content result)]
                  [dedup-result (dedup t-content)])
             (Table t-name t-schema dedup-result))))]))
-  
+
 ;; convert schema list to hash map (name -> index)           
 (define (list->hash l)
   (let ([h (make-hash)])
-    (map (lambda (name idx)
-           (hash-set! h name idx))
+    (map (lambda (name idx) (hash-set! h name idx))
          l
          (range (length l)))
     h))
@@ -114,24 +113,24 @@
   (cond 
     [(query-named? query)
      (get-qualified-schema (query-named-table-ref query))]
-     ;(map (lambda (x) (string-append (get-table-name (query-named-table-ref query)) "." x))(get-schema (query-named-table-ref query)))]
+    ;(map (lambda (x) (string-append (get-table-name (query-named-table-ref query)) "." x))(get-schema (query-named-table-ref query)))]
     [(query-join? query) 
      (append (extract-schema (query-join-query1 query)) 
-	     (extract-schema (query-join-query2 query)))]
+             (extract-schema (query-join-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
-	   [cnames (query-rename-column-names query)])
+           [cnames (query-rename-column-names query)])
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]))
 
 ;;; values
 (struct val-const (val)
-	#:transparent)
+        #:transparent)
 (struct val-column-ref (column-name)
-	#:transparent)
+        #:transparent)
 (struct val-agg (agg-func query)
-	#:transparent)
+        #:transparent)
 
 ;;; denote value returns tuple -> value
 (define (denote-value value nmap)
@@ -178,16 +177,16 @@
 ;; output is the aggregation result of the list
 
 (define (aggr-count l)
-    (foldl + 0 (map cdr l)))
+  (foldl + 0 (map cdr l)))
 
 (define (aggr-sum l)
-    (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
+  (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
 
 (define (aggr-max l)
-    (max (map (lambda (x) (car x)) l)))
+  (max (map (lambda (x) (car x)) l)))
 
 (define (aggr-min l)
-    (min (map (lambda (x) (car x)) l)))
+  (min (map (lambda (x) (car x)) l)))
 
 ;; the interface to run sql
 
@@ -214,10 +213,10 @@
   (query-join q1 q2))
 
 (define-syntax-rule (NAMED t)
-  (query-named t))
+                    (query-named t))
 
 (define-syntax-rule (AS q [t l])
-  (query-rename q t l))
+                    (query-rename q t l))
 
 (define (RENAME t name)
   (rename-table t name))
@@ -239,7 +238,7 @@
   (filter-binop op (VAL v1) (VAL v2)))
 
 (define-syntax-rule (EXISTS q)
-  (filter-exists q))
+                    (filter-exists q))
 
 (define (AND f1 f2)
   (filter-conj f1 f2))
