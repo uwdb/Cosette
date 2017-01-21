@@ -22,7 +22,7 @@
          sqlnull
          aggr-raw)
 
-(define sqlnull "null-symbol")
+(define sqlnull "sqlnull")
 
 ;; rawTable -> rawTable -> rawTable
 (define (xproduct-raw a b)

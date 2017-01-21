@@ -2,7 +2,7 @@
 
 #lang rosette
 
-(require "util.rkt" "table.rkt" "equal.rkt" "sql.rkt")
+(require "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt")
 (require racket/pretty)
 (require json)
 

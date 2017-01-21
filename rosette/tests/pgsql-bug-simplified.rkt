@@ -36,7 +36,8 @@
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
 #lang rosette                                                                                                                                                 
-(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
+         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 

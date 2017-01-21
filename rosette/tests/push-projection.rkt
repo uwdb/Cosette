@@ -1,6 +1,7 @@
 #lang rosette
 
-(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
+         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define sx (Table "x" (list "a" "k" "g") (gen-sym-schema 3 2)))
 (define sy (Table "y" (list "a" "k" "g") (gen-sym-schema 3 2)))

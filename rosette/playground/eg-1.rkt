@@ -1,6 +1,8 @@
 #lang rosette
 
-(require "../cosette.rkt" "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../cosette.rkt" "../util.rkt" "../table.rkt" 
+         "../syntax.rkt" "../denotation.rkt" 
+         "../evaluator.rkt" "../equal.rkt")
 
 (define t1 (Table "t1" (list "id") (gen-sym-schema 1 3)))
 (define t2 (Table "t2" (list "id") (list)))
