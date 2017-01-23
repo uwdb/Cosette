@@ -1,6 +1,6 @@
 #lang rosette 
 
-(require "equal.rkt" "sql.rkt" "table.rkt")
+(require "../equal.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt")
 
 (provide 
   sym-table-gen)

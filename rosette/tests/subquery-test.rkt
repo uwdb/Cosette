@@ -1,5 +1,7 @@
 #lang rosette                                                                                                                                                 
-(require "../util.rkt" "../table.rkt"  "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+
+(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
+         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define symbolic-t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 2)))    
 (define symbolic-t2 (Table "t2" (list "c4" "c5" "c6") (gen-sym-schema 3 2)))    

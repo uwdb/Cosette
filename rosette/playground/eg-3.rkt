@@ -1,6 +1,7 @@
 #lang rosette
 
-(require  "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require  "../table.rkt" "../syntax.rkt" 
+          "../denotation.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ;(current-bitwidth 32)
 

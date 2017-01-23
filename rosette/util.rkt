@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "table.rkt" "equal.rkt" "sql.rkt")
+(require "table.rkt" "equal.rkt" "denotation.rkt")
 (require json)
 
 (provide (all-defined-out))  

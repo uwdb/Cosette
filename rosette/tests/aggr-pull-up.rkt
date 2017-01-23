@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 2)))
 ; (define t1 (Table "t1" (list "c1" "c2" "c3") concrete-table-3-col))
