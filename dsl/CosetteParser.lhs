@@ -88,6 +88,7 @@ TODO: add Left Join, Semi join etc to table expression
 >                deriving (Eq, Show)
 
 > data TableRef = TR TableExpr String           -- table expr, alias
+>               | TRXProd TableRef TableRef
 >                 deriving (Eq, Show)
 
 > getTe :: TableRef -> TableExpr

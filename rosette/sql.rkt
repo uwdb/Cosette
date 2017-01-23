@@ -253,6 +253,9 @@
 (define (LEFT-OUTER-JOIN-2 q1 q2 join-query)
   (query-left-outer-join-2 q1 q2 join-query))
 
+(define (TABLE-UNION-ALL t1 t2)
+  (union-all t1 t2))
+
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
 ;;   FROM (JOIN (NAMED table1) (AS (NAMED table1) ["t2" '("c1" "c2" "c3")]))

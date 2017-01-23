@@ -7,41 +7,42 @@
 > import Text.Parsec.Error as PE
 > import Data.List (unwords)
 
-== TO BE Deleted
-
-> testQuery2 :: QueryExpr
-> testQuery2 = Select [Proj (DIden "t2" "c1") "tc1",Proj (DIden "t2" "c2") "tc2",Proj (DIden "t2" "c3") "tc3"]
->            (Just [TR (TRQuery (Select [Proj (DIden "t1" "c1") "c1",Proj (DIden "t1" "c2") "c2",Proj (DIden "t1" "c3") "c3"]
->                           (Just [TR (TRBase "t1") "t1"])
->                           (Just (Vlt (DIden "t1" "c1") (DIden "t1" "c2")))
->                           Nothing False)) "t2"])
->            (Just (Vlt (DIden "t2" "c1") (DIden "t2" "c3")))
->            Nothing False
-
-> testQuery3 :: QueryExpr
-> testQuery3 = Select [Proj (DIden "t1" "c1") "tc1",Proj (DIden "t1" "c2") "tc2",Proj (DIden "t1" "c3") "tc3"]
->              (Just [TR (TRBase "t1") "t1"])
->              (Just (And (Vlt (DIden "t1" "c1") (DIden "t1" "c2")) (Vlt (DIden "t1" "c1") (DIden "t1" "c3"))))
->              Nothing False
-
 == Rosette Abstract Syntax
 
-> data RosTableRef = RosTRBase String String
->                  | RosTRQuery RosQueryExpr String
->                  | RosJoin RosTableRef RosTableRef
->                  | RosUnion RosTableRef RosTableRef
+> data RosTableExpr = RosTRBase String
+>                   | RosTRQuery RosQueryExpr
+>                   | RosUnion RosTableExpr RosTableExpr
+>                     deriving (Eq, Show)
+
+> data RosTableRef = RosTR RosTableExpr String
+>                  | RosTRXProd RosTableRef RosTableRef
 >                    deriving (Eq, Show)
 
 > data RosQueryExpr = RosQuery {rosSelectList :: [ValueExpr]
 >                              ,rosFrom :: Maybe [RosTableRef]
 >                              ,rosWhere :: Maybe Predicate
->                              ,rosSchema :: (String, [String])
 >                              ,rosGroup :: Maybe [ValueExpr]
+>                              ,rosDistinct :: Bool
+>                              ,rosSchema :: (String, [String])
 >                              } deriving (Eq, Show)
+
+== Util function
+
+> checkListErr :: [Either String a] -> Either String [a]
+> checkListErr lt = foldE lt (Right [])
+>   where foldE [] x = x
+>         foldE (h:t) (Left es) =
+>           case h of Left es' -> foldE t (Left (es ++ es'))
+>                     Right e  -> foldE t (Left es)
+>         foldE (h:t) (Right l) =
+>           case h of Left es' -> foldE t (Left es')
+>                     Right e  -> foldE t (Right (l ++ [e]))
 
 === convert select
 
 the base case
+
+TODO: revisit this one for adding support of "*"
 
 > makeRosSelectItem :: SelectItem -> Either String (ValueExpr, String)
 > makeRosSelectItem Star = Left "* \n"
@@ -57,10 +58,13 @@ convert select
 
 the base case
 
+TODO: the handling of union of tables is not ideal, need to be revised
+
 > makeRosFromItem :: TableRef -> Either String RosTableRef
-> makeRosFromItem (TRBase tn alias) = Right (RosTRBase tn alias)
-> makeRosFromItem (TRQuery query alias) =
->   RosTRQuery <$> makeRosQuery query alias <*> Right alias
+> makeRosFromItem (TR te al) = RosTR <$> conv te <*> Right al
+>   where conv (TRBase tn) = Right (RosTRBase tn)
+>         conv (TRQuery q) = RosTRQuery <$> makeRosQuery q al 
+>         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2  
 
 convert from
 
@@ -77,6 +81,8 @@ unzip result
 >                        <$> (fst <$> sl)  -- select list
 >                        <*> (makeRosFrom $ qFrom qe)
 >                        <*> Right (qWhere qe)
+>                        <*> Right (qGroup qe)
+>                        <*> Right (qDistinct qe)
 >                        <*> ((,) <$> Right name <*> (snd <$> sl))
 >   where sl  = unzip <$> (makeRosSelect $ qSelectList qe) -- unzip result
 
@@ -87,17 +93,21 @@ convert list of tables (or subqueries) in from clause to joins
 >                   (rosSelectList q)
 >                   ((\a -> [a]) <$> (toJoin fr))
 >                   (rosWhere q)
+>                   (rosGroup q)
+>                   (rosDistinct q)
 >                   (rosSchema q)
 >   where fr' = rosFrom q
->         fr =  fmap (\t ->
->                      (case t of RosTRQuery q a
->                                   -> RosTRQuery (convertFrom q) a
->                                 _ -> t)) <$> fr'
+>         fr =  fmap convTr <$> fr'
+>         convTr (RosTR te al) = RosTR (convTe te) al
+>         convTr tr = tr
+>         convTe (RosTRQuery q) = RosTRQuery (convertFrom q)
+>         convTe (RosUnion t1 t2) = RosUnion (convTe t1) (convTe t2)
+>         convTe b = b
 >         toJoin Nothing = Nothing
 >         toJoin (Just []) = Nothing
 >         toJoin (Just [x]) = Just x
->         toJoin (Just [x1, x2]) = Just $ RosJoin x1 x2
->         toJoin (Just (h:t)) = RosJoin <$> Just h <*> toJoin (Just t)
+>         toJoin (Just [x1, x2]) = Just $ RosTRXProd x1 x2
+>         toJoin (Just (h:t)) = RosTRXProd <$> Just h <*> toJoin (Just t)
 
 Finally, convert Cosette AST to Rosette AST
 
@@ -108,6 +118,9 @@ Finally, convert Cosette AST to Rosette AST
 
 > class Sexp a where
 >   toSexp :: a -> String
+
+> addParen :: String -> String
+> addParen s = "(" ++ s ++ ")"
 
 > addSParen :: String -> String
 > addSParen s = "[" ++ s ++ "]"
@@ -142,10 +155,14 @@ convert Predicate to sexp
 
 convert RosTableRef to sexp
 
+> instance Sexp RosTableExpr where
+>   toSexp (RosTRBase tn) = tn
+>   toSexp (RosTRQuery q) = toSexp q
+>   toSexp (RosUnion t1 t2) = addParen $ uw ["TABLE-UNION-ALL", toSexp t1, toSexp t2]
+
 > instance Sexp RosTableRef where
->   toSexp (RosTRBase t a) = addParen $ uw ["RENAME", t, addEscStr a]
->   toSexp (RosTRQuery q a) = addParen $ uw ["RENAME", toSexp q, addEscStr a]
->   toSexp (RosJoin q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
+>   toSexp (RosTR t a) = addParen $ uw ["RENAME", toSexp t, addEscStr a]
+>   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp
 
