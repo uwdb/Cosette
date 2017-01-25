@@ -31,9 +31,12 @@
 (define test-q
   (query-aggr (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
 
+(define test-q2
+  (SELECT-GROUP (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+
 (writeln (denote-sql test-q (make-hash)))
 
-(run test-q)
+(run test-q2)
 
 ;(define t2 (Table "t1" (list "id") (list (cons (list 0) 0))))
 

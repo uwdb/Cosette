@@ -56,6 +56,10 @@
   (query-select v q f))
 
 (define-syntax-rule
+  (SELECT-GROUP q f aggr target)
+  (query-aggr q f aggr target))
+
+(define-syntax-rule
   (SELECT-DISTINCT v FROM q WHERE f)
   (query-select-distinct v q f))
 

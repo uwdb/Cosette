@@ -42,4 +42,11 @@
 
 ; commutativity of selection query 2
 
-(time (verify (same subq-aggr-1 subq-aggr-2)))
+;(time (verify (same subq-aggr-1 subq-aggr-2)))
+
+(define-symbolic x integer?)
+(define-symbolic y integer?)
+(define-symbolic z integer?)
+(define s (set x y z))
+(define s2 (set y z x))
+(verify (assert (set-eq? s s2)))

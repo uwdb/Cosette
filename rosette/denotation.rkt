@@ -1,4 +1,5 @@
 #lang rosette
+;; denotation rules for SQL
 
 (require "syntax.rkt" "table.rkt" "evaluator.rkt")
 
