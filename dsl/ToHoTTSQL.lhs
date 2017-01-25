@@ -74,6 +74,7 @@ HoTTSQL query
 >                  {hsSelectList :: [HSSelectItem]
 >                  ,hsFrom :: HSTableRef
 >                  ,hsWhere :: HSPredicate
+>                  ,hsGroup :: [HSValueExpr]
 >                  ,hsDistinct :: Bool}
 >                  | HSUnionAll HSQueryExpr HSQueryExpr
 >                  deriving (Eq, Show)
@@ -85,20 +86,20 @@ TODO delete the example
 
 > query1 :: QueryExpr
 > query1 = Select [Star]
->                     (Just [TR (TRBase "a") "x",
->                            TR (TRQuery (Select [Star] (Just [TR (TRBase "b") "y"]) (Just (PredVar "b0" ["y"])) False)) "z"])
->                     (Just (PredVar "b1" ["x", "z"]))
->                     False
+>          (Just [TR (TRBase "a") "x",
+>                  TR (TRQuery (Select [Star] (Just [TR (TRBase "b") "y"]) (Just (PredVar "b0" ["y"])) Nothing False)) "z"])
+>          (Just (PredVar "b1" ["x", "z"]))
+>          Nothing False
 
 "select x1.a as x1a from (select x.a as a, x.k as k from x x) x1, y y where x1.k = y.k"
 
 > query2 :: QueryExpr
 > query2 = Select [Proj (DIden "x1" "a") "x1a"]
 >                 (Just [TR (TRQuery (Select [Proj (DIden "x" "a") "a", Proj (DIden "x" "k") "k"]
->                                (Just [TR (TRBase "x") "x"]) Nothing False)) "x1",
+>                                     (Just [TR (TRBase "x") "x"]) Nothing Nothing False)) "x1",
 >                        TR (TRBase "y") "y"])
->                 (Just (Veq (DIden "x1" "k") (DIden "y" "k")))
->                 False
+>                (Just (Veq (DIden "x1" "k") (DIden "y" "k")))
+>          Nothing False
 
 end TODO
 
@@ -264,16 +265,21 @@ convert where
 > convertWhere env ctx Nothing = Right HSTrue
 > convertWhere env ctx (Just p) = convertPred env ctx p
 
+> convertGroup :: HSContext -> Maybe [ValueExpr] -> Either String [HSValueExpr]
+> convertGroup ctx Nothing = Right []
+> convertGroup ctx (Just g) = checkListErr $ (convertVE ctx <$> g)
+
 convert Cosette AST to HoTTSQL AST 
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
 > toHSQuery env ctx q = case q of
->                         Select sl fr wh ds ->
+>                         Select sl fr wh gr ds ->
 >                           do ctx' <- getCtx env ctx fr
->                              ft <- convertFrom env ctx fr
->                              sl <- convertSelect (HSNode ctx ctx') sl
->                              wh <- convertWhere env (HSNode ctx ctx') wh
->                              return (HSSelect sl ft wh ds)
+>                              ft' <- convertFrom env ctx fr
+>                              sl' <- convertSelect (HSNode ctx ctx') sl
+>                              wh' <- convertWhere env (HSNode ctx ctx') wh
+>                              gr' <- convertGroup (HSNode ctx ctx') gr
+>                              return (HSSelect sl' ft' wh' gr' ds)
 >                         UnionAll q1 q2 ->
 >                              HSUnionAll <$>
 >                              toHSQuery env ctx q1 <*>(toHSQuery env ctx q2)
