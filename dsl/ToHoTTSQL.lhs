@@ -82,27 +82,6 @@ HoTTSQL query
 
 == convert Cosette to HoTTSQL
 
-TODO delete the example
-
-> query1 :: QueryExpr
-> query1 = Select [Star]
->          (Just [TR (TRBase "a") "x",
->                  TR (TRQuery (Select [Star] (Just [TR (TRBase "b") "y"]) (Just (PredVar "b0" ["y"])) Nothing False)) "z"])
->          (Just (PredVar "b1" ["x", "z"]))
->          Nothing False
-
-"select x1.a as x1a from (select x.a as a, x.k as k from x x) x1, y y where x1.k = y.k"
-
-> query2 :: QueryExpr
-> query2 = Select [Proj (DIden "x1" "a") "x1a"]
->                 (Just [TR (TRQuery (Select [Proj (DIden "x" "a") "a", Proj (DIden "x" "k") "k"]
->                                     (Just [TR (TRBase "x") "x"]) Nothing Nothing False)) "x1",
->                        TR (TRBase "y") "y"])
->                (Just (Veq (DIden "x1" "k") (DIden "y" "k")))
->          Nothing False
-
-end TODO
-
 a utility function
 
 > lkUp :: [a] -> (a -> String -> Bool) -> String -> Either String a
