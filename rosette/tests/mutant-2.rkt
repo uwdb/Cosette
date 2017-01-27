@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
 (current-bitwidth 5)
 
@@ -49,7 +49,7 @@
   (SELECT (VALS "t1.id1" "t1.name" "t1.cname" "t1.id2")
    FROM (AS (LEFT-OUTER-JOIN (NAMED teaches) (NAMED instructor) 1 0)
       	["t1" (list "cname" "id2" "id1" "name")])
-   WHERE (filter-empty)))
+   WHERE (F-EMPTY)))
 ; expect model
 ;(run q2)
 ;(run q4)

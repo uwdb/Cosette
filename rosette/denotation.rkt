@@ -5,9 +5,12 @@
 
 (provide (all-defined-out))
 
-;;; define the current name space as ns
 (define-namespace-anchor anc)
 (define ns (namespace-anchor->namespace anc))
+
+(define (denote-and-run q)
+  (let ([query-in-rkt (denote-sql q (make-hash))])
+    ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
 ;; index-map: the mapping of the names to their index in the context, which is a hash map
@@ -20,7 +23,7 @@
     ; denote join to a racket program
     [(query-join? query) 
      `(lambda (e) 
-        (xproduct	
+        (xproduct
           (,(denote-sql (query-join-query1 query) index-map) e)
           (,(denote-sql (query-join-query2 query) index-map) e)
           "anonymous"))]
@@ -158,12 +161,6 @@
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
     [(filter-empty? f) `(lambda (e) #t)]))
 
-
-;; the interface to run sql
-(define (run q)
-  (let ([racket-query (denote-sql q (make-hash))])
-    ((eval racket-query ns) '())))
-
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
 ;;   FROM (JOIN (NAMED table1) (AS (NAMED table1) ["t2" '("c1" "c2" "c3")]))
@@ -182,23 +179,3 @@
 ; (denote-sql q (make-hash))
 ; ((eval (denote-sql q (make-hash)) ns) '())
 
-; (define test-table1
-;    (list
-;      (cons (list 1 1 2) 2)
-;      (cons (list 1 1 2) 2)
-;      (cons (list 0 1 2) 2)
-;      (cons (list 1 2 1) 1)
-;      (cons (list 1 2 3) 1)
-;      (cons (list 2 1 0) 3)))
-;(define table1 (Table "t1" (list "c1" "c2" "c3") test-table1))
-
-;(define q (query-select 
-;  (list (val-column-ref "t1.c1") (val-column-ref "t1.c2"))
-;  (query-named table1)
-;  (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
-
-;(define q2 (query-rename (query-named table1) "qt" (list "c1" "c2" "c3")))
-
-;(define q3 (query-join (query-named table1) (query-rename (query-named table1) "t2" (list "c1" "c2" "c3"))))
-
-;(define part-of-q3 (query-rename (query-named table1) "t2" (list "c1" "c2" "c3")))

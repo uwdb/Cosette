@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ; (define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 3)))
 ; (define ta (Table "R" (list "A" "B") concrete-table-2-col))
@@ -24,7 +24,7 @@
 					FROM (AS (NAMED tb) ["S2" (list "C" "D")])
 				       WHERE (BINOP "S2.C" = "S.C"))))
 	      FROM (NAMED tb)
-	      WHERE (filter-empty)))
+	      WHERE (F-EMPTY)))
 
 (define subq-aggr-2
   (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 

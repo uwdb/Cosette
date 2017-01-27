@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ; ------- actual tables (only for test) -------
 
@@ -86,7 +86,7 @@
 		  FROM (AS q2-part ["t" (list "x_uid" "x_uname" "x_city" "y_uid" "y_size")])
 		  WHERE (AND (BINOP "t.x_uid" = "table.x_uid") (BINOP "t.x_uname" = "table.x_uname")))))
     FROM q2-part
-    WHERE (filter-empty)))
+    WHERE (F-EMPTY)))
 
 ; (run q1)
 ; (run q2-part)
