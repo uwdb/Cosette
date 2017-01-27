@@ -1,7 +1,6 @@
 #lang rosette
 
-(require  "../table.rkt" "../syntax.rkt" 
-          "../denotation.rkt" "../evaluator.rkt" "../equal.rkt")
+(require  "../table.rkt" "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 ;(current-bitwidth 32)
 
@@ -16,14 +15,14 @@
 
 (define q1
 	(SELECT-DISTINCT 
-      (VALS (AGGR aggr-count (SELECT-DISTINCT (VALS "t.v") FROM (NAMED t) WHERE (filter-empty))))
+      (VALS (AGGR aggr-count (SELECT-DISTINCT (VALS "t.v") FROM (NAMED t) WHERE (F-EMPTY))))
 	 FROM  (NAMED t3)
-	 WHERE (filter-empty)))
+	 WHERE (F-EMPTY)))
 
 (define cq1
-	(SELECT-DISTINCT (VALS (AGGR aggr-count (SELECT-DISTINCT (VALS "t.v") FROM (NAMED ct) WHERE (filter-empty))))
+	(SELECT-DISTINCT (VALS (AGGR aggr-count (SELECT-DISTINCT (VALS "t.v") FROM (NAMED ct) WHERE (F-EMPTY))))
 	 FROM  (NAMED t3)
-	 WHERE (filter-empty)))
+	 WHERE (F-EMPTY)))
 
 (define q2
 	(SELECT (VALS "j.s1")
