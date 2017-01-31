@@ -1,12 +1,12 @@
 #lang rosette
 
-(provide (all-defined-out))
+(provide bag-equal)
 ;(provide tuple-in table-sum bag-contain bag-equal)
 
 ; sum the multiplicity of tuples in a table
 (define (sum table)
   (cond
-    [(empty? table) 0]
+   [(empty? table) 0]
     [else (+ (cdr (first table)) (sum (rest table)))]))
 
 ;filter same tuple

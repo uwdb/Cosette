@@ -81,6 +81,13 @@
 (define (sym-tab-constrain table)
   (foldl && #t (map (lambda (p) (> (cdr p) 0)) table)))
 
+;; given a table (content only), judge whether the table is empty
+(define (table-content-empty? table)
+  (cond
+    [(equal? '() table) #t]
+    [(zero? (foldl + 0 (map cdr table))) #t]
+    [else #f]))
+
 ; perform aggregation on a table :table
 ; Arguments:
 ;     table: the table to be aggregated, which contains only table-content but not schema
@@ -96,13 +103,14 @@
              [aggr-key-vals (map (lambda (i) (list-ref (car row) i)) aggr-field-indices)]
              [target-val (list-ref (car row) target-index)])
         (cons
-          (cons (append aggr-key-vals
-                        (list (raw-aggr-fun
-                                (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
-                                     (filter (lambda (r) (equal? aggr-key-vals
-                                                                 (map (lambda (i) (list-ref (car r) i))
-                                                                      aggr-field-indices)))
-                                             table))))) 1)
+          (let ([same-val-rows 
+                  (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
+                       (filter (lambda (r) (equal? aggr-key-vals
+                                                   (map (lambda (i) (list-ref (car r) i))
+                                                        aggr-field-indices)))
+                               table))])
+            (cons (append aggr-key-vals (list (raw-aggr-fun same-val-rows))) 
+                  (if (table-content-empty? same-val-rows) 0 1)))
           (aggr-raw (filter (lambda (r) (not (equal? aggr-key-vals
                                                      (map (lambda (i) (list-ref (car r) i))
                                                           aggr-field-indices))))

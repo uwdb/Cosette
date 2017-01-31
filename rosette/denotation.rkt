@@ -10,7 +10,7 @@
 
 (define (denote-and-run q)
   (let ([query-in-rkt (denote-sql q (make-hash))])
-;;  (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
+;;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
     ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
@@ -27,7 +27,7 @@
         (xproduct
           (,(denote-sql (query-join-query1 query) index-map) e)
           (,(denote-sql (query-join-query2 query) index-map) e)
-          "anonymous"))]
+          "dummy"))]
     ; denote left-outer-join table
     [(query-left-outer-join? query)
      (let* 
@@ -81,7 +81,7 @@
                                   (filter (lambda (r) (,where-clause (car r)))
                                           (map (lambda (r) (cons (append e (car r)) (cdr r)))
                                                (Table-content ,from-table))))]
-                    [new-name "dummy-name"]
+                    [new-name "dummy"]
                     [new-schema (,extract-schema ,query)])
                 (Table new-name new-schema (dedup-accum content))))))]
     ; denote aggregation query

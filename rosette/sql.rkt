@@ -7,7 +7,7 @@
 ;; the interface to run sql, 
 ;; note that ns is the namespace defined in denotation
 (define (run q)
-	(denote-and-run q))
+  (denote-and-run q))
 
 ;; easy syntax rules to write sql queries
 
@@ -20,8 +20,22 @@
 ;; aggr: aggregation functions
 ;; target: group by field
 (define-syntax-rule
-  (SELECT-GROUP q f aggr target)
-  (query-aggr q f aggr target))
+  (SELECT-GROUP q gb-fields aggrf target)
+  (query-aggr q gb-fields aggrf target))
+
+;; group by but with an alternative implementation
+(define-syntax-rule
+  (SELECT-GROUP-SUBQ q gb-fields aggrf target)
+  (SELECT-DISTINCT 
+    (append (map (lambda (x) (VAL x)) gb-fields)
+            (list (VAL (AGGR aggrf (SELECT 
+                                     (VALS (string-append "tmp." target))
+                                     FROM (AS (SELECT (append (map (lambda (x) (VAL x)) gb-fields) (list (VAL target))) FROM q WHERE (F-EMPTY)) 
+                                              ["tmp" (append gb-fields (list target))])
+                                     WHERE (foldl (lambda (x y) (AND x y)) (F-EMPTY) 
+                                                  (map (lambda (z) (BINOP z = (string-append "tmp." z))) gb-fields)))))))
+    FROM q
+    WHERE (F-EMPTY)))
 
 (define-syntax-rule
   (SELECT-DISTINCT v FROM q WHERE f)
@@ -43,30 +57,30 @@
 ;                    (query-rename q t l))
 
 (define-syntax AS
-    (syntax-rules 
-      ()
-      [(AS q [t l]) (query-rename-full q t l)]
-      [(AS q [t]) (query-rename q t)]))
+  (syntax-rules 
+    ()
+    [(AS q [t l]) (query-rename-full q t l)]
+    [(AS q [t]) (query-rename q t)]))
 
 (define-syntax-rule
   (RENAME t name)
   (rename-table t name))
 
 (define-syntax-rule (VAL v)
-  (cond
-    [(equal? v sqlnull) (val-const sqlnull)]
-    [(string? v) (val-column-ref v)]
-    [(int? v) (val-const v)]
-    [(val-agg? v) v]))
+                    (cond
+                      [(equal? v sqlnull) (val-const sqlnull)]
+                      [(string? v) (val-column-ref v)]
+                      [(int? v) (val-const v)]
+                      [(val-agg? v) v]))
 
 (define (VALS . v)
   (map (lambda (x) (VAL x)) v))
 
 (define-syntax-rule (AGGR aggr-fun q)
-  (val-agg aggr-fun q))
+                    (val-agg aggr-fun q))
 
 (define-syntax-rule (BINOP v1 op v2)
-  (filter-binop op (VAL v1) (VAL v2)))
+                    (filter-binop op (VAL v1) (VAL v2)))
 
 (define-syntax-rule (EXISTS q)
                     (filter-exists q))
@@ -74,16 +88,16 @@
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
 (define-syntax-rule (AND f1 f2)
-  (filter-conj f1 f2))
+                    (filter-conj f1 f2))
 
 (define-syntax-rule (NOT f)
-  (filter-not f))
+                    (filter-not f))
 
 (define-syntax-rule (LEFT-OUTER-JOIN q1 q2 k1 k2)
-  (query-left-outer-join q1 q2 k1 k2))
+                    (query-left-outer-join q1 q2 k1 k2))
 
 (define-syntax-rule (LEFT-OUTER-JOIN-2 q1 q2 join-query)
-  (query-left-outer-join-2 q1 q2 join-query))
+                    (query-left-outer-join-2 q1 q2 join-query))
 
 ;; aggregation functions
 ;; input to these functions:
@@ -103,19 +117,19 @@
   (min (map (lambda (x) (car x)) l)))
 
 (define test-table1
-   (list
-     (cons (list 1 1 2) 2)
-     (cons (list 1 1 2) 2)
-     (cons (list 0 1 2) 2)
-     (cons (list 1 2 1) 1)
-     (cons (list 1 2 3) 1)
-     (cons (list 2 1 0) 3)))
+  (list
+    (cons (list 1 1 2) 2)
+    (cons (list 1 1 2) 2)
+    (cons (list 0 1 2) 2)
+    (cons (list 1 2 1) 1)
+    (cons (list 1 2 3) 1)
+    (cons (list 2 1 0) 3)))
 (define table1 (Table "t1" (list "c1" "c2" "c3") test-table1))
 
 (define q (query-select 
- (list (val-column-ref "t1.c1") (val-column-ref "t1.c2"))
- (query-named table1)
- (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
+            (list (val-column-ref "t1.c1") (val-column-ref "t1.c2"))
+            (query-named table1)
+            (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
 
 (define q2 (query-rename-full (query-named table1) "qt" (list "c12" "c22" "c32")))
 

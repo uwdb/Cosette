@@ -5,6 +5,7 @@
 (define t1 (Table "votes" (list "vote" "story_id") (gen-sym-schema 2 3)))
 (define t2 (Table "stories" (list "id") (gen-sym-schema 1 2)))
 
+(define st1 (Table "votes" (list "vote" "story_id" "aggrf") (gen-sym-schema 3 2)))
 (define ct 
   (Table "votes" (list "vote" "story_id" "aggrf") 
          (list (cons (list 2 3 1) 2)
@@ -28,14 +29,17 @@
 (define t4 (Table "t" (list "sum") (list)))
 
 (define test-q
-  (SELECT-GROUP (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+  (SELECT-GROUP (NAMED st1) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
 
 (define test-q2
-  (SELECT-GROUP (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+  (SELECT-GROUP-SUBQ (NAMED st1) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+
 
 ;(writeln (denote-sql test-q (make-hash)))
 
-(run test-q2)
+;(run test-q)
+;(run test-q2)
+(time (verify (same test-q test-q2)))
 
 ;(define t2 (Table "t1" (list "id") (list (cons (list 0) 0))))
 
