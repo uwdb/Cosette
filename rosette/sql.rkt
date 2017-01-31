@@ -15,6 +15,10 @@
   (SELECT v FROM q WHERE f)
   (query-select v q f))
 
+;; q: the table/subquery to group
+;; f: group by fields
+;; aggr: aggregation functions
+;; target: group by field
 (define-syntax-rule
   (SELECT-GROUP q f aggr target)
   (query-aggr q f aggr target))
@@ -35,8 +39,14 @@
                     (query-named t))
 
 ; rename the result of q with name t, and fields l (a list of string)
-(define-syntax-rule (AS q [t l])
-                    (query-rename q t l))
+;(define-syntax-rule (AS q [t l])
+;                    (query-rename q t l))
+
+(define-syntax AS
+    (syntax-rules 
+      ()
+      [(AS q [t l]) (query-rename-full q t l)]
+      [(AS q [t]) (query-rename q t)]))
 
 (define-syntax-rule
   (RENAME t name)
@@ -107,10 +117,8 @@
  (query-named table1)
  (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
 
-(define q2 (query-rename (query-named table1) "qt" (list "c1" "c2" "c3")))
+(define q2 (query-rename-full (query-named table1) "qt" (list "c12" "c22" "c32")))
 
-(define q3 (query-join (query-named table1) (query-rename (query-named table1) "t2" (list "c1" "c2" "c3"))))
+(define q3 (query-join (query-named table1) (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3"))))
 
-(define part-of-q3 (query-rename (query-named table1) "t2" (list "c1" "c2" "c3")))
-
-(run q2)
+(define part-of-q3 (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3")))

@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../table.rkt" "../evaluator.rkt" "../syntax.rkt" "../denotation.rkt")
+(require "../table.rkt" "../evaluator.rkt" "../sql.rkt")
 
 ;(struct input ([user_id, path, email]))
 (define project-tbl (Table "project" (list "id" "path" "group_id" "public" "archived") (gen-sym-schema 5 1)))

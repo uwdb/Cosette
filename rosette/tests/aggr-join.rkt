@@ -11,29 +11,29 @@
 
 (define subq-aggr-1
   (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 
-			      (SELECT (VALS "S2.D")
-				 FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
-					    (AS (NAMED tb) ["S2" (list "C" "D")]))
-				 WHERE (BINOP "R.A" = "R2.A"))))
-     FROM (JOIN (NAMED ta) (NAMED tb))
-     WHERE (BINOP "R.B" = "S.C")))
+                                     (SELECT (VALS "S2.D")
+                                             FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
+                                                        (AS (NAMED tb) ["S2" (list "C" "D")]))
+                                             WHERE (BINOP "R.A" = "R2.A"))))
+                   FROM (JOIN (NAMED ta) (NAMED tb))
+                   WHERE (BINOP "R.B" = "S.C")))
 
 (define part-subq-2 
   (SELECT-DISTINCT (VALS "S.C" (AGGR aggr-sum
-				     (SELECT (VALS "S2.D")
-					FROM (AS (NAMED tb) ["S2" (list "C" "D")])
-				       WHERE (BINOP "S2.C" = "S.C"))))
-	      FROM (NAMED tb)
-	      WHERE (F-EMPTY)))
+                                     (SELECT (VALS "S2.D")
+                                             FROM (AS (NAMED tb) ["S2" (list "C" "D")])
+                                             WHERE (BINOP "S2.C" = "S.C"))))
+                   FROM (NAMED tb)
+                   WHERE (F-EMPTY)))
 
 (define subq-aggr-2
   (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 
-			      (SELECT (VALS "S3.D")
-				 FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
-					    (AS (NAMED tb) ["S3" (list "C" "D")]))
-				 WHERE (BINOP "R.A" = "R2.A"))))
-     FROM (JOIN (NAMED ta) (AS part-subq-2 ["S3" (list "C" "D")]))
-     WHERE (BINOP "R.B" = "S3.C")))
+                                     (SELECT (VALS "S3.D")
+                                             FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
+                                                        (AS (NAMED tb) ["S3" (list "C" "D")]))
+                                             WHERE (BINOP "R.A" = "R2.A"))))
+                   FROM (JOIN (NAMED ta) (AS part-subq-2 ["S3" (list "C" "D")]))
+                   WHERE (BINOP "R.B" = "S3.C")))
 
 ;(run subq-aggr-1)
 ;(run subq-aggr-2)
@@ -42,11 +42,5 @@
 
 ; commutativity of selection query 2
 
-;(time (verify (same subq-aggr-1 subq-aggr-2)))
+(time (verify (same subq-aggr-1 subq-aggr-2)))
 
-(define-symbolic x integer?)
-(define-symbolic y integer?)
-(define-symbolic z integer?)
-(define s (set x y z))
-(define s2 (set y z x))
-(verify (assert (set-eq? s s2)))

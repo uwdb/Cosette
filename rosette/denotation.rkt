@@ -10,6 +10,7 @@
 
 (define (denote-and-run q)
   (let ([query-in-rkt (denote-sql q (make-hash))])
+;;  (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
     ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
@@ -52,6 +53,13 @@
     [(query-rename? query)
      `(lambda (e)
         (rename-table (,(denote-sql (query-rename-query query) index-map) e) ,(query-rename-table-name query)))]
+    ; denote rename table full and schema
+    [(query-rename-full? query)
+     `(lambda (e)
+        (rename-table-full (,(denote-sql (query-rename-full-query query) index-map) e) 
+                           ,(query-rename-full-table-name query)
+                           ;;; it is very tricky below, we need to pass down single quote ' to make the list a list to make it runnable 
+                           ',(query-rename-full-column-names query)))]
     ; denote select query
     [(query-select? query)
      `(lambda (e)
@@ -124,7 +132,11 @@
              (extract-schema (query-join-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
-           [cnames (query-rename-column-names query)])
+           [cnames (extract-schema (query-rename-query query))])
+       (map (lambda (x) (string-append tn "." x)) cnames))]
+    [(query-rename-full? query)
+     (let ([tn (query-rename-full-table-name query)]
+           [cnames (query-rename-full-column-names query)])
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]
