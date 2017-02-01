@@ -10,7 +10,7 @@
 
 (define (denote-and-run q)
   (let ([query-in-rkt (denote-sql q (make-hash))])
-    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
+;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
     ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to

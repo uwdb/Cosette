@@ -2,10 +2,7 @@
 
 (require "table.rkt")
 
-(provide gen-sym-schema
-         gen-pos-sym-schema
-         sym-tab-constrain
-         dedup
+(provide dedup
          dedup-accum
          projection
          cross-prod
@@ -14,6 +11,8 @@
          left-outer-join
          left-outer-join-2
          left-outer-join-raw
+         table-content-empty?
+         table-content-ascending?
          table-diff
          union-all
          extend-each-row
@@ -45,48 +44,30 @@
 (define (xproduct a b name)
   (Table name (schema-join a b) (xproduct-raw (Table-content a) (Table-content b))))
 
-; generate a symbolic value
-(define (gen-sv)
-  (define-symbolic* sv integer?)
-  sv)
-
-; generate a tuple, n is the number of column
-(define (gen-sv-row n)
-  (build-list n (lambda (x) (gen-sv))))
-
-; generate a positive symbolic value, used to represent cardinalities of tuples
-(define (gen-pos-sv)
-  (define-symbolic* sv-pos integer?)
-  (assert (>= sv-pos 0))
-  sv-pos)
-
-; generate a positive tuple, n is the number of column
-(define (gen-pos-sv-row n)
-  (build-list n (lambda (x) (gen-pos-sv))))
-
-; generate a symbolic table of num-col columns and num-row rows
-(define (gen-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x)
-                   (cons (gen-sv-row num-col)
-                         (gen-pos-sv)))])
-    (build-list num-row gen-row)))
-
-; generate a symbolic table of num-col columns and num-row rows
-(define (gen-pos-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x)
-                   (cons (gen-pos-sv-row num-col)
-                         (gen-pos-sv)))])
-    (build-list num-row gen-row)))
-
-(define (sym-tab-constrain table)
-  (foldl && #t (map (lambda (p) (> (cdr p) 0)) table)))
-
 ;; given a table (content only), judge whether the table is empty
 (define (table-content-empty? table)
+  (foldl && #t (map (lambda (r) (zero? (cdr r))) table)))
+
+(define (table-content-ascending? table)
   (cond
-    [(equal? '() table) #t]
-    [(zero? (foldl + 0 (map cdr table))) #t]
+    [(equal? table '()) #t]
+    [(equal? (cdr table) '()) #t]
+    [(equal? (dict-order-compare (car (car table)) 
+                          (car (car (cdr table)))) 
+             -1) (table-content-ascending? (cdr table))]
     [else #f]))
+
+; given two lists with the same length, 
+; judge their partial order under dict order
+; 0 : l1 == l2
+; -1 : l1 < l2
+; 1 : l1 > l2
+(define (dict-order-compare l1 l2)
+  (cond
+    [(and (equal? '() l1) (equal? '() l2)) 0]
+    [(> (car l1) (car l2)) 1]
+    [(< (car l1) (car l2)) -1]
+    [else (dict-order-compare (cdr l1) (cdr l2))]))
 
 ; perform aggregation on a table :table
 ; Arguments:
