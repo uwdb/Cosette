@@ -37,9 +37,13 @@
 
 ;(writeln (denote-sql test-q (make-hash)))
 
-(run test-q)
-(run test-q2)
-;(time (verify (same test-q test-q2)))
+;(run test-q)
+;(run test-q2)
+
+
+;(time (verify (begin 
+;                (same test-q test-q2)
+;                (assert-table-ordered st1))))
 
 ;(define t2 (Table "t1" (list "id") (list (cons (list 0) 0))))
 
@@ -63,7 +67,7 @@
 
 (define q4 (NAMED t4))
 
-(run q2)
+;(run q2)
 ;(get-content (run q2))
 ;(get-content (run q3))
 ;(get-content (run q4))

@@ -13,6 +13,7 @@
          left-outer-join-raw
          table-content-empty?
          table-content-ascending?
+         list-distinct?
          table-diff
          union-all
          extend-each-row
@@ -234,6 +235,8 @@
                                  (cons (append r1 r2) cnt)))
                              table2))])
     (foldr append '() (map cross-single table1))))
+
+;(define (list-distinct? l))
 
 ;; several test xproduct
 (define content-a

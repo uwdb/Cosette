@@ -3,12 +3,12 @@
 (require "table.rkt" "equal.rkt" "sql.rkt" "evaluator.rkt")
 (require json)
 
-(provide gen-sym-schema
-         gen-pos-sym-schema
-         assert-table-non-empty
-         assert-table-ordered
-         same
-         neq)
+(provide gen-sym-schema ;; generate a symbolic table based on schema
+         gen-pos-sym-schema ;; generate table that contains only positive symbolic values
+         assert-table-non-empty ;; assert that a table is not empty
+         assert-table-ordered ;; assert that the table is ordered
+         same ;; assert two queries are the same 
+         neq) ;; assert two queries are not the same
 
 ; generate a symbolic value
 (define (gen-sv)
@@ -48,8 +48,14 @@
 (define (assert-table-non-empty table)
   (assert (not (table-content-empty? (get-content table)))))
 
+; breaking symmetry of a table
 (define (assert-table-ordered table)
   (assert (table-content-ascending? (get-content table))))
+
+; assert that all element in a column is distinct
+(define (assert-table-col-distinct table col)
+  ())
+
 ;; assertions
 
 (define (same q1 q2)
