@@ -54,7 +54,7 @@
     [(equal? table '()) #t]
     [(equal? (cdr table) '()) #t]
     [(equal? (dict-order-compare (car (car table)) 
-                          (car (car (cdr table)))) 
+                                 (car (car (cdr table)))) 
              -1) (table-content-ascending? (cdr table))]
     [else #f]))
 
@@ -236,46 +236,11 @@
                              table2))])
     (foldr append '() (map cross-single table1))))
 
-;(define (list-distinct? l))
+;; calculate whether a list is distinct of not
+(define (list-distinct? l)
+  (cond 
+    [(eq? l '()) #t]
+    [else (&& (distinct-to-all-list (car l) (cdr l)) (list-distinct? (cdr l)))]))
 
-;; several test xproduct
-(define content-a
-  (list
-    (cons (list 1 1 2) 2)
-    (cons (list 0 1 2) 2)))
-
-(define content-b
-  (list
-    (cons (list 1 2 3) 1)
-    (cons (list 1 2 4) 2)
-    (cons (list 2 1 0) 3)
-    (cons (list 1 2 1) 3)
-    (cons (list 2 1 3) 3)))
-
-(define content-d
-  (list
-    (cons (list 1 2 3) 2)
-    (cons (list 2 3 3) 3)))
-
-(define content-ab
-  (list (cons (list 1 1 2 2 1 0) 6)))
-
-(define content-c (list))
-
-(define table-a
-  (Table "a" (list "a" "b" "c") content-a))
-
-(define table-b
-  (Table "b" (list "a" "b" "c") content-b))
-
-(define table-ab
-  (Table "ab" (list "a" "b" "c" "a" "b" "c") content-ab))
-
-(define (raw-aggr-sum l)
-  (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
-
-; tests
-; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2)))
-; (println (xproduct-raw content-a content-b))
-; (println (get-content (left-outer-join table-a table-b 2 2)))
-; (left-outer-join-raw content-c content-c 0 0 3 3)
+(define (distinct-to-all-list x l)
+  (foldl && #t (map (lambda (y) (not (eq? x y))) l)))

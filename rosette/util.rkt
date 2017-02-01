@@ -7,6 +7,7 @@
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
          assert-table-non-empty ;; assert that a table is not empty
          assert-table-ordered ;; assert that the table is ordered
+         assert-table-col-distinct ;; assert that all values in a column is distinct from each other
          same ;; assert two queries are the same 
          neq) ;; assert two queries are not the same
 
@@ -52,9 +53,11 @@
 (define (assert-table-ordered table)
   (assert (table-content-ascending? (get-content table))))
 
-; assert that all element in a column is distinct
-(define (assert-table-col-distinct table col)
-  ())
+; assert that all element in a column is distinct, it enforces that all multiplicity set to 1
+(define (assert-table-col-distinct table col-num)
+  (assert 
+    (and (list-distinct? (map (lambda (r) (list-ref (car r) col-num)) (get-content table)))
+         (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) (get-content table))))))
 
 ;; assertions
 
