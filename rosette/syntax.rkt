@@ -24,6 +24,8 @@
 (struct val-const (val) #:transparent)
 (struct val-column-ref (column-name) #:transparent)
 (struct val-agg (agg-func query) #:transparent)
+(struct val-bexpr (v1 binop v2) #:transparent)
+(struct val-uexpr (op val) #:transparent)
 
 ;;; filters
 (struct filter-binop (op val1 val2) #:transparent)

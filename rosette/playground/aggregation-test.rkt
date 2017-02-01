@@ -25,7 +25,7 @@
                (cons (list 3) 1))))
 
 
-(define t3 (Table "t" (list "sum") (list (cons (list -1) 1))))
+(define t3 (Table "t" (list "sum") (list (cons (list -2) 1))))
 (define t4 (Table "t" (list "sum") (list)))
 
 (define test-q
@@ -39,7 +39,7 @@
 
 ;(run test-q)
 ;(run test-q2)
-(time (verify (same test-q test-q2)))
+;(time (verify (same test-q test-q2)))
 
 ;(define t2 (Table "t1" (list "id") (list (cons (list 0) 0))))
 
@@ -53,7 +53,7 @@
           FROM (NAMED t3)
           WHERE (F-EMPTY)))
 
-(define q2 (NAMED t3))
+(define q2 (SELECT (VALS (VAL-BINOP 12 * "t.sum") 1) FROM (NAMED t3) WHERE (F-EMPTY)))
 
 (define q3 
   (SELECT (VALS "j.s1")
@@ -63,7 +63,7 @@
 
 (define q4 (NAMED t4))
 
-;(run q1)
+(run q2)
 ;(get-content (run q2))
 ;(get-content (run q3))
 ;(get-content (run q4))

@@ -10,7 +10,6 @@
   (denote-and-run q))
 
 ;; easy syntax rules to write sql queries
-
 (define-syntax-rule
   (SELECT v FROM q WHERE f)
   (query-select v q f))
@@ -71,7 +70,15 @@
                       [(equal? v sqlnull) (val-const sqlnull)]
                       [(string? v) (val-column-ref v)]
                       [(int? v) (val-const v)]
-                      [(val-agg? v) v]))
+                      [(val-agg? v) v]
+                      [(val-bexpr? v) v]
+                      [(val-uexpr? v) v]))
+
+(define-syntax-rule (VAL-BINOP v1 op v2)
+                    (val-bexpr (VAL v1) op (VAL v2)))
+
+(define-syntax-rule (VAL-UNOP op val)
+                    (val-uexpr op (VAL val)))
 
 (define (VALS . v)
   (map (lambda (x) (VAL x)) v))

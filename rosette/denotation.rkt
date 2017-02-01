@@ -10,7 +10,7 @@
 
 (define (denote-and-run q)
   (let ([query-in-rkt (denote-sql q (make-hash))])
-;;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
+    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
     ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
@@ -149,6 +149,11 @@
     [(val-const? value) `(lambda (e) ,(val-const-val value))]
     [(val-column-ref? value)
      `(lambda (e) (list-ref e ,(hash-ref nmap (val-column-ref-column-name value))))]
+    [(val-bexpr? value)
+     `(lambda (e) (,(val-bexpr-binop value) (,(denote-value (val-bexpr-v1 value) nmap) e)
+                                            (,(denote-value (val-bexpr-v2 value) nmap) e)))]
+    [(val-uexpr? value)
+     `(lambda (e) (,(val-uexpr-op value) (,(denote-value (val-uexpr-val value) nmap) e)))]
     [(val-agg? value)
      `(lambda (e) 
         (,(val-agg-agg-func value) 
