@@ -2,10 +2,7 @@
 
 (require "table.rkt")
 
-(provide gen-sym-schema
-         gen-pos-sym-schema
-         sym-tab-constrain
-         dedup
+(provide dedup
          dedup-accum
          projection
          cross-prod
@@ -14,6 +11,9 @@
          left-outer-join
          left-outer-join-2
          left-outer-join-raw
+         table-content-empty?
+         table-content-ascending?
+         list-distinct?
          table-diff
          union-all
          extend-each-row
@@ -45,41 +45,30 @@
 (define (xproduct a b name)
   (Table name (schema-join a b) (xproduct-raw (Table-content a) (Table-content b))))
 
-; generate a symbolic value
-(define (gen-sv)
-  (define-symbolic* sv integer?)
-  sv)
+;; given a table (content only), judge whether the table is empty
+(define (table-content-empty? table)
+  (foldl && #t (map (lambda (r) (zero? (cdr r))) table)))
 
-; generate a tuple, n is the number of column
-(define (gen-sv-row n)
-  (build-list n (lambda (x) (gen-sv))))
+(define (table-content-ascending? table)
+  (cond
+    [(equal? table '()) #t]
+    [(equal? (cdr table) '()) #t]
+    [(equal? (dict-order-compare (car (car table)) 
+                                 (car (car (cdr table)))) 
+             -1) (table-content-ascending? (cdr table))]
+    [else #f]))
 
-; generate a positive symbolic value, used to represent cardinalities of tuples
-(define (gen-pos-sv)
-  (define-symbolic* sv-pos integer?)
-  (assert (>= sv-pos 0))
-  sv-pos)
-
-; generate a positive tuple, n is the number of column
-(define (gen-pos-sv-row n)
-  (build-list n (lambda (x) (gen-pos-sv))))
-
-; generate a symbolic table of num-col columns and num-row rows
-(define (gen-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x)
-                   (cons (gen-sv-row num-col)
-                         (gen-pos-sv)))])
-    (build-list num-row gen-row)))
-
-; generate a symbolic table of num-col columns and num-row rows
-(define (gen-pos-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x)
-                   (cons (gen-pos-sv-row num-col)
-                         (gen-pos-sv)))])
-    (build-list num-row gen-row)))
-
-(define (sym-tab-constrain table)
-  (foldl && #t (map (lambda (p) (> (cdr p) 0)) table)))
+; given two lists with the same length, 
+; judge their partial order under dict order
+; 0 : l1 == l2
+; -1 : l1 < l2
+; 1 : l1 > l2
+(define (dict-order-compare l1 l2)
+  (cond
+    [(and (equal? '() l1) (equal? '() l2)) 0]
+    [(> (car l1) (car l2)) 1]
+    [(< (car l1) (car l2)) -1]
+    [else (dict-order-compare (cdr l1) (cdr l2))]))
 
 ; perform aggregation on a table :table
 ; Arguments:
@@ -96,13 +85,14 @@
              [aggr-key-vals (map (lambda (i) (list-ref (car row) i)) aggr-field-indices)]
              [target-val (list-ref (car row) target-index)])
         (cons
-          (cons (append aggr-key-vals
-                        (list (raw-aggr-fun
-                                (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
-                                     (filter (lambda (r) (equal? aggr-key-vals
-                                                                 (map (lambda (i) (list-ref (car r) i))
-                                                                      aggr-field-indices)))
-                                             table))))) 1)
+          (let ([same-val-rows 
+                  (map (lambda (r) (cons (list-ref (car r) target-index) (cdr r)))
+                       (filter (lambda (r) (equal? aggr-key-vals
+                                                   (map (lambda (i) (list-ref (car r) i))
+                                                        aggr-field-indices)))
+                               table))])
+            (cons (append aggr-key-vals (list (raw-aggr-fun same-val-rows))) 
+                  (if (table-content-empty? same-val-rows) 0 1)))
           (aggr-raw (filter (lambda (r) (not (equal? aggr-key-vals
                                                      (map (lambda (i) (list-ref (car r) i))
                                                           aggr-field-indices))))
@@ -246,44 +236,11 @@
                              table2))])
     (foldr append '() (map cross-single table1))))
 
-;; several test xproduct
-(define content-a
-  (list
-    (cons (list 1 1 2) 2)
-    (cons (list 0 1 2) 2)))
+;; calculate whether a list is distinct of not
+(define (list-distinct? l)
+  (cond 
+    [(eq? l '()) #t]
+    [else (&& (distinct-to-all-list (car l) (cdr l)) (list-distinct? (cdr l)))]))
 
-(define content-b
-  (list
-    (cons (list 1 2 3) 1)
-    (cons (list 1 2 4) 2)
-    (cons (list 2 1 0) 3)
-    (cons (list 1 2 1) 3)
-    (cons (list 2 1 3) 3)))
-
-(define content-d
-  (list
-    (cons (list 1 2 3) 2)
-    (cons (list 2 3 3) 3)))
-
-(define content-ab
-  (list (cons (list 1 1 2 2 1 0) 6)))
-
-(define content-c (list))
-
-(define table-a
-  (Table "a" (list "a" "b" "c") content-a))
-
-(define table-b
-  (Table "b" (list "a" "b" "c") content-b))
-
-(define table-ab
-  (Table "ab" (list "a" "b" "c" "a" "b" "c") content-ab))
-
-(define (raw-aggr-sum l)
-  (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
-
-; tests
-; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2)))
-; (println (xproduct-raw content-a content-b))
-; (println (get-content (left-outer-join table-a table-b 2 2)))
-; (left-outer-join-raw content-c content-c 0 0 3 3)
+(define (distinct-to-all-list x l)
+  (foldl && #t (map (lambda (y) (not (eq? x y))) l)))

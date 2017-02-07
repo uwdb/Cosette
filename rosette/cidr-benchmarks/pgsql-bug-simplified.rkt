@@ -36,14 +36,17 @@
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
 #lang rosette                                                                                                                                                 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 
 (define ct1
     (Table "DefaultPropertyValues" (list "ID" "fk_Property")
 	   (list (cons (list 0 0) 1))))
+
+(define ct4
+  (Table "CurrentDateTimeDefaultValues" (list "ID" "C")
+	 (list (cons (list 3 4) 1))))
 
 (define ct5
   (Table "EnumDefaultValues" (list "ID" "C")
@@ -53,11 +56,13 @@
 
 (current-bitwidth 32)
 (define st1 (Table "DefaultPropertyValues" (list "ID" "fk_Property") (gen-sym-schema 2 1)))
-(define st5 (Table "EnumDefaultValues" (list "ID" "C") (gen-sym-schema 2 2)))
+(define st4 (Table "CurrentDateTimeDefaultValues" (list "ID" "C") (gen-sym-schema 2 1)))
+(define st5 (Table "EnumDefaultValues" (list "ID" "C") (gen-sym-schema 2 1)))
 
 ; ========================= Define tables ====================================
 
 (define t1 st1)
+(define t4 st4)
 (define t5 st5)
 
 ;01 Nested Loop Left Join  
@@ -88,7 +93,10 @@
     ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")]))
 
 (define q0-part-2
-  (AS (NAMED t5)
+  (AS 
+    (UNION-ALL 
+      (NAMED t4)
+      (NAMED t5))
     ["UnionAll2" (list "ID" "C")]))
 
 (define q0-part-3
@@ -134,8 +142,9 @@
 
 (define q1-part-4
   (AS 
-    (UNION-ALL  		 
-      (NAMED t5)
+    (UNION-ALL  
+      (UNION-ALL (NAMED t4) 
+		 (NAMED t5))
       q1-part-3) ["U" (list "ID" "C")]))
 
 (define q1
@@ -144,7 +153,8 @@
 
 (define q2-part-2 q1-part-2)
 (define q2-part-4
-  (AS (NAMED t5)
+  (AS (UNION-ALL (NAMED t4) 
+		 (NAMED t5))
       ["U" (list "ID" "C1")]))
 
 (define q2
@@ -156,8 +166,8 @@
 ;(run q2)
 
 (verify (same q0-part-2 q2-part-4))
-(verify (same q0 q2))
 (verify (same q0 q1))
+(verify (same q0 q2))
 
 ;EXPLAIN ANALYZE:
 ;01 Nested Loop Left Join

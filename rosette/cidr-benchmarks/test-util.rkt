@@ -1,7 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (provide neq same concrete-table-3-col concrete-table-2-col num-rows-in-sym-table)
 

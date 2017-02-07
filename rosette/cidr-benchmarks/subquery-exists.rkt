@@ -1,7 +1,6 @@
 #lang rosette                                                                                                                                                 
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define acontent
     (list
@@ -25,12 +24,16 @@
     WHERE (EXISTS 
 	    (SELECT (VALS "Dept.Dept")
 	       FROM (NAMED sDept)
-	      WHERE (AND (AND (BINOP "Emp.Emp" eq? "Dept.Mgr") (BINOP "Emp.Dept" eq? "Dept.Dept")) (BINOP "Dept.Loc" eq? 1))))))
+	      WHERE (AND (AND (BINOP "Emp.Emp" eq? "Dept.Mgr") 
+            (BINOP "Emp.Dept" eq? "Dept.Dept")) 
+        (BINOP "Dept.Loc" eq? 1))))))
 
 (define q2
   (SELECT (VALS "Emp.Name")
      FROM (JOIN (NAMED sEmp) (NAMED sDept))
-    WHERE (AND (BINOP "Emp.Dept" eq? "Dept.Dept") (AND (BINOP "Dept.Loc" eq? 1) (BINOP "Emp.Emp" eq? "Dept.Mgr")))))
+    WHERE (AND (BINOP "Emp.Dept" eq? "Dept.Dept") 
+      (AND (BINOP "Dept.Loc" eq? 1) 
+        (BINOP "Emp.Emp" eq? "Dept.Mgr")))))
 
 ;; (run q1)
 ;; (run q2)

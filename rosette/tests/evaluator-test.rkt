@@ -1,8 +1,44 @@
 #lang rosette
 
-(require "evaluator.rkt")
+(require "../evaluator.rkt")
 
-(provide queries test-table test-table1)
+;; test list-distinct function
+(assert (list-distinct? '(1 3 5 6 2 4 7)))
+(assert (list-distinct? '(1)))
+(assert (list-distinct? '()))
+(assert (not (list-distinct? '(1 3 1 6 2 4 7))))
+(assert (not (list-distinct? '(8 8 8 8 8))))
+
+;; several test xproduct
+(define content-a
+  (list
+    (cons (list 1 1 2) 2)
+    (cons (list 0 1 2) 2)))
+
+(define content-b
+  (list
+    (cons (list 1 2 3) 1)
+    (cons (list 1 2 4) 2)
+    (cons (list 2 1 0) 3)
+    (cons (list 1 2 1) 3)
+    (cons (list 2 1 3) 3)))
+
+(define content-d
+  (list
+    (cons (list 1 2 3) 2)
+    (cons (list 2 3 3) 3)))
+
+(define content-ab
+  (list (cons (list 1 1 2 2 1 0) 6)))
+
+(define content-c (list))
+
+; tests
+; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2)))
+; (println (xproduct-raw content-a content-b))
+; (println (get-content (left-outer-join table-a table-b 2 2)))
+; (left-outer-join-raw content-c content-c 0 0 3 3)
+
 
 (define test-table
   (list
@@ -85,41 +121,3 @@
 		       (q3-subquery content (list-ref (car p) 0) (list-ref (car p) 1))))))) 
 	    (cdr p)))
 	content))))
-
-(define queries (list q1 q2 q3))
- 
-; (q3 test-table1)
-
-; (apply max (flatten-once (map (lambda (t) (car t)) (q3-subquery test-table1 1 2))))
-
-; SELECT t1.c1, MAX(SELECT t2.c2 FROM table1 AS t2[c1,c2] WHERE t2.c1 = t1.c1)
-; FROM table1 AS t1[c1,c2]
-; WHERE c1 > 1
-
-;(SELECT 
-;  (t1.c1 (MAX (SELECT (t2.c2) (table1 AS t2) (t2.c1 == t1.c1))))
-;  (FROM table1 AS t1)
-;  (WHERE t1.1 > 1))
-
-;(define test-query-001
-;  (query-select
-;    `(,(val-column-ref "t1.c1") 
-;      ,(val-agg agg-max 
-;	        (query-select 
-;		  `((val-column-ref "t2.c2"))
-;		  (query-rename (query-named table1) "t2" `("c1" "c2" "c3")))))))
-
-; commutativity of selection query 1
-(define selection-commute-q1
-  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3")
-          FROM  (AS (SELECT (VALS "t1.c1" "t2.c2" "t1.c3")
-                                FROM (NAMED t1)
-                                WHERE "t1.c1" < "t1.c2")
-                    ["t2", '("c1", "c2", "c3")])
-          WHERE  (BINOP "t2.c1" < "t1.c3")))
-
-; commutativity of selection query 2
-(define selection-commute-q2
-    (SELECT (VALS "t1.c1" "t1.c2" "t1.c3")
-	       FROM   (NAMED t1)
-	          WHERE  (AND (BINOP "t1.c1" < "t1.c2") (BINOP "t1.c1" < "t1.c3"))))

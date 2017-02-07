@@ -37,8 +37,7 @@
 
 #lang rosette  
                                                                                                                                                
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 

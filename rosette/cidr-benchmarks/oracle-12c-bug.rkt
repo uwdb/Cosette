@@ -1,14 +1,14 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
 ; ------- actual tables (only for test) -------
 
 (define c-t
   (Table "t" (list "tid" "name")
-         (list
-          (cons (list 1 1) 1)
-          (cons (list 2 2) 1)
+   (list
+    (cons (list 1 1) 1)
+    (cons (list 2 2) 1)
 	  (cons (list 3 3) 1)
 	  (cons (list 4 4) 1)
 	  (cons (list 5 5) 1))))
@@ -97,7 +97,7 @@
 (define q4
   (SELECT (VALS "t0.tid1" "t0.name" "t0.status1" "t0.status2")
           FROM q3
-          WHERE (filter-empty)))
+          WHERE (F-EMPTY)))
 
 ; === wrong query ===
 
@@ -127,7 +127,7 @@
 (define q4-r
   (SELECT (VALS "t0.tid1" "t0.name" "t0.status1" "t0.status2")
           FROM q3-r
-          WHERE (filter-empty)))
+          WHERE (F-EMPTY)))
 
 ; expect model
 ; (run count-bug-q1)

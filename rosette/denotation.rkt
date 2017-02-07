@@ -5,9 +5,13 @@
 
 (provide (all-defined-out))
 
-;;; define the current name space as ns
 (define-namespace-anchor anc)
 (define ns (namespace-anchor->namespace anc))
+
+(define (denote-and-run q)
+  (let ([query-in-rkt (denote-sql q (make-hash))])
+;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
+    ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
 ;; index-map: the mapping of the names to their index in the context, which is a hash map
@@ -20,10 +24,10 @@
     ; denote join to a racket program
     [(query-join? query) 
      `(lambda (e) 
-        (xproduct	
+        (xproduct
           (,(denote-sql (query-join-query1 query) index-map) e)
           (,(denote-sql (query-join-query2 query) index-map) e)
-          "anonymous"))]
+          "dummy"))]
     ; denote left-outer-join table
     [(query-left-outer-join? query)
      (let* 
@@ -49,6 +53,13 @@
     [(query-rename? query)
      `(lambda (e)
         (rename-table (,(denote-sql (query-rename-query query) index-map) e) ,(query-rename-table-name query)))]
+    ; denote rename table full and schema
+    [(query-rename-full? query)
+     `(lambda (e)
+        (rename-table-full (,(denote-sql (query-rename-full-query query) index-map) e) 
+                           ,(query-rename-full-table-name query)
+                           ;;; it is very tricky below, we need to pass down single quote ' to make the list a list to make it runnable 
+                           ',(query-rename-full-column-names query)))]
     ; denote select query
     [(query-select? query)
      `(lambda (e)
@@ -70,7 +81,7 @@
                                   (filter (lambda (r) (,where-clause (car r)))
                                           (map (lambda (r) (cons (append e (car r)) (cdr r)))
                                                (Table-content ,from-table))))]
-                    [new-name "dummy-name"]
+                    [new-name "dummy"]
                     [new-schema (,extract-schema ,query)])
                 (Table new-name new-schema (dedup-accum content))))))]
     ; denote aggregation query
@@ -121,7 +132,11 @@
              (extract-schema (query-join-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
-           [cnames (query-rename-column-names query)])
+           [cnames (extract-schema (query-rename-query query))])
+       (map (lambda (x) (string-append tn "." x)) cnames))]
+    [(query-rename-full? query)
+     (let ([tn (query-rename-full-table-name query)]
+           [cnames (query-rename-full-column-names query)])
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]
@@ -134,6 +149,11 @@
     [(val-const? value) `(lambda (e) ,(val-const-val value))]
     [(val-column-ref? value)
      `(lambda (e) (list-ref e ,(hash-ref nmap (val-column-ref-column-name value))))]
+    [(val-bexpr? value)
+     `(lambda (e) (,(val-bexpr-binop value) (,(denote-value (val-bexpr-v1 value) nmap) e)
+                                            (,(denote-value (val-bexpr-v2 value) nmap) e)))]
+    [(val-uexpr? value)
+     `(lambda (e) (,(val-uexpr-op value) (,(denote-value (val-uexpr-val value) nmap) e)))]
     [(val-agg? value)
      `(lambda (e) 
         (,(val-agg-agg-func value) 
@@ -158,12 +178,6 @@
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
     [(filter-empty? f) `(lambda (e) #t)]))
 
-
-;; the interface to run sql
-(define (run q)
-  (let ([racket-query (denote-sql q (make-hash))])
-    ((eval racket-query ns) '())))
-
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
 ;;   FROM (JOIN (NAMED table1) (AS (NAMED table1) ["t2" '("c1" "c2" "c3")]))
@@ -182,23 +196,3 @@
 ; (denote-sql q (make-hash))
 ; ((eval (denote-sql q (make-hash)) ns) '())
 
-; (define test-table1
-;    (list
-;      (cons (list 1 1 2) 2)
-;      (cons (list 1 1 2) 2)
-;      (cons (list 0 1 2) 2)
-;      (cons (list 1 2 1) 1)
-;      (cons (list 1 2 3) 1)
-;      (cons (list 2 1 0) 3)))
-;(define table1 (Table "t1" (list "c1" "c2" "c3") test-table1))
-
-;(define q (query-select 
-;  (list (val-column-ref "t1.c1") (val-column-ref "t1.c2"))
-;  (query-named table1)
-;  (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
-
-;(define q2 (query-rename (query-named table1) "qt" (list "c1" "c2" "c3")))
-
-;(define q3 (query-join (query-named table1) (query-rename (query-named table1) "t2" (list "c1" "c2" "c3"))))
-
-;(define part-of-q3 (query-rename (query-named table1) "t2" (list "c1" "c2" "c3")))

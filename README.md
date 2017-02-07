@@ -5,7 +5,7 @@ Cosette
 
 Cosette is an automated SQL solver. See the Cosette [website][web] for more details.
 
-This repository contains Cosette's Coq code. We will release the Rosette code later.
+This project is in active development. Shoot us a message (cosette@cs.washington.edu) or create an issue if you find that something doesn't work!
 
 
 ### Running Cosette

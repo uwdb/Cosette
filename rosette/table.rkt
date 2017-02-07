@@ -8,6 +8,8 @@
 (define-generics table-interface
   ; this will create a new table
   (rename-table table-interface new-name)
+  ; this will create a new table
+  (rename-table-full table-interface new-name new-schema)
   ; get schema as a list of column names
   (get-schema table-interface)
   ; get the name of the table
@@ -37,6 +39,10 @@
   [(define (rename-table self new-name)
      (match-define (Table name schema content) self)
      (Table new-name schema content))
+   
+   (define (rename-table-full self new-name new-schema)
+     (match-define (Table name schema content) self)
+     (Table new-name new-schema content))
    
    (define (get-table-name self)
      (Table-name self))

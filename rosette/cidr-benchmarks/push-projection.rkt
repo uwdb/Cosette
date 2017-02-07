@@ -1,7 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define sx (Table "x" (list "a" "k" "g") (gen-sym-schema 3 2)))
 (define sy (Table "y" (list "a" "k" "g") (gen-sym-schema 3 2)))
@@ -17,7 +16,7 @@
   (SELECT (VALS "x1.a")
           FROM (JOIN (AS (SELECT (VALS "x.a" "x.k")
                                  FROM (NAMED sx)
-                                 WHERE (filter-empty))
+                                 WHERE (F-EMPTY))
                          ["x1" (list "a" "k")])
                      (NAMED sy))
           WHERE (BINOP "x1.k" eq? "y.k")))

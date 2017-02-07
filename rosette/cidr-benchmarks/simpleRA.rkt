@@ -1,7 +1,6 @@
 #lang rosette
 
-(require "../util.rkt" "../syntax.rkt" "../denotation.rkt" 
-         "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 (define t1 (Table "t1" (list "c1" "c2" "c3") (gen-sym-schema 3 2)))
 
@@ -21,5 +20,3 @@
                WHERE  (AND (BINOP "t1.c1" < "t1.c2") (BINOP "t1.c1" < "t1.c3"))))
 
 (time (verify (same push-selection-q1 push-selection-q2)))
-
-(denote-sql push-selection-q2 (make-hash))
