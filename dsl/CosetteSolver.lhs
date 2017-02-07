@@ -21,14 +21,18 @@ FIXME: import ToRosette
 >           case genCoq cs' of
 >             Right ans -> ans
 >             Left err -> "ERROR: " ++ err
->           case toSexp cs' of
+>         "rosette" ->
+>           case genRos cs' of
+>             Right ans -> ans
+>             Left err -> "ERROR: " ++ err 
+>         _ -> "ERROR: output lang. is not supported."
 >     Left err -> "ERROR: " ++ (show err)
 >   where
 >     cs = (parse (whitespace *> cosetteProgram <* eof) "" p)
 
 > main = do
 >   cont <- getContents
->   (putStr $ getResult cont "coq")
+>   (putStr $ getResult cont "rosette")
 
 toCoqString :: String -> String
 toCoqString 

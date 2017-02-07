@@ -14,7 +14,7 @@
 
 schema
 
-> data HSSchema =  MakeSchema {hsSName :: String             -- name of the schema
+> data HSSchema =  MakeHSSchema {hsSName :: String             -- name of the schema
 >                             ,hsAttrs :: [(String, String)] -- name, typename
 >                             } deriving (Eq, Show)
 
@@ -164,7 +164,7 @@ generate context from FROM clause
 > getCtxNode env ctx (TR tr al) = gcn tr
 >   where gcn (TRBase tn) = HSLeaf al <$> lkUpSchema env tn
 >         gcn (TRQuery q) = do at <- getOutput env ctx q
->                              return (HSLeaf al (MakeSchema al at))
+>                              return (HSLeaf al (MakeHSSchema al at))
 >         gcn (TRUnion t1 t2) = gcn t1
 
 > getCtx :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String HSContext
@@ -331,7 +331,7 @@ statement list
 > genCoq' :: [(String, String)] -> [(String, String)]-> [(String, [String])] -> [HSSchema] -> [(String, QueryExpr)] -> [CosetteStmt] -> Either String String
 > genCoq' tsl cl pl sl ql (h:t) =
 >   case h of
->     Schema sn sl' -> genCoq' tsl cl pl (MakeSchema sn sl':sl) ql t
+>     Schema sn sl' -> genCoq' tsl cl pl (MakeHSSchema sn sl':sl) ql t
 >     Table tn sn -> genCoq' ((tn, sn):tsl) cl pl sl ql t  
 >     Pred pn sn -> genCoq' tsl cl ((pn, sn):pl) sl ql t
 >     Const cn tn -> genCoq' tsl ((cn, tn):cl) pl sl ql t

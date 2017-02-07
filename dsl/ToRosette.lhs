@@ -26,6 +26,10 @@
 >                              ,rosSchema :: (String, [String])
 >                              } deriving (Eq, Show)
 
+> data RosSchema = MakeRosSchema {hsSName :: String   -- schema name
+>                                ,hsAttrs :: [(String, String)] -- name, typename
+>                                } deriving (Eq, Show)
+
 == Util function
 
 > checkListErr :: [Either String a] -> Either String [a]
@@ -140,7 +144,7 @@ convert ValueExpr to sexp
 >   toSexp (DIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
 >   toSexp (BinOp v1 op v2) =  addParen 
 >     $ unwords ["BINOP", toSexp v1, op, toSexp v2]
-
+ 
 convert Predicate to sexp
 
 > instance Sexp Predicate where
@@ -179,3 +183,39 @@ convert RosQueryExpr to sexp
 >           sch' = rosSchema q
 >           sch = addSParen $ uw [addEscStr (fst sch'), al]
 >           al = addParen $ uw ("list":(addEscStr <$> snd sch'))
+
+generate rosette code
+
+> genRos :: [CosetteStmt] -> Either String String
+> genRos sts = genRos' [] [] [] [] [] sts
+
+the first pass of the statements
+
+> genRos' :: [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> [CosetteStmt] -> Either String String
+> genRos' tsl cl pl sl ql (h:t) =
+>   case h of
+>     Schema sn sl' -> genRos' tsl cl pl (MakeRosSchema sn sl':sl) ql t
+>     Table tn sn -> genRos' ((tn, sn):tsl) cl pl sl ql t  
+>     Pred pn sn -> genRos' tsl cl ((pn, sn):pl) sl ql t
+>     Const cn tn -> genRos' tsl ((cn, tn):cl) pl sl ql t
+>     Query qn q -> genRos' tsl cl pl sl ((qn, q): ql) t
+>     Verify q1 q2 -> genRosCode tsl cl pl sl ql q1 q2
+> genRos' tsl cl pl sl ql _ = Left "Cannot find verify statement."
+
+The actual working horse:
+Table-Schema map, constant list, predicate list, schema list, query list,
+statement list
+
+> genRosCode ::  [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> String -> String -> Either String String
+> genRosCode tsl cl pl sl ql q1 q2 =
+>   do qe1 <- findQ q1 ql
+>      qe2 <- findQ q2 ql
+>      rsq1 <- toRosQuery qe1 q1
+>      rsq2 <- toRosQuery qe2 q2
+>      rs1 <- Right (toSexp rsq1)
+>      rs2 <- Right (toSexp rsq2)
+>      return (rs1 ++ "\n" ++ rs2)
+>   where
+>     findQ q' ql' = case lookup q' ql' of
+>                      Just qe -> Right qe
+>                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
