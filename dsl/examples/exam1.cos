@@ -1,0 +1,22 @@
+schema su(uid:int, uname:int, city:int);
+schema sp(uid:int, size:int);
+
+table Usr(su);
+table Picture(sp);
+
+query q1
+`select x.uid, x.uname,
+	(select count(*)
+	 from Picture y
+	 where x.uid = y.uid and y.size > 10000)
+ from Usr x
+ where x.city = 3`;
+
+
+query q2
+`select x.uid, x.uname, count(*)
+ from Usr x, Picture y
+ where x.uid = y.uid and y.size > 10000 and x.city = 3
+ group by x.uid, x.uname`;
+
+verify q1 q2;
