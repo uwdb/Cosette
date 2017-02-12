@@ -6,6 +6,7 @@
 > import CosetteParser
 > import Text.Parsec.Error as PE
 > import Data.List (unwords)
+> import Data.Char (toLower)
 
 == Rosette Abstract Syntax
 
@@ -18,9 +19,29 @@
 >                  | RosTRXProd RosTableRef RosTableRef
 >                    deriving (Eq, Show)
 
-> data RosQueryExpr = RosQuery {rosSelectList :: [ValueExpr]
+> data RosValueExpr = RosNumLit Integer
+>                   | RosDIden String String
+>                   | RosBinOp RosValueExpr String RosValueExpr
+>                   | RosConstant String
+>                   | RosVQE RosQueryExpr
+>                   | RosAgg String AggExpr
+>                     deriving (Eq, Show)
+
+> data RosPredicate = RosTRUE
+>                   | RosFALSE
+>                   | RosPredVar String [String]   -- meta predicate
+>                   | RosAnd RosPredicate RosPredicate
+>                   | RosOr RosPredicate RosPredicate
+>                   | RosNot RosPredicate
+>                   | RosExists RosQueryExpr 
+>                   | RosVeq RosValueExpr RosValueExpr   -- equal
+>                   | RosVgt RosValueExpr RosValueExpr   -- greater than
+>                   | RosVlt RosValueExpr RosValueExpr   -- less than
+>                  deriving (Eq, Show)
+
+> data RosQueryExpr = RosQuery {rosSelectList :: [RosValueExpr]
 >                              ,rosFrom :: Maybe [RosTableRef]
->                              ,rosWhere :: Maybe Predicate
+>                              ,rosWhere :: Maybe RosPredicate
 >                              ,rosGroup :: Maybe [ValueExpr]
 >                              ,rosDistinct :: Bool
 >                              ,rosSchema :: (String, [String])
@@ -48,14 +69,27 @@ the base case
 
 TODO: revisit this one for adding support of "*"
 
-> makeRosSelectItem :: SelectItem -> Either String (ValueExpr, String)
+> makeRosSelectItem :: SelectItem -> Either String (RosValueExpr, String)
 > makeRosSelectItem Star = Left "* \n"
-> makeRosSelectItem (Proj v s) =  Right (v, s)
+> makeRosSelectItem (Proj v s) =  (,) <$> makeRosVE v <*> Right s
 > makeRosSelectItem (DStar s) = Left (s ++ ".* \n")
+
+> makeRosVE :: ValueExpr -> Either String RosValueExpr
+> makeRosVE (NumLit i) = Right (RosNumLit i)
+> makeRosVE (DIden r a) = Right (RosDIden r a)
+> makeRosVE (BinOp v1 o v2) =  RosBinOp <$> makeRosVE v1 <*> Right o <*> makeRosVE v2
+> makeRosVE (VQE q) = RosVQE <$> makeRosQuery q "anyname"
+> makeRosVE (Agg o e) =
+>   case (map toLower o) of
+>     "sum" -> Right (RosAgg "aggr-sum" e)
+>     "count" -> Right (RosAgg "aggr-count" e)
+>     "max" -> Right (RosAgg "aggr-max" e)
+>     "min" -> Right (RosAgg "aggr-min" e)
+>     o' -> Left (o' ++ " is not supported as an aggregation function.")
 
 convert select
 
-> makeRosSelect :: [SelectItem]  -> Either String [(ValueExpr, String)]
+> makeRosSelect :: [SelectItem]  -> Either String [(RosValueExpr, String)]
 > makeRosSelect sl = checkListErr $ (makeRosSelectItem <$> sl) 
 
 === convert from
@@ -76,6 +110,24 @@ convert from
 > makeRosFrom Nothing = Right Nothing
 > makeRosFrom (Just fr) =  Just <$> checkListErr (makeRosFromItem <$> fr)
 
+=== convert where
+
+> makeRosPred :: Predicate -> Either String RosPredicate
+> makeRosPred TRUE = Right RosTRUE
+> makeRosPred FALSE = Right RosFALSE
+> makeRosPred (PredVar n s) = Right $ RosPredVar n s
+> makeRosPred (And p1 p2) = RosAnd <$> makeRosPred p1 <*> makeRosPred p2
+> makeRosPred (Or p1 p2) = RosOr <$> makeRosPred p1 <*> makeRosPred p2
+> makeRosPred (Not p) = RosNot <$> makeRosPred p
+> makeRosPred (Exists q) = RosExists <$> makeRosQuery q "anyname"
+> makeRosPred (Veq v1 v2) = RosVeq <$> makeRosVE v1 <*> makeRosVE v2
+> makeRosPred (Vgt v1 v2) = RosVgt <$> makeRosVE v1 <*> makeRosVE v2
+> makeRosPred (Vlt v1 v2) = RosVlt <$> makeRosVE v1 <*> makeRosVE v2
+
+> makeRosWhere :: Maybe Predicate -> Either String (Maybe RosPredicate)
+> makeRosWhere Nothing = Right Nothing
+> makeRosWhere (Just p) = Just <$> makeRosPred p
+
 === Cosette AST -> Rosette AST
 
 unzip result
@@ -84,7 +136,7 @@ unzip result
 > makeRosQuery qe name = RosQuery
 >                        <$> (fst <$> sl)  -- select list
 >                        <*> (makeRosFrom $ qFrom qe)
->                        <*> Right (qWhere qe)
+>                        <*> (makeRosWhere $ qWhere qe)
 >                        <*> Right (qGroup qe)
 >                        <*> Right (qDistinct qe)
 >                        <*> ((,) <$> Right name <*> (snd <$> sl))
@@ -139,23 +191,24 @@ Finally, convert Cosette AST to Rosette AST
 
 convert ValueExpr to sexp
 
-> instance Sexp ValueExpr where
->   toSexp (NumLit i) = show i
->   toSexp (DIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
->   toSexp (BinOp v1 op v2) =  addParen 
+> instance Sexp RosValueExpr where
+>   toSexp (RosNumLit i) = show i
+>   toSexp (RosDIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
+>   toSexp (RosBinOp v1 op v2) =  addParen 
 >     $ unwords ["BINOP", toSexp v1, op, toSexp v2]
+>   toSexp (RosVQE q) = toSexp q
  
 convert Predicate to sexp
 
-> instance Sexp Predicate where
->   toSexp TRUE = "#t"
->   toSexp FALSE = "#f"
->   toSexp (And p1 p2) = addParen $ uw ["AND", toSexp p1, toSexp p2]
->   toSexp (Or p1 p2) = addParen $ uw ["OR", toSexp p1, toSexp p2]
->   toSexp (Not p) = addParen $ uw ["NOT", toSexp p]
->   toSexp (Veq v1 v2) = addParen $ uw [toSexp v1, "=", toSexp v2]
->   toSexp (Vgt v1 v2) = addParen $ uw [toSexp v1, ">", toSexp v2]
->   toSexp (Vlt v1 v2) = addParen $ uw [toSexp v1, "<", toSexp v2]
+> instance Sexp RosPredicate where
+>   toSexp RosTRUE = "#t"
+>   toSexp RosFALSE = "#f"
+>   toSexp (RosAnd p1 p2) = addParen $ uw ["AND", toSexp p1, toSexp p2]
+>   toSexp (RosOr p1 p2) = addParen $ uw ["OR", toSexp p1, toSexp p2]
+>   toSexp (RosNot p) = addParen $ uw ["NOT", toSexp p]
+>   toSexp (RosVeq v1 v2) = addParen $ uw [toSexp v1, "=", toSexp v2]
+>   toSexp (RosVgt v1 v2) = addParen $ uw [toSexp v1, ">", toSexp v2]
+>   toSexp (RosVlt v1 v2) = addParen $ uw [toSexp v1, "<", toSexp v2]
 
 convert RosTableRef to sexp
 
@@ -172,17 +225,24 @@ convert RosQueryExpr to sexp
 
 -- TODO: handle from nothing in rosette ("UNIT")
 
+Since query with only aggregation (no group by) and group by query requires their own syntactic rewrite, we need to first handle these two cases.
+
 > instance Sexp RosQueryExpr where
 >   toSexp q = addParen $ uw ["AS", spj, sch]
->     where spj = addParen $ uw ["SELECT", sl, "FROM", fl, "WHERE", p]
->           sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
->           fl = addParen $ case rosFrom q of Nothing -> "UNIT"
->                                             Just fr -> toSexp $ head fr
->           p = addParen $ case rosWhere q of Nothing -> "filter-empty"
->                                             Just wh -> toSexp wh
+>     where spj = toSexpSchemaless q
 >           sch' = rosSchema q
 >           sch = addSParen $ uw [addEscStr (fst sch'), al]
 >           al = addParen $ uw ("list":(addEscStr <$> snd sch'))
+
+convert RosQueryExpr to s-expression string without adding schema. 
+
+> toSexpSchemaless :: RosQueryExpr -> String
+> toSexpSchemaless q = addParen $ uw ["SELECT", sl, "FROM", fl, "WHERE", p]
+>   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
+>         fl = addParen $ case rosFrom q of Nothing -> "UNIT"
+>                                           Just fr -> toSexp $ head fr
+>         p = addParen $ case rosWhere q of Nothing -> "filter-empty"
+>                                           Just wh -> toSexp wh
 
 generate rosette code
 
@@ -212,8 +272,8 @@ statement list
 >      qe2 <- findQ q2 ql
 >      rsq1 <- toRosQuery qe1 q1
 >      rsq2 <- toRosQuery qe2 q2
->      rs1 <- Right (toSexp rsq1)
->      rs2 <- Right (toSexp rsq2)
+>      rs1 <- Right (toSexpSchemaless rsq1)
+>      rs2 <- Right (toSexpSchemaless rsq2)
 >      return (rs1 ++ "\n" ++ rs2)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
