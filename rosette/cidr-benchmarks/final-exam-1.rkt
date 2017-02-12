@@ -55,7 +55,7 @@
     (VALS "Usr.uid" "Usr.uname" 
           (AGGR aggr-count 
                 (SELECT 
-                  (VALS "Picture.uid" "Picture.size")
+                  (VALS "Picture.uid")
                   FROM (NAMED Picture)
                   WHERE (AND (BINOP "Usr.uid" = "Picture.uid")
                              (BINOP "Picture.size" > 1000000)))))
