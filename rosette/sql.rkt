@@ -106,6 +106,13 @@
 (define-syntax-rule (LEFT-OUTER-JOIN-2 q1 q2 join-query)
                     (query-left-outer-join-2 q1 q2 join-query))
 
+(define-syntax-rule (UNIT) unit-table)
+
+;; UNIT table is a table with 1 row and empty schema
+(define unit-table
+  (Table "UNIT" (list)
+         (list (cons (list) 1))))
+
 ;; aggregation functions
 ;; input to these functions:
 ;;    [(v1 . m1), (v2 . m2), ..., (vn . mn)]
