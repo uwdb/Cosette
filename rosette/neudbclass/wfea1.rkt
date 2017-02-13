@@ -26,11 +26,11 @@
   
 
 ;------ symbolic tables ------
-(define Courses (Table "Courses" (list "cid" "cname" "ch" "ppch") (gen-sym-schema 4 2)))
+(define Courses (Table "Courses" (list "cid" "cname" "ch" "ppch") (gen-sym-schema 4 1)))
 
-(define TB (Table "TB" (list "isbn") (gen-sym-schema 1 2)))
+(define TB (Table "TB" (list "isbn") (gen-sym-schema 1 1)))
 
-(define TBAssign (Table "TBAssign" (list "cid" "isbn") (gen-sym-schema 2 2)))
+(define TBAssign (Table "TBAssign" (list "cid" "isbn") (gen-sym-schema 2 1)))
 
 ;------ first query (WFEA) ------
 
