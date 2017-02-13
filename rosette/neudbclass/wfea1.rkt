@@ -2,6 +2,8 @@
 
 (require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
+(current-bitwidth 32)
+
 ;------ real tables (for debug) ------
 (define RC (Table "Courses" (list "cid" "cname" "ch" "ppch")
                   (list
@@ -121,13 +123,6 @@
 ; ------ Second query (WFA) ------
 
 ; CREATE VIEW wfa
-
-#;(define wfa
-  (SELECT
-   (VALS (AGGR aggr-count
-               (SELECT (VALS "TB.isbn") FROM (NAMED TB) WHERE (F-EMPTY))))
-   FROM (NAMED (UNIT))
-   WHERE (F-EMPTY)))
 
 (define wfa
   (SELECT
