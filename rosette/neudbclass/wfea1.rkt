@@ -130,10 +130,6 @@
    FROM (NAMED (UNIT))
    WHERE (F-EMPTY)))
 
-(time (begin
-        (assert-table-ordered TB)
-        (assert-table-ordered TBAssign)
-        (assert-table-ordered Courses)
-        (verify (same wfea wfa))))
+(time (verify (same wfea wfa)))
 
           
