@@ -351,7 +351,7 @@ assemble the theorem definition.
 >        qs1 <- Right (toCoq hsq1)
 >        qs2 <- Right (toCoq hsq2)
 >        vs <- Right (verifyDecs qs1 qs2)
->        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ ending)
+>        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof $ joinWithBr tactics) ++ ending)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -413,10 +413,13 @@ generate predicate declarations
 > endDef :: String
 > endDef = "  Defined. \n"
 
-generate proof given a tactic
+generate proof given a tactics
 
 > genProof :: String -> String
-> genProof tac = "Arguments Rule /. \n \n  Lemma ruleStand: Rule. \n  " ++ tac ++ "\n Qed. \n "
+> genProof tac = "Arguments Rule /. \n \n  Lemma ruleStand: Rule. \n  " ++ tac ++ "  Qed. \n "
+
+> tactics :: [String]
+> tactics = ["try hott_ring."]
 
 > ending :: String
 > ending = "\nEnd Optimization. \n" 
