@@ -42,5 +42,8 @@ RUN curl -O https://coq.inria.fr/distrib/V8.5pl1/files/coq-8.5pl1.tar.gz && \
                      make -j `nproc` && \ 
                      make install
 
+RUN apt-get update && \
+    apt-get install -y haskell-platform
+
 # ADD hott /hott
 # RUN make -C /hott
