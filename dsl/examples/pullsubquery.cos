@@ -11,6 +11,6 @@ query q1
 `select * from a x, (select * from b y where b0(y)) z where b1(x, z)`;
 
 query q2
-`select * from a x, b y where b0(y) and b1(x, y)`;
+`select * from a x, b y where b1(x, y) and b0(y)`;
 
 verify q1 q2;
