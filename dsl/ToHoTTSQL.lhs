@@ -351,7 +351,7 @@ assemble the theorem definition.
 >        qs1 <- Right (toCoq hsq1)
 >        qs2 <- Right (toCoq hsq2)
 >        vs <- Right (verifyDecs qs1 qs2)
->        return (openDef ++ decs ++ vs ++ endDef)
+>        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ ending)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -386,11 +386,29 @@ generate predicate declarations
 > predDecs t = "(" ++ (fst t) ++ " : Pred (Γ++" ++ "" ++ scms ++ "))"
 >   where scms = foldr (\a b -> if b == "" then a else a ++ "++" ++ b) "" (snd t)
 
+> joinWithBr :: [String] -> String
+> joinWithBr = foldr (\a b -> if a == "" then b else a ++ " \n" ++ b) "" 
+
+> headers :: [String]
+> headers = ["Require Import HoTT.",
+>            "Require Import UnivalenceAxiom.",
+>            "Require Import HoTTEx.",
+>            "Require Import Denotation.",
+>            "Require Import UnivalentSemantics.",
+>            "Require Import AutoTactics. \n",
+>            "Open Scope type. \n",
+>            "Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T S).",
+>            "  Import T S R A.",
+>            "  Module SQL_TSRA := SQL T S R A.",
+>            "  Import SQL_TSRA.",
+>            "  Module AutoTac := AutoTactics T S R A.",
+>            "  Import AutoTac. \n "]
+
 > openDef :: String
 > openDef = "  Definition Rule: Type. \n"
 
 > addRefine :: String -> String
-> addRefine s = "  refine (" ++ s ++ "). \n"
+> addRefine s = "    refine (" ++ s ++ "). \n"
 
 > endDef :: String
 > endDef = "  Defined. \n"
@@ -399,3 +417,6 @@ generate proof given a tactic
 
 > genProof :: String -> String
 > genProof tac = "Arguments Rule /. \n \n  Lemma ruleStand: Rule. \n  " ++ tac ++ "\n Qed. \n "
+
+> ending :: String
+> ending = "\nEnd Optimization. \n" 
