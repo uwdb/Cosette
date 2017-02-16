@@ -274,7 +274,7 @@ delimit strings with space
 > uw = unwords
 
 > instance Coqable HSValueExpr where
->   toCoq (HSDIden t a) = t ++ "⋅" ++ a
+>   toCoq (HSDIden t a) = addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op, toCoq v1, toCoq v2]
 >   toCoq (HSConstant c) = addParen $ uw ["constantExpr", c]
 
