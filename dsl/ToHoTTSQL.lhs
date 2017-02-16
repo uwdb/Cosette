@@ -422,4 +422,5 @@ generate proof given a tactics
 > tactics = ["try hott_ring."]
 
 > ending :: String
-> ending = "\nEnd Optimization. \n" 
+> ending = "\nEnd Optimization. \n"
+
