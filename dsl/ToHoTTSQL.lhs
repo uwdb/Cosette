@@ -283,8 +283,8 @@ delimit strings with space
 >   toCoq HSFalse = "false"
 >   toCoq (HSPredVar v sl) = addParen $ uw ["castPred (combine left",
 >                                          (f sl) ++ ")", v]
->     where f [x] = x
->           f (t:h) = addParen $ uw ["combine", t, f h]
+>     where f [x] = addParen $ x
+>           f (t:h) = addParen $ uw ["combine", addParen $ t, f h]
 >           f [] = "ERROR"
 >   toCoq (HSAnd b1 b2) = addParen $ uw ["and", toCoq b1, toCoq b2]
 >   toCoq (HSOr b1 b2) = addParen $ uw ["or", toCoq b1, toCoq b2]
@@ -310,7 +310,7 @@ delimit strings with space
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
 >                              (addParen $ toCoq q2)
 >   toCoq q = p ++ (addParen $ uw ["SELECT", f $ hsSelectList q,
->                                  "FROM", toCoq $ hsFrom q,
+>                                  "FROM1", toCoq $ hsFrom q,
 >                                  "WHERE", toCoq $ hsWhere q])
 >     where f [x] = toCoq x
 >           f (h:t) = addParen $ uw ["combine", toCoq h, f t]
@@ -350,7 +350,7 @@ assemble the theorem definition.
 >        hsq2 <- toHSQuery env HSEmpty qe2
 >        qs1 <- Right (toCoq hsq1)
 >        qs2 <- Right (toCoq hsq2)
->        vs <- Right (addRefine $ verifyDecs qs1 qs2)
+>        vs <- Right (verifyDecs qs1 qs2)
 >        return (openDef ++ decs ++ vs ++ endDef)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
@@ -383,17 +383,17 @@ generate attribute (column) declarations from schemas
 generate predicate declarations
 
 > predDecs :: (String, [String]) -> String
-> predDecs t = "(" ++ (fst t) ++ " : Pred (" ++ scms ++ "))"
+> predDecs t = "(" ++ (fst t) ++ " : Pred (Γ++" ++ "" ++ scms ++ "))"
 >   where scms = foldr (\a b -> if b == "" then a else a ++ "++" ++ b) "" (snd t)
 
 > openDef :: String
-> openDef = "Definition Rule: Type. \n"
+> openDef = "  Definition Rule: Type. \n"
 
 > addRefine :: String -> String
-> addRefine s = "refine (" ++ s ++ "). \n"
+> addRefine s = "  refine (" ++ s ++ "). \n"
 
 > endDef :: String
-> endDef = "Defined. \n"
+> endDef = "  Defined. \n"
 
 generate proof given a tactic
 
