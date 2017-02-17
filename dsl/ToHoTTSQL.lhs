@@ -6,7 +6,8 @@
 
 > import CosetteParser
 > import Text.Parsec.Error as PE
-> import Data.List (unwords, intercalate)
+> import Data.List (unwords, intercalate, filter)
+> import Data.Set (toList, fromList)
 > import FunctionsAndTypesForParsing
 > import qualified Data.Map as Map
 
@@ -15,8 +16,8 @@
 schema
 
 > data HSSchema =  MakeHSSchema {hsSName :: String             -- name of the schema
->                             ,hsAttrs :: [(String, String)] -- name, typename
->                             } deriving (Eq, Show)
+>                               ,hsAttrs :: [(String, String)] -- name, typename
+>                               } deriving (Eq, Show)
 
 environment
 
@@ -273,6 +274,11 @@ delimit strings with space
 > uw :: [String] -> String
 > uw = unwords
 
+dedup list (this does not preserve the order)
+
+> dedup :: Ord a => [a] -> [a]
+> dedup = toList . fromList
+
 > instance Coqable HSValueExpr where
 >   toCoq (HSDIden t a) = addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op, toCoq v1, toCoq v2]
@@ -310,13 +316,15 @@ delimit strings with space
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
 >                              (addParen $ toCoq q2)
 >   toCoq q = p ++ (addParen $ uw ["SELECT", f $ hsSelectList q,
->                                  "FROM1", toCoq $ hsFrom q,
->                                  "WHERE", toCoq $ hsWhere q])
+>                                  "FROM1", toCoq $ hsFrom q, w])
 >     where f [x] = toCoq x
 >           f (h:t) = addParen $ uw ["combine", toCoq h, f t]
 >           p = if (hsDistinct q)
 >               then "DISTINCT "
 >               else ""
+>           w = if (hsWhere q == HSTrue)
+>               then ""
+>               else "WHERE " ++ (toCoq $ hsWhere q)                  
 
 
 from Cosette statements to Coq program (or Error message)
@@ -351,18 +359,25 @@ assemble the theorem definition.
 >        qs1 <- Right (toCoq hsq1)
 >        qs2 <- Right (toCoq hsq2)
 >        vs <- Right (verifyDecs qs1 qs2)
->        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof $ joinWithBr tactics) ++ ending)
+>        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof tactics) ++ ending)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
 >     snames = unwords $ map hsSName sl
->     tables = unwords $ map (\t -> "(" ++ (fst t) ++ " : relation " ++ (snd t) ++ ")") tsl
->     scms = "( Γ " ++ snames ++ " : Schema) "
+>     tables = unwords $ map (\t -> "(" ++ (fst t) ++ ": relation " ++ (snd t) ++ ")") tsl
+>     scms = "( Γ " ++ snames ++ ": Schema) "
 >     tbls = tables ++ " "
+>     dts = (unwords $ (\a -> "("++ a ++ ": type)") <$> getDataTypes sl) ++ " "
 >     attrs = unwords $ map attrDecs sl
 >     preds = unwords $ map predDecs pl
->     decs = addRefine $ "forall " ++ scms ++ tbls ++ attrs ++ preds ++ ", _"
+>     decs = addRefine $ "forall " ++ scms ++ tbls ++ dts ++ attrs ++ preds ++ ", _"
+
+extract data types that are needed. e.g. schema s(a:t1, b:t2, c:t1, ??) -> [t1, t2] 
+
+> getDataTypes :: [HSSchema] -> [String]
+> getDataTypes sl = filter (\a -> a /= "type") (dedup sl')
+>   where sl' = foldr (\l s -> s ++ (snd <$> hsAttrs l)) [] sl
 
 generate verify declaration string
 
@@ -415,11 +430,12 @@ generate predicate declarations
 
 generate proof given a tactics
 
-> genProof :: String -> String
-> genProof tac = "Arguments Rule /. \n \n  Lemma ruleStand: Rule. \n  " ++ tac ++ "  Qed. \n "
+> genProof :: [String] -> String
+> genProof tac = "  Arguments Rule /. \n \n  Lemma ruleStand: Rule. \n" ++ "    start;\n" ++ (f tac) ++ "  Qed. \n "
+>   where f x = "    first [" ++ (intercalate "| " x) ++ "]. \n"
 
 > tactics :: [String]
-> tactics = ["try hott_ring."]
+> tactics = ["sum_heurstic1", "hott_ring'"]
 
 > ending :: String
 > ending = "\nEnd Optimization. \n"

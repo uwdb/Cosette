@@ -289,8 +289,8 @@ TODO: for now, only base relations can be unioned in from clause.
 > fromItem =  TR <$> tableExpr <*> aliasIdentifier             
 >   where aliasIdentifier = identifierBlacklist sqlKeywords
 
-> fromList :: Parser [TableRef]
-> fromList = keyword_ "from" *> commaSep1 fromItem
+> fromClause :: Parser [TableRef]
+> fromClause = keyword_ "from" *> commaSep1 fromItem
 
 === grouping clause
 
@@ -307,7 +307,7 @@ Query without distinct
 > bagQuery :: Parser QueryExpr
 > bagQuery = Select
 >            <$> selectList
->            <*> optionMaybe fromList
+>            <*> optionMaybe fromClause
 >            <*> optionMaybe whereClause
 >            <*> optionMaybe groupList
 >            <*> (do return False)
@@ -317,7 +317,7 @@ Query with distinct
 > setQuery :: Parser QueryExpr
 > setQuery = Select
 >            <$> distSelectList
->            <*> optionMaybe fromList
+>            <*> optionMaybe fromClause
 >            <*> optionMaybe whereClause
 >            <*> optionMaybe groupList
 >            <*> (do return True)
