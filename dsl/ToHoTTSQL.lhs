@@ -122,7 +122,10 @@ look up a schema in FROM clause by alias
 get output schema of a query
 
 > getOutput :: HSEnv -> HSContext -> QueryExpr -> Either String [(String, String)]
-> getOutput env ctx q = f (qSelectList q)
+> getOutput env ctx q =
+>   case q of
+>     Select s fr w g d -> f s
+>     UnionAll q1 q2 -> getOutput env ctx q1
 >   where f [Star] = getFromSchema env ctx (qFrom q)
 >         f (h:t) = case h of DStar al -> (++) <$> (lkUpSchemaInFrom env ctx (qFrom q) al)
 >                                              <*> f t
@@ -435,7 +438,7 @@ generate proof given a tactics
 >   where f x = "    first [" ++ (intercalate "| " x) ++ "]. \n"
 
 > tactics :: [String]
-> tactics = ["sum_heurstic1", "hott_ring'"]
+> tactics = ["sum_heuristic1", "deductive_proof'", "hott_ring'"]
 
 > ending :: String
 > ending = "\nEnd Optimization. \n"

@@ -59,11 +59,14 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
     | _ => simp_solve
     end.
 
-  Ltac deductive_proof :=
-    start;
+  Ltac deductive_proof' :=
     apply path_universe_uncurried;
     apply equiv_iff_hprop_uncurried;
     constructor; solve_disjunction.
+
+  Ltac deductive_proof :=
+    start;
+    deductive_proof'.
 
   (*try hprop_prod_l. *)
   Ltac sum_heuristic1 :=
