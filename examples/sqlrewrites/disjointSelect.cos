@@ -1,0 +1,15 @@
+schema s(??);
+
+table r(s);
+
+predicate b1(s);
+predicate b2(s);
+
+query q1
+`select distinct * from r x where b1(x) or b2(x)`;
+
+query q2
+`select distinct *
+ from ((select * from r x where b1(x)) union all (select * from r y where b2(y))) x`;
+
+verify q1 q2;
