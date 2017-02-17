@@ -36,11 +36,11 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
     try ring1;
     try rewrite (path_universe_uncurried (hprop_prod_prod _)).
 
+
+
   Ltac hott_ring' :=
     repeat rewrite (path_universe_uncurried (sum_distrib_l _ _ _));
-    try first [(ring1; simp_solve) | (ring2; simp_solve) | (ring3; simp_solve)];
-    try transform;
-    try simp_solve.
+    try first [ simp_solve | (ring1; simp_solve) | (ring2; simp_solve) | (ring3; simp_solve) | (transform; simp_solve)].
   
   (* Poor men's ring tactic *)
   Ltac hott_ring :=
