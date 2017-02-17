@@ -36,13 +36,16 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
     try ring1;
     try rewrite (path_universe_uncurried (hprop_prod_prod _)).
 
-  (* Poor men's ring tactic *)
-  Ltac hott_ring :=
-    start;
+  Ltac hott_ring' :=
     repeat rewrite (path_universe_uncurried (sum_distrib_l _ _ _));
     try first [(ring1; simp_solve) | (ring2; simp_solve) | (ring3; simp_solve)];
     try transform;
     try simp_solve.
+  
+  (* Poor men's ring tactic *)
+  Ltac hott_ring :=
+    start;
+    hott_ring'.
 
   Ltac solve_disjunction :=
     match goal with
@@ -74,6 +77,6 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
   (* TODO: add more heuristics *)
   Ltac solve_summation :=
     start;
-    try sum_heuristic1.
+    sum_heuristic1.
   
 End AutoTactics.
