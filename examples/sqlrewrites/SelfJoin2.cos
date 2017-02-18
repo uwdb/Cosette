@@ -1,0 +1,12 @@
+schema s(a1:ty1, a2:ty2, ??);
+
+table r(s);
+
+query q1
+`select distinct y.a1 as a1, y.a2 as a2 from r x, r y where x.a1 = y.a1 and x.a2 = y.a2`;
+
+query q2
+`select distinct x.a1 as a1, x.a2 as a2 from r x`;
+
+verify q1 q2;
+
