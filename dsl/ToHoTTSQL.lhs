@@ -318,7 +318,7 @@ convert valueExpr to projection strings.
 
 > instance Coqable HSSelectItem where
 >   toCoq HSStar = "*"
->   toCoq (HSDStar x) = x ++ "⋅*"
+>   toCoq (HSDStar x) = addParen $ (x ++ "⋅star")
 >   toCoq (HSProj v) = veToProj v
 
 > instance Coqable HSQueryExpr where
