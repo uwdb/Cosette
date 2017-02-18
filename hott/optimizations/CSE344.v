@@ -87,11 +87,6 @@ Module CSE344 (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators 
         (* TODO: HAVING x.usrCity = denver *)
       ⟧.
     Proof.
-      prepareDistinctSQLProof.
-      - prepareConjuctiveQueryProof.
-        destruct t as [tUidUname tInteger].
-        destruct tUidUname as [tUid tUname].
-        simple refine (exist _ (t0, _) _).
     Admitted.
    
     Definition s := Γ ++ ((Usr ++ Pic) ++ Pic) ++ Pic.

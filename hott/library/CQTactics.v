@@ -35,7 +35,6 @@ Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregato
     end.
 
   Ltac prepareDistinctSQLProof :=
-    start;
     apply path_universe_uncurried;
     apply equiv_iff_hprop_uncurried;
     constructor.
@@ -52,9 +51,13 @@ Module CQTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregato
     apply tr;
     simpl in *.
 
-  Ltac conjunctiveQueryProof :=
+  Ltac conjunctiveQueryProof' :=
     prepareDistinctSQLProof;
     prepareConjuctiveQueryProof;  
     searchInstantiation solveInstantiatedConjuctiveQuery.
+
+  Ltac conjunctiveQueryProof :=
+    start;
+    conjunctiveQueryProof'.
 
 End CQTactics.

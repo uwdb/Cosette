@@ -287,6 +287,12 @@ dedup list (this does not preserve the order)
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op, toCoq v1, toCoq v2]
 >   toCoq (HSConstant c) = addParen $ uw ["constantExpr", c]
 
+convert valueExpr to projection strings.
+
+> veToProj :: HSValueExpr -> String
+> veToProj (HSDIden t a) = addParen $ t ++ "⋅" ++ a
+> veToProj v = toCoq v
+
 > instance Coqable HSPredicate where
 >   toCoq HSTrue = "true"
 >   toCoq HSFalse = "false"
@@ -313,14 +319,16 @@ dedup list (this does not preserve the order)
 > instance Coqable HSSelectItem where
 >   toCoq HSStar = "*"
 >   toCoq (HSDStar x) = x ++ "⋅*"
->   toCoq (HSProj v) = toCoq v
+>   toCoq (HSProj v) = veToProj v
 
 > instance Coqable HSQueryExpr where
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
 >                              (addParen $ toCoq q2)
->   toCoq q = p ++ (addParen $ uw ["SELECT", f $ hsSelectList q,
+>   toCoq q = p ++ (addParen $ uw [ genSel $ hsSelectList q,
 >                                  "FROM1", toCoq $ hsFrom q, w])
->     where f [x] = toCoq x
+>     where genSel [HSStar] = "SELECT *"
+>           genSel sl = "SELECT1 " ++ (f sl)
+>           f [x] = toCoq x
 >           f (h:t) = addParen $ uw ["combine", toCoq h, f t]
 >           p = if (hsDistinct q)
 >               then "DISTINCT "
@@ -413,14 +421,17 @@ generate predicate declarations
 >            "Require Import HoTTEx.",
 >            "Require Import Denotation.",
 >            "Require Import UnivalentSemantics.",
->            "Require Import AutoTactics. \n",
+>            "Require Import AutoTactics.",
+>            "Require Import CQTactics. \n",
 >            "Open Scope type. \n",
 >            "Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T S).",
 >            "  Import T S R A.",
 >            "  Module SQL_TSRA := SQL T S R A.",
 >            "  Import SQL_TSRA.",
 >            "  Module AutoTac := AutoTactics T S R A.",
->            "  Import AutoTac. \n "]
+>            "  Import AutoTac.",
+>            "  Module CQTac := CQTactics T S R A.",
+>            "  Import CQTac. \n"]
 
 > openDef :: String
 > openDef = "  Definition Rule: Type. \n"
@@ -438,7 +449,10 @@ generate proof given a tactics
 >   where f x = "    first [" ++ (intercalate "| " x) ++ "]. \n"
 
 > tactics :: [String]
-> tactics = ["sum_heuristic1", "deductive_proof'", "hott_ring'"]
+> tactics = ["sum_heuristic1",
+>            "deductive_proof'",
+>            "conjunctiveQueryProof'",
+>            "hott_ring'"]
 
 > ending :: String
 > ending = "\nEnd Optimization. \n"
