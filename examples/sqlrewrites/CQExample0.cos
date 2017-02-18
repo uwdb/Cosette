@@ -1,0 +1,13 @@
+schema s1(x:ty0, ya:ty1, ??);
+schema s2(yb:ty1, ??);
+
+table r1(s1);
+table r2(s2);
+
+query q1
+`select distinct x.x as x from r1 x, r2 y where x.ya = y.yb`;
+
+query q2
+`select distinct x.x as x from r1 x, r1 y, r2 z where x.x = y.x and x.ya = z.yb`;
+
+verify q1 q2;

@@ -1,0 +1,12 @@
+schema s1(??);
+schema s2(??);
+
+table r1(s1);
+table r2(s2);
+table r3(s2);
+
+query q1 `select * from r1 x, (r2 union all r3) y`;
+
+query q2 `(select * from r1 x, r2 y) union all (select * from r1 x, r3 y)`;
+
+verify q1 q2;
