@@ -56,11 +56,13 @@ RUN cd ghc-8.0.2 && make install
 RUN curl -O http://hackage.haskell.org/package/cabal-install-1.24.0.2/cabal-install-1.24.0.2.tar.gz
 RUN tar xvfz cabal-install-1.24.0.2.tar.gz
 RUN cd cabal-install-1.24.0.2 && sh ./bootstrap.sh
-ENV PATH /.cabal/bin:$PATH
+ENV PATH /root/.cabal/bin/:$PATH
 ENV LANG C.UTF-8
 
 RUN git clone -b pldi-ae https://github.com/uwdb/Cosette.git
+
 RUN cd /Cosette/dsl && cabal sandbox init
+RUN cabal update
 RUN cd /Cosette/dsl && cabal install Parsec
 RUN cd /Cosette/dsl && ghc CoqCodeGen.lhs
 
