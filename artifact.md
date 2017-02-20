@@ -1,5 +1,6 @@
 HoTTSQL: Proving Query Rewrites wth Univalent SQL Semantics
 ===========================================================
+[Shumo Chu](www.shumochu.com), [Konstantin Weitz](http://www.konne.me/), [Alvin Cheung](https://homes.cs.washington.edu/~akcheung/), [Dan Suciu](https://homes.cs.washington.edu/~suciu/)
 
 ## Overview
 
