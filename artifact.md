@@ -33,7 +33,7 @@ The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Th
    docker run --name hottsql --entrypoint /bin/bash -ti shumo/hottsql
    ```
    
-   (You can replace `/bin/bash` with your favorite shell, also this command has not been tested in Windows)
+   (You can replace `/bin/bash` with your favorite shell, also this command has not been tested on Windows.)
 
 ## Run the experiment
 
