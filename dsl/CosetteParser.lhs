@@ -14,7 +14,6 @@ Syntax and Parser for Cosette.
 > import Control.Monad
 > import Data.Maybe ()
 > import Data.Char
-> import qualified Test.HUnit as H
 > import FunctionsAndTypesForParsing
 > import Debug.Trace
 
@@ -510,10 +509,3 @@ Parse cosette program
 >                     ,qWhere = Nothing
 >                     ,qGroup = Nothing
 >                     ,qDistinct = False}
-
-> makeTest :: (Eq a, Show a) => Parser a -> (String,a) -> H.Test
-> makeTest parser (src,expected) = H.TestLabel src $ H.TestCase $ do
->     let gote = parse (whitespace *> parser <* eof) "" src
->     case gote of
->       Left e -> H.assertFailure $ show e
->       Right got -> H.assertEqual src expected got
