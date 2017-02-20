@@ -22,10 +22,18 @@ The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Th
 1. Install [docker](https://www.docker.com/products/docker) for your host OS.
 
 2. Pull the prepared docker container from dockerhub:
-   `docker pull shumo/hottsql`
+   
+   ```
+   docker pull shumo/hottsql
+   ``` 
 
 3. Run the docker container and open a console running on the docker container by (you may need to do `docker rm -f hottsql` if you already have a container named `hottsql`.):
-   `docker run --name hottsql --entrypoint /bin/bash -ti shumo/hottsql` (replace `/bin/bash` with your favorite shell, also this command has not been tested in Windows)
+   
+   ```
+   docker run --name hottsql --entrypoint /bin/bash -ti shumo/hottsql
+   ```
+   
+   (You can replace `/bin/bash` with your favorite shell, also this command has not been tested in Windows)
 
 ## Run the experiment
 
