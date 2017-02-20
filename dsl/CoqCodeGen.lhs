@@ -6,8 +6,7 @@
 > import ToHoTTSQL
 > import Text.Parsec (parse,ParseError)
 > import Text.Parsec.String.Combinator
-
-FIXME: import ToRosette
+> import System.IO
 
 > import Data.Char
 
@@ -23,5 +22,6 @@ FIXME: import ToRosette
 >     cs = (parse (whitespace *> cosetteProgram <* eof) "" p)
 
 > main = do
+>   hSetEncoding stdout utf8
 >   cont <- getContents
 >   (putStr $ getResult cont)
