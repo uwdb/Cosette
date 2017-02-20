@@ -90,7 +90,7 @@ Each `*.v` files under `Cosette/hott/optimizations` can be inspected. For exampl
 
 All source code is in `/Cosette` directory. The source code is arranged as follows:
 
-* `hott`: All the Coq files, including denotation semantics of HoTTIR, a library developed from proving rewrite rules, and all the rules that we proved and validated using Coq. 
+* `hott`: All the Coq files, including denotation semantics of HoTTIR (`hott/UnivalentSemantics.v`), a library developed from proving rewrite rules (`hott/library/`), and all the rules that we proved and validated using Coq (`hott/optimizations/`). 
 
 * `dsl`: Parser of HoTTSQL and translation from HoTTSQL to HoTTIR.
 
