@@ -11,9 +11,9 @@ The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Th
 
 ## Claims
 
-1. Users can express SQL rewrite rules in HoTTSQL (front end syntax) and our system will translate HoTTSQL to HoTTIR (Sec 4).
+1. Users can express SQL rewrite rules in HoTTSQL (front end syntax), which will be parsed and translated to HoTTIR by our system (Sec 4).
 
-2. HoTTSQL can be used to prove a wide range of real world SQL rewrites with brief proofs (Sec 5.1).
+2. Our system can prove a wide range of real world SQL rewrites with brief proofs (Sec 5.1).
 
 3. HoTTSQL's automatic solving tactic for Conjunctive queries are effective (Sec 5.2).
 
