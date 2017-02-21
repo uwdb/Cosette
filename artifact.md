@@ -96,7 +96,7 @@ If the automated tactics failed, you can try to edit the generated .v file to ad
 
 ## Source Code
 
-All source code is in `/Cosette` directory. The source code is arranged as follows:
+The source code is in the `/Cosette` directory and is arranged as follows:
 
 * `hott`:  The Coq files, including denotation semantics of HoTTIR, a library developed from proving rewrite rules, and all the rules that we proved and validated using Coq. 
 
