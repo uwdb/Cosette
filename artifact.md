@@ -4,18 +4,18 @@ HoTTSQL: Proving Query Rewrites wth Univalent SQL Semantics
 
 ## Overview
 
-We have provided a docker container containing the implementation of HoTTSQL, a machine checkable formal semantics for SQL, as well as the SQL rewrite rules that have been proved usng HoTTSQL.
+We have provided a docker container containing the implementation of HoTTSQL, a machine checkable formal semantics for SQL, as well as the SQL rewrite rules that have been proved using HoTTSQL.
 
-The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Theory library. The parsing of the front end language and the translation from front end language to HoTTIR is implemented using Haskell.
+The core part of HoTTSQL (HoTTIR) is implemented using Coq and the Homotopy Type Theory library. Parsing of the front end language and the translation from front end language to HoTTIR is implemented using Haskell.
 
 
 ## Claims
 
-1. Users can express SQL rewrite rules in HoTTSQL (front end syntax), which will be parsed and translated to HoTTIR by our system (Sec 4).
+1. Users can express SQL rewrite rules in HoTTSQL (front end syntax) and our system will translate HoTTSQL to HoTTIR (Sec 4).
 
-2. Our system can prove a wide range of real world SQL rewrites with brief proofs (Sec 5.1).
+2. HoTTSQL can be used to concisely prove a wide range of real world SQL rewrite rules(Sec 5.1).
 
-3. HoTTSQL's automatic solving tactic for Conjunctive queries are effective (Sec 5.2).
+3. HoTTSQL's automatic conjunctive query solving tactics are effective (Sec 5.2).
 
 ## Setup
 
@@ -27,7 +27,7 @@ The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Th
    docker pull shumo/hottsql
    ``` 
 
-3. Run the docker container and open a console running on the docker container by (you may need to do `docker rm -f hottsql` if you already have a container named `hottsql`.):
+3. Run the docker container, and open a console running in the docker container (you may need to do `docker rm -f hottsql` if you already have a container named `hottsql`.):
    
    ```
    docker run --name hottsql --entrypoint /bin/bash -ti shumo/hottsql
@@ -35,7 +35,7 @@ The core part of HoTTSQL (HoTTIR) is implemented using Coq with Homotopy Type Th
    
    (You can replace `/bin/bash` with your favorite shell, also this command has not been tested on Windows.)
 
-## Run the experiment
+## Running the experiment
 
 In the docker console (See step 3 in Setup), run the following commands:
 
@@ -60,15 +60,16 @@ This will produce the following output:
 	./hott/optimizations/generated/pullsubquery.v generated.
 	./hott/optimizations/generated/pushdownSelect.v generated.
 
-`run_examples.sh` will generate a Coq source code file for each rewrite rule in `Cosette/examples/` and write the Coq source code to `Cosette/hott/optimizations/generated` by calling the compiler (HoTTSQL to HoTTIR). A generated Coq file contains the specification of the rule using HoTTIR as well as a proof for the rule, which is a combination of different automated solving tactics. 
+`run_examples.sh` generates a Coq source code file for each rewrite rule in `Cosette/examples/` and writes the Coq source code to `Cosette/hott/optimizations/generated` by calling the parser to translate from HoTTSQL to HoTTIR. The generated Coq file contains the specification of the rule using HoTTIR as well as a proof script for the rule, which contains calls to different automated solving tactics for validating the rule.
+ 
 
-To validate the generated rewrite rules as well as the rewrite rules that we have manually proved in `Cosette/hott/optimizations`, run:
+To validate the rewrite rules that we have proven automatically and manually in Sec. 5 of the paper, as well as contained in `Cosette/hott/optimizations`, run 
 
 	cd /Cosette/hott
 	make
 	
-`hoqc` (HoTT verison of `coqc`)  will be called to compile all the `*.v` file in `/Cosette/hott` folder. The success of `make` requires all the Coq proofs to be validated. This will produce the following output:
-	
+When executed, `hoqc` (HoTT verison of `coqc`) is called to compile each of the `*.v` files in `/Cosette/hott`. `make` only succeeds after all of the Coq proofs are validated. You should get an output that looks like the following:
+
 	mkdir .build 2> /dev/null || true
 	find . -path ./.build -prune -o -name '*.v' -print | xargs cp -a --parents -t .build
 	cd .build; find . -name '*.v' | xargs coq_makefile -R . Cosette -o Makefile
@@ -84,14 +85,22 @@ To validate the generated rewrite rules as well as the rewrite rules that we hav
 	"hoqc"  -q  -R "." Cosette   optimizations/Subquery
 	make[1]: Leaving directory `/Cosette/hott/.build'
 
-Each `*.v` files under `Cosette/hott/optimizations` can be inspected. For example, `Cosette/hott/optimizations/Conjunctive.v` can be checked to see our usage of conjuctive query automated solving tactic.
+Each `*.v` file under `Cosette/hott/optimizations` can be inspected. For example, check `Cosette/hott/optimizations/Conjunctive.v` to see our usage of the conjunctive query automated solving tactic. You can add your own rewrite rule in `Cosette/examples` and save it with extension `.cos`. To check whether cosette can prove your rewrite rule automatically, run:
+
+	sh /Cosette/run_examples.sh
+	cd /Cosette/hott
+	make
+
+If the automated tactics failed, you can try to edit the generated .v file to add your manual proof as well.
+
 
 ## Source Code
 
 All source code is in `/Cosette` directory. The source code is arranged as follows:
 
-* `hott`: All the Coq files, including denotation semantics of HoTTIR (`hott/UnivalentSemantics.v`), a library developed from proving rewrite rules (`hott/library/`), and all the rules that we proved and validated using Coq (`hott/optimizations/`). 
+* `hott`:  The Coq files, including denotation semantics of HoTTIR, a library developed from proving rewrite rules, and all the rules that we proved and validated using Coq. 
 
-* `dsl`: Parser of HoTTSQL and translation from HoTTSQL to HoTTIR.
+* `dsl`: HoTTSQL parser from HoTTSQL to HoTTIR.
 
-* `examples`: SQL rewrites expressed in HoTTSQL (all `*.cos` files).
+* `examples`: SQL rewrites expressed in HoTTSQL front end syntax (`*.cos` files).
+
