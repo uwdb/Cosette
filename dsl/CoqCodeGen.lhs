@@ -6,6 +6,7 @@
 > import ToHoTTSQL
 > import Text.Parsec (parse,ParseError)
 > import Text.Parsec.String.Combinator
+> import System.IO
 
 FIXME: import ToRosette
 
