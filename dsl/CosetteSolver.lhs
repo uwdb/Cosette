@@ -32,7 +32,7 @@ FIXME: import ToRosette
 
 > main = do
 >   cont <- getContents
->   (putStr $ getResult cont "coq")
+>   (putStr $ getResult cont "rosette")
 
 toCoqString :: String -> String
 toCoqString 

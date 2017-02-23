@@ -23,5 +23,6 @@ FIXME: import ToRosette
 >     cs = (parse (whitespace *> cosetteProgram <* eof) "" p)
 
 > main = do
+>   hSetEncoding stdout utf8
 >   cont <- getContents
 >   (putStr $ getResult cont)
