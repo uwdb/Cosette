@@ -4,7 +4,6 @@
 
 > import CosetteParser
 > import ToHoTTSQL
-> import ToRosette
 > import Text.Parsec (parse,ParseError)
 > import Text.Parsec.String.Combinator
 
