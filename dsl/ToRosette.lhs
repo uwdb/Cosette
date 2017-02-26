@@ -7,6 +7,7 @@
 > import Text.Parsec.Error as PE
 > import Data.List (unwords)
 > import Data.Char (toLower)
+> import Data.Foldable (foldMap)
 > import Utilities
 
 == Rosette Abstract Syntax
@@ -51,6 +52,97 @@
 > data RosSchema = MakeRosSchema {hsSName :: String   -- schema name
 >                                ,hsAttrs :: [(String, String)] -- name, typename
 >                                } deriving (Eq, Show)
+
+rename schema
+
+> renameSchema :: RosSchema -> String -> RosSchema
+> renameSchema r n = MakeRosSchema n (hsAttrs r)
+
+find a schema from a list by name
+
+> findScm :: [RosSchema] -> String -> Either String RosSchema
+> findScm rs a = lkUp rs (\e n -> (hsSName e == n)) a
+
+=== convert * to concrete projections
+
+> elimStar :: [RosSchema] -> QueryExpr -> Either String QueryExpr
+> elimStar scms (UnionAll q1 q2) = elimStar scms q1
+> elimStar scms (Select sl fr wh g d) =
+>   do rs <- getFromScms scms fr
+>      sl' <- checkListErr (map (starToSelect rs) sl)
+>      fr' <- convFr fr
+>      wh' <- convWh wh
+>      return (Select (foldl (++) [] sl') fr' wh g d)
+>   where convWh Nothing = Right Nothing
+>         convWh (Just w) = Just <$> elimStarInPred scms w
+>         convFr Nothing  = Right Nothing
+>         convFr (Just tl) = Just <$> (checkListErr $ map convTR tl)
+>         convTR (TR te a) = TR <$> convTE te <*> Right a
+>         convTE (TRQuery q) = TRQuery <$> elimStar scms q
+>         convTE t = Right t
+ 
+extract [RosSchema] from FROM clause
+the first argument is a list from RosSchemas from the environment
+
+> getFromScms :: [RosSchema] -> Maybe [TableRef] -> Either String [RosSchema]
+> getFromScms rs (Nothing) = Right []
+> getFromScms rs (Just tl) = checkListErr (convTR <$> tl)
+>   where convTR (TR te a) = convTE te a
+>         convTE (TRBase r) a = renameSchema <$> (findScm rs r) <*> Right a
+>         convTE (TRUnion t1 t2) a = convTE t1 a
+>         convTE (TRQuery q) a = MakeRosSchema <$> Right a <*> getQueryScms rs q
+
+extract output schema from a query. we don't care data type in rosette code,
+so every type is int.
+
+> getQueryScms :: [RosSchema] -> QueryExpr -> Either String [(String, String)]
+> getQueryScms rs (UnionAll q1 q2) = getQueryScms rs q1
+> getQueryScms rs (Select sl fr wh g d) = foldMap id <$> checkListErr (f <$> sl)
+>   where f (Proj v a) = Right [(a, "int")]
+>         f Star = foldMap hsAttrs <$> getFromScms rs fr
+>         f (DStar r) = do scms <- getFromScms rs fr
+>                          scm <- findScm scms r
+>                          return (hsAttrs scm)
+
+star to select item
+
+> starToSelect :: [RosSchema] -> SelectItem -> Either String [SelectItem]
+> starToSelect rs (Proj v s) =
+>   do v' <- elimStarInVE rs v
+>      return [Proj v' s]
+> starToSelect rs Star = Right (foldMap scmToList rs)
+> starToSelect rs (DStar a) = scmToList <$> findScm rs a 
+
+> scmToList :: RosSchema -> [SelectItem]
+> scmToList (MakeRosSchema n al) = (\a -> Proj (DIden n a) a) <$> (map fst al)
+
+remove star in predicate
+
+> elimStarInPred :: [RosSchema] -> Predicate -> Either String Predicate
+> elimStarInPred rs (And p1 p2) = And <$> elimStarInPred rs p1 <*> elimStarInPred rs p2
+> elimStarInPred rs (Or p1 p2) = Or <$> elimStarInPred rs p1 <*> elimStarInPred rs p2
+> elimStarInPred rs (Not p) = Not <$> elimStarInPred rs p
+> elimStarInPred rs (Exists q) = Exists <$> elimStar rs q
+> elimStarInPred rs (Veq v1 v2) = Veq <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
+> elimStarInPred rs (Vgt v1 v2) = Vgt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
+> elimStarInPred rs (Vlt v1 v2) = Vlt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
+
+remove star in value expression
+
+here, we put the last attribute of the last relation in place of star if the aggregation
+function is count. star should not appear in any other aggregation function.
+
+> elimStarInVE :: [RosSchema] -> ValueExpr -> Either String ValueExpr
+> elimStarInVE rs (BinOp v1 o v2) = BinOp <$> elimStarInVE rs v1 <*> Right o <*> elimStarInVE rs v2
+> elimStarInVE rs (VQE q) = VQE <$> elimStar rs q
+> elimStarInVE rs (Agg s a) = Agg s <$> f a
+>   where f AStar = if (map toLower s == "count")
+>                   then let r = last rs
+>                        in let a' = fst $ head (hsAttrs r)
+>                           in Right (AV (DIden (hsSName r) a'))
+>                   else Left ("you cannot use * in aggregation " ++ s)
+>         f (AV v) = AV <$> elimStarInVE rs v
+> elimStarInVE rs other = Right other
 
 === convert select
 

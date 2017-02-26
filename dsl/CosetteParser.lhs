@@ -88,8 +88,11 @@ TODO: add Left Join, Semi join etc to table expression
 >                | TRQuery QueryExpr            -- query
 >                deriving (Eq, Show)
 
+consider add the following to the definition of TableRef
+| TRXProd TableRef TableRef
+if convert list of relation to nested join is move to Cosette AST level
+
 > data TableRef = TR TableExpr String           -- table expr, alias
->               | TRXProd TableRef TableRef
 >                 deriving (Eq, Show)
 
 > getTe :: TableRef -> TableExpr

@@ -18,7 +18,7 @@ schema
 
 > data HSSchema =  MakeHSSchema {hsSName :: String             -- name of the schema
 >                               ,hsAttrs :: [(String, String)] -- name, typename
->                               } deriving (Eq, Show)
+>                              } deriving (Eq, Show)
 
 environment
 
