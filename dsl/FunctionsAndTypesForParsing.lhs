@@ -60,16 +60,6 @@ better place in the tutorial.
 
 == Util functions
 
-> checkListErr :: [Either String a] -> Either String [a]
-> checkListErr lt = foldE lt (Right [])
->   where foldE [] x = x
->         foldE (h:t) (Left es) =
->           case h of Left es' -> foldE t (Left (es ++ es'))
->                     Right e  -> foldE t (Left es)
->         foldE (h:t) (Right l) =
->           case h of Left es' -> foldE t (Left es')
->                     Right e  -> foldE t (Right (l ++ [e]))
-
 > addParen :: String -> String
 > addParen s = "(" ++ s ++ ")"
 

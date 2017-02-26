@@ -8,8 +8,6 @@
 > import Text.Parsec (parse,ParseError)
 > import Text.Parsec.String.Combinator
 
-FIXME: import ToRosette
-
 > import Data.Char
 
 > getResult :: String -> String -> String
@@ -34,5 +32,3 @@ FIXME: import ToRosette
 >   cont <- getContents
 >   (putStr $ getResult cont "rosette")
 
-toCoqString :: String -> String
-toCoqString 

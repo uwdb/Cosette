@@ -9,6 +9,7 @@
 > import Data.List (unwords, intercalate, filter)
 > import Data.Set (toList, fromList)
 > import FunctionsAndTypesForParsing
+> import Utilities
 > import qualified Data.Map as Map
 
 == HoTTSQL Abstract Syntax
@@ -82,12 +83,6 @@ HoTTSQL query
 
 
 == convert Cosette to HoTTSQL
-
-a utility function
-
-> lkUp :: [a] -> (a -> String -> Bool) -> String -> Either String a
-> lkUp [] _ q = Left $ "cannot find " ++ q ++ " in list."
-> lkUp (h:t) f q = if f h q then Right h else lkUp t f q
 
 look up schema by table name
 

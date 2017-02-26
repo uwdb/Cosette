@@ -7,6 +7,7 @@
 > import Text.Parsec.Error as PE
 > import Data.List (unwords)
 > import Data.Char (toLower)
+> import Utilities
 
 == Rosette Abstract Syntax
 
@@ -51,28 +52,14 @@
 >                                ,hsAttrs :: [(String, String)] -- name, typename
 >                                } deriving (Eq, Show)
 
-== Util function
-
-> checkListErr :: [Either String a] -> Either String [a]
-> checkListErr lt = foldE lt (Right [])
->   where foldE [] x = x
->         foldE (h:t) (Left es) =
->           case h of Left es' -> foldE t (Left (es ++ es'))
->                     Right e  -> foldE t (Left es)
->         foldE (h:t) (Right l) =
->           case h of Left es' -> foldE t (Left es')
->                     Right e  -> foldE t (Right (l ++ [e]))
-
 === convert select
 
 the base case
 
-TODO: revisit this one for adding support of "*"
-
 > makeRosSelectItem :: SelectItem -> Either String (RosValueExpr, String)
-> makeRosSelectItem Star = Left "* \n"
+> makeRosSelectItem Star = Left "* shouldn't appear at this stage. \n"
 > makeRosSelectItem (Proj v s) =  (,) <$> makeRosVE v <*> Right s
-> makeRosSelectItem (DStar s) = Left (s ++ ".* \n")
+> makeRosSelectItem (DStar s) = Left (s ++ ".* shouldn't appear at this stage \n")
 
 > makeRosVE :: ValueExpr -> Either String RosValueExpr
 > makeRosVE (NumLit i) = Right (RosNumLit i)

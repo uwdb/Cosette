@@ -16,6 +16,7 @@ Syntax and Parser for Cosette.
 > import Data.Char
 > import qualified Test.HUnit as H
 > import FunctionsAndTypesForParsing
+> import Utilities
 > import Debug.Trace
 
 == SQL keywords
