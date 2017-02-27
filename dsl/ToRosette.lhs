@@ -126,6 +126,7 @@ remove star in predicate
 > elimStarInPred rs (Veq v1 v2) = Veq <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
 > elimStarInPred rs (Vgt v1 v2) = Vgt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
 > elimStarInPred rs (Vlt v1 v2) = Vlt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
+> elimStarInPred rs other = Right other
 
 remove star in value expression
 
@@ -347,10 +348,13 @@ statement list
 
 > genRosCode ::  [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> String -> String -> Either String String
 > genRosCode tsl cl pl sl ql q1 q2 =
->   do qe1 <- findQ q1 ql
->      qe2 <- findQ q2 ql
->      rsq1 <- toRosQuery qe1 q1
->      rsq2 <- toRosQuery qe2 q2
+>   do sl' <- tableScms                     -- put table names in schemas
+>      qe1 <- findQ q1 ql                    
+>      qe2 <- findQ q2 ql                   -- find query expressions 
+>      qe1' <- elimStar sl' qe1
+>      qe2' <- elimStar sl' qe2              -- get rid of stars in queries
+>      rsq1 <- toRosQuery qe1' q1
+>      rsq2 <- toRosQuery qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      return (rs1 ++ "\n" ++ rs2)
@@ -358,3 +362,5 @@ statement list
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
+>     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl 
+
