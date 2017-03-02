@@ -183,7 +183,7 @@
      `(lambda (e)
         (apply
          ,(filter-nary-op-f f)
-         ,(map (lambda (x)
+         ',(map (lambda (x)
                  `(,(denote-value x nmap) e))
                (filter-nary-op-args f))))]))
 
