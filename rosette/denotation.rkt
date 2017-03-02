@@ -164,8 +164,10 @@
 (define (denote-filter f nmap)
   (cond
     [(filter-binop? f)
-     `(lambda (e) (,(filter-binop-op f) (,(denote-value (filter-binop-val1 f) nmap) e)
-                                        (,(denote-value (filter-binop-val2 f) nmap) e)))]
+     `(lambda (e)
+        (,(filter-binop-op f)
+         (,(denote-value (filter-binop-val1 f) nmap) e)
+         (,(denote-value (filter-binop-val2 f) nmap) e)))]
     [(filter-conj? f)
      `(lambda (e) (and (,(denote-filter (filter-conj-f1 f) nmap) e)
                        (,(denote-filter (filter-conj-f2 f) nmap) e)))]
@@ -177,7 +179,13 @@
     [(filter-exists? f)
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
     [(filter-empty? f) `(lambda (e) #t)]
-    [(filter-uf? f) `(lambda (e) (f e))]))
+    [(filter-uf? f)
+     `(lambda (e)
+        (apply
+         ,(filter-uf-f f)
+         ,(map (lambda (x)
+                 `(,(denote-value (val-column-ref x) nmap) e))
+               (filter-uf-args f))))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")

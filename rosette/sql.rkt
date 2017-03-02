@@ -94,7 +94,7 @@
 
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
-(define-syntax-rule (UF f) (filter-uf f))
+(define-syntax-rule (UF f args) (filter-uf f args))
 
 (define-syntax-rule (AND f1 f2)
                     (filter-conj f1 f2))
