@@ -184,7 +184,7 @@
         (apply
          ,(filter-uf-f f)
          ,(map (lambda (x)
-                 `(,(denote-value (val-column-ref x) nmap) e))
+                 `(,(denote-value x nmap) e))
                (filter-uf-args f))))]))
 
 ;;(define test-query1

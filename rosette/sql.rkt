@@ -94,7 +94,8 @@
 
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
-(define-syntax-rule (UF f args) (filter-uf f args))
+(define (UF f . args)
+  (filter-uf f (map (lambda (x) (VAL x)) args)))
 
 (define-syntax-rule (AND f1 f2)
                     (filter-conj f1 f2))
