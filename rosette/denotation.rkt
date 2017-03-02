@@ -179,13 +179,13 @@
     [(filter-exists? f)
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
     [(filter-empty? f) `(lambda (e) #t)]
-    [(filter-uf? f)
+    [(filter-nary-op? f)
      `(lambda (e)
         (apply
-         ,(filter-uf-f f)
+         ,(filter-nary-op-f f)
          ,(map (lambda (x)
                  `(,(denote-value x nmap) e))
-               (filter-uf-args f))))]))
+               (filter-nary-op-args f))))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")

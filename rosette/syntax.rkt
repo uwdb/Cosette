@@ -34,4 +34,4 @@
 (struct filter-not (f1) #:transparent)
 (struct filter-exists (query) #:transparent)
 (struct filter-empty () #:transparent)
-(struct filter-uf (f args) #:transparent) ; uninterpreted functions
+(struct filter-nary-op (f args) #:transparent) ; n-ary-operator
