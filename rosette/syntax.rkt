@@ -34,4 +34,4 @@
 (struct filter-not (f1) #:transparent)
 (struct filter-exists (query) #:transparent)
 (struct filter-empty () #:transparent)
-(struct filter-uf (f args) #:transparent)
+(struct filter-uf (f args) #:transparent) ; uninterpreted functions

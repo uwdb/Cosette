@@ -29,16 +29,19 @@
 (define t4 (Table "t" (list "sum") (list)))
 
 (define test-q
-  (SELECT-GROUP (NAMED st1) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+  (SELECT-GROUP (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
 
 (define test-q2
-  (SELECT-GROUP-SUBQ (NAMED st1) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
+  (SELECT-GROUP-SUBQ (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
 
+(define test-q3
+  (SELECT-GROUP (NAMED ct) (list ) aggr-sum "votes.aggrf"))
 
 ;(writeln (denote-sql test-q (make-hash)))
 
-;(run test-q)
-;(run test-q2)
+(run test-q)
+(run test-q2)
+(run test-q3)
 
 
 ;(time (verify (begin 

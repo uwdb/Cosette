@@ -94,6 +94,7 @@
 
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
+; uninterpreted functions
 (define (UF f . args)
   (filter-uf f (map (lambda (x) (VAL x)) args)))
 
