@@ -176,7 +176,8 @@
      `(lambda (e) (not (,(denote-filter (filter-not-f1 f) nmap) e)))]
     [(filter-exists? f)
      `(lambda (e) (if (empty? (,(denote-sql (filter-exists-query f) nmap) e)) #f #t))]
-    [(filter-empty? f) `(lambda (e) #t)]))
+    [(filter-empty? f) `(lambda (e) #t)]
+    [(filter-uf? f) `(lambda (e) (f e))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
