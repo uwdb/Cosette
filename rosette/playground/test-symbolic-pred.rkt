@@ -21,10 +21,13 @@
 (define q2
   (SELECT (VALS "t1.id")
    FROM   (NAMED t1)
-   WHERE  (F-NARY-OP p1 "t1.id" "t1.val"))) 
+   WHERE  (NARY-OP p1 "t1.id" "t1.val"))) 
 
 ; expect model
 (time (verify (same q1 q2)))
+
+; expect unsat
+(time (verify (same q2 q2)))
 
 ;(denote-and-run q2)
 

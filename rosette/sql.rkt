@@ -94,8 +94,8 @@
 
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
-; uninterpreted functions
-(define (F-NARY-OP f . args)
+; f can be uninterpreted functions
+(define (NARY-OP f . args)
   (filter-nary-op f (map (lambda (x) (VAL x)) args)))
 
 (define-syntax-rule (AND f1 f2)
