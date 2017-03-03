@@ -1,10 +1,9 @@
 #lang rosette
 
 (require "../cosette.rkt" "../util.rkt" "../table.rkt" 
-         "../sql.rkt" "../evaluator.rkt" "../equal.rkt" "../denotation.rkt" "../syntax.rkt")
+         "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 (define t1 (Table "t1" (list "id" "val") (gen-sym-schema 2 3)))
-(define t2 (Table "t2" (list "id") (list)))
 
 (define-symbolic p1 (~> integer? integer? boolean?)) 
 
