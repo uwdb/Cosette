@@ -16,16 +16,18 @@
 
 (define q1
   (SELECT (VALS "t1.id")
-   FROM   (NAMED t2c)
-   WHERE  (BINOP "t1.id" = "t1.id"))) 
+   FROM   (NAMED t1)
+   WHERE  (BINOP "t1.id" = "t1.val"))) 
 
 ;(define q2 (NAMED t2))
 (define q2
   (SELECT (VALS "t1.id")
-   FROM   (NAMED t2c)
-   WHERE  (F-NARY-OP = "t1.id" "t1.id"))) 
+   FROM   (NAMED t1)
+   WHERE  (F-NARY-OP = "t1.id" "t1.val"))) 
 
-(denote-and-run q2)
+(time (verify (same q1 q2)))
+
+;(denote-and-run q2)
 
 (define nop (F-NARY-OP > "t1.id1" "t1.id"))
 
@@ -37,4 +39,4 @@
             (filter-nary-op-args f)))])
         val)))
 
-(denote-nop nop)
+;(denote-nop nop)
