@@ -183,9 +183,10 @@
      `(lambda (e)
         (apply
          ,(filter-nary-op-f f)
-         ,(map (lambda (x)
+         ;push a quote "list" to make the list a list 
+         ,(append '(list) (map (lambda (x)
                  `(,(denote-value x nmap) e))
-               (filter-nary-op-args f))))]))
+               (filter-nary-op-args f)))))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")

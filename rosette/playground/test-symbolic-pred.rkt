@@ -23,15 +23,18 @@
 (define q2
   (SELECT (VALS "t1.id")
    FROM   (NAMED t2c)
-   WHERE  (F-NARY-OP > "t1.id" "t1.id"))) 
+   WHERE  (F-NARY-OP = "t1.id" "t1.id"))) 
+
+(denote-and-run q2)
 
 (define nop (F-NARY-OP > "t1.id1" "t1.id"))
 
 (define (denote-nop f)
   `(apply 
       ,(filter-nary-op-f f)
-      ,(map (lambda (x)
-              `(+ ,(string-length (val-column-ref-column-name x)) 1))
-            (filter-nary-op-args f))))
+      ,(let ([val (append '(list) (map (lambda (x)
+               `(+ ,(string-length (val-column-ref-column-name x)) 1))
+            (filter-nary-op-args f)))])
+        val)))
 
 (denote-nop nop)
