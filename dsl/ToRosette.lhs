@@ -357,10 +357,30 @@ statement list
 >      rsq2 <- toRosQuery qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
->      return (rs1 ++ "\n" ++ rs2)
+>      return ((joinWithBr headers) ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
->     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl 
+>     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
+
+Number of rows of symbolic relations, to be replaced by incremental solving
+
+> numOfRows :: Integer
+> numOfRows = 1
+
+> headers :: [String]
+> headers = ["#lang rosette \n",
+>            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
+>            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n"]
+
+> genQ1 :: String -> String
+> genQ1 q = "(define q1 \n  " ++ q ++ ")\n\n"
+
+> genQ2 :: String -> String
+> genQ2 q = "(define q1 \n  " ++ q ++ ")\n"
+
+> lastLine :: String
+> lastLine = "(verify (same q1 q2))"
+
 

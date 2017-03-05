@@ -407,9 +407,6 @@ generate predicate declarations
 > predDecs t = "(" ++ (fst t) ++ " : Pred (Γ++" ++ "" ++ scms ++ "))"
 >   where scms = foldr (\a b -> if b == "" then a else a ++ "++" ++ b) "" (snd t)
 
-> joinWithBr :: [String] -> String
-> joinWithBr = foldr (\a b -> if a == "" then b else a ++ " \n" ++ b) "" 
-
 > headers :: [String]
 > headers = ["Require Import HoTT.",
 >            "Require Import UnivalenceAxiom.",
