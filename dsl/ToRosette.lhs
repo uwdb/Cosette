@@ -357,18 +357,19 @@ statement list
 >      rsq2 <- toRosQuery qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
->      preds <- predDec pl sl
->      return ((joinWithBr headers) ++ preds ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
+>      preds <- predDecs pl sl
+>      tbs <- tableDecs tsl sl
+>      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
 >     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
 
-generate declarations of generic predicate
+generate declarations of symbolic predicate (generic predicate)
 
-> predDec :: [(String, [String])] -> [RosSchema] -> Either String String
-> predDec pl sl =
+> predDecs :: [(String, [String])] -> [RosSchema] -> Either String String
+> predDecs pl sl =
 >   do pl' <- checkListErr $ map f pl
 >      return (joinWithBr pl')
 >   where
@@ -376,9 +377,21 @@ generate declarations of generic predicate
 >              scms' <- Right (map hsAttrs scms)
 >              al <- Right (foldl (++) [] scms') 
 >              return ("(define-symbolic " ++ (fst p) ++ " (~> " ++
->                     (uw $ map (\a -> "integer?") al) ++ " boolean?))\n") 
->         
->           
+>                     (uw $ map (\a -> "integer?") al) ++ " boolean?))\n")
+
+generate declarations of symbolic tables.
+Table-Schema map, schema list
+
+> tableDecs :: [(String, String)] -> [RosSchema] -> Either String String
+> tableDecs tsl sl =
+>   do tl <- checkListErr $ map f tsl
+>      return (joinWithBr tl)
+>   where f t = do scm <- findScm sl (snd t)
+>                  return (genTbDec (fst t) (map fst (hsAttrs scm)))  
+>         genTbDec n s = "(define " ++ n ++ " (Table \"" ++ n ++ "\" (list " ++
+>                        (uw $ map addQuote s) ++ ") (gen-sym-schema " ++
+>                        (show $ length s) ++ " " ++ (show numOfRows) ++ ")))\n"
+>         addQuote x = "\"" ++ x ++ "\""
 
 Number of rows of symbolic relations, to be replaced by incremental solving
 
