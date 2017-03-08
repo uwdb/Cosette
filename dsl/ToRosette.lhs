@@ -357,12 +357,28 @@ statement list
 >      rsq2 <- toRosQuery qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
->      return ((joinWithBr headers) ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
+>      preds <- predDec pl sl
+>      return ((joinWithBr headers) ++ preds ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
 >     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
+
+generate declarations of generic predicate
+
+> predDec :: [(String, [String])] -> [RosSchema] -> Either String String
+> predDec pl sl =
+>   do pl' <- checkListErr $ map f pl
+>      return (joinWithBr pl')
+>   where
+>     f p = do scms <- checkListErr $ map (findScm sl) (snd p)
+>              scms' <- Right (map hsAttrs scms)
+>              al <- Right (foldl (++) [] scms') 
+>              return ("(define-symbolic " ++ (fst p) ++ " (~> " ++
+>                     (uw $ map (\a -> "integer?") al) ++ " boolean?))\n") 
+>         
+>           
 
 Number of rows of symbolic relations, to be replaced by incremental solving
 
