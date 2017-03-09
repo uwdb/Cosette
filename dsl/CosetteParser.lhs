@@ -61,7 +61,7 @@ Syntax and Parser for Cosette.
 
 > data Predicate = TRUE
 >                | FALSE
->                | PredVar String [String]   -- meta predicate
+>                | PredVar String [String]   -- generic predicate
 >                | And Predicate Predicate
 >                | Or Predicate Predicate
 >                | Not Predicate

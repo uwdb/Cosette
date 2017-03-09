@@ -31,8 +31,7 @@
 
 > data RosPredicate = RosTRUE
 >                   | RosFALSE
->                   | RosPredVar String [String]   -- generic predicate, e.g. p(s1, s2), to be converted
->                   | RosNaryOp String [String]    -- nary function int-> ... -> int -> bool
+>                   | RosNaryOp String [String]  -- nary func. int-> ... -> bool
 >                   | RosAnd RosPredicate RosPredicate
 >                   | RosOr RosPredicate RosPredicate
 >                   | RosNot RosPredicate
@@ -93,6 +92,7 @@ generate a list of schemas with names replaced by table names
  
 extract [RosSchema] from FROM clause
 the first argument is a list of RosSchemas from the environment
+(schema name replaced with table name already)
 
 > getFromScms :: [RosSchema] -> Maybe [TableRef] -> Either String [RosSchema]
 > getFromScms rs (Nothing) = Right []
@@ -100,6 +100,7 @@ the first argument is a list of RosSchemas from the environment
 
 extract RosSchema from a TableRef
 the first argument is a list of RosSchemas fromt the environment
+(schema name replaced with table name already)
 
 > getTRScm :: [RosSchema] -> TableRef -> Either String RosSchema
 > getTRScm rs (TR te a) = convTE te a
@@ -175,26 +176,26 @@ function is count. star should not appear in any other aggregation function.
 >         f (AV v) = AV <$> elimStarInVE rs v
 > elimStarInVE rs other = Right other
 
-=== convert symbolic predicate to naryOp
-
-
 === convert select
 
 the base case
 
-> makeRosSelectItem :: SelectItem -> Either String (RosValueExpr, String)
-> makeRosSelectItem Star = Left "* shouldn't appear at this stage. \n"
-> makeRosSelectItem (Proj v s) =  (,) <$> makeRosVE v <*> Right s
-> makeRosSelectItem (DStar s) =
+> makeRosSelectItem :: [RosSchema] -> [RosSchema] ->
+>                      SelectItem -> Either String (RosValueExpr, String)
+> makeRosSelectItem tl al Star = Left "* shouldn't appear at this stage. \n"
+> makeRosSelectItem tl al (Proj v s) =  (,) <$> makeRosVE tl al v <*> Right s
+> makeRosSelectItem tl al (DStar s) =
 >   Left (s ++ ".* shouldn't appear at this stage \n")
 
-> makeRosVE :: ValueExpr -> Either String RosValueExpr
-> makeRosVE (NumLit i) = Right (RosNumLit i)
-> makeRosVE (DIden r a) = Right (RosDIden r a)
-> makeRosVE (BinOp v1 o v2) =  RosBinOp
->                              <$> makeRosVE v1 <*> Right o <*> makeRosVE v2
-> makeRosVE (VQE q) = RosVQE <$> makeRosQuery q "anyname"
-> makeRosVE (Agg o e) =
+> makeRosVE :: [RosSchema] -> [RosSchema] -> ValueExpr
+>           -> Either String RosValueExpr
+> makeRosVE tl al (NumLit i) = Right (RosNumLit i)
+> makeRosVE tl al (DIden r a) = Right (RosDIden r a)
+> makeRosVE tl al (BinOp v1 o v2) =  RosBinOp
+>                                    <$> makeRosVE tl al v1
+>                                    <*> Right o <*> makeRosVE tl al v2
+> makeRosVE tl al (VQE q) = RosVQE <$> makeRosQuery tl al q "anyname"
+> makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
 >     "sum" -> Right (RosAgg "aggr-sum" e)
 >     "count" -> Right (RosAgg "aggr-count" e)
@@ -204,8 +205,9 @@ the base case
 
 convert select
 
-> makeRosSelect :: [SelectItem]  -> Either String [(RosValueExpr, String)]
-> makeRosSelect sl = checkListErr $ (makeRosSelectItem <$> sl) 
+> makeRosSelect :: [RosSchema] -> [RosSchema] -> [SelectItem] ->
+>                  Either String [(RosValueExpr, String)]
+> makeRosSelect tl al sl = checkListErr $ (makeRosSelectItem tl al <$> sl) 
 
 === convert from
 
@@ -213,49 +215,80 @@ the base case
 
 TODO: the handling of union of tables is not ideal, need to be revised
 
-> makeRosFromItem :: TableRef -> Either String RosTableRef
-> makeRosFromItem (TR te al) = RosTR <$> conv te <*> Right al
+1st argument: a list of schemas (with table names) from env.
+
+> makeRosFromItem :: [RosSchema] -> TableRef -> Either String RosTableRef
+> makeRosFromItem tl (TR te alias) = RosTR <$> conv te <*> Right alias
 >   where conv (TRBase tn) = Right (RosTRBase tn)
->         conv (TRQuery q) = RosTRQuery <$> makeRosQuery q al 
+>         conv (TRQuery q) = RosTRQuery <$> makeRosQuery tl [] q alias 
 >         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2  
 
 convert from
 
-> makeRosFrom :: Maybe [TableRef] -> Either String (Maybe [RosTableRef])
-> makeRosFrom Nothing = Right Nothing
-> makeRosFrom (Just fr) =  Just <$> checkListErr (makeRosFromItem <$> fr)
+> makeRosFrom :: [RosSchema] -> Maybe [TableRef]
+>             -> Either String (Maybe [RosTableRef])
+> makeRosFrom tl Nothing = Right Nothing
+> makeRosFrom tl (Just fr) =
+>   Just <$> checkListErr (makeRosFromItem tl <$> fr)
 
 === convert where
 
-> makeRosPred :: Predicate -> Either String RosPredicate
-> makeRosPred TRUE = Right RosTRUE
-> makeRosPred FALSE = Right RosFALSE
-> makeRosPred (PredVar n s) = Right $ RosPredVar n s
-> makeRosPred (And p1 p2) = RosAnd <$> makeRosPred p1 <*> makeRosPred p2
-> makeRosPred (Or p1 p2) = RosOr <$> makeRosPred p1 <*> makeRosPred p2
-> makeRosPred (Not p) = RosNot <$> makeRosPred p
-> makeRosPred (Exists q) = RosExists <$> makeRosQuery q "anyname"
-> makeRosPred (Veq v1 v2) = RosVeq <$> makeRosVE v1 <*> makeRosVE v2
-> makeRosPred (Vgt v1 v2) = RosVgt <$> makeRosVE v1 <*> makeRosVE v2
-> makeRosPred (Vlt v1 v2) = RosVlt <$> makeRosVE v1 <*> makeRosVE v2
+1st argument: a list of schemas (with table names) from env.
+2nd argument: a list of schemas (with alias names) from FROM clause and env.
 
-> makeRosWhere :: Maybe Predicate -> Either String (Maybe RosPredicate)
-> makeRosWhere Nothing = Right Nothing
-> makeRosWhere (Just p) = Just <$> makeRosPred p
+> makeRosPred :: [RosSchema] -> [RosSchema] -> Predicate
+>             -> Either String RosPredicate
+> makeRosPred tl al TRUE = Right RosTRUE
+> makeRosPred tl al FALSE = Right RosFALSE
+> makeRosPred tl al (PredVar n s) = convPredVar al n s
+> makeRosPred tl al (And p1 p2) = RosAnd <$> makeRosPred tl al p1
+>                              <*> makeRosPred tl al p2
+> makeRosPred tl al (Or p1 p2) = RosOr <$> makeRosPred tl al p1
+>                             <*> makeRosPred tl al p2
+> makeRosPred tl al (Not p) = RosNot <$> makeRosPred tl al p
+> makeRosPred tl al (Exists q) = RosExists <$> makeRosQuery tl al q "anyname"
+> makeRosPred tl al (Veq v1 v2) = RosVeq <$> makeRosVE tl al v1 <*>
+>                                 makeRosVE tl al v2
+> makeRosPred tl al (Vgt v1 v2) = RosVgt <$> makeRosVE tl al v1 <*>
+>                                 makeRosVE tl al v2
+> makeRosPred tl al (Vlt v1 v2) = RosVlt <$> makeRosVE tl al v1 <*>
+>                                 makeRosVE tl al v2
+
+> convPredVar ::  [RosSchema] -> String -> [String]
+>             -> Either String RosPredicate
+> convPredVar rs n s = RosNaryOp <$> Right n <*> al
+>   where al = do scms <- checkListErr $ map (findScm rs) s
+>                 scms' <- Right (map toRosAttr scms)
+>                 return (foldl (++) [] scms')
+>         toRosAttr (MakeRosSchema n attrs) =
+>           map (\a -> n ++ "." ++ (fst a)) attrs         
+
+> makeRosWhere :: [RosSchema] -> [RosSchema] -> Maybe Predicate ->
+>                 Either String (Maybe RosPredicate)
+> makeRosWhere tl al Nothing = Right Nothing
+> makeRosWhere tl al (Just p) = Just <$> makeRosPred tl al p
 
 === Cosette AST -> Rosette AST
 
 unzip result
 
-> makeRosQuery :: QueryExpr -> String -> Either String RosQueryExpr
-> makeRosQuery qe name = RosQuery
->                        <$> (fst <$> sl)  -- select list
->                        <*> (makeRosFrom $ qFrom qe)
->                        <*> (makeRosWhere $ qWhere qe)
->                        <*> Right (qGroup qe)
->                        <*> Right (qDistinct qe)
->                        <*> ((,) <$> Right name <*> (snd <$> sl))
->   where sl  = unzip <$> (makeRosSelect $ qSelectList qe) -- unzip result
+1st argument: a list of schemas (with table names) from env.
+2nd argument: a list of schemas (with alias names) from env.
+
+> makeRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr -> String
+>              -> Either String RosQueryExpr
+> makeRosQuery tl al qe name =
+>   do sl' <- (fst <$> sl)  -- select list
+>      fr <- (makeRosFrom tl $ qFrom qe)
+>      fr_al <- (convFr $ qFrom qe)
+>      wh <- (makeRosWhere tl (al++fr_al) $ qWhere qe)
+>      gr <- Right (qGroup qe)
+>      dis <- Right (qDistinct qe)
+>      scm <- ((,) <$> Right name <*> (snd <$> sl))
+>      return (RosQuery sl' fr wh gr dis scm)
+>   where sl  = unzip <$> (makeRosSelect tl al $ qSelectList qe) -- unzip result
+>         convFr Nothing = Right []
+>         convFr (Just fl) = checkListErr $ map (getTRScm tl) fl
 
 convert list of tables (or subqueries) in from clause to joins
 
@@ -282,8 +315,9 @@ convert list of tables (or subqueries) in from clause to joins
 
 Finally, convert Cosette AST to Rosette AST
 
-> toRosQuery :: QueryExpr -> String -> Either String RosQueryExpr
-> toRosQuery q s = convertFrom <$> makeRosQuery q s
+> toRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
+>            -> String -> Either String RosQueryExpr
+> toRosQuery tl al q s = convertFrom <$> makeRosQuery tl al q s
 
 === RosQuery to sexp string
 
@@ -388,8 +422,8 @@ statement list
 >      qe2 <- findQ q2 ql                   -- find query expressions 
 >      qe1' <- elimStar sl' qe1
 >      qe2' <- elimStar sl' qe2             -- get rid of stars in queries
->      rsq1 <- toRosQuery qe1' q1
->      rsq2 <- toRosQuery qe2' q2
+>      rsq1 <- toRosQuery sl' [] qe1' q1
+>      rsq2 <- toRosQuery sl' [] qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      preds <- predDecs pl sl
