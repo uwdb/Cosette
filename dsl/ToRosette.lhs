@@ -5,7 +5,7 @@
 
 > import CosetteParser
 > import Text.Parsec.Error as PE
-> import Data.List (unwords)
+> import Data.List (unwords, lookup)
 > import Data.Char (toLower)
 > import Data.Foldable (foldMap)
 > import Utilities
@@ -31,7 +31,8 @@
 
 > data RosPredicate = RosTRUE
 >                   | RosFALSE
->                   | RosPredVar String [String]   -- meta predicate
+>                   | RosPredVar String [String]   -- generic predicate, e.g. p(s1, s2), to be converted
+>                   | RosNaryOp String [String]    -- nary function int-> ... -> int -> bool
 >                   | RosAnd RosPredicate RosPredicate
 >                   | RosOr RosPredicate RosPredicate
 >                   | RosNot RosPredicate
@@ -49,9 +50,12 @@
 >                              ,rosSchema :: (String, [String])
 >                              } deriving (Eq, Show)
 
-> data RosSchema = MakeRosSchema {hsSName :: String   -- schema name
->                                ,hsAttrs :: [(String, String)] -- name, typename
->                                } deriving (Eq, Show)
+> data RosSchema =
+>   MakeRosSchema {hsSName :: String   -- schema name
+>                 ,hsAttrs :: [(String, String)] -- name, typename
+>                 } deriving (Eq, Show)
+
+Some Utility functions
 
 rename schema
 
@@ -62,6 +66,12 @@ find a schema from a list by name
 
 > findScm :: [RosSchema] -> String -> Either String RosSchema
 > findScm rs a = lkUp rs (\e n -> (hsSName e == n)) a
+
+This function takes a list of table-schema mappings and a list of schemas,
+generate a list of schemas with names replaced by table names
+
+> tableScms :: [(String, String)] -> [RosSchema] -> Either String [RosSchema]
+> tableScms tsl sl = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
 
 === convert * to concrete projections
 
@@ -82,22 +92,31 @@ find a schema from a list by name
 >         convTE t = Right t
  
 extract [RosSchema] from FROM clause
-the first argument is a list from RosSchemas from the environment
+the first argument is a list of RosSchemas from the environment
 
 > getFromScms :: [RosSchema] -> Maybe [TableRef] -> Either String [RosSchema]
 > getFromScms rs (Nothing) = Right []
-> getFromScms rs (Just tl) = checkListErr (convTR <$> tl)
->   where convTR (TR te a) = convTE te a
->         convTE (TRBase r) a = renameSchema <$> (findScm rs r) <*> Right a
+> getFromScms rs (Just tl) = checkListErr (getTRScm rs <$> tl)
+
+extract RosSchema from a TableRef
+the first argument is a list of RosSchemas fromt the environment
+
+> getTRScm :: [RosSchema] -> TableRef -> Either String RosSchema
+> getTRScm rs (TR te a) = convTE te a
+>   where convTE (TRBase r) a = renameSchema <$> (findScm rs r) <*> Right a
 >         convTE (TRUnion t1 t2) a = convTE t1 a
->         convTE (TRQuery q) a = MakeRosSchema <$> Right a <*> getQueryScms rs q
+>         convTE (TRQuery q) a = MakeRosSchema
+>                                <$> Right a
+>                                <*> getQueryScms rs q
 
 extract output schema from a query. we don't care data type in rosette code,
 so every type is int.
 
-> getQueryScms :: [RosSchema] -> QueryExpr -> Either String [(String, String)]
+> getQueryScms :: [RosSchema] -> QueryExpr
+>   -> Either String [(String, String)]
 > getQueryScms rs (UnionAll q1 q2) = getQueryScms rs q1
-> getQueryScms rs (Select sl fr wh g d) = foldMap id <$> checkListErr (f <$> sl)
+> getQueryScms rs (Select sl fr wh g d) =
+>   foldMap id <$> checkListErr (f <$> sl)
 >   where f (Proj v a) = Right [(a, "int")]
 >         f Star = foldMap hsAttrs <$> getFromScms rs fr
 >         f (DStar r) = do scms <- getFromScms rs fr
@@ -114,18 +133,29 @@ star to select item
 > starToSelect rs (DStar a) = scmToList <$> findScm rs a 
 
 > scmToList :: RosSchema -> [SelectItem]
-> scmToList (MakeRosSchema n al) = (\a -> Proj (DIden n a) a) <$> (map fst al)
+> scmToList (MakeRosSchema n al) =
+>   (\a -> Proj (DIden n a) a) <$> (map fst al)
 
 remove star in predicate
 
 > elimStarInPred :: [RosSchema] -> Predicate -> Either String Predicate
-> elimStarInPred rs (And p1 p2) = And <$> elimStarInPred rs p1 <*> elimStarInPred rs p2
-> elimStarInPred rs (Or p1 p2) = Or <$> elimStarInPred rs p1 <*> elimStarInPred rs p2
+> elimStarInPred rs (And p1 p2) = And
+>                                 <$> elimStarInPred rs p1
+>                                 <*> elimStarInPred rs p2
+> elimStarInPred rs (Or p1 p2) = Or
+>                                <$> elimStarInPred rs p1
+>                                <*> elimStarInPred rs p2
 > elimStarInPred rs (Not p) = Not <$> elimStarInPred rs p
 > elimStarInPred rs (Exists q) = Exists <$> elimStar rs q
-> elimStarInPred rs (Veq v1 v2) = Veq <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
-> elimStarInPred rs (Vgt v1 v2) = Vgt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
-> elimStarInPred rs (Vlt v1 v2) = Vlt <$> elimStarInVE rs v1 <*> elimStarInVE rs v2
+> elimStarInPred rs (Veq v1 v2) = Veq
+>                                 <$> elimStarInVE rs v1
+>                                 <*> elimStarInVE rs v2
+> elimStarInPred rs (Vgt v1 v2) = Vgt
+>                                 <$> elimStarInVE rs v1
+>                                 <*> elimStarInVE rs v2
+> elimStarInPred rs (Vlt v1 v2) = Vlt
+>                                 <$> elimStarInVE rs v1
+>                                 <*> elimStarInVE rs v2
 > elimStarInPred rs other = Right other
 
 remove star in value expression
@@ -145,6 +175,9 @@ function is count. star should not appear in any other aggregation function.
 >         f (AV v) = AV <$> elimStarInVE rs v
 > elimStarInVE rs other = Right other
 
+=== convert symbolic predicate to naryOp
+
+
 === convert select
 
 the base case
@@ -152,12 +185,14 @@ the base case
 > makeRosSelectItem :: SelectItem -> Either String (RosValueExpr, String)
 > makeRosSelectItem Star = Left "* shouldn't appear at this stage. \n"
 > makeRosSelectItem (Proj v s) =  (,) <$> makeRosVE v <*> Right s
-> makeRosSelectItem (DStar s) = Left (s ++ ".* shouldn't appear at this stage \n")
+> makeRosSelectItem (DStar s) =
+>   Left (s ++ ".* shouldn't appear at this stage \n")
 
 > makeRosVE :: ValueExpr -> Either String RosValueExpr
 > makeRosVE (NumLit i) = Right (RosNumLit i)
 > makeRosVE (DIden r a) = Right (RosDIden r a)
-> makeRosVE (BinOp v1 o v2) =  RosBinOp <$> makeRosVE v1 <*> Right o <*> makeRosVE v2
+> makeRosVE (BinOp v1 o v2) =  RosBinOp
+>                              <$> makeRosVE v1 <*> Right o <*> makeRosVE v2
 > makeRosVE (VQE q) = RosVQE <$> makeRosQuery q "anyname"
 > makeRosVE (Agg o e) =
 >   case (map toLower o) of
@@ -348,11 +383,11 @@ statement list
 
 > genRosCode ::  [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> String -> String -> Either String String
 > genRosCode tsl cl pl sl ql q1 q2 =
->   do sl' <- tableScms                     -- put table names in schemas
+>   do sl' <- tableScms tsl sl              -- put table names in schemas
 >      qe1 <- findQ q1 ql                    
 >      qe2 <- findQ q2 ql                   -- find query expressions 
 >      qe1' <- elimStar sl' qe1
->      qe2' <- elimStar sl' qe2              -- get rid of stars in queries
+>      qe2' <- elimStar sl' qe2             -- get rid of stars in queries
 >      rsq1 <- toRosQuery qe1' q1
 >      rsq2 <- toRosQuery qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
@@ -364,7 +399,7 @@ statement list
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
->     tableScms = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
+
 
 generate declarations of symbolic predicate (generic predicate)
 
