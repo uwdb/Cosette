@@ -352,6 +352,7 @@ convert Predicate to sexp
 > instance Sexp RosPredicate where
 >   toSexp RosTRUE = "#t"
 >   toSexp RosFALSE = "#f"
+>   toSexp (RosNaryOp p al) = addParen $ uw (["F-NARY-OP", p] ++ al)
 >   toSexp (RosAnd p1 p2) = addParen $ uw ["AND", toSexp p1, toSexp p2]
 >   toSexp (RosOr p1 p2) = addParen $ uw ["OR", toSexp p1, toSexp p2]
 >   toSexp (RosNot p) = addParen $ uw ["NOT", toSexp p]
