@@ -17,7 +17,10 @@
             (sleep max-time)
             (channel-put main-channel 'timeout))))
 
-;; the (fake) solver thread, will send result of each iteration to main thread
+;; the (fake) solver thread
+;; at each iteration, if unsat, it will send sizes fo relations to main thread 
+;; and proceed to the next iteration (increase the sizes of symbolic relations)
+;; if a counterexample is found, it will return the counterexample immediately.
 (define solver-thread
   (thread (lambda ()
             (sleep 4)
