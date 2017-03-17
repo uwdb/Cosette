@@ -95,6 +95,7 @@
 (define-syntax-rule (F-EMPTY) (filter-empty))
 
 ; f can be uninterpreted functions
+; f should be of type int->int->...->int->bool
 (define (NARY-OP f . args)
   (filter-nary-op f (map (lambda (x) (VAL x)) args)))
 
