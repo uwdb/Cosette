@@ -1,5 +1,8 @@
 #lang rosette
 
+(require "cosette.rkt" "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt")
+
+
 ;; daemon of the rosette backend
 ;; if the solver returns a counter example, return the counter example
 ;; immediately.
@@ -23,16 +26,15 @@
 ;; if a counterexample is found, it will return the counterexample immediately.
 (define solver-thread
   (thread (lambda ()
-            (sleep 4)
-            (channel-put main-channel "UNSAT"))))
+            (define messenger (lambda (message) (channel-put main-channel message)))
+            ; call the solve-queries function
+            (messenger "UNSAT"))))
 
 ;; main thread
 (define item (channel-get main-channel))
 (define ret 'init)
 (case item
-  [(timeout)
-   (void)]
-  [else
-   (set! ret item)])
+  [(timeout) (void)]
+  [else (set! ret item)])
 
 (displayln item)
