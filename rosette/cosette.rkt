@@ -10,7 +10,7 @@
          cosette-solve
          table-info
          solve-queries
-         gen-table)
+         gen-sym-table-from-info)
 
 ; format cosette solution into a json string
 ; {
@@ -55,7 +55,7 @@
                     [else (values name schema)])))
 
 ; generate a symbolic table according to table-info and size
-(define (gen-table tf size)
+(define (gen-sym-table-from-info tf size)
   (let ([schema (table-info-schema tf)])
     (Table (table-info-name tf) schema (gen-sym-schema (length schema) size)))) 
 
@@ -78,7 +78,7 @@
            (init-table-size-list (length table-info-list))]
          [try-solve
            (lambda (fq1 fq2 table-info-list table-size-list)
-             (let* ([tables (map (lambda (i) (gen-table (list-ref table-info-list i)
+             (let* ([tables (map (lambda (i) (gen-sym-table-from-info (list-ref table-info-list i)
                                                         (list-ref table-size-list i)))
                                  (build-list (length table-info-list) values))]
                     [q1 (fq1 tables)]

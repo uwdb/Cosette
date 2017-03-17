@@ -13,7 +13,7 @@
 (define t1-info (table-info "t1" (list "id")))
 (define t2-info (table-info "t2" (list "id")))
 
-(define tabs (list (gen-table t1-info 3)))
+(define tabs (list (gen-sym-table-from-info t1-info 3)))
 
 (car (let ([q1 (fq1 tabs)]
       [q2 (fq2 tabs)])
