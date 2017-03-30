@@ -1,7 +1,7 @@
 #lang rosette
 
-(require "../cosette.rkt" "../util.rkt" "../table.rkt" "../denotation.rkt"
-         "../sql.rkt" "../evaluator.rkt" "../equal.rkt" "../syntax.rkt")
+(require "../cosette.rkt" "../util.rkt" "../table.rkt"
+         "../sql.rkt" "../evaluator.rkt" "../equal.rkt")
 
 (define (fq1 tables)
   (SELECT (VALS "t1.id")
