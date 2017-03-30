@@ -429,7 +429,7 @@ statement list
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      preds <- predDecs pl sl
 >      tbs <- tableDecs tsl sl
->      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ1 rs1) ++ (genQ2 rs2) ++ lastLine)
+>      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q2 rs1) ++ (genQ q1 rs2) ++ lastLine)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -473,11 +473,8 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 >            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
 >            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n"]
 
-> genQ1 :: String -> String
-> genQ1 q = "(define q1 \n  " ++ q ++ ")\n\n"
-
-> genQ2 :: String -> String
-> genQ2 q = "(define q1 \n  " ++ q ++ ")\n"
+> genQ :: String -> String -> String
+> genQ qn q = "(define " ++ qn ++ " \n  " ++ q ++ ")\n\n"
 
 > lastLine :: String
 > lastLine = "(verify (same q1 q2))"

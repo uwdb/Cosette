@@ -15,14 +15,14 @@
 
 (define tabs (list (gen-sym-table-from-info t1-info 3)))
 
-(car (let ([q1 (fq1 tabs)]
-      [q2 (fq2 tabs)])
-  (cosette-solve q1 q2 tabs)))
+;; (car (let ([q1 (fq1 tabs)]
+;;       [q2 (fq2 tabs)])
+;;   (cosette-solve q1 q2 tabs)))
 
 ; this one returns neq pretty quickly
 (solve-queries fq1 fq2 (list t1-info) println)
 ; this one will never return unequal, but keep increasing table size
-(solve-queries fq3 fq2 (list t1-info t2-info) println)
+;(solve-queries fq3 fq2 (list t1-info t2-info) println)
 
 ;(define (cosette-solve-new fq1 fq2 table-infos)
 ;  )
