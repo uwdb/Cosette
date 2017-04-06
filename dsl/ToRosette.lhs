@@ -363,13 +363,14 @@ convert Predicate to sexp
 > instance Sexp RosPredicate where
 >   toSexp RosTRUE = "#t"
 >   toSexp RosFALSE = "#f"
->   toSexp (RosNaryOp p al) = addParen $ uw (["F-NARY-OP", p] ++ al)
+>   toSexp (RosNaryOp p al) = addParen $
+>     uw (["NARY-OP", p] ++ (map (\a-> "\"" ++ a ++ "\"") al))
 >   toSexp (RosAnd p1 p2) = addParen $ uw ["AND", toSexp p1, toSexp p2]
 >   toSexp (RosOr p1 p2) = addParen $ uw ["OR", toSexp p1, toSexp p2]
 >   toSexp (RosNot p) = addParen $ uw ["NOT", toSexp p]
->   toSexp (RosVeq v1 v2) = addParen $ uw [toSexp v1, "=", toSexp v2]
->   toSexp (RosVgt v1 v2) = addParen $ uw [toSexp v1, ">", toSexp v2]
->   toSexp (RosVlt v1 v2) = addParen $ uw [toSexp v1, "<", toSexp v2]
+>   toSexp (RosVeq v1 v2) = addParen $ uw ["BINOP", toSexp v1, "=", toSexp v2]
+>   toSexp (RosVgt v1 v2) = addParen $ uw ["BINOP", toSexp v1, ">", toSexp v2]
+>   toSexp (RosVlt v1 v2) = addParen $ uw ["BINOP", toSexp v1, "<", toSexp v2]
 
 convert RosTableRef to sexp
 
@@ -379,7 +380,10 @@ convert RosTableRef to sexp
 >   toSexp (RosUnion t1 t2) = addParen $ uw ["TABLE-UNION-ALL", toSexp t1, toSexp t2]
 
 > instance Sexp RosTableRef where
->   toSexp (RosTR t a) = addParen $ uw ["RENAME", toSexp t, addEscStr a]
+>   toSexp (RosTR t a) = addParen $ uw ["NAMED",
+>                                       "(RENAME",
+>                                       toSexp t,
+>                                       (addEscStr a) ++ ")"]
 >   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp
@@ -398,12 +402,12 @@ Since query with only aggregation (no group by) and group by query requires thei
 convert RosQueryExpr to s-expression string without adding schema. 
 
 > toSexpSchemaless :: RosQueryExpr -> String
-> toSexpSchemaless q = addParen $ uw ["SELECT", sl, "FROM", fl, "WHERE", p]
+> toSexpSchemaless q = addParen $ uw ["SELECT", sl, "\n  FROM", fl, "\n  WHERE", p]
 >   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
->         fl = addParen $ case rosFrom q of Nothing -> "UNIT"
->                                           Just fr -> toSexp $ head fr
->         p = addParen $ case rosWhere q of Nothing -> "filter-empty"
->                                           Just wh -> toSexp wh
+>         fl = case rosFrom q of Nothing -> "UNIT"
+>                                Just fr -> toSexp $ head fr
+>         p =  case rosWhere q of Nothing -> "filter-empty"
+>                                 Just wh -> toSexp wh
 
 generate rosette code
 
