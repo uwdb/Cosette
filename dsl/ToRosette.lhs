@@ -5,7 +5,7 @@
 
 > import CosetteParser
 > import Text.Parsec.Error as PE
-> import Data.List (unwords, lookup)
+> import Data.List (unwords, lookup, findIndex)
 > import Data.Char (toLower)
 > import Data.Foldable (foldMap)
 > import Utilities
@@ -50,8 +50,8 @@
 >                              } deriving (Eq, Show)
 
 > data RosSchema =
->   MakeRosSchema {hsSName :: String   -- schema name
->                 ,hsAttrs :: [(String, String)] -- name, typename
+>   MakeRosSchema {rosSName :: String   -- schema name
+>                 ,rosAttrs :: [(String, String)] -- name, typename
 >                 } deriving (Eq, Show)
 
 Some Utility functions
@@ -59,18 +59,22 @@ Some Utility functions
 rename schema
 
 > renameSchema :: RosSchema -> String -> RosSchema
-> renameSchema r n = MakeRosSchema n (hsAttrs r)
+> renameSchema r n = MakeRosSchema n (rosAttrs r)
 
 find a schema from a list by name
 
 > findScm :: [RosSchema] -> String -> Either String RosSchema
-> findScm rs a = lkUp rs (\e n -> (hsSName e == n)) a
+> findScm rs a = lkUp rs (\e n -> (rosSName e == n)) a
 
 This function takes a list of table-schema mappings and a list of schemas,
-generate a list of schemas with names replaced by table names
+generate a list of schemas with names replaced by table names.
+It returns [(tableSchema, indexStr)] or error message.
 
-> tableScms :: [(String, String)] -> [RosSchema] -> Either String [RosSchema]
-> tableScms tsl sl = checkListErr $ map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
+> tableScms :: [(String, String)] -> [RosSchema]
+>   -> Either String [RosSchema]
+> tableScms tsl sl =
+>   checkListErr $
+>   map (\a -> renameSchema <$> findScm sl (snd a) <*> Right (fst a)) tsl
 
 === convert * to concrete projections
 
@@ -119,10 +123,10 @@ so every type is int.
 > getQueryScms rs (Select sl fr wh g d) =
 >   foldMap id <$> checkListErr (f <$> sl)
 >   where f (Proj v a) = Right [(a, "int")]
->         f Star = foldMap hsAttrs <$> getFromScms rs fr
+>         f Star = foldMap rosAttrs <$> getFromScms rs fr
 >         f (DStar r) = do scms <- getFromScms rs fr
 >                          scm <- findScm scms r
->                          return (hsAttrs scm)
+>                          return (rosAttrs scm)
 
 star to select item
 
@@ -170,8 +174,8 @@ function is count. star should not appear in any other aggregation function.
 > elimStarInVE rs (Agg s a) = Agg s <$> f a
 >   where f AStar = if (map toLower s == "count")
 >                   then let r = last rs
->                        in let a' = fst $ head (hsAttrs r)
->                           in Right (AV (DIden (hsSName r) a'))
+>                        in let a' = fst $ head (rosAttrs r)
+>                           in Right (AV (DIden (rosSName r) a'))
 >                   else Left ("you cannot use * in aggregation " ++ s)
 >         f (AV v) = AV <$> elimStarInVE rs v
 > elimStarInVE rs other = Right other
@@ -219,9 +223,16 @@ TODO: the handling of union of tables is not ideal, need to be revised
 
 > makeRosFromItem :: [RosSchema] -> TableRef -> Either String RosTableRef
 > makeRosFromItem tl (TR te alias) = RosTR <$> conv te <*> Right alias
->   where conv (TRBase tn) = Right (RosTRBase tn)
+>   where conv (TRBase tn) = RosTRBase <$> tnToIdxStr tn 
 >         conv (TRQuery q) = RosTRQuery <$> makeRosQuery tl [] q alias 
->         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2  
+>         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2
+>         tnToIdxStr tn =
+>           let i = findIndex (\a -> (rosSName a == tn)) tl in
+>             case i of
+>               Nothing -> Left $ "Cannot find " ++ tn 
+>               Just i' -> Right $
+>                          "(list-ref tables " ++ (show i') ++ ")" 
+
 
 convert from
 
@@ -275,8 +286,8 @@ unzip result
 1st argument: a list of schemas (with table names) from env.
 2nd argument: a list of schemas (with alias names) from env.
 
-> makeRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr -> String
->              -> Either String RosQueryExpr
+> makeRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
+>   -> String -> Either String RosQueryExpr
 > makeRosQuery tl al qe name =
 >   do sl' <- (fst <$> sl)  -- select list
 >      fr <- (makeRosFrom tl $ qFrom qe)
@@ -418,18 +429,18 @@ statement list
 
 > genRosCode ::  [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> String -> String -> Either String String
 > genRosCode tsl cl pl sl ql q1 q2 =
->   do sl' <- tableScms tsl sl              -- put table names in schemas
+>   do sl' <- tableScms tsl sl              -- put tableNames in schemas
 >      qe1 <- findQ q1 ql                    
 >      qe2 <- findQ q2 ql                   -- find query expressions 
 >      qe1' <- elimStar sl' qe1
->      qe2' <- elimStar sl' qe2             -- get rid of stars in queries
+>      qe2' <- elimStar sl' qe2   -- get rid of stars in queries
 >      rsq1 <- toRosQuery sl' [] qe1' q1
 >      rsq2 <- toRosQuery sl' [] qe2' q2
 >      rs1 <- Right (toSexpSchemaless rsq1)
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      preds <- predDecs pl sl
->      tbs <- tableDecs tsl sl
->      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q2 rs1) ++ (genQ q1 rs2) ++ lastLine)
+>      tbs <- tableDecs sl'
+>      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q2 rs1) ++ (genQ q1 rs2) ++ (genSolve sl' q1 q2))
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -444,24 +455,28 @@ generate declarations of symbolic predicate (generic predicate)
 >      return (joinWithBr pl')
 >   where
 >     f p = do scms <- checkListErr $ map (findScm sl) (snd p)
->              scms' <- Right (map hsAttrs scms)
+>              scms' <- Right (map rosAttrs scms)
 >              al <- Right (foldl (++) [] scms') 
 >              return ("(define-symbolic " ++ (fst p) ++ " (~> " ++
 >                     (uw $ map (\a -> "integer?") al) ++ " boolean?))\n")
 
 generate declarations of symbolic tables.
 Table-Schema map, schema list
+The first argument must be a list of schemas representing TABLEs, with
+schema name replaced by table names.
 
-> tableDecs :: [(String, String)] -> [RosSchema] -> Either String String
-> tableDecs tsl sl =
->   do tl <- checkListErr $ map f tsl
->      return (joinWithBr tl)
->   where f t = do scm <- findScm sl (snd t)
->                  return (genTbDec (fst t) (map fst (hsAttrs scm)))  
->         genTbDec n s = "(define " ++ n ++ " (Table \"" ++ n ++ "\" (list " ++
->                        (uw $ map addQuote s) ++ ") (gen-sym-schema " ++
->                        (show $ length s) ++ " " ++ (show numOfRows) ++ ")))\n"
+> tableDecs :: [RosSchema] -> Either String String
+> tableDecs sl = Right (joinWithBr tl)
+>   where tl = map f sl
+>         f t =
+>           let n = rosSName t in
+>             let scm = rosAttrs t in
+>               "(define " ++ n ++ "-info (table-info \"" ++ n 
+>               ++ "\" (list " ++ (uw $ map (addQuote . fst) scm) ++ ")))\n"
 >         addQuote x = "\"" ++ x ++ "\""
+>         
+
+
 
 Number of rows of symbolic relations, to be replaced by incremental solving
 
@@ -474,9 +489,14 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 >            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n"]
 
 > genQ :: String -> String -> String
-> genQ qn q = "(define " ++ qn ++ " \n  " ++ q ++ ")\n\n"
+> genQ qn q = "(define (" ++ qn ++ " tables) \n  " ++ q ++ ")\n\n"
 
-> lastLine :: String
-> lastLine = "(verify (same q1 q2))"
+The first argument must be a list of schemas representing TABLEs, with
+schema name replaced by table names.
+
+> genSolve :: [RosSchema] -> String -> String -> String
+> genSolve tl q1 q2 = "\n(solve-queries " ++ q1 ++ " " ++ q2 ++ " (list "
+>                     ++ (uw $ map (\a -> (rosSName a) ++ "-info") tl)
+>                     ++ ") println) \n"
 
 
