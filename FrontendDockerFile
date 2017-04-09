@@ -1,4 +1,4 @@
-FROM FROM konne/cosette
+FROM konne/cosette
 
 ####### Install Dependencies #######################
 RUN apt-get -y update
