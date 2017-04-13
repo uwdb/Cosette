@@ -86,7 +86,7 @@
                (cosette-solve q1 q2 tables)))])
     (define (rec-wrapper table-size-list)
       (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
-        (cond [(eq? (car sol) "neq") sol]
+        (cond [(eq? (car sol) "neq") (messenger sol)]
               [else (messenger  table-size-list)
                     (rec-wrapper (inc-table-size-list table-size-list))])))
     (rec-wrapper init-table-size-list)))
