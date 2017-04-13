@@ -39,9 +39,18 @@
 (define (table->jsexpr t) 
   (hasheq 'table-name (get-table-name t) 
           'table-content (list (get-schema t) 
-                               (map (lambda (r) (list (car r) (cdr r))) 
+                               (map (lambda (r)
+                                      (list (map sv->string (car r))
+                                            (sv->string (cdr r)))) 
                                     (get-content t)))))
 
+(define (sv->string v)
+  (if (term? v) (term->string) v))
+
+(define (term->string v)
+  (let ([op (open-output-string)])
+    (write v op)
+    (get-output-string op)))
 
 ; note: the new interface requires rewrite all the queries to the following form
 
