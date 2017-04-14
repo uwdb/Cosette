@@ -45,7 +45,7 @@
                                     (get-content t)))))
 
 (define (sv->string v)
-  (if (term? v) (term->string) v))
+  (if (term? v) (term->string v) v))
 
 (define (term->string v)
   (let ([op (open-output-string)])

@@ -50,10 +50,8 @@
     [(timeout) (void)]
     [else (set! ret item) (loop)]))
 
-(displayln ret)
-
-;(displayln (match ret
-;             [(n) (jsexpr->string
-;                   (hasheq 'status "UNSAT"
-;                           'size n))]
-;             [_ (cosette-sol->json item)]))
+(displayln (cond
+             [(eq? (car ret) "neq") (cosette-sol->json ret)]
+             [else (jsexpr->string
+                    (hasheq 'status "UNSAT"
+                            'size ret))]))
