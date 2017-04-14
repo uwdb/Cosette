@@ -26,7 +26,7 @@
 (time (verify (same q1 q2)))
 
 ; expect unsat
-(time (verify (same q2 q2)))
+;(time (verify (same q2 q2)))
 
 ;(denote-and-run q2)
 
