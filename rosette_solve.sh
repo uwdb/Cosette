@@ -1,9 +1,9 @@
 #!/bin/bash
 
-PROG=/Cosette/dsl/dist/build/RosetteCodeGen/RosetteCodeGen
+PROG=/Users/chushumo/Project/Cosette/dsl/dist/build/RosetteCodeGen/RosetteCodeGen
 NAME=Cosette
 
-BUILD=.generated
+BUILD=generated
 
 FILE="$1"
 
