@@ -23,7 +23,7 @@
    WHERE  (NARY-OP p1 "t1.id" "t1.val"))) 
 
 ; expect model
-(time (verify (same q1 q2)))
+(cosette-solve q1 q2 (list t1 p1))
 
 ; expect unsat
 ;(time (verify (same q2 q2)))

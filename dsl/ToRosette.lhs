@@ -380,10 +380,13 @@ convert RosTableRef to sexp
 >   toSexp (RosUnion t1 t2) = addParen $ uw ["TABLE-UNION-ALL", toSexp t1, toSexp t2]
 
 > instance Sexp RosTableRef where
->   toSexp (RosTR t a) = addParen $ uw ["NAMED",
->                                       "(RENAME",
->                                       toSexp t,
->                                       (addEscStr a) ++ ")"]
+>   toSexp (RosTR t a) =
+>     case t of
+>       RosTRQuery q -> toSexp t
+>       _ -> addParen $ uw ["NAMED",
+>                                      "(RENAME",
+>                                      toSexp t,
+>                                      (addEscStr a) ++ ")"]      
 >   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp
@@ -490,7 +493,8 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 > headers :: [String]
 > headers = ["#lang rosette \n",
 >            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
->            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n"]
+>            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n",
+>           "(provide ros-instance)\n"]
 
 > genQ :: String -> String -> String
 > genQ qn q = "(define (" ++ qn ++ " tables) \n  " ++ q ++ ")\n\n"
@@ -499,8 +503,8 @@ The first argument must be a list of schemas representing TABLEs, with
 schema name replaced by table names.
 
 > genSolve :: [RosSchema] -> String -> String -> String
-> genSolve tl q1 q2 = "\n(solve-queries " ++ q1 ++ " " ++ q2 ++ " (list "
+> genSolve tl q1 q2 = "\n(define ros-instance (list " ++ q1 ++ " " ++ q2 ++ " (list "
 >                     ++ (uw $ map (\a -> (rosSName a) ++ "-info") tl)
->                     ++ ") println) \n"
+>                     ++ "))) \n"
 
 

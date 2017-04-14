@@ -1,7 +1,7 @@
 #lang racket/load
 
 (require "cosette.rkt" "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt")
-
+(require json)
 
 ;; daemon of the rosette backend
 ;; if the solver returns a counter example, return the counter example
@@ -42,7 +42,7 @@
             )))
 
 ;; main thread
-(define ret 'init)
+(define ret '(1))
 
 (let loop ()
   (define item (channel-get main-channel))
@@ -51,3 +51,9 @@
     [else (set! ret item) (loop)]))
 
 (displayln ret)
+
+;(displayln (match ret
+;             [(n) (jsexpr->string
+;                   (hasheq 'status "UNSAT"
+;                           'size n))]
+;             [_ (cosette-sol->json item)]))
