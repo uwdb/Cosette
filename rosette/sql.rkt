@@ -99,6 +99,9 @@
 (define (NARY-OP f . args)
   (filter-nary-op f (map (lambda (x) (VAL x)) args)))
 
+(define-syntax-rule (OR f1 f2)
+  (filter-disj f1 f2))
+
 (define-syntax-rule (AND f1 f2)
                     (filter-conj f1 f2))
 
