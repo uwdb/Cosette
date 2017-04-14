@@ -12,7 +12,7 @@ Syntax and Parser for Cosette.
 > import Control.Applicative ((<$>),(<*), (*>),(<*>), (<$), (<|>), many)
 > import qualified Text.Parsec.String.Expr as E
 > import Control.Monad
-> import Data.Maybe ()
+> import Data.Maybe
 > import Data.Char
 > import Test.HUnit
 > import FunctionsAndTypesForParsing
