@@ -16,4 +16,5 @@ mkdir -p .compiled/
 cat $FILE | $PROG > rosette/$BUILD/$UUID.rkt
 cp rosette/$BUILD/$UUID.rkt .compiled/
 cd rosette
+echo "$UUID.rkt"
 racket server.rkt $BUILD/$UUID.rkt
