@@ -494,7 +494,8 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 > headers = ["#lang rosette \n",
 >            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
 >            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n",
->           "(provide ros-instance)\n"]
+>            "(provide ros-instance)\n",
+>            "(current-bitwidth #f)\n"]
 
 > genQ :: String -> String -> String
 > genQ qn q = "(define (" ++ qn ++ " tables) \n  " ++ q ++ ")\n\n"
