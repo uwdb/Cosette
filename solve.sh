@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROG=/Cosette/dsl/dist/build/CoqCodeGen
+PROG=/Cosette/dsl/dist/build/CoqCodeGen/CoqCodeGen
 NAME=Cosette
 
 BUILD=.build_solve
