@@ -405,12 +405,13 @@ Since query with only aggregation (no group by) and group by query requires thei
 convert RosQueryExpr to s-expression string without adding schema. 
 
 > toSexpSchemaless :: RosQueryExpr -> String
-> toSexpSchemaless q = addParen $ uw ["SELECT", sl, "\n  FROM", fl, "\n  WHERE", p]
+> toSexpSchemaless q = addParen $ uw [sel, sl, "\n  FROM", fl, "\n  WHERE", p]
 >   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
 >         fl = case rosFrom q of Nothing -> "UNIT"
 >                                Just fr -> toSexp $ head fr
 >         p =  case rosWhere q of Nothing -> "filter-empty"
 >                                 Just wh -> toSexp wh
+>         sel = if (rosDistinct q) then "SELECT-DISTINCT" else "SELECT"
 
 generate rosette code
 
