@@ -6,7 +6,7 @@
 > import Control.Applicative ((<$>))
 > import CosetteParser
 > import Text.Parsec (parse,ParseError)
-> import qualified Test.HUnit as H
+> import Test.HUnit
 > import Debug.Trace
 
 > testQuery1 :: QueryExpr
@@ -99,5 +99,5 @@
 >    ("select * from (a union all b union all c) x", testQuery11),
 >    ("select x.uid as xu, count(*) as xn from a x group by x.uid, x.uname", testQuery12)]
 
-> main :: IO H.Counts
-> main =  H.runTestTT $ H.TestList $ makeTest queryExpr <$> queryParseTests
+> main :: IO Counts
+> main =  runTestTT $ TestList $ makeTest queryExpr <$> queryParseTests
