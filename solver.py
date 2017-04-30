@@ -88,6 +88,9 @@ def parse_results(results):
     """ Parse the results of Coq and Rosette execution.
     """
     coq_result, ros_result = results
+    coq_result = coq_result.lower()
+    ros_result = ros_result.lower()
+    coq_ret = ""
     if "error" in coq_result:
         if "attempt to save an incomplete proof" in coq_result:
             coq_ret = "Query equivalence unknown."
