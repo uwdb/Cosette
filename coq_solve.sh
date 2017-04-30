@@ -1,6 +1,5 @@
 #!/bin/bash
 
-PROG=/Cosette/dsl/dist/build/CoqCodeGen/CoqCodeGen
 NAME=Cosette
 
 BUILD=.build_solve
@@ -13,7 +12,7 @@ UUID=$(head /dev/urandom | tr -dc A-Za-z | head -c 13 )
 mkdir -p hott/$BUILD
 mkdir -p .compiled/
 
-cat $FILE | $PROG > hott/$BUILD/$UUID.v
+cp $FILE hott/$BUILD/$UUID.v
 cp hott/$BUILD/$UUID.v .compiled/
 cd hott/
 cp -n -r library $BUILD/
