@@ -7,11 +7,13 @@ import tempfile
 import time
 import json
 
-def solve(cos_source):
-    """ return the result of runing a cosette query
+def solve(cos_source, cos_folder="."):
+    """ cos_source: Cosette source code, in string
+        cos_folder: path of cosette folder, default is current "."
+        return the result of runing a cosette query
     """
-    coq_parse, coq_out = gen_coq(cos_source)
-    ros_parse, ros_out = gen_rosette(cos_source)
+    coq_parse, coq_out = gen_coq(cos_source, cos_folder)
+    ros_parse, ros_out = gen_rosette(cos_source, cos_folder)
 
     ret = {
         'coq_html': "",
@@ -30,8 +32,8 @@ def solve(cos_source):
         ros_file.write(ros_out)
         ros_file.seek(0)
 
-        cmd_coq = './coq_solve.sh ' + coq_file.name
-        cmd_ros = './rosette_solve.sh ' + ros_file.name
+        cmd_coq = '{}/coq_solve.sh '.format(cos_folder) + coq_file.name
+        cmd_ros = '{}/rosette_solve.sh '.format(cos_folder) + ros_file.name
         running_procs = [(Popen(cmd_coq, shell=True, stdout=PIPE, stderr=PIPE), 0),
                          (Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE), 1)]
         results = ["", ""]
@@ -57,11 +59,11 @@ def solve(cos_source):
         return json.dumps(ret)
 
 
-def gen_rosette(cos_source):
+def gen_rosette(cos_source, cos_folder):
     """ generate rosette code given a cosette program and filename.
         return (True, <rosette code>) or (False, <error message>).
     """
-    prog = "dsl/dist/build/RosetteCodeGen/RosetteCodeGen"
+    prog = "{}/dsl/dist/build/RosetteCodeGen/RosetteCodeGen".format(cos_folder)
     proc = Popen(prog, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     output = proc.communicate(input=cos_source.encode())[0]
     if proc.returncode != 0:
@@ -70,11 +72,11 @@ def gen_rosette(cos_source):
         return (False, "Syntax Error. \n {}".format(output))
     return (True, output)
 
-def gen_coq(cos_source):
+def gen_coq(cos_source, cos_folder):
     """ generate coq cod given cosette program and filename.
         return (True, <coq code>) or (False, <error message>)
     """
-    prog = "dsl/dist/build/CoqCodeGen/CoqCodeGen"
+    prog = "{}/dsl/dist/build/CoqCodeGen/CoqCodeGen".format(cos_folder)
     proc = Popen(prog, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT)
     output = proc.communicate(input=cos_source.encode())[0]
     if proc.returncode != 0:
