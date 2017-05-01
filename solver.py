@@ -32,8 +32,8 @@ def solve(cos_source, cos_folder="."):
         ros_file.write(ros_out)
         ros_file.seek(0)
 
-        cmd_coq = '{}/coq_solve.sh '.format(cos_folder) + coq_file.name
-        cmd_ros = '{}/rosette_solve.sh '.format(cos_folder) + ros_file.name
+        cmd_coq = 'cd {}; ./coq_solve.sh '.format(cos_folder) + coq_file.name
+        cmd_ros = 'cd {}; ./rosette_solve.sh '.format(cos_folder) + ros_file.name
         running_procs = [(Popen(cmd_coq, shell=True, stdout=PIPE, stderr=PIPE), 0),
                          (Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE), 1)]
         results = ["", ""]
