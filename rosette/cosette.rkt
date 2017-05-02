@@ -33,8 +33,8 @@
 (define (cosette-solve q1 q2 input-tables)
   (let ([solution (verify (same q1 q2))])
     (cond 
-      [(sat? solution) (cons "neq" (evaluate input-tables solution))]
-      [else (cons "eq"  (list))]))) 
+      [(sat? solution) (cons "NEQ" (evaluate input-tables solution))]
+      [else (cons "EQ"  (list))]))) 
 
 (define (table->jsexpr t) 
   (hasheq 'table-name (get-table-name t) 
@@ -95,7 +95,7 @@
                (cosette-solve q1 q2 tables)))])
     (define (rec-wrapper table-size-list)
       (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
-        (cond [(eq? (car sol) "neq") (messenger sol)]
+        (cond [(eq? (car sol) "NEQ") (messenger sol)]
               [else (messenger  table-size-list)
                     (rec-wrapper (inc-table-size-list table-size-list))])))
     (rec-wrapper init-table-size-list)))

@@ -51,7 +51,7 @@
     [else (set! ret item) (loop)]))
 
 (displayln (cond
-             [(eq? (car ret) "neq") (cosette-sol->json ret)]
+             [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
              [else (jsexpr->string
                     (hasheq 'status "UNSAT"
                             'size ret))]))

@@ -7,7 +7,7 @@ import tempfile
 import time
 import json
 
-def solve(cos_source, cos_folder="."):
+def solve(cos_source, cos_folder=".", show_compiled=False):
     """ cos_source: Cosette source code, in string
         cos_folder: path of cosette folder, default is current "."
         return the result of runing a cosette query
@@ -16,11 +16,13 @@ def solve(cos_source, cos_folder="."):
     ros_parse, ros_out = gen_rosette(cos_source, cos_folder)
 
     ret = {
-        'coq_html': "",
-        'rosette': {
-            'html': "",
-            'json': {}
-        }
+        "result": "",           # can be EQ, NEQ, UNKNOWN, ERROR
+        "coq_result": "",       # can be EQ, UNKNOWN, ERROR, STOPED
+        "coq_log": "",          # log of the Coq execution
+        "rosette_log": "",      # log of the Rosette execution
+        "rosette_result": "",   # can be NEQ, UNSAT, STOPED
+        "counterexamples": [],  # counterexamples
+        "error_msg": "",        # error message
     }
 
     if coq_parse and ros_parse:
@@ -46,17 +48,39 @@ def solve(cos_source, cos_folder="."):
                 else:
                     time.sleep(.1)
                     continue
-        return parse_results(results)
+        ret = parse_results(results)
     else: # either coq_parse or ros_parse is False
+        if coq_parse: # then rosette must not parse
+            ret["coq_log"] = "Coq code generation succeed."
+            ret["coq_result"] = "STOPED"
+        else:
+            ret["coq_log"] = coq_out
+            ret["coq_result"] = "ERROR"
+        if ros_parse: # then Coq must not parse
+            ret["rosette_log"] = "Rosette code generation succeed."
+            ret["rosette_result"] = "STOPED"
+        else:
+            ret["rosette_log"] = ros_out
+            ret["rosette_result"] = "ERROR"
+
+        # put overall error message
+        if (not coq_parse) and (not ros_parse):
+            # probably an error on parsing Cosette AST
+            # only show one error here
+            ret["error_msg"] = "Syntax Error. \n {}".format(coq_out)
+        elif coq_parse: # only coq_parse is true
+            ret["error_msg"] = "Rosette Error. \n {}".format(ros_out)
+        else: # only ros_parse is true
+            ret["error_msg"] = "Coq Error \n {}".format(coq_out)
+
+    # add coq and rosette source code if required
+    if show_compiled:
         if coq_parse:
-            ret["coq_html"] = "Coq code generation succeed."
-        else:
-            ret["coq_html"] = coq_out
+            ret["coq_source"] = coq_out
         if ros_parse:
-            ret["rosette"]["html"] = "Rosette code generation succeed."
-        else:
-            ret["rosette"]["html"] = ros_out
-        return json.dumps(ret)
+            ret["rosette_source"] = ros_out
+
+    return json.dumps(ret)
 
 
 def gen_rosette(cos_source, cos_folder):
@@ -91,21 +115,41 @@ def parse_results(results):
     """
     coq_result, ros_result = results
     coq_result = coq_result.lower()
-    ros_result = ros_result.lower()
-    coq_ret = ""
+    ret = {}
+    # put Coq result
     if "error" in coq_result:
         if "attempt to save an incomplete proof" in coq_result:
-            coq_ret = "Query equivalence unknown."
+            ret["coq_result"] = "UNKNOWN"
+            ret["coq_log"] = ""
         elif "syntax error" in coq_result:
-            coq_ret = "Invalid Coq Code."
+            ret["coq_result"] = "ERROR"
+            ret["coq_log"] = "Invalid generated Coq code. Please file an issue."
     else:
-        coq_ret = "Success. Queries are equivalent."
-    json_dict = {
-        'coq_html': coq_ret,
-        'rosette': {
-            'html': "",
-            'json': json.loads(ros_result)
-        }
-    }
+        ret["coq_result"] = "EQ"
+        ret["coq_log"] = ""     # nothing
 
-    return json.dumps(json_dict)
+    # put rosette result
+    try:
+        ros_json = json.loads(ros_result)
+        ret["rosette_result"] = ros_json["status"]
+        if ros_json["status"] == "NEQ":
+            ret["counterexamples"] = ros_json["counter-example"]
+        else:
+            ret["rosette_log"] = ""
+    except ValueError:
+        ret["rosette_result"] = "ERROR"
+        ret["rosette_log"] = ros_result # just dump the raw error message here
+
+    # combine Coq and rosette results
+    if ret["coq_result"] == "UNKNOWN" and ret["rosette_result"] == "NEQ":
+        ret["result"] = "NEQ"
+    elif ret["coq_result"] == "EQ" and ret["rosette_result"] == "UNSAT":
+        ret["result"] = "EQ"
+    elif ret["coq_result"] == "EQ" and ret["rosette_result"] == "NEQ":
+        ret["result"] = "ERROR"
+        ret["error_msg"] = "Coq and Rosette executions doesn't agree. File an issue!"
+    else:
+        ret["result"] = "ERROR"
+        ret["error_msg"] = "{} \n \n {}".format(ret["coq_log"], ret["rosette_log"])
+
+    return ret
