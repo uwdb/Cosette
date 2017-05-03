@@ -22,7 +22,7 @@ If you want to run Cosette locally, [docker][docker] is the best way to install 
 
 	docker run  --name cosette --entrypoint /bin/bash -ti shumo/cosette-frontend
 
-This will enter the bash of the container. You can enter cosette folder and call `solver.py` to run Cosette program locally.
+This will enter the bash of the container. You can enter cosette `\Cosette` folder and call `solver.py` to run Cosette program locally.
 
 
 [web]: http://cosette.cs.washington.edu/.
