@@ -27,14 +27,8 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
   Arguments Rule /. 
  
   Lemma ruleStand: Rule.
-    start.
-    f_ap.
-    by_extensionality t0.
-    apply path_universe_uncurried.
-    apply hprop_prod_r_eq.
-    intros [b c].
-    rewrite b.
-    reflexivity.
+    start;
+    prod_heuristic1.
   Qed. 
  
 End Optimization. 

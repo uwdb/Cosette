@@ -76,6 +76,18 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
     apply tr;
     searchInstantiation solveInstantiatedConjuctiveQuery.
 
+  (*try hprop_prod_r_eq *)
+  Ltac prod_heuristic1 :=
+    f_ap;
+    let t := fresh "t" in
+    by_extensionality t;
+    apply path_universe_uncurried;
+    apply hprop_prod_r_eq;
+    intros;
+    solve_disjunction;
+    solveInstantiatedConjuctiveQuery.
+  
+  
   (* try to apply heuristcs to solve summation *)
   (* TODO: add more heuristics *)
   Ltac solve_summation :=
