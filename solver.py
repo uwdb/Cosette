@@ -67,7 +67,7 @@ def solve(cos_source, cos_folder=".", show_compiled=False):
         if (not coq_parse) and (not ros_parse):
             # probably an error on parsing Cosette AST
             # only show one error here
-            ret["error_msg"] = "Syntax Error. \n {}".format(coq_out)
+            ret["error_msg"] = coq_out
         elif coq_parse: # only coq_parse is true
             ret["error_msg"] = "Rosette Error. \n {}".format(ros_out)
         else: # only ros_parse is true
@@ -134,6 +134,7 @@ def parse_results(results):
         ret["rosette_result"] = ros_json["status"]
         if ros_json["status"] == "NEQ":
             ret["counterexamples"] = ros_json["counter-example"]
+            ret["rosette_log"] = "Rosette find an counterexample."
         else:
             ret["rosette_log"] = ""
     except ValueError:
