@@ -114,7 +114,7 @@ the first argument is a list of RosSchemas fromt the environment
 >                                <$> Right a
 >                                <*> getQueryScms rs q
 
-extract output schema from a query. we don't care data type in rosette code,
+extract output schema from a query. we don't care data type in rosette code for now,
 so every type is int.
 
 > getQueryScms :: [RosSchema] -> QueryExpr

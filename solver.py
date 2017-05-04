@@ -121,7 +121,7 @@ def parse_results(results):
         if "attempt to save an incomplete proof" in coq_result:
             ret["coq_result"] = "UNKNOWN"
             ret["coq_log"] = ""
-        elif "syntax error" in coq_result:
+        else:
             ret["coq_result"] = "ERROR"
             ret["coq_log"] = "Invalid generated Coq code. Please file an issue."
     else:

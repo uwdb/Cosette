@@ -383,10 +383,9 @@ assemble the theorem definition.
 >     tables = unwords $ map (\t -> "(" ++ (fst t) ++ ": relation " ++ (snd t) ++ ")") tsl
 >     scms = "( Γ " ++ snames ++ ": Schema) "
 >     tbls = tables ++ " "
->     dts = (unwords $ (\a -> "("++ a ++ ": type)") <$> getDataTypes sl) ++ " "
 >     attrs = unwords $ map attrDecs sl
 >     preds = unwords $ map predDecs pl
->     decs = addRefine $ "forall " ++ scms ++ tbls ++ dts ++ attrs ++ preds ++ ", _"
+>     decs = addRefine $ "forall " ++ scms ++ tbls ++ attrs ++ preds ++ ", _"
 
 extract data types that are needed. e.g. schema s(a:t1, b:t2, c:t1, ??) -> [t1, t2] 
 
@@ -399,7 +398,7 @@ generate verify declaration string
 > verifyDecs :: String -> String -> String
 > verifyDecs q1 q2 = addRefine $ "⟦ Γ ⊢ " ++ q1 ++ " : _ ⟧ =  ⟦ Γ ⊢ " ++ q2 ++ " : _ ⟧" 
 
-generate attribute (column) declarations from schemas
+generate attribute (column) declarations from schemas, TODO: everything is int for now.
 
 > attrDecs :: HSSchema -> String
 > attrDecs s = unwords $
@@ -408,7 +407,7 @@ generate attribute (column) declarations from schemas
 >         attrs = hsAttrs s
 >         genAttr t = if (fst t) == "unkowns"
 >                     then ""
->                     else "(" ++ (fst t) ++ " : Column " ++ (snd t) ++ " " ++ sn ++ ")"
+>                     else "(" ++ (fst t) ++ " : Column int " ++ sn ++ ")"
 
 generate predicate declarations
 
