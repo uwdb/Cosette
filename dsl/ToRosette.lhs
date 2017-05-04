@@ -355,7 +355,7 @@ convert ValueExpr to sexp
 >   toSexp (RosNumLit i) = show i
 >   toSexp (RosDIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
 >   toSexp (RosBinOp v1 op v2) =  addParen 
->     $ unwords ["BINOP", toSexp v1, op, toSexp v2]
+>     $ unwords ["VAL-BINOP", toSexp v1, op, toSexp v2]
 >   toSexp (RosVQE q) = toSexp q
  
 convert Predicate to sexp
