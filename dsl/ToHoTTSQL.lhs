@@ -82,6 +82,12 @@ HoTTSQL query
 >                  deriving (Eq, Show)
 
 
+== supported binary operators (op, Coq translation)
+
+> binOps :: [(String, String)]
+> binOps = [("+", "binaryExpr add"),
+>           ("-", "binaryExpr minus")]
+
 == convert Cosette to HoTTSQL
 
 look up schema by table name
@@ -279,14 +285,17 @@ dedup list (this does not preserve the order)
 
 > instance Coqable HSValueExpr where
 >   toCoq (HSDIden t a) = addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
->   toCoq (HSBinOp v1 op v2) = addParen $ uw [op, toCoq v1, toCoq v2]
+>   toCoq (HSBinOp v1 op v2) = addParen $ uw [op', toCoq v1, toCoq v2]
+>     where op' = case lookup op binOps of
+>                   Just o -> o
+>                   Nothing -> "ERROR: do not support " ++ " op."             
 >   toCoq (HSConstant c) = addParen $ uw ["constantExpr", c]
 
 convert valueExpr to projection strings.
 
 > veToProj :: HSValueExpr -> String
 > veToProj (HSDIden t a) = addParen $ t ++ "⋅" ++ a
-> veToProj v = toCoq v
+> veToProj v = addParen $ uw ["e2p", toCoq v]
 
 > instance Coqable HSPredicate where
 >   toCoq HSTrue = "true"
@@ -423,7 +432,10 @@ generate predicate declarations
 >            "  Module AutoTac := AutoTactics T S R A.",
 >            "  Import AutoTac.",
 >            "  Module CQTac := CQTactics T S R A.",
->            "  Import CQTac. \n"]
+>            "  Import CQTac. \n",
+>            "  Parameter int: type.",
+>            "  Parameter add: binary int int int.",
+>            "  Parameter minus: binary int int int. \n"]
 
 > openDef :: String
 > openDef = "  Definition Rule: Type. \n"
@@ -442,6 +454,7 @@ generate proof given a tactics
 
 > tactics :: [String]
 > tactics = ["sum_heuristic1",
+>            "prod_heuristic1",
 >            "deductive_proof'",
 >            "conjunctiveQueryProof'",
 >            "hott_ring'"]
