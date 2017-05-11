@@ -47,7 +47,9 @@
 >                              ,rosGroup :: Maybe [ValueExpr]
 >                              ,rosDistinct :: Bool
 >                              ,rosSchema :: (String, [String])
->                              } deriving (Eq, Show)
+>                              }
+>                   | RosQueryUnion RosQueryExpr RosQueryExpr
+>                   deriving (Eq, Show)
 
 > data RosSchema =
 >   MakeRosSchema {rosSName :: String   -- schema name
@@ -79,7 +81,8 @@ It returns [(tableSchema, indexStr)] or error message.
 === convert * to concrete projections
 
 > elimStar :: [RosSchema] -> QueryExpr -> Either String QueryExpr
-> elimStar scms (UnionAll q1 q2) = elimStar scms q1
+> elimStar scms (UnionAll q1 q2) =
+>   UnionAll <$> elimStar scms q1 <*> elimStar scms q2
 > elimStar scms (Select sl fr wh g d) =
 >   do rs <- getFromScms scms fr
 >      sl' <- checkListErr (map (starToSelect rs) sl)
@@ -92,6 +95,7 @@ It returns [(tableSchema, indexStr)] or error message.
 >         convFr (Just tl) = Just <$> (checkListErr $ map convTR tl)
 >         convTR (TR te a) = TR <$> convTE te <*> Right a
 >         convTE (TRQuery q) = TRQuery <$> elimStar scms q
+>         convTE (TRUnion t1 t2) = TRUnion <$> convTE t1 <*> convTE t2
 >         convTE t = Right t
  
 extract [RosSchema] from FROM clause
@@ -198,7 +202,7 @@ the base case
 > makeRosVE tl al (BinOp v1 o v2) =  RosBinOp
 >                                    <$> makeRosVE tl al v1
 >                                    <*> Right o <*> makeRosVE tl al v2
-> makeRosVE tl al (VQE q) = RosVQE <$> makeRosQuery tl al q "anyname"
+> makeRosVE tl al (VQE q) = RosVQE <$> toRosQuery tl al q "anyname"
 > makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
 >     "sum" -> Right (RosAgg "aggr-sum" e)
@@ -224,7 +228,7 @@ TODO: the handling of union of tables is not ideal, need to be revised
 > makeRosFromItem :: [RosSchema] -> TableRef -> Either String RosTableRef
 > makeRosFromItem tl (TR te alias) = RosTR <$> conv te <*> Right alias
 >   where conv (TRBase tn) = RosTRBase <$> tnToIdxStr tn 
->         conv (TRQuery q) = RosTRQuery <$> makeRosQuery tl [] q alias 
+>         conv (TRQuery q) = RosTRQuery <$> toRosQuery tl [] q alias 
 >         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2
 >         tnToIdxStr tn =
 >           let i = findIndex (\a -> (rosSName a == tn)) tl in
@@ -257,7 +261,7 @@ convert from
 > makeRosPred tl al (Or p1 p2) = RosOr <$> makeRosPred tl al p1
 >                             <*> makeRosPred tl al p2
 > makeRosPred tl al (Not p) = RosNot <$> makeRosPred tl al p
-> makeRosPred tl al (Exists q) = RosExists <$> makeRosQuery tl al q "anyname"
+> makeRosPred tl al (Exists q) = RosExists <$> toRosQuery tl al q "anyname"
 > makeRosPred tl al (Veq v1 v2) = RosVeq <$> makeRosVE tl al v1 <*>
 >                                 makeRosVE tl al v2
 > makeRosPred tl al (Vgt v1 v2) = RosVgt <$> makeRosVE tl al v1 <*>
@@ -304,6 +308,7 @@ unzip result
 convert list of tables (or subqueries) in from clause to joins
 
 > convertFrom :: RosQueryExpr -> RosQueryExpr
+> convertFrom (RosQueryUnion q1 q2) = RosQueryUnion (convertFrom q1) (convertFrom q2)
 > convertFrom q = RosQuery
 >                   (rosSelectList q)
 >                   ((\a -> [a]) <$> (toJoin fr))
@@ -328,6 +333,8 @@ Finally, convert Cosette AST to Rosette AST
 
 > toRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
 >            -> String -> Either String RosQueryExpr
+> toRosQuery tl al (UnionAll q1 q2) s =
+>   RosQueryUnion <$> toRosQuery tl al q1 s <*> toRosQuery tl al q2 s
 > toRosQuery tl al q s = convertFrom <$> makeRosQuery tl al q s
 
 === RosQuery to sexp string
@@ -405,11 +412,13 @@ Since query with only aggregation (no group by) and group by query requires thei
 convert RosQueryExpr to s-expression string without adding schema. 
 
 > toSexpSchemaless :: RosQueryExpr -> String
+> toSexpSchemaless (RosQueryUnion q1 q2) =
+>   addParen $ uw ["UNION-ALL", toSexpSchemaless q1, toSexpSchemaless q2]
 > toSexpSchemaless q = addParen $ uw [sel, sl, "\n  FROM", fl, "\n  WHERE", p]
 >   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
 >         fl = case rosFrom q of Nothing -> "UNIT"
 >                                Just fr -> toSexp $ head fr
->         p =  case rosWhere q of Nothing -> "filter-empty"
+>         p =  case rosWhere q of Nothing -> addParen $ "F-EMPTY"
 >                                 Just wh -> toSexp wh
 >         sel = if (rosDistinct q) then "SELECT-DISTINCT" else "SELECT"
 
