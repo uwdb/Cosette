@@ -345,13 +345,13 @@ Query expression
 
 Parse schema declaration
 
-Note: we always treat "??"  as unknonws: type
+Note: we always treat "??"  as unknowns: type
 
 > schemaItem :: Parser (String, String)
 > schemaItem =  unknowns <|> normalAttr
 >   where normalAttr = (,) <$> identifier
 >                          <*> (symbol_ ":" *> identifier)
->         unknowns = (\_ -> ("unkowns", "type")) <$> unknown
+>         unknowns = (\_ -> ("unknowns", "type")) <$> unknown
 
 > schemaStmt :: Parser CosetteStmt
 > schemaStmt = Schema <$> (keyword_ "schema" *> identifier) <*> schema

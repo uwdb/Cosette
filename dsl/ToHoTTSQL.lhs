@@ -405,7 +405,7 @@ generate attribute (column) declarations from schemas, TODO: everything is int f
 >   map genAttr attrs
 >   where sn = hsSName s
 >         attrs = hsAttrs s
->         genAttr t = if (fst t) == "unkowns"
+>         genAttr t = if (fst t) == "unknowns"
 >                     then ""
 >                     else "(" ++ (fst t) ++ " : Column int " ++ sn ++ ")"
 
