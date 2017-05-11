@@ -287,8 +287,10 @@ convert from
 
 unzip result
 
-1st argument: a list of schemas (with table names) from env.
-2nd argument: a list of schemas (with alias names) from env.
+tl: a list of schemas (with table names) from env.
+al: a list of schemas (with alias names) from env.
+qe: query expression
+name: alias of the query
 
 > makeRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
 >   -> String -> Either String RosQueryExpr
@@ -391,9 +393,9 @@ convert RosTableRef to sexp
 >     case t of
 >       RosTRQuery q -> toSexp t
 >       _ -> addParen $ uw ["NAMED",
->                                      "(RENAME",
->                                      toSexp t,
->                                      (addEscStr a) ++ ")"]      
+>                           "(RENAME",
+>                           toSexp t,
+>                           (addEscStr a) ++ ")"]
 >   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp
@@ -405,7 +407,9 @@ Since query with only aggregation (no group by) and group by query requires thei
 > instance Sexp RosQueryExpr where
 >   toSexp q = addParen $ uw ["AS", spj, sch]
 >     where spj = toSexpSchemaless q
->           sch' = rosSchema q
+>           sch' = case q of
+>                    RosQueryUnion q1 q2 -> rosSchema q1
+>                    _ -> rosSchema q
 >           sch = addSParen $ uw [addEscStr (fst sch'), al]
 >           al = addParen $ uw ("list":(addEscStr <$> snd sch'))
 
@@ -417,7 +421,7 @@ convert RosQueryExpr to s-expression string without adding schema.
 > toSexpSchemaless q = addParen $ uw [sel, sl, "\n  FROM", fl, "\n  WHERE", p]
 >   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
 >         fl = case rosFrom q of Nothing -> "UNIT"
->                                Just fr -> toSexp $ head fr
+>                                Just fr -> toSexp $ head fr -- assuming converted from list to singleton
 >         p =  case rosWhere q of Nothing -> addParen $ "F-EMPTY"
 >                                 Just wh -> toSexp wh
 >         sel = if (rosDistinct q) then "SELECT-DISTINCT" else "SELECT"
