@@ -85,7 +85,7 @@ It returns [(tableSchema, indexStr)] or error message.
 >   UnionAll <$> elimStar scms q1 <*> elimStar scms q2
 > elimStar scms (Select sl fr wh g d) =
 >   do rs <- getFromScms scms fr
->      sl' <- checkListErr (map (starToSelect rs) sl)
+>      sl' <- checkListErr (map (starToSelect rs scms) sl)
 >      fr' <- convFr fr
 >      wh' <- convWh wh
 >      return (Select (foldl (++) [] sl') fr' wh g d)
@@ -133,13 +133,15 @@ so every type is int.
 >                          return (rosAttrs scm)
 
 star to select item
+rs: the schema list from the FROM clause 
+sl: the schema list from the env, this is needed for subqueries in SELECT
 
-> starToSelect :: [RosSchema] -> SelectItem -> Either String [SelectItem]
-> starToSelect rs (Proj v s) =
->   do v' <- elimStarInVE rs v
+> starToSelect :: [RosSchema] -> [RosSchema] -> SelectItem -> Either String [SelectItem]
+> starToSelect rs sl (Proj v s) =
+>   do v' <- elimStarInVE sl v
 >      return [Proj v' s]
-> starToSelect rs Star = Right (foldMap scmToList rs)
-> starToSelect rs (DStar a) = scmToList <$> findScm rs a 
+> starToSelect rs sl Star = Right (foldMap scmToList rs)
+> starToSelect rs sl (DStar a) = scmToList <$> findScm rs a 
 
 > scmToList :: RosSchema -> [SelectItem]
 > scmToList (MakeRosSchema n al) =

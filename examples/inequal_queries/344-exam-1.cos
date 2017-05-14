@@ -11,7 +11,7 @@ query q1
  from user x
  where x.city = 2`;
 
- query q2
+query q2
  `select x.uid as uid, x.uname as uname, count(*) as cnt
   from user x, picture y
   where x.uid = y.uid and y.size > 1000 and x.city = 2
