@@ -26,7 +26,7 @@
 >                   | RosBinOp RosValueExpr String RosValueExpr
 >                   | RosConstant String
 >                   | RosVQE RosQueryExpr
->                   | RosAgg String AggExpr
+>                   | RosAgg String RosValueExpr
 >                     deriving (Eq, Show)
 
 > data RosPredicate = RosTRUE
@@ -44,11 +44,13 @@
 > data RosQueryExpr = RosQuery {rosSelectList :: [RosValueExpr]
 >                              ,rosFrom :: Maybe [RosTableRef]
 >                              ,rosWhere :: Maybe RosPredicate
->                              ,rosGroup :: Maybe [ValueExpr]
+>                              ,rosGroup :: Maybe [RosValueExpr]
 >                              ,rosDistinct :: Bool
 >                              ,rosSchema :: (String, [String])
 >                              }
 >                   | RosQueryUnion RosQueryExpr RosQueryExpr
+>                   | RosQueryAgg RosQueryExpr [RosValueExpr] String RosValueExpr
+>                         -- to SELECT-GROUP 
 >                   deriving (Eq, Show)
 
 > data RosSchema =
@@ -207,11 +209,13 @@ the base case
 > makeRosVE tl al (VQE q) = RosVQE <$> toRosQuery tl al q "anyname"
 > makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
->     "sum" -> Right (RosAgg "aggr-sum" e)
->     "count" -> Right (RosAgg "aggr-count" e)
->     "max" -> Right (RosAgg "aggr-max" e)
->     "min" -> Right (RosAgg "aggr-min" e)
+>     "sum" -> RosAgg "aggr-sum" <$> aggToVE e
+>     "count" -> RosAgg "aggr-count" <$> aggToVE e
+>     "max" -> RosAgg "aggr-max" <$> aggToVE e
+>     "min" -> RosAgg "aggr-min" <$> aggToVE e
 >     o' -> Left (o' ++ " is not supported as an aggregation function.")
+>   where aggToVE (AV (DIden t a)) = Right $ RosDIden t a
+>         aggToVE _ = Left "only support aggregate on an attribute."
 
 convert select
 
@@ -301,14 +305,19 @@ name: alias of the query
 >      fr <- (makeRosFrom tl $ qFrom qe)
 >      fr_al <- (convFr $ qFrom qe)
 >      wh <- (makeRosWhere tl (al++fr_al) $ qWhere qe)
->      gr <- Right (qGroup qe)
+>      gr <- (convGr $ qGroup qe)
 >      dis <- Right (qDistinct qe)
 >      scm <- ((,) <$> Right name <*> (snd <$> sl))
 >      return (RosQuery sl' fr wh gr dis scm)
 >   where sl  = unzip <$> (makeRosSelect tl al $ qSelectList qe) -- unzip result
 >         convFr Nothing = Right []
 >         convFr (Just fl) = checkListErr $ map (getTRScm tl) fl
-
+>         convGr Nothing =  Right Nothing
+>         convGr (Just grl) =
+>           case checkListErr $ map (makeRosVE tl al) grl of
+>             Right l -> Right (Just l)
+>             Left e -> Left e
+ 
 convert list of tables (or subqueries) in from clause to joins
 
 > convertFrom :: RosQueryExpr -> RosQueryExpr
@@ -333,13 +342,61 @@ convert list of tables (or subqueries) in from clause to joins
 >         toJoin (Just [x1, x2]) = Just $ RosTRXProd x1 x2
 >         toJoin (Just (h:t)) = RosTRXProd <$> Just h <*> toJoin (Just t)
 
-Finally, convert Cosette AST to Rosette AST
+Finally, convert Cosette AST to Rosette AST, and transform Rosette AST
+
+pass 0: generate Rosette AST
+
+tl: a list of schemas (with table names) from env.
+al: a list of schemas (with alias names) from env.
+
+> cosToRos :: [RosSchema] -> [RosSchema] -> QueryExpr
+>          -> String -> Either String RosQueryExpr
+> cosToRos tl al (UnionAll q1 q2) s =
+>   RosQueryUnion <$> cosToRos tl al q1 s <*> cosToRos tl al q2 s
+> cosToRos tl al q s = convertFrom <$> makeRosQuery tl al q s
+
+pass 1 on Rosette AST, handle group by
+
+> handleGroupBy :: [RosSchema] -> [RosSchema] -> RosQueryExpr
+>               -> Either String RosQueryExpr
+> handleGroupBy tl al (RosQueryUnion q1 q2) =
+>   RosQueryUnion <$> handleGroupBy tl al q1 <*> handleGroupBy tl al q2
+> handleGroupBy tl al q =
+>   case rosGroup q of
+>     Nothing -> Right q    -- do nothing if there is no group by
+>     Just gbc ->
+>       case lastField of
+>         RosAgg aggf target -> RosQueryAgg
+>                           <$> Right (RosQuery initFields
+>                                       (rosFrom q)
+>                                       (rosWhere q)
+>                                       (rosGroup q)
+>                                       (rosDistinct q)
+>                                       (rosSchema q))
+>                           <*> sl
+>                           <*> Right aggf
+>                           <*> Right target
+>         _ -> Right $ RosQuery     -- to distinct if no aggregation 
+>                        (rosSelectList q)
+>                        (rosFrom q)
+>                        (rosWhere q)
+>                        Nothing
+>                        True
+>                        (rosSchema q)
+>       where lastField = last $ rosSelectList q
+>             initFields = init $ rosSelectList q
+>             noOnAgg (RosAgg _ _) = Left "We currently only support single aggregation in the end of SELECT list."
+>             noOnAgg other = Right other
+>             sl = checkListErr $ map noOnAgg initFields
+
+do all the passes.
 
 > toRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
 >            -> String -> Either String RosQueryExpr
-> toRosQuery tl al (UnionAll q1 q2) s =
->   RosQueryUnion <$> toRosQuery tl al q1 s <*> toRosQuery tl al q2 s
-> toRosQuery tl al q s = convertFrom <$> makeRosQuery tl al q s
+> toRosQuery tl al q s = 
+>   do ros1 <- cosToRos tl al q s
+>      ros2 <- handleGroupBy tl al ros1
+>      return ros2
 
 === RosQuery to sexp string
 
@@ -428,12 +485,12 @@ convert RosQueryExpr to s-expression string without adding schema.
 >                                 Just wh -> toSexp wh
 >         sel = if (rosDistinct q) then "SELECT-DISTINCT" else "SELECT"
 
-generate rosette code
+generate rosette code.
 
 > genRos :: [CosetteStmt] -> Either String String
 > genRos sts = genRos' [] [] [] [] [] sts
 
-the first pass of the statements
+the first pass of the statements.
 
 > genRos' :: [(String, String)] -> [(String, String)]-> [(String, [String])] -> [RosSchema] -> [(String, QueryExpr)] -> [CosetteStmt] -> Either String String
 > genRos' tsl cl pl sl ql (h:t) =
@@ -498,7 +555,6 @@ schema name replaced by table names.
 >               ++ "\" (list " ++ (uw $ map (addQuote . fst) scm) ++ ")))\n"
 >         addQuote x = "\"" ++ x ++ "\""
 >         
-
 
 
 Number of rows of symbolic relations, to be replaced by incremental solving

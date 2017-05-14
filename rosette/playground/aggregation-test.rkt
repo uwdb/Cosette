@@ -44,7 +44,7 @@
 (run test-q)
 (run test-q2)
 (run test-q3)
-
+(run test-q4)
 
 ;(time (verify (begin 
 ;                (same test-q test-q2)
