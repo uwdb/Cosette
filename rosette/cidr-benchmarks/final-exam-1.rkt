@@ -34,9 +34,13 @@
 ; ------------ symbolic tables ----------------
 ; we need at least two rows
 
-(define Usr (Table "Usr" (list "uid" "uname" "city") (gen-sym-schema 3 2)))
+(define sUsr (Table "Usr" (list "uid" "uname" "city") (gen-sym-schema 3 2)))
 
-(define Picture (Table "Picture" (list "uid" "size") (gen-sym-schema 2 2)))
+(define sPicture (Table "Picture" (list "uid" "size") (gen-sym-schema 2 2)))
+
+; set table to be symbolic or concrete
+(define Usr sUsr)
+(define Picture sPicture)
 
 ; ------------ verification ----------------------
 ; the example is taken from the final example of CSE 344
@@ -88,16 +92,29 @@
     FROM q2-part
     WHERE (F-EMPTY)))
 
+; an alternative solution, using new syntax
+(define q2-new
+  (SELECT-GROUP (AS (SELECT (VALS "x.uid" "x.uname")
+                        FROM (JOIN (AS (NAMED Usr) ["x" (list "uid" "uname" "city")])
+                                   (AS (NAMED Picture) ["y" (list "uid" "size")]))
+                        WHERE (AND (AND (BINOP "x.uid" = "y.uid") (BINOP "y.size" > 1000000)) (BINOP "x.city" = 3)))
+                    ["x" (list "uid" "uname")])
+                (list "x.uid" "x.uname")
+                aggr-count
+                "x.uid"))
+
 ; (run q1)
 ; (run q2-part)
 ;(extract-schema q2-part)
 
-; (run q2)
-
+;(run q2)
+;(run q2-new)
 ; expect model
 
 ; Usr
 ; Picture
-
+; expect model
 (time (verify (same q1 q2)))
+; expect unsat
+(time (verify (same q2 q2-new)))
 

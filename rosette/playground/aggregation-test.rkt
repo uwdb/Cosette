@@ -37,6 +37,8 @@
 (define test-q3
   (SELECT-GROUP (NAMED ct) (list ) aggr-sum "votes.aggrf"))
 
+(define test-q4
+  (SELECT-GROUP (NAMED ct) (list ) aggr-count "votes.aggrf"))
 ;(writeln (denote-sql test-q (make-hash)))
 
 (run test-q)
