@@ -49,7 +49,11 @@
 >                              ,rosSchema :: (String, [String])
 >                              }
 >                   | RosQueryUnion RosQueryExpr RosQueryExpr
->                   | RosQueryAgg RosQueryExpr [RosValueExpr] String RosValueExpr
+>                   | RosQueryAgg {rosAggQE:: RosQueryExpr
+>                                 ,rosAggGB::[RosValueExpr]
+>                                 ,rosAggFun:: String
+>                                 ,rosAggTarget:: RosValueExpr
+>                                 ,rosAggSchema:: (String, [String])}
 >                         -- to SELECT-GROUP 
 >                   deriving (Eq, Show)
 
@@ -355,19 +359,38 @@ al: a list of schemas (with alias names) from env.
 >   RosQueryUnion <$> cosToRos tl al q1 s <*> cosToRos tl al q2 s
 > cosToRos tl al q s = convertFrom <$> makeRosQuery tl al q s
 
-pass 1 on Rosette AST, handle group by
+pass 1 on Rosette AST, handle aggregate without group by
+
+> handleAgg :: [RosSchema] -> [RosSchema] -> RosQueryExpr
+>           -> Either String RosQueryExpr
+> handleAgg tl al q =
+>   if length sl == 1 then
+>     case head sl of
+>       RosAgg af ve -> case rosGroup q of
+>                         Just gl -> Right q            -- already group by, do nothing
+>                         Nothing -> Right (RosQuery sl -- group by with empty group 
+>                                            (rosFrom q)
+>                                            (rosWhere q)
+>                                            (Just [])
+>                                            (rosDistinct q)
+>                                            (rosSchema q))
+>       _ -> Right q
+>   else Right q
+>   where sl = (rosSelectList q)
+  
+
+pass 2 on Rosette AST, handle group by. Only need to do basic query form here.
+Union is handled in applyPass.
 
 > handleGroupBy :: [RosSchema] -> [RosSchema] -> RosQueryExpr
 >               -> Either String RosQueryExpr
-> handleGroupBy tl al (RosQueryUnion q1 q2) =
->   RosQueryUnion <$> handleGroupBy tl al q1 <*> handleGroupBy tl al q2
 > handleGroupBy tl al q =
 >   case rosGroup q of
->     Nothing -> Right q    -- do nothing if there is no group by
->     Just gbc ->
+>     Nothing -> Right q           -- do nothing if there is no group by
+>     Just gbc ->                  -- to RosQueryAgg
 >       case lastField of
 >         RosAgg aggf target -> RosQueryAgg
->                           <$> Right (RosQuery initFields
+>                           <$> Right (RosQuery (initFields ++ [target])
 >                                       (rosFrom q)
 >                                       (rosWhere q)
 >                                       (rosGroup q)
@@ -375,7 +398,8 @@ pass 1 on Rosette AST, handle group by
 >                                       (rosSchema q))
 >                           <*> sl
 >                           <*> Right aggf
->                           <*> Right target
+>                           <*> Right (renameTar target)
+>                           <*> Right (rosSchema q)
 >         _ -> Right $ RosQuery     -- to distinct if no aggregation 
 >                        (rosSelectList q)
 >                        (rosFrom q)
@@ -388,15 +412,66 @@ pass 1 on Rosette AST, handle group by
 >             noOnAgg (RosAgg _ _) = Left "We currently only support single aggregation in the end of SELECT list."
 >             noOnAgg other = Right other
 >             sl = checkListErr $ map noOnAgg initFields
+>             (n, attrs) = rosSchema q
+>             renameTar (RosDIden t a) = RosDIden n a
 
-do all the passes.
+> type RosPass =
+>   [RosSchema] -> [RosSchema] -> RosQueryExpr -> Either String RosQueryExpr
+
+recursively apply query passes to query. query pass must has type RosPass
+
+> applyPass :: RosPass -> [RosSchema] -> [RosSchema] -> RosQueryExpr
+>           -> Either String RosQueryExpr
+> applyPass p tl al (RosQueryUnion q1 q2) =
+>   RosQueryUnion <$> p tl al q1 <*> p tl al q2
+> applyPass p tl al (RosQueryAgg q sl aggf target scm) =
+>   Right (RosQueryAgg q sl aggf target scm)   -- handleGroupBy is the last call, no need go deeper 
+> applyPass p tl al (RosQuery sl fr wh gr d scm) =
+>   let qPrev = (RosQuery sl fr wh gr d scm)
+>   in let qNew = RosQuery
+>                 <$> (checkListErr $ map convVE sl)
+>                 <*> newFr
+>                 <*> newPred
+>                 <*> Right gr
+>                 <*> Right d
+>                 <*> Right scm
+>   in case qNew of
+>     Left _ -> qNew
+>     Right qNew' -> if qPrev == qNew'
+>                      then p tl al qPrev   -- end of recursion
+>                      else applyPass p tl al qNew' 
+>   where convVE (RosVQE q) = RosVQE <$> applyPass p tl al q
+>         convVE ve = Right ve
+>         convTR (RosTR te n) = RosTR <$> convTE te <*> Right n
+>         convTR (RosTRXProd t1 t2) = RosTRXProd <$> convTR t1 <*> convTR t2
+>         convTE (RosUnion t1 t2) = RosUnion <$> convTE t1 <*> convTE t2
+>         convTE (RosTRQuery tq) = RosTRQuery <$> applyPass p tl al tq
+>         convTE te = Right te
+>         newFr = case fr of
+>                   Nothing -> Right Nothing
+>                   Just fl -> Just <$> (checkListErr $ map convTR fl)
+>         convPred (RosAnd p1 p2) = RosAnd <$> convPred p1 <*> convPred p2
+>         convPred (RosOr p1 p2) = RosOr <$> convPred p1 <*> convPred p2
+>         convPred (RosNot pr) = RosNot <$> convPred pr
+>         convPred (RosExists q) = RosExists <$> applyPass p tl al q
+>         convPred (RosVeq v1 v2) = RosVeq <$> convVE v1 <*> convVE v2
+>         convPred (RosVgt v1 v2) = RosVgt <$> convVE v1 <*> convVE v2
+>         convPred (RosVlt v1 v2) = RosVlt <$> convVE v1 <*> convVE v2
+>         convPred pred = Right pred  -- do nothing for other predicate
+>         newPred = case wh of
+>                     Nothing -> Right Nothing
+>                     Just pred -> Just <$> (convPred pred)
+>         
+
+do all the passes here.
 
 > toRosQuery :: [RosSchema] -> [RosSchema] -> QueryExpr
 >            -> String -> Either String RosQueryExpr
 > toRosQuery tl al q s = 
 >   do ros1 <- cosToRos tl al q s
->      ros2 <- handleGroupBy tl al ros1
->      return ros2
+>      ros2 <- applyPass handleAgg tl al ros1
+>      ros3 <- applyPass handleGroupBy tl al ros2
+>      return ros3
 
 === RosQuery to sexp string
 

@@ -27,6 +27,7 @@
 
 (define t3 (Table "t" (list "sum") (list (cons (list -2) 1))))
 (define t4 (Table "t" (list "sum") (list)))
+(define t5 (Table "t" (list) (list (cons (list) 3)))) ; empty tuple
 
 (define test-q
   (SELECT-GROUP (NAMED ct) (list "votes.vote" "votes.story_id") aggr-sum "votes.aggrf"))
@@ -40,6 +41,9 @@
 (define test-q4
   (SELECT-GROUP (NAMED ct) (list ) aggr-count "votes.aggrf"))
 ;(writeln (denote-sql test-q (make-hash)))
+
+(define test-q5
+  (SELECT-GROUP (NAMED t5) (list ) aggr-count "votes.aggrf"))
 
 (run test-q)
 (run test-q2)
