@@ -26,12 +26,13 @@
 >                   | RosBinOp RosValueExpr String RosValueExpr
 >                   | RosConstant String
 >                   | RosVQE RosQueryExpr
+>                   | RosAggVQE String RosQueryExpr  -- query, aggregate fun
 >                   | RosAgg String RosValueExpr
 >                     deriving (Eq, Show)
 
 > data RosPredicate = RosTRUE
 >                   | RosFALSE
->                   | RosNaryOp String [String]  -- nary func. int-> ... -> bool
+>                   | RosNaryOp String [String]      -- nary func. int-> ... -> bool
 >                   | RosAnd RosPredicate RosPredicate
 >                   | RosOr RosPredicate RosPredicate
 >                   | RosNot RosPredicate
@@ -144,7 +145,7 @@ sl: the schema list from the env, this is needed for subqueries in SELECT
 
 > starToSelect :: [RosSchema] -> [RosSchema] -> SelectItem -> Either String [SelectItem]
 > starToSelect rs sl (Proj v s) =
->   do v' <- elimStarInVE sl v
+>   do v' <- elimStarInVE rs sl v
 >      return [Proj v' s]
 > starToSelect rs sl Star = Right (foldMap scmToList rs)
 > starToSelect rs sl (DStar a) = scmToList <$> findScm rs a 
@@ -156,41 +157,45 @@ sl: the schema list from the env, this is needed for subqueries in SELECT
 remove star in predicate
 
 > elimStarInPred :: [RosSchema] -> Predicate -> Either String Predicate
-> elimStarInPred rs (And p1 p2) = And
->                                 <$> elimStarInPred rs p1
->                                 <*> elimStarInPred rs p2
-> elimStarInPred rs (Or p1 p2) = Or
->                                <$> elimStarInPred rs p1
->                                <*> elimStarInPred rs p2
-> elimStarInPred rs (Not p) = Not <$> elimStarInPred rs p
-> elimStarInPred rs (Exists q) = Exists <$> elimStar rs q
-> elimStarInPred rs (Veq v1 v2) = Veq
->                                 <$> elimStarInVE rs v1
->                                 <*> elimStarInVE rs v2
-> elimStarInPred rs (Vgt v1 v2) = Vgt
->                                 <$> elimStarInVE rs v1
->                                 <*> elimStarInVE rs v2
-> elimStarInPred rs (Vlt v1 v2) = Vlt
->                                 <$> elimStarInVE rs v1
->                                 <*> elimStarInVE rs v2
-> elimStarInPred rs other = Right other
+> elimStarInPred sl (And p1 p2) = And
+>                                 <$> elimStarInPred sl p1
+>                                 <*> elimStarInPred sl p2
+> elimStarInPred sl (Or p1 p2) = Or
+>                                <$> elimStarInPred sl p1
+>                                <*> elimStarInPred sl p2
+> elimStarInPred sl (Not p) = Not <$> elimStarInPred sl p
+> elimStarInPred sl (Exists q) = Exists <$> elimStar sl q
+> elimStarInPred sl (Veq v1 v2) = Veq
+>                                 <$> elimStarInVE [] sl v1
+>                                 <*> elimStarInVE [] sl v2
+> elimStarInPred sl (Vgt v1 v2) = Vgt
+>                                 <$> elimStarInVE [] sl v1
+>                                 <*> elimStarInVE [] sl v2
+> elimStarInPred sl (Vlt v1 v2) = Vlt
+>                                 <$> elimStarInVE [] sl v1
+>                                 <*> elimStarInVE [] sl v2
+> elimStarInPred sl other = Right other
 
 remove star in value expression
 
 here, we put the last attribute of the last relation in place of star if the aggregation
 function is count. star should not appear in any other aggregation function.
 
-> elimStarInVE :: [RosSchema] -> ValueExpr -> Either String ValueExpr
-> elimStarInVE rs (BinOp v1 o v2) = BinOp <$> elimStarInVE rs v1 <*> Right o <*> elimStarInVE rs v2
-> elimStarInVE rs (VQE q) = VQE <$> elimStar rs q
-> elimStarInVE rs (Agg s a) = Agg s <$> f a
+rs: the schema list from the FROM clause 
+sl: the schema list from the env, this is needed for subqueries in SELECT
+
+> elimStarInVE :: [RosSchema] -> [RosSchema] -> ValueExpr -> Either String ValueExpr
+> elimStarInVE rs sl (BinOp v1 o v2) =
+>   BinOp <$> elimStarInVE rs sl v1 <*> Right o <*> elimStarInVE rs sl v2
+> elimStarInVE rs sl (VQE q) = VQE <$> elimStar sl q
+> elimStarInVE rs sl (Agg s a) = Agg s <$> f a
 >   where f AStar = if (map toLower s == "count")
 >                   then let r = last rs
 >                        in let a' = fst $ head (rosAttrs r)
 >                           in Right (AV (DIden (rosSName r) a'))
 >                   else Left ("you cannot use * in aggregation " ++ s)
->         f (AV v) = AV <$> elimStarInVE rs v
-> elimStarInVE rs other = Right other
+>         f (AV v) = AV <$> elimStarInVE rs sl v
+> elimStarInVE rs sl other = Right other
 
 === convert select
 
@@ -210,7 +215,7 @@ the base case
 > makeRosVE tl al (BinOp v1 o v2) =  RosBinOp
 >                                    <$> makeRosVE tl al v1
 >                                    <*> Right o <*> makeRosVE tl al v2
-> makeRosVE tl al (VQE q) = RosVQE <$> toRosQuery tl al q "anyname"
+> makeRosVE tl al (VQE q) = RosVQE <$> makeRosQuery tl al q "anyname"
 > makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
 >     "sum" -> RosAgg "aggr-sum" <$> aggToVE e
@@ -378,8 +383,37 @@ pass 1 on Rosette AST, handle aggregate without group by
 >   else Right q
 >   where sl = (rosSelectList q)
   
+pass 2 on Rosette AST, handle QueryExpr in ValueExpr,
+currently only support aggregate without group by
 
-pass 2 on Rosette AST, handle group by. Only need to do basic query form here.
+> handleQueryAsValue :: [RosSchema] -> [RosSchema] -> RosQueryExpr
+>                    -> Either String RosQueryExpr
+> handleQueryAsValue tl al (RosQuery sl fr wh gr dis sch) =
+>   RosQuery <$> (checkListErr $ map convVE sl)
+>            <*> Right fr
+>            <*> convWhere wh
+>            <*> Right gr
+>            <*> Right dis
+>            <*> Right sch
+>   where convVE (RosVQE (RosQuery sl' fr' wh' gr' dis' sch')) =
+>           case sl' of
+>             [RosAgg af v] -> if gr' == Just []
+>                              then Right (RosAggVQE af (RosQuery [v] fr' wh' gr' dis' sch'))
+>                              else Left "QueryExpr as Value can only be aggregate."
+>             _ -> Left "QueryExpr as Value can only be aggregate."
+>         convVE other = Right other
+>         convPred (RosVeq v1 v2) = RosVeq <$> convVE v1 <*> convVE v2
+>         convPred (RosVgt v1 v2) = RosVgt <$> convVE v1 <*> convVE v2
+>         convPred (RosVlt v1 v2) = RosVlt <$> convVE v1 <*> convVE v2
+>         convPred (RosAnd p1 p2) = RosAnd <$> convPred p1 <*> convPred p2
+>         convPred (RosOr p1 p2) = RosOr <$> convPred p1 <*> convPred p2
+>         convPred (RosNot p) = RosNot <$> convPred p
+>         convPred other = Right other
+>         convWhere Nothing = Right Nothing
+>         convWhere (Just p) = Just <$> convPred p
+
+
+pass 3 on Rosette AST, handle group by. Only need to do basic query form here.
 Union is handled in applyPass.
 
 > handleGroupBy :: [RosSchema] -> [RosSchema] -> RosQueryExpr
@@ -398,7 +432,7 @@ Union is handled in applyPass.
 >                                       (rosSchema q))
 >                           <*> sl
 >                           <*> Right aggf
->                           <*> Right (renameTar target)
+>                           <*> Right tar
 >                           <*> Right (rosSchema q)
 >         _ -> Right $ RosQuery     -- to distinct if no aggregation 
 >                        (rosSelectList q)
@@ -407,13 +441,17 @@ Union is handled in applyPass.
 >                        Nothing
 >                        True
 >                        (rosSchema q)
->       where lastField = last $ rosSelectList q
+>       where scm = rosSchema q
+>             lastField = last $ rosSelectList q
 >             initFields = init $ rosSelectList q
+>             alias = last $ snd (rosSchema q)
 >             noOnAgg (RosAgg _ _) = Left "We currently only support single aggregation in the end of SELECT list."
 >             noOnAgg other = Right other
->             sl = checkListErr $ map noOnAgg initFields
+>             sl = case checkListErr $ map noOnAgg initFields of
+>                    Left err -> Left err
+>                    Right _ -> Right $ map (RosDIden (fst scm)) (init $ snd scm) 
 >             (n, attrs) = rosSchema q
->             renameTar (RosDIden t a) = RosDIden n a
+>             tar = RosDIden n alias
 
 > type RosPass =
 >   [RosSchema] -> [RosSchema] -> RosQueryExpr -> Either String RosQueryExpr
@@ -470,8 +508,9 @@ do all the passes here.
 > toRosQuery tl al q s = 
 >   do ros1 <- cosToRos tl al q s
 >      ros2 <- applyPass handleAgg tl al ros1
->      ros3 <- applyPass handleGroupBy tl al ros2
->      return ros3
+>      ros3 <- applyPass handleQueryAsValue tl al ros2
+>      ros4 <- applyPass handleGroupBy tl al ros3
+>      return ros4
 
 === RosQuery to sexp string
 
@@ -499,7 +538,7 @@ convert ValueExpr to sexp
 >   toSexp (RosDIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
 >   toSexp (RosBinOp v1 op v2) =  addParen 
 >     $ unwords ["VAL-BINOP", toSexp v1, op, toSexp v2]
->   toSexp (RosVQE q) = toSexp q
+>   toSexp (RosAggVQE af q) = addParen $ uw ["AGGR", af, toSexpSchemaless q]    -- need to unwrap relation to value, currently only support aggregate without groupby
  
 convert Predicate to sexp
 
@@ -543,6 +582,7 @@ Since query with only aggregation (no group by) and group by query requires thei
 >     where spj = toSexpSchemaless q
 >           sch' = case q of
 >                    RosQueryUnion q1 q2 -> rosSchema q1
+>                    RosQueryAgg _ _ _ _ scm -> scm
 >                    _ -> rosSchema q
 >           sch = addSParen $ uw [addEscStr (fst sch'), al]
 >           al = addParen $ uw ("list":(addEscStr <$> snd sch'))
@@ -550,15 +590,19 @@ Since query with only aggregation (no group by) and group by query requires thei
 convert RosQueryExpr to s-expression string without adding schema. 
 
 > toSexpSchemaless :: RosQueryExpr -> String
+> toSexpSchemaless (RosQueryAgg q gb f tar _) =
+>   addParen $ uw ["SELECT-GROUP", toSexp q, gb', f, toSexp tar]
+>   where gb'  = addParen $ uw ("list" : map toSexp gb)
 > toSexpSchemaless (RosQueryUnion q1 q2) =
 >   addParen $ uw ["UNION-ALL", toSexpSchemaless q1, toSexpSchemaless q2]
-> toSexpSchemaless q = addParen $ uw [sel, sl, "\n  FROM", fl, "\n  WHERE", p]
->   where sl = addParen $ uw ("VALS": (toSexp <$> rosSelectList q))
->         fl = case rosFrom q of Nothing -> "UNIT"
->                                Just fr -> toSexp $ head fr -- assuming converted from list to singleton
->         p =  case rosWhere q of Nothing -> addParen $ "F-EMPTY"
->                                 Just wh -> toSexp wh
->         sel = if (rosDistinct q) then "SELECT-DISTINCT" else "SELECT"
+> toSexpSchemaless (RosQuery sl fl p _ dis _) = 
+>   addParen $ uw [sel, sl', "\n  FROM", fl', "\n  WHERE", p']
+>   where sl' = addParen $ uw ("VALS": map toSexp sl)
+>         fl' = case fl of Nothing -> "UNIT"
+>                          Just fr -> toSexp $ head fr -- assuming converted from list to singleton
+>         p' =  case p of Nothing -> addParen $ "F-EMPTY"
+>                         Just wh -> toSexp wh
+>         sel = if dis then "SELECT-DISTINCT" else "SELECT"
 
 generate rosette code.
 
@@ -595,12 +639,11 @@ statement list
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      preds <- predDecs pl sl
 >      tbs <- tableDecs sl'
->      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q2 rs1) ++ (genQ q1 rs2) ++ (genSolve sl' q1 q2))
+>      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q1 rs1) ++ (genQ q2 rs2) ++ (genSolve sl' q1 q2))
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
-
 
 generate declarations of symbolic predicate (generic predicate)
 
