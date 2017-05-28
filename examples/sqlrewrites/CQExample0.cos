@@ -5,9 +5,9 @@ table r1(s1);
 table r2(s2);
 
 query q1
-`select distinct x.x as x from r1 x, r2 y where x.y = y.y`;
+`select distinct x.x as x from r1 x, r2 y where x.y = y.y and x.x = 1`;
 
 query q2
-`select distinct x.x as x from r1 x, r1 y, r2 z where x.x = y.x and x.y = z.y`;
+`select distinct x.x as x from r1 x, r1 y, r2 z where x.x = y.x and x.y = z.y and x.x = 1`;
 
 verify q1 q2;

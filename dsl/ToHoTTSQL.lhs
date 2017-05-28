@@ -22,8 +22,8 @@ schema
 
 environment
 
-> data HSEnv = MakeHSEnv {tables :: [(String, String)]  -- table name, schema name
->                        ,schemas :: [HSSchema]         -- schemas
+> data HSEnv = MakeHSEnv {tables :: [(String, String)]    -- table name, schema name
+>                        ,schemas :: [HSSchema]           -- schemas
 >                        } deriving (Eq, Show)
 
 context
@@ -204,7 +204,7 @@ convert Cosette value expression to HoTTSQL expression
 > fstInList (h:t) a = if fst h == a then True else fstInList t a
 
 > convertVE :: HSContext -> ValueExpr -> Either String HSValueExpr
-> convertVE ctx (NumLit i) = Left "do not support concrete number now."
+> convertVE ctx (NumLit i) = Right $ HSConstant ("integer_" ++ (show i))
 > convertVE ctx (DIden tr attr) = do (p, s) <- nameToPath ctx tr
 >                                    if fstInList (hsAttrs s) attr
 >                                    then return (HSDIden p (hsSName s ++ "_" ++ attr))
@@ -253,7 +253,38 @@ convert where
 > convertGroup ctx Nothing = Right []
 > convertGroup ctx (Just g) = checkListErr $ (convertVE ctx <$> g)
 
-convert Cosette AST to HoTTSQL AST 
+
+get number literals from Cosette AST.
+
+> getNumberLiterals :: QueryExpr -> [Integer]
+> getNumberLiterals (Select sl fr wh _ _) =
+>   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh   
+>   where getNumSI (Proj v _) = getNumVE v
+>         getNumSI others = []
+>         getNumVE (NumLit i) = [i]
+>         getNumVE (BinOp v1 o v2) = getNumVE v1 ++ getNumVE v2
+>         getNumVE (VQE q) = getNumberLiterals q
+>         getNumVE others = []
+>         getNumFr Nothing = []
+>         getNumFr (Just trs) = (foldl (++) [] $ map getNumTR trs)
+>         getNumTR (TR te _) = getNumTE te
+>         getNumTE (TRQuery q) = getNumberLiterals q
+>         getNumTE (TRUnion t1 t2) = getNumTE t1 ++ getNumTE t2
+>         getNumTE others = []
+>         getNumWh Nothing = []
+>         getNumWh (Just p) = getNumPred p
+>         getNumPred (Exists q) = getNumberLiterals q
+>         getNumPred (Veq v1 v2) = getNumVE v1 ++ getNumVE v2
+>         getNumPred (Vgt v1 v2) = getNumVE v1 ++ getNumVE v2
+>         getNumPred (Vlt v1 v2) = getNumVE v1 ++ getNumVE v2
+>         getNumPred (And p1 p2) = getNumPred p1 ++ getNumPred p2
+>         getNumPred (Or p1 p2) = getNumPred p1 ++ getNumPred p2
+>         getNumPred (Not p) = getNumPred p
+
+> intToConst :: Integer -> String
+> intToConst i = "integer_" ++ (show i)
+
+convert Cosette AST to HoTTSQL AST
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
 > toHSQuery env ctx q = case q of
@@ -366,15 +397,17 @@ assemble the theorem definition.
 
 > genTheorem :: [(String, String)] -> [(String, String)]-> [(String, [String])] -> [HSSchema] -> [(String, QueryExpr)] -> String -> String -> Either String String
 > genTheorem tsl cl pl sl ql q1 q2 =
->   let env = MakeHSEnv tsl sl in
->     do qe1 <- findQ q1 ql
->        qe2 <- findQ q2 ql
->        hsq1 <- toHSQuery env HSEmpty qe1 
->        hsq2 <- toHSQuery env HSEmpty qe2
->        qs1 <- Right (toCoq hsq1)
->        qs2 <- Right (toCoq hsq2)
->        vs <- Right (verifyDecs qs1 qs2)
->        return ((joinWithBr headers) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof tactics) ++ ending)
+>   do qe1 <- findQ q1 ql
+>      qe2 <- findQ q2 ql
+>      nl1 <- Right $ getNumberLiterals qe1
+>      nl2 <- Right $ getNumberLiterals qe2
+>      env <- Right $ MakeHSEnv tsl sl
+>      hsq1 <- toHSQuery env HSEmpty qe1
+>      hsq2 <- toHSQuery env HSEmpty qe2
+>      qs1 <- Right (toCoq hsq1)
+>      qs2 <- Right (toCoq hsq2)
+>      vs <- Right (verifyDecs qs1 qs2)
+>      return ((joinWithBr headers) ++ (constDecs (nl1++nl2)) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof tactics) ++ ending)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -386,6 +419,7 @@ assemble the theorem definition.
 >     attrs = unwords $ map attrDecs sl
 >     preds = unwords $ map predDecs pl
 >     decs = addRefine $ "forall " ++ scms ++ tbls ++ attrs ++ preds ++ ", _"
+>     constDecs consts = (joinWithBr $ map (\a -> "  Variable " ++ (intToConst a) ++ ": constant int.") (dedup consts)) ++ "\n" 
 
 extract data types that are needed. e.g. schema s(a:t1, b:t2, c:t1, ??) -> [t1, t2] 
 
