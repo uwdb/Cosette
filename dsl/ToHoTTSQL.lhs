@@ -205,9 +205,9 @@ convert Cosette value expression to HoTTSQL expression
 
 > convertVE :: HSContext -> ValueExpr -> Either String HSValueExpr
 > convertVE ctx (NumLit i) = Left "do not support concrete number now."
-> convertVE ctx (DIden tr attr) = do t <- nameToPath ctx tr
->                                    if fstInList (hsAttrs (snd t)) attr
->                                    then return (HSDIden (fst t) attr)
+> convertVE ctx (DIden tr attr) = do (p, s) <- nameToPath ctx tr
+>                                    if fstInList (hsAttrs s) attr
+>                                    then return (HSDIden p (hsSName s ++ "_" ++ attr))
 >                                    else Left ("attribute " ++ attr ++ " is not valid")
 > convertVE ctx (BinOp v1 op v2) = HSBinOp <$> convertVE ctx v1
 >                                          <*> Right op
@@ -407,7 +407,7 @@ generate attribute (column) declarations from schemas, TODO: everything is int f
 >         attrs = hsAttrs s
 >         genAttr t = if (fst t) == "unknowns"
 >                     then ""
->                     else "(" ++ (fst t) ++ " : Column int " ++ sn ++ ")"
+>                     else "(" ++ sn ++ "_" ++ (fst t) ++ " : Column int " ++ sn ++ ")"
 
 generate predicate declarations
 
