@@ -1,0 +1,25 @@
+schema su(usrUid:int, usrName:str, ??);
+schema sp(picUid:int, picSize:int, ??);
+
+table usr(su);
+table pic(sp);
+
+predicate b1(sp);
+predicate b2(sp);
+
+query q1
+`select distinct x.usrUid as xid, x.usrName as xname
+ from usr x, pic u, pic v, pic w
+ where x.usrUid = u.picUid AND x.usrUid = v.picUid AND
+       x.usrUid = w.picUid AND w.picSize = v.picSize AND
+       b1(u) AND b2(v)`;
+
+query q2
+`select distinct x.usrUid as xid, x.usrName as xname
+ from usr x, pic u, pic v
+ where x.usrUid = u.picUid AND x.usrUid = v.picUid AND
+       b1(u) AND b2(v)`;
+
+verify q1 q2;
+       
+
