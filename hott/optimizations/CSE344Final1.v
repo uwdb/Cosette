@@ -49,23 +49,22 @@ Module CSE344Final1 (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
         where x.city = 3 *)
      
     Lemma CSE344Final1 : Type.
-      refine (forall {Γ: Schema},
-      ⟦ SELECT1 combine (combine (left ⋅ right ⋅ u_uid) (left ⋅ right ⋅ u_uname))
+      refine (forall {Γ:Schema},
+      ⟦ Γ ⊢ (SELECT1 combine (combine (right ⋅ u_uid) (right ⋅ u_uname))
                         (e2p (aggregate count
                                         (SELECT1 (right ⋅ p_pid) FROM1 table pic
                                                  WHERE equal (var (left ⋅ right ⋅ u_uid))
                                                  (var (right ⋅ p_uid)) AND
                                                  castPred (right ⋅ p_size) gt100000)))
                         FROM1 table usr
-                        WHERE equal (var (right ⋅ u_city)) (constantExpr denver) ⟧ = 
-      ⟦ SELECT combine' (combine' PLAIN(var (right ⋅ left ⋅ u_uid))
+                        WHERE equal (var (right ⋅ u_city)) (constantExpr denver)) : _ ⟧ = 
+      ⟦ Γ ⊢ (SELECT combine' (combine' PLAIN(var (right ⋅ left ⋅ u_uid))
                                       PLAIN(var (right ⋅ left ⋅ u_uname))) 
                                   COUNT(var (right ⋅ right ⋅ p_pid))
              FROM1 (product (table usr) (table pic)) 
              WHERE  equal (var (right ⋅ left ⋅ u_uid)) (var (right ⋅ right ⋅ p_uid)) AND
              castPred (right ⋅ right ⋅ p_size) gt100000
-             GROUP BY (combine (right ⋅ left ⋅ u_uid) (right ⋅ left ⋅ u_uname)) ⟧).
-      exact Γ.
+             GROUP BY (combine (right ⋅ left ⋅ u_uid) (right ⋅ left ⋅ u_uname))) : _ ⟧).
     Defined.
 
     Arguments CSE344Final1 /.
