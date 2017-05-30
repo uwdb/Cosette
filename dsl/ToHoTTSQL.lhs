@@ -26,6 +26,9 @@ environment
 >                        ,schemas :: [HSSchema]           -- schemas
 >                        } deriving (Eq, Show)
 
+> emptyEnv :: HSEnv
+> emptyEnv = MakeHSEnv [] []
+
 context
 
 > data HSContext = HSNode HSContext HSContext
@@ -37,7 +40,8 @@ value expression
 
 > data HSValueExpr = HSDIden String String                   -- eg: r.a  
 >                  | HSBinOp HSValueExpr String HSValueExpr  -- eg: r.a + r.b
->                  | HSConstant String                       -- constant variable
+>                  | HSConstant String                       -- constant
+>                  | HSAggVQE String HSQueryExpr             -- aggFun Query
 >                    deriving (Eq, Show)
 
 predicate
@@ -203,16 +207,28 @@ convert Cosette value expression to HoTTSQL expression
 > fstInList [] a = False
 > fstInList (h:t) a = if fst h == a then True else fstInList t a
 
-> convertVE :: HSContext -> ValueExpr -> Either String HSValueExpr
-> convertVE ctx (NumLit i) = Right $ HSConstant ("integer_" ++ (show i))
-> convertVE ctx (DIden tr attr) = do (p, s) <- nameToPath ctx tr
->                                    if fstInList (hsAttrs s) attr
->                                    then return (HSDIden p (hsSName s ++ "_" ++ attr))
->                                    else Left ("attribute " ++ attr ++ " is not valid")
-> convertVE ctx (BinOp v1 op v2) = HSBinOp <$> convertVE ctx v1
+> convertVE :: HSEnv -> HSContext -> ValueExpr -> Either String HSValueExpr
+> convertVE env ctx (NumLit i) = Right $ HSConstant ("integer_" ++ (show i))
+> convertVE env ctx (DIden tr attr) = do (p, s) <- nameToPath ctx tr
+>                                        if fstInList (hsAttrs s) attr
+>                                          then return (HSDIden p (hsSName s ++ "_" ++ attr))
+>                                          else Left ("attribute " ++ attr ++ " is not valid")
+> convertVE env ctx (BinOp v1 op v2) = HSBinOp <$> convertVE env ctx v1
 >                                          <*> Right op
->                                          <*> convertVE ctx v2
-> convertVE ctx (Constant c) = Right (HSConstant c)
+>                                          <*> convertVE env ctx v2
+> convertVE env ctx (Constant c) = Right (HSConstant c)
+> convertVE env ctx (VQE (Select sl fr wh gb di)) =
+>   case sl of
+>     [Proj (Agg f v) a] -> if (gb == Nothing)
+>                           then let q = (Select [newSI f v a] fr wh gb di) in
+>                                  HSAggVQE f <$> toHSQuery env ctx q
+>                           else Left err
+>     _ -> Left err
+>   where err = "Currently only support aggregate without group by as value expression"
+>         newSI f v a = case v of
+>                         AV v' -> Proj v' a
+>                         AStar -> Star
+> convertVE env ctx (VQE others) = Left "Currently only support aggregate without group by as value expression"
 
 convert Cosette predicate to HoTTSQL predicate
 
@@ -228,20 +244,20 @@ convert Cosette predicate to HoTTSQL predicate
 >                                       <*> convertPred env ctx b2
 > convertPred env ctx (Not b) = HSNot <$> convertPred env ctx b
 > convertPred env ctx (Exists q) = HSExists <$> toHSQuery env ctx q
-> convertPred env ctx (Veq v1 v2) = HSEq <$> convertVE ctx v1
->                                        <*> convertVE ctx v2
-> convertPred env ctx (Vgt v1 v2) = HSGt <$> convertVE ctx v1
->                                        <*> convertVE ctx v2
-> convertPred env ctx (Vlt v1 v2) = HSLt <$> convertVE ctx v1
->                                        <*> convertVE ctx v2
+> convertPred env ctx (Veq v1 v2) = HSEq <$> convertVE env ctx v1
+>                                        <*> convertVE env ctx v2
+> convertPred env ctx (Vgt v1 v2) = HSGt <$> convertVE env ctx v1
+>                                        <*> convertVE env ctx v2
+> convertPred env ctx (Vlt v1 v2) = HSLt <$> convertVE env ctx v1
+>                                        <*> convertVE env ctx v2
 
 convert Select
 
-> convertSelect :: HSContext -> [SelectItem] -> Either String [HSSelectItem]
-> convertSelect ctx l = checkListErr (f <$> l)
+> convertSelect :: HSEnv -> HSContext -> [SelectItem] -> Either String [HSSelectItem]
+> convertSelect env ctx l = checkListErr (f <$> l)
 >   where f Star = Right HSStar
 >         f (DStar x) = HSDStar <$> (fst <$> nameToPath ctx x)
->         f (Proj v _) = HSProj <$> convertVE ctx v
+>         f (Proj v _) = HSProj <$> convertVE env ctx v
 
 convert where
 
@@ -251,7 +267,7 @@ convert where
 
 > convertGroup :: HSContext -> Maybe [ValueExpr] -> Either String [HSValueExpr]
 > convertGroup ctx Nothing = Right []
-> convertGroup ctx (Just g) = checkListErr $ (convertVE ctx <$> g)
+> convertGroup ctx (Just g) = checkListErr $ (convertVE emptyEnv ctx <$> g)
 
 
 get number literals from Cosette AST.
@@ -291,7 +307,7 @@ convert Cosette AST to HoTTSQL AST
 >                         Select sl fr wh gr ds ->
 >                           do ctx' <- getCtx env ctx fr
 >                              ft' <- convertFrom env ctx fr
->                              sl' <- convertSelect (HSNode ctx ctx') sl
+>                              sl' <- convertSelect env (HSNode ctx ctx') sl
 >                              wh' <- convertWhere env (HSNode ctx ctx') wh
 >                              gr' <- convertGroup (HSNode ctx ctx') gr
 >                              return (HSSelect sl' ft' wh' gr' ds)
@@ -321,6 +337,7 @@ dedup list (this does not preserve the order)
 >                   Just o -> o
 >                   Nothing -> "ERROR: do not support " ++ " op."             
 >   toCoq (HSConstant c) = addParen $ uw ["constantExpr", c]
+>   toCoq (HSAggVQE f q) = addParen $ uw ["aggregate", f, toCoq q]
 
 convert valueExpr to projection strings.
 
