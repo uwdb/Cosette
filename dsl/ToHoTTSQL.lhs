@@ -8,6 +8,7 @@
 > import Text.Parsec.Error as PE
 > import Data.List (unwords, intercalate, filter)
 > import Data.Set (toList, fromList)
+> import Data.Char (toUpper)
 > import FunctionsAndTypesForParsing
 > import Utilities
 > import qualified Data.Map as Map
@@ -321,10 +322,12 @@ convert Cosette AST to HoTTSQL AST
 >                             Proj (Agg f v) _ ->         -- last proj is a aggregate
 >                               do ctx' <- getCtx env ctx fr
 >                                  fr' <- convertFrom env ctx fr
->                                  slNew <- sl'
+>                                  sl' <- case checkListErr $ map noOnAgg initFields of
+>                                    Left e -> Left e
+>                                    Right _ -> convertSelect env (HSNode ctx ctx') sl
 >                                  wh' <- convertWhere env (HSNode ctx ctx') wh
 >                                  gr' <- convertGroup (HSNode ctx ctx') gr
->                                  return (HSSelect slNew fr' wh' gr' ds)
+>                                  return (HSSelect sl' fr' wh' gr' ds)
 >                             _ -> case checkListErr $ map noOnAgg sl of 
 >                                    Left e -> Left e
 >                                    Right _ -> toHSQuery env ctx (Select sl fr wh Nothing True)
@@ -333,9 +336,6 @@ convert Cosette AST to HoTTSQL AST
 >                                 noOnAgg other = Right other
 >                                 lastField = last sl
 >                                 initFields = init sl
->                                 sl' = case checkListErr $ map noOnAgg initFields of
->                                   Left e -> Left e
->                                   Right _ -> convertSelect env ctx sl
 >                         UnionAll q1 q2 ->
 >                              HSUnionAll <$>
 >                              toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
@@ -376,7 +376,7 @@ convert valueExpr to projection strings.
 >   toCoq (HSPredVar v sl) = addParen $ uw ["castPred (combine left",
 >                                          (f sl) ++ ")", v]
 >     where f [x] = addParen $ x
->           f (t:h) = addParen $ uw ["combine", addParen $ t, f h]
+>           f (t:h) = addParen $ uw ["combine", addParen t, f h]
 >           f [] = "ERROR"
 >   toCoq (HSAnd b1 b2) = addParen $ uw ["and", toCoq b1, toCoq b2]
 >   toCoq (HSOr b1 b2) = addParen $ uw ["or", toCoq b1, toCoq b2]
@@ -402,7 +402,7 @@ convert valueExpr to projection strings.
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
 >                              (addParen $ toCoq q2)
 >   toCoq (HSSelect sl fr wh [] di) =             -- if there is no group by
->     p ++ (addParen $ uw [ genSel $ sl, "FROM1", toCoq $ fr, w])
+>     p ++ (addParen $ uw [ genSel sl, "FROM1", toCoq fr, w])
 >     where genSel [HSStar] = "SELECT *"
 >           genSel sl = "SELECT1 " ++ (f sl)
 >           f [x] = toCoq x
@@ -411,11 +411,20 @@ convert valueExpr to projection strings.
 >           w = if (wh == HSTrue)
 >               then ""
 >               else "WHERE " ++ (toCoq wh)
-
-    toCoq (HSSelect sl fr wh gr di) =            -- if group by is not empty
-     p ++ (addParen 
-     where p = if di then "DISTINCT " else ""
-
+>   toCoq (HSSelect sl fr wh gr di) =            -- if group by is not empty
+>     p ++ (addParen $ uw ["SELECT ", f sl, "FROM1 ", toCoq fr, w, "GROUP BY ", f' gr])
+>     where p = if di then "DISTINCT " else "" 
+>           -- always valid here, replace * in COUNT(*) with right
+>           -- the pattern matching is intended to be imcomplete,
+>           -- last field can only AGG
+>           f [HSProj (HSAgg af HSVStar)] = (map toUpper af) ++ (addParen $ "right") 
+>           f [HSProj (HSAgg af ve)] =  (map toUpper af) ++ (addParen $ toCoq ve) 
+>           f (h:t) = addParen $ uw ["combine'", "PLAIN" ++ (addParen $ toCoq h), f t]
+>           w = if (wh == HSTrue)
+>               then ""
+>               else "WHERE " ++ (toCoq wh)
+>           f' [x] = veToProj x
+>           f' (h:t) = addParen $ uw ["combine", veToProj h, f' t]
 
 from Cosette statements to Coq program (or Error message)
 
@@ -512,7 +521,10 @@ generate predicate declarations
 >            "  Import CQTac. \n",
 >            "  Parameter int: type.",
 >            "  Parameter add: binary int int int.",
->            "  Parameter minus: binary int int int. \n"]
+>            "  Parameter minus: binary int int int. \n",
+>            "  Notation combine' := combineGroupByProj.\n",
+>            "  Parameter count : forall {T}, aggregator T int.",
+>            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e). \n"]
 
 > openDef :: String
 > openDef = "  Definition Rule: Type. \n"
