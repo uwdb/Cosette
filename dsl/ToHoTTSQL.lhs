@@ -42,6 +42,8 @@ value expression
 >                  | HSBinOp HSValueExpr String HSValueExpr  -- eg: r.a + r.b
 >                  | HSConstant String                       -- constant
 >                  | HSAggVQE String HSQueryExpr             -- aggFun Query
+>                  | HSAgg String HSValueExpr                -- eg: count(*)
+>                  | HSVStar                                 -- only in count(*)
 >                    deriving (Eq, Show)
 
 predicate
@@ -229,6 +231,9 @@ convert Cosette value expression to HoTTSQL expression
 >                         AV v' -> Proj v' a
 >                         AStar -> Star
 > convertVE env ctx (VQE others) = Left "Currently only support aggregate without group by as value expression"
+> convertVE env ctx (Agg f ae) = case ae of
+>                                  AV v -> HSAgg f <$> convertVE env ctx v
+>                                  AStar -> Right $ HSAgg f HSVStar                                  
 
 convert Cosette predicate to HoTTSQL predicate
 
@@ -251,7 +256,7 @@ convert Cosette predicate to HoTTSQL predicate
 > convertPred env ctx (Vlt v1 v2) = HSLt <$> convertVE env ctx v1
 >                                        <*> convertVE env ctx v2
 
-convert Select
+convert Select when group by is empty
 
 > convertSelect :: HSEnv -> HSContext -> [SelectItem] -> Either String [HSSelectItem]
 > convertSelect env ctx l = checkListErr (f <$> l)
@@ -304,16 +309,36 @@ convert Cosette AST to HoTTSQL AST
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
 > toHSQuery env ctx q = case q of
->                         Select sl fr wh gr ds ->
+>                         Select sl fr wh Nothing ds ->
 >                           do ctx' <- getCtx env ctx fr
 >                              ft' <- convertFrom env ctx fr
 >                              sl' <- convertSelect env (HSNode ctx ctx') sl
 >                              wh' <- convertWhere env (HSNode ctx ctx') wh
->                              gr' <- convertGroup (HSNode ctx ctx') gr
+>                              gr' <- Right []
 >                              return (HSSelect sl' ft' wh' gr' ds)
+>                         Select sl fr wh gr ds ->
+>                           case last sl of
+>                             Proj (Agg f v) _ ->         -- last proj is a aggregate
+>                               do ctx' <- getCtx env ctx fr
+>                                  fr' <- convertFrom env ctx fr
+>                                  slNew <- sl'
+>                                  wh' <- convertWhere env (HSNode ctx ctx') wh
+>                                  gr' <- convertGroup (HSNode ctx ctx') gr
+>                                  return (HSSelect slNew fr' wh' gr' ds)
+>                             _ -> case checkListErr $ map noOnAgg sl of 
+>                                    Left e -> Left e
+>                                    Right _ -> toHSQuery env ctx (Select sl fr wh Nothing True)
+>                           where err = "only support single group by with single aggregation at the end of SELECT list"
+>                                 noOnAgg (Proj (Agg _ _) _) = Left err
+>                                 noOnAgg other = Right other
+>                                 lastField = last sl
+>                                 initFields = init sl
+>                                 sl' = case checkListErr $ map noOnAgg initFields of
+>                                   Left e -> Left e
+>                                   Right _ -> convertSelect env ctx sl
 >                         UnionAll q1 q2 ->
 >                              HSUnionAll <$>
->                              toHSQuery env ctx q1 <*>(toHSQuery env ctx q2)
+>                              toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
 
 convert HoTTSQL AST to string (Coq program)
 
@@ -376,18 +401,20 @@ convert valueExpr to projection strings.
 > instance Coqable HSQueryExpr where
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
 >                              (addParen $ toCoq q2)
->   toCoq q = p ++ (addParen $ uw [ genSel $ hsSelectList q,
->                                  "FROM1", toCoq $ hsFrom q, w])
+>   toCoq (HSSelect sl fr wh [] di) =             -- if there is no group by
+>     p ++ (addParen $ uw [ genSel $ sl, "FROM1", toCoq $ fr, w])
 >     where genSel [HSStar] = "SELECT *"
 >           genSel sl = "SELECT1 " ++ (f sl)
 >           f [x] = toCoq x
 >           f (h:t) = addParen $ uw ["combine", toCoq h, f t]
->           p = if (hsDistinct q)
->               then "DISTINCT "
->               else ""
->           w = if (hsWhere q == HSTrue)
+>           p = if di then "DISTINCT " else ""
+>           w = if (wh == HSTrue)
 >               then ""
->               else "WHERE " ++ (toCoq $ hsWhere q)                  
+>               else "WHERE " ++ (toCoq wh)
+
+    toCoq (HSSelect sl fr wh gr di) =            -- if group by is not empty
+     p ++ (addParen 
+     where p = if di then "DISTINCT " else ""
 
 
 from Cosette statements to Coq program (or Error message)
