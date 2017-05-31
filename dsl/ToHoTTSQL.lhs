@@ -306,6 +306,50 @@ get number literals from Cosette AST.
 > intToConst :: Integer -> String
 > intToConst i = "integer_" ++ (show i)
 
+(recursively) replace star with an attribute
+
+> elimStar :: HSEnv -> HSContext -> QueryExpr -> Either String QueryExpr
+> elimStar env ctx (Select sl fr wh gr di) =
+>   do ctx' <- getCtx env ctx fr
+>      (a, scm) <- findALeaf ctx'       -- find a leaf's alias
+>      sl' <- checkListErr $ map (convSI a scm (HSNode ctx ctx')) sl
+>      fr' <- convFr env ctx fr
+>      wh' <- convWh env (HSNode ctx ctx') wh
+>      return (Select sl' fr' wh' gr di) 
+>   where findALeaf (HSNode t1 t2) = case (findALeaf t1, findALeaf t2) of
+>                                     (Left e1, Left e2) -> Left e1
+>                                     (Left err, Right a) -> Right a
+>                                     (Right a1, Right a2) -> Right a2
+>                                     (Right a, Left err) -> Right a
+>         findALeaf (HSLeaf a s) = Right (a, s)
+>         findALeaf HSEmpty = Left "cannot find a leaf."
+>         convSI a scm ctx (Proj (Agg f AStar) aname) =
+>           Right $ Proj (Agg f (AV (DIden a ((fst . last) $ hsAttrs scm)))) aname
+>         convSI a scm ctx (Proj (VQE q) aname) =
+>           Proj <$> (VQE <$> elimStar env ctx q) <*> Right aname 
+>         convSI a scm ctx other = Right $ other
+>         convFr env ctx Nothing = Right Nothing
+>         convFr env ctx (Just fl) = Just <$> (checkListErr $ map (convTR env ctx) fl)
+>         convTR env ctx (TR te s) = TR <$> convTE env ctx te <*> Right s
+>         convTE env ctx (TRQuery q) = TRQuery <$> elimStar env ctx q
+>         convTE env ctx (TRUnion t1 t2) =
+>           TRUnion <$> convTE env ctx t1 <*> convTE env ctx t2
+>         convTE env ctx base = Right base
+>         convWh env ctx Nothing = Right Nothing
+>         convWh env ctx (Just p) = Just <$> convPred env ctx p
+>         convPred env ctx (And p1 p2) = And <$> convPred env ctx p1 <*> convPred env ctx p2
+>         convPred env ctx (Or p1 p2) = Or <$> convPred env ctx p1 <*> convPred env ctx p2
+>         convPred env ctx (Not p1) = Not <$> convPred env ctx p1
+>         convPred env ctx (Exists q) = Exists <$> elimStar env ctx q
+>         convPred env ctx (Veq v1 v2) = Veq <$> convVE env ctx v1 <*> convVE env ctx v2
+>         convPred env ctx (Vgt v1 v2) = Vgt <$> convVE env ctx v1 <*> convVE env ctx v2
+>         convPred env ctx (Vlt v1 v2) = Vlt <$> convVE env ctx v1 <*> convVE env ctx v2
+>         convPred env ctx others = Right others
+>         convVE env ctx (VQE q) = VQE <$> elimStar env ctx q
+>         convVE env ctx (BinOp v1 op v2) =
+>           BinOp <$> convVE env ctx v1 <*> Right op <*> convVE env ctx v2
+>         convVE env ctx others = Right others
+
 convert Cosette AST to HoTTSQL AST
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
@@ -339,6 +383,11 @@ convert Cosette AST to HoTTSQL AST
 >                         UnionAll q1 q2 ->
 >                              HSUnionAll <$>
 >                              toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
+
+> cosToHS :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
+> cosToHS env ctx q = do q1 <- elimStar env ctx q
+>                        q2 <- toHSQuery env ctx q1
+>                        return q2
 
 convert HoTTSQL AST to string (Coq program)
 
@@ -455,8 +504,8 @@ assemble the theorem definition.
 >      nl1 <- Right $ getNumberLiterals qe1
 >      nl2 <- Right $ getNumberLiterals qe2
 >      env <- Right $ MakeHSEnv tsl sl
->      hsq1 <- toHSQuery env HSEmpty qe1
->      hsq2 <- toHSQuery env HSEmpty qe2
+>      hsq1 <- cosToHS env HSEmpty qe1
+>      hsq2 <- cosToHS env HSEmpty qe2
 >      qs1 <- Right (toCoq hsq1)
 >      qs2 <- Right (toCoq hsq2)
 >      vs <- Right (verifyDecs qs1 qs2)
