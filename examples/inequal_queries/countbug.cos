@@ -9,7 +9,7 @@ query q1
  from parts x
  where x.qoh = (select count(y.shipdate) as cnt
        	      from supply y
-	      where y.pnum = parts.pnum AND y.shipdate < 10)`;
+	      where y.pnum = x.pnum AND y.shipdate < 10)`;
 
 query q2
 `select x.pnum as xp

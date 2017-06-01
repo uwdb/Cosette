@@ -471,7 +471,7 @@ convert valueExpr to projection strings.
 >           -- last field can only AGG
 >           f [HSProj (HSAgg af HSVStar)] = (map toUpper af) ++ (addParen $ "right") 
 >           f [HSProj (HSAgg af ve)] =  (map toUpper af) ++ (addParen $ toCoq ve) 
->           f (h:t) = addParen $ uw ["combine'", "PLAIN" ++ (addParen $ toCoq h), f t]
+>           f (h:t) = addParen $ uw ["combine'", "PLAIN" ++ (addParen $ uw ["variable", toCoq h]), f t]
 >           w = if (wh == HSTrue)
 >               then ""
 >               else "WHERE " ++ (toCoq wh)
