@@ -215,7 +215,7 @@ the base case
 > makeRosVE tl al (BinOp v1 o v2) =  RosBinOp
 >                                    <$> makeRosVE tl al v1
 >                                    <*> Right o <*> makeRosVE tl al v2
-> makeRosVE tl al (VQE q) = RosVQE <$> makeRosQuery tl al q "anyname"
+> makeRosVE tl al (VQE q) = RosVQE <$> cosToRos tl al q "anyname"
 > makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
 >     "sum" -> RosAgg "aggr-sum" <$> aggToVE e
@@ -243,7 +243,7 @@ TODO: the handling of union of tables is not ideal, need to be revised
 > makeRosFromItem :: [RosSchema] -> TableRef -> Either String RosTableRef
 > makeRosFromItem tl (TR te alias) = RosTR <$> conv te <*> Right alias
 >   where conv (TRBase tn) = RosTRBase <$> tnToIdxStr tn 
->         conv (TRQuery q) = RosTRQuery <$> toRosQuery tl [] q alias 
+>         conv (TRQuery q) = RosTRQuery <$> cosToRos tl [] q alias 
 >         conv (TRUnion t1 t2) = RosUnion <$> conv t1 <*> conv t2
 >         tnToIdxStr tn =
 >           let i = findIndex (\a -> (rosSName a == tn)) tl in
@@ -276,7 +276,7 @@ convert from
 > makeRosPred tl al (Or p1 p2) = RosOr <$> makeRosPred tl al p1
 >                             <*> makeRosPred tl al p2
 > makeRosPred tl al (Not p) = RosNot <$> makeRosPred tl al p
-> makeRosPred tl al (Exists q) = RosExists <$> toRosQuery tl al q "anyname"
+> makeRosPred tl al (Exists q) = RosExists <$> cosToRos tl al q "anyname"
 > makeRosPred tl al (Veq v1 v2) = RosVeq <$> makeRosVE tl al v1 <*>
 >                                 makeRosVE tl al v2
 > makeRosPred tl al (Vgt v1 v2) = RosVgt <$> makeRosVE tl al v1 <*>
@@ -362,7 +362,7 @@ al: a list of schemas (with alias names) from env.
 >          -> String -> Either String RosQueryExpr
 > cosToRos tl al (UnionAll q1 q2) s =
 >   RosQueryUnion <$> cosToRos tl al q1 s <*> cosToRos tl al q2 s
-> cosToRos tl al q s = convertFrom <$> makeRosQuery tl al q s
+> cosToRos tl al q s = convertFrom <$> makeRosQuery tl al q s   -- basic query
 
 pass 1 on Rosette AST, handle aggregate without group by
 
