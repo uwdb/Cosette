@@ -432,8 +432,11 @@ convert valueExpr to projection strings.
 >   toCoq (HSNot b) = addParen $ uw ["negate", toCoq b]
 >   toCoq (HSExists q) = addParen $ uw ["EXISTS", toCoq q]
 >   toCoq (HSEq v1 v2) = addParen $ uw ["equal", toCoq v1, toCoq v2]
->   toCoq (HSGt v1 v2) = addParen $ uw ["gt", toCoq v1, toCoq v2]
->   toCoq (HSLt v1 v2) = addParen $ uw ["lt", toCoq v2, toCoq v2]
+>   toCoq (HSGt v1 v2) =
+>     addParen $ uw ["castPred (combine", veToProj v1, veToProj v2, ") gt"]
+>   toCoq (HSLt v1 v2) =
+>     addParen $ uw ["castPred (combine", veToProj v2, veToProj v1, ") gt"]
+
 
 > instance Coqable HSTableRef where
 >   toCoq (HSTRBase x) = addParen $ uw ["table", x]
@@ -573,7 +576,8 @@ generate predicate declarations
 >            "  Parameter minus: binary int int int. \n",
 >            "  Notation combine' := combineGroupByProj.\n",
 >            "  Parameter count : forall {T}, aggregator T int.",
->            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e). \n"]
+>            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e). \n",
+>            "  Parameter gt: Pred (node (leaf int) (leaf int)). \n"]
 
 > openDef :: String
 > openDef = "  Definition Rule: Type. \n"
