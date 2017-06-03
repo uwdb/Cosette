@@ -39,8 +39,8 @@
 (define sPicture (Table "Picture" (list "uid" "size") (gen-sym-schema 2 2)))
 
 ; set table to be symbolic or concrete
-(define Usr sUsr)
-(define Picture sPicture)
+(define Usr cUsr)
+(define Picture cPicture)
 
 ; ------------ verification ----------------------
 ; the example is taken from the final example of CSE 344
@@ -65,6 +65,40 @@
                              (BINOP "Picture.size" > 1000000)))))
     FROM (NAMED Usr)
     WHERE (BINOP "Usr.city" = 3)))
+
+(define q1-generated
+  (SELECT
+   (VALS "x.uid" "x.uname"
+         (AS
+          (SELECT-GROUP
+           (AS (SELECT (VALS "y.uid")
+                       FROM (NAMED (RENAME Picture "y"))
+                       WHERE (AND (BINOP "x.uid" = "y.uid") (BINOP "y.size" > 1000000)))
+               ["anyname" (list "cnt")])
+           (list )
+           aggr-count
+           "anyname.cnt")
+          ["anyname" (list "cnt")]))
+  FROM (NAMED (RENAME Usr "x"))
+  WHERE (BINOP "x.city" = 3)))
+
+(define q1-part
+  (AGGR aggr-count 
+                (SELECT 
+                  (VALS "Picture.uid")
+                  FROM (NAMED Picture)
+                  WHERE (BINOP "Picture.size" > 1000000))))
+
+(define q2-generated 
+  (SELECT-GROUP
+   (AS
+    (SELECT
+     (VALS "x.uid" "x.uname" "x.uid") 
+     FROM (JOIN (NAMED (RENAME Usr "x")) (NAMED (RENAME Picture "y"))) 
+     WHERE (AND (AND (BINOP "x.uid" = "y.uid") (BINOP "y.size" > 1000000)) (BINOP "x.city" = 3))) ["q2" (list "uid" "uname" "cnt")])
+   (list "q2.uid" "q2.uname")
+   aggr-count
+   "q2.cnt"))
 
 ; Q2
 ; select x.uid, x.uname, count(*)
@@ -103,18 +137,18 @@
                 aggr-count
                 "x.uid"))
 
-; (run q1)
-; (run q2-part)
+(run q1-part)
+;(run q1)
 ;(extract-schema q2-part)
 
 ;(run q2)
-;(run q2-new)
+;(run q2-generated)
 ; expect model
 
 ; Usr
 ; Picture
 ; expect model
-(time (verify (same q1 q2)))
+;(time (verify (same q1 q2)))
 ; expect unsat
-(time (verify (same q2 q2-new)))
+;(time (verify (same q2-new q2-generated)))
 

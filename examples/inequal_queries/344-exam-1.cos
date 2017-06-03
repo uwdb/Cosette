@@ -7,14 +7,14 @@ table picture(pic_schema);
 query q1 
 `select x.uid as uid, x.uname as uname, 
         (select count(*) as cnt from picture y
-         where x.uid = y.uid and y.size > 1000) as cnt
+         where x.uid = y.uid and y.size > 1000000) as cnt
  from user x
- where x.city = 2`;
+ where x.city = 3`;
 
 query q2
  `select x.uid as uid, x.uname as uname, count(*) as cnt
   from user x, picture y
-  where x.uid = y.uid and y.size > 1000 and x.city = 2
+  where x.uid = y.uid and y.size > 1000000 and x.city = 3
   group by x.uid, x.uname`;
 
 verify q1 q2;

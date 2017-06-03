@@ -1,0 +1,63 @@
+"""
+test solver using examples
+"""
+import json
+import solver
+import unittest
+
+def get_status(source):
+    """ run program and get status
+    """
+    with open(source, 'r') as ofile:
+        source = ofile.read()
+        res = solver.solve(source)
+        json_res = json.loads(res)
+        return json_res["result"]
+
+
+
+class EndToEndTests(unittest.TestCase):
+    """ End to end tests for the solver
+    """
+
+    # equal queries
+    def test_cq_ex0(self):
+        """ CQExample0 """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/CQExample0.cos"), 'EQ', "CQExample0")
+
+    def test_sj0(self):
+        """ SelfJoin0 """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/SelfJoin0.cos"), 'EQ', "SelfJoin0")
+
+    def test_comm_sel(self):
+        """ commutativeSelect """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/commutativeSelect.cos"), 'EQ', "commutativeSelect")
+
+    def test_inline_subq(self):
+        """ inlineCorrelatedSubqueries """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/inlineCorrelatedSubqueries.cos"), 'EQ',
+            "inlineCorrelatedSubqueries")
+
+    def test_dist_proj_over_union(self):
+        """ projectionDistributesOverUnion.cos~ """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/projectionDistributesOverUnion.cos"), 'EQ',
+            "projectionDistributesOverUnion")
+
+    # inequal sql queries
+    def test_344_exam_0(self):
+        """ 344-exam-1 """
+        self.assertEqual(
+            get_status("./examples/inequal_queries/344-exam-1.cos"), 'NEQ', "344-exam-1")
+
+    def test_countbug(self):
+        """ countbug """
+        self.assertEqual(
+            get_status("./examples/inequal_queries/countbug.cos"), 'NEQ', "countbug")
+
+if __name__ == '__main__':
+    unittest.main()

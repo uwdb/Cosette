@@ -20,7 +20,7 @@ executable CoqCodeGen
   main-is:             CoqCodeGen.lhs
   -- other-modules:
   other-extensions:    OverloadedStrings
-  build-depends:       base >=4.9 && <4.10, parsec >=3.1 && <3.2, HUnit >=1.6 && <1.7, containers >=0.5 && <0.6
+  build-depends:       HUnit >=1.6 && <1.7, base >=4.9 && <4.10, containers >=0.5 && <0.6, parsec >=3.1 && <3.2
   -- hs-source-dirs:
   default-language:    Haskell2010
 
