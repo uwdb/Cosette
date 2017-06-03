@@ -289,6 +289,8 @@ convert where
 get number literals from Cosette AST.
 
 > getNumberLiterals :: QueryExpr -> [Integer]
+> getNumberLiterals (UnionAll q1 q2) =
+>   getNumberLiterals q1 ++ getNumberLiterals q1
 > getNumberLiterals (Select sl fr wh _ _) =
 >   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh   
 >   where getNumSI (Proj v _) = getNumVE v
@@ -319,7 +321,10 @@ get number literals from Cosette AST.
 
 (recursively) replace star with an attribute
 
-> elimStar :: HSEnv -> HSContext -> QueryExpr -> Either String QueryExpr
+> elimStar :: HSEnv -> HSContext -> QueryExpr
+>          -> Either String QueryExpr
+> elimStar env ctx (UnionAll q1 q2) =
+>   UnionAll <$> elimStar env ctx q1 <*> elimStar env ctx q2
 > elimStar env ctx (Select sl fr wh gr di) =
 >   do ctx' <- getCtx env ctx fr
 >      (r, c) <- findRel ctx'                                         -- find a leaf's paths
