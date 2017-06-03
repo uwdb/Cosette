@@ -1,0 +1,12 @@
+sudo: required
+
+language: python
+
+services:
+  - docker
+
+before_install:
+  - docker pull shumo/cosette-frontend
+
+script:
+  - docker run shumo/cosette-frontend /bin/sh  -c "cd /Cosette; git pull; cd dsl; cabal build; cd ..; apt-get -y install python; python solver_test.py"
