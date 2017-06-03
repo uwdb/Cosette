@@ -33,9 +33,17 @@ environment
 context
 
 > data HSContext = HSNode HSContext HSContext
->                | HSLeaf String HSSchema         -- alias schema
+>                | HSAbsScm String HSSchema           -- abstract schema
+>                | HSScm String HSContext HSContext    -- concrete schema
+>                | HSLeaf String String                -- single attribute: name, type
 >                | HSEmpty
 >                  deriving (Eq, Show)
+
+> renameCtx :: HSContext -> String -> HSContext
+> renameCtx (HSNode c1 c2) n = HSScm n c1 c2
+> renameCtx (HSAbsScm a s) n = HSAbsScm n s
+> renameCtx (HSScm a c1 c2) n = HSScm n c1 c2
+> renameCtx others n = others
 
 value expression
 
@@ -103,46 +111,50 @@ look up schema by table name
 > lkUpSchema env q = do sn <- lkUp (tables env) (\t q1 -> fst t == q1) q
 >                       lkUp (schemas env) (\t q1 -> hsSName t == q1) $ snd sn
 
-get output schema
+look up context by name
 
-> getFromSchema :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String [(String, String)]
-> getFromSchema env ctx Nothing = Right []
-> getFromSchema env ctx (Just []) = Right []
-> getFromSchema env ctx (Just (h:t)) =  (++) <$> getScm env (getTe h) <*> getFromSchema env ctx (Just t)
->   where getScm env (TRBase tn) = hsAttrs <$> lkUpSchema env tn
->         getScm env (TRQuery q) = getOutput env ctx q
->         getScm env (TRUnion t1 t2) = getScm env t1
+> lkUpCtx :: HSContext -> String -> Either String HSContext
+> lkUpCtx ctx n = Left $ "cannot find " ++ n
 
-look up a schema in FROM clause by alias
+get output context from FROM
 
-> lkUpSchemaInFrom :: HSEnv -> HSContext -> Maybe [TableRef] -> String -> Either String [(String, String)]
-> lkUpSchemaInFrom env ctx Nothing a = Left $ "cannot find " ++ a
-> lkUpSchemaInFrom env ctx (Just []) a = Left $ "cannot find " ++ a
-> lkUPSchemaInFrom env ctx (Just (h:t)) a =
->   if scm h == a
->   then lkUpSchemaInTe (getTe h)
->   else lkUpSchemaInFrom env ctx (Just t) a
->   where scm (TR _ al) = al
->         lkUpSchemaInTe (TRBase tn) = hsAttrs <$> lkUpSchema env tn
->         lkUpSchemaInTe (TRQuery q) = getOutput env ctx q
->         lkUpSchemaInTe (TRUnion t1 _) = lkUpSchemaInTe t1
+> getCtx :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String HSContext
+> getCtx env ctx Nothing = Right HSEmpty
+> getCtx env ctx (Just fl) = f fl
+>   where f [a] = fromTR a
+>         f (h:t) = HSNode <$> fromTR h <*> f t
+>         f [] = Right HSEmpty
+>         fromTR (TR te a) = renameCtx <$> getScm te <*> Right a
+>         getScm (TRBase tn) = HSAbsScm <$> Right "" <*> lkUpSchema env tn
+>         getScm (TRQuery q) = getOutCtx env ctx "" q
+>         getScm (TRUnion t1 t2) = getScm t1
 
-get output schema of a query
+look up a schema (which is a context) in FROM clause by alias
 
-> getOutput :: HSEnv -> HSContext -> QueryExpr -> Either String [(String, String)]
-> getOutput env ctx q =
+> lkUpScmInFr :: HSEnv -> HSContext -> Maybe [TableRef] -> String
+>                  -> Either String HSContext
+> lkUpScmInFr env ctx fr a = do ctx' <- getCtx env ctx fr
+>                               ret <- lkUpCtx ctx' a
+>                               return ret
+
+get output schema (which is a context) of a query
+env, out context, query name, query expr.
+
+> getOutCtx :: HSEnv -> HSContext -> String ->  QueryExpr -> Either String HSContext
+> getOutCtx env ctx qn q =
 >   case q of
->     Select s fr w g d -> f s
->     UnionAll q1 q2 -> getOutput env ctx q1
->   where f [Star] = getFromSchema env ctx (qFrom q)
->         f (h:t) = case h of DStar al -> (++) <$> (lkUpSchemaInFrom env ctx (qFrom q) al)
->                                              <*> f t
->                             Proj e al -> do ctx' <- getCtx env ctx (qFrom q)
->                                             ty <- getType env (HSNode ctx ctx') e
->                                             rest <- f t
->                                             return ((al,ty):rest) 
->                             _ -> Left "error."
->         f [] = Right []
+>     Select s fr w g d ->
+>       do ctx' <- getCtx env ctx fr
+>          ret <- convSl ctx' s
+>          return ret
+>     UnionAll q1 q2 -> getOutCtx env ctx qn q1
+>   where f ctx' Star =  Right ctx'
+>         f ctx' (DStar r) = lkUpCtx ctx' r
+>         f ctx' (Proj e al) = do ty <- getType env (HSNode ctx ctx') e
+>                                 return (HSLeaf al ty)
+>         convSl ctx' [a] = f ctx' a
+>         convSl ctx' (h:t) = HSNode <$> f ctx' h <*> convSl ctx' t
+>         convSl ctx' [] = Right HSEmpty
 
 get type of a value expression
 
@@ -170,52 +182,51 @@ convert from clause, it does the following things:
 > convertFrom env ctx (Just (h:t)) = HSProduct <$> convertFromItem env ctx h
 >                                              <*> (convertFrom env ctx (Just t))
 
-generate context from FROM clause
-
-> getCtxNode :: HSEnv -> HSContext -> TableRef -> Either String HSContext
-> getCtxNode env ctx (TR tr al) = gcn tr
->   where gcn (TRBase tn) = HSLeaf al <$> lkUpSchema env tn
->         gcn (TRQuery q) = do at <- getOutput env ctx q
->                              return (HSLeaf al (MakeHSSchema al at))
->         gcn (TRUnion t1 t2) = gcn t1
-
-> getCtx :: HSEnv -> HSContext -> Maybe [TableRef] -> Either String HSContext
-> getCtx env ctx Nothing = Right HSEmpty
-> getCtx env ctx (Just []) = Right HSEmpty
-> getCtx env ctx (Just [x]) = getCtxNode env ctx x
-> getCtx env ctx (Just (h:t)) = HSNode <$> getCtxNode env ctx h
->                                      <*> getCtx env ctx (Just t)
-
 convert alias to path, and get its schema 
 it returns (path, schema) or nothing
 
-> nameToPath' :: HSContext -> String -> Maybe ([String], HSSchema)
-> nameToPath' HSEmpty _ = Nothing
+> nameToPath' :: HSContext -> String -> Either String ([String], HSContext)
+> nameToPath' HSEmpty s = Left $ "cannot find alias " ++ s
+> nameToPath' (HSAbsScm al sch) s =
+>   if al == s then Right ([], (HSAbsScm al sch)) else Left $ "cannot find alias " ++ s
+> nameToPath' (HSScm al lt rt) s =
+>   if al == s then Right ([], (HSScm al lt rt)) else nameToPath' (HSNode lt rt) s 
 > nameToPath' (HSNode lt rt) s =
->   case nameToPath' rt s of Nothing -> do t <- nameToPath' lt s
->                                          return ("left":(fst t), snd t)
->                            Just t -> Just ("right":(fst t), snd t) 
-> nameToPath' (HSLeaf al sch) s = if al == s then Just ([], sch) else Nothing
+>   case nameToPath' rt s of Left _ -> do t <- nameToPath' lt s
+>                                         return ("left":(fst t), snd t)
+>                            Right t -> Right ("right":(fst t), snd t)
+> nameToPath' (HSLeaf _ _) s = Left $ "cannot find alias " ++ s
 
-wrap it in Either
+only return path.
 
-> nameToPath :: HSContext -> String -> Either String (String, HSSchema)
-> nameToPath ctx s = case nameToPath' ctx s of
->                      Nothing -> Left ("cannot find alias " ++ s)
->                      Just x -> Right (intercalate "⋅" (fst x), snd x)
+> nameToPath :: HSContext -> String -> Either String String
+> nameToPath ctx s = (\x -> intercalate "⋅" (fst x)) <$> nameToPath' ctx s
 
 convert Cosette value expression to HoTTSQL expression
 
-> fstInList :: (Eq a) => [(a, b)] -> a -> Bool
-> fstInList [] a = False
-> fstInList (h:t) a = if fst h == a then True else fstInList t a
-
 > convertVE :: HSEnv -> HSContext -> ValueExpr -> Either String HSValueExpr
 > convertVE env ctx (NumLit i) = Right $ HSConstant ("integer_" ++ (show i))
-> convertVE env ctx (DIden tr attr) = do (p, s) <- nameToPath ctx tr
->                                        if fstInList (hsAttrs s) attr
->                                          then return (HSDIden p (hsSName s ++ "_" ++ attr))
->                                          else Left ("attribute " ++ attr ++ " is not valid")
+> convertVE env ctx (DIden tr attr) =
+>   do (p, s) <- nameToPath' ctx tr
+>      r <- Right (intercalate "⋅" p)
+>      arr <- attrToPath s attr
+>      a <- Right (intercalate "⋅" arr)
+>      return (HSDIden r a)
+>   where
+>      attrToPath (HSNode lf rt) a =
+>        case attrToPath rt a of
+>          Left err -> case attrToPath lf a of
+>                        Left e -> Left e
+>                        Right p -> Right ("left":p)
+>          Right p -> Right ("right":p)
+>      attrToPath (HSAbsScm rn hs) a =
+>        if any (\x-> fst x == a) (hsAttrs hs)
+>        then Right [hsSName hs ++ "_" ++ a]
+>        else Left $ "cannot find attribute " ++ a
+>      attrToPath (HSScm rn lf rt) a = attrToPath (HSNode lf rt) a
+>      attrToPath (HSLeaf at ty) a =
+>        if a == at then Right []
+>        else Left $ "cannot find attribute " ++ a                                     
 > convertVE env ctx (BinOp v1 op v2) = HSBinOp <$> convertVE env ctx v1
 >                                          <*> Right op
 >                                          <*> convertVE env ctx v2
@@ -242,8 +253,7 @@ convert Cosette predicate to HoTTSQL predicate
 > convertPred env ctx TRUE = Right HSTrue
 > convertPred env ctx FALSE = Right HSFalse
 > convertPred env ctx (PredVar b s) = HSPredVar <$> Right b
->                                     <*> checkListErr (f <$> s)
->   where f a = fst <$> nameToPath ctx a
+>                                     <*> checkListErr (nameToPath ctx <$> s)
 > convertPred env ctx (And b1 b2) = HSAnd <$> convertPred env ctx b1
 >                                         <*> convertPred env ctx b2
 > convertPred env ctx (Or b1 b2) = HSOr <$> convertPred env ctx b1
@@ -262,7 +272,7 @@ convert Select when group by is empty
 > convertSelect :: HSEnv -> HSContext -> [SelectItem] -> Either String [HSSelectItem]
 > convertSelect env ctx l = checkListErr (f <$> l)
 >   where f Star = Right HSStar
->         f (DStar x) = HSDStar <$> (fst <$> nameToPath ctx x)
+>         f (DStar x) = HSDStar <$> nameToPath ctx x
 >         f (Proj v _) = HSProj <$> convertVE env ctx v
 
 convert where
@@ -302,6 +312,7 @@ get number literals from Cosette AST.
 >         getNumPred (And p1 p2) = getNumPred p1 ++ getNumPred p2
 >         getNumPred (Or p1 p2) = getNumPred p1 ++ getNumPred p2
 >         getNumPred (Not p) = getNumPred p
+>         getNumPred others = []
 
 > intToConst :: Integer -> String
 > intToConst i = "integer_" ++ (show i)
@@ -311,23 +322,34 @@ get number literals from Cosette AST.
 > elimStar :: HSEnv -> HSContext -> QueryExpr -> Either String QueryExpr
 > elimStar env ctx (Select sl fr wh gr di) =
 >   do ctx' <- getCtx env ctx fr
->      (a, scm) <- findALeaf ctx'       -- find a leaf's alias
->      sl' <- checkListErr $ map (convSI a scm (HSNode ctx ctx')) sl
+>      (r, c) <- findRel ctx'                                         -- find a leaf's paths
+>      a <- findLeaf c 
+>      sl' <- checkListErr $ map (convSI (DIden r a) (HSNode ctx ctx')) sl
 >      fr' <- convFr env ctx fr
 >      wh' <- convWh env (HSNode ctx ctx') wh
 >      return (Select sl' fr' wh' gr di) 
->   where findALeaf (HSNode t1 t2) = case (findALeaf t1, findALeaf t2) of
+>   where findRel (HSNode t1 t2) = case (findRel t1, findRel t2) of
+>                                    (Left e1, Left e2) -> Left e1
+>                                    (Left e, Right a) -> Right a
+>                                    (Right a1, Right a2) -> Right a2
+>                                    (Right a, Left e) -> Right a
+>         findRel (HSAbsScm a s) = Right (a, (HSAbsScm a s))
+>         findRel (HSScm a t1 t2) = Right (a, (HSScm a t1 t2))
+>         findRel other = Left "Error in elimSatr (ToHoTTSQL.lhs)."
+>         findLeaf (HSNode t1 t2) = case (findLeaf t1, findLeaf t2) of
 >                                     (Left e1, Left e2) -> Left e1
 >                                     (Left err, Right a) -> Right a
 >                                     (Right a1, Right a2) -> Right a2
 >                                     (Right a, Left err) -> Right a
->         findALeaf (HSLeaf a s) = Right (a, s)
->         findALeaf HSEmpty = Left "cannot find a leaf."
->         convSI a scm ctx (Proj (Agg f AStar) aname) =
->           Right $ Proj (Agg f (AV (DIden a ((fst . last) $ hsAttrs scm)))) aname
->         convSI a scm ctx (Proj (VQE q) aname) =
+>         findLeaf (HSAbsScm a s) = Right ((fst . last) $ hsAttrs s)
+>         findLeaf (HSScm sn t1 t2) =  findLeaf (HSNode t1 t2)
+>         findLeaf (HSLeaf at ty) = Right at
+>         findLeaf HSEmpty = Left "cannot find a leaf."
+>         convSI v ctx (Proj (Agg f AStar) aname) =
+>           Right $ Proj (Agg f (AV v)) aname
+>         convSI v ctx (Proj (VQE q) aname) =
 >           Proj <$> (VQE <$> elimStar env ctx q) <*> Right aname 
->         convSI a scm ctx other = Right $ other
+>         convSI v ctx other = Right $ other
 >         convFr env ctx Nothing = Right Nothing
 >         convFr env ctx (Just fl) = Just <$> (checkListErr $ map (convTR env ctx) fl)
 >         convTR env ctx (TR te s) = TR <$> convTE env ctx te <*> Right s

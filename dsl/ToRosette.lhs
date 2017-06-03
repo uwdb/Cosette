@@ -95,7 +95,7 @@ It returns [(tableSchema, indexStr)] or error message.
 >      sl' <- checkListErr (map (starToSelect rs scms) sl)
 >      fr' <- convFr fr
 >      wh' <- convWh wh
->      return (Select (foldl (++) [] sl') fr' wh g d)
+>      return (Select (foldl (++) [] sl') fr' wh' g d)
 >   where convWh Nothing = Right Nothing
 >         convWh (Just w) = Just <$> elimStarInPred scms w
 >         convFr Nothing  = Right Nothing
@@ -553,6 +553,7 @@ convert Predicate to sexp
 >   toSexp (RosVeq v1 v2) = addParen $ uw ["BINOP", toSexp v1, "=", toSexp v2]
 >   toSexp (RosVgt v1 v2) = addParen $ uw ["BINOP", toSexp v1, ">", toSexp v2]
 >   toSexp (RosVlt v1 v2) = addParen $ uw ["BINOP", toSexp v1, "<", toSexp v2]
+>   toSexp (RosExists q) = addParen $ uw ["EXISTS", toSexp q]
 
 convert RosTableRef to sexp
 
