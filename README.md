@@ -1,4 +1,5 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/uwdb/Cosette)
+[![Build Status](https://travis-ci.org/uwdb/Cosette.svg?branch=master)](https://travis-ci.org/uwdb/Cosette)
 
 Cosette
 =======
