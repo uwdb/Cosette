@@ -45,6 +45,11 @@
   (query-union-all q1 q2))
 
 (define-syntax-rule
+  (TABLE-UNION-ALL t1 t2)
+  (union-all t1 t2)
+)
+
+(define-syntax-rule
   (JOIN q1 q2)
   (query-join q1 q2))
 
