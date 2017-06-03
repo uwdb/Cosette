@@ -2,7 +2,7 @@ FROM konne/cosette
 
 ####### Install Dependencies #######################
 RUN apt-get -y update
-RUN apt-get -y install build-essential curl zlib1g-dev libgmp3-dev libedit2
+RUN apt-get -y install build-essential curl zlib1g-dev libgmp3-dev libedit2 python
 
 ############## install haskell #####################
 RUN curl -O http://homes.cs.washington.edu/~chushumo/files/ghc-8.0.2-x86_64-deb7-linux.tar.xz
