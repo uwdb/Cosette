@@ -59,5 +59,24 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(
             get_status("./examples/inequal_queries/countbug.cos"), 'NEQ', "countbug")
 
+    def test_syntax_error(self):
+        """ test syntax error"""
+        wrong_query = """
+        schema s1(x:int, y:int);
+        table a(s1);                   -- table a of schema s1 
+
+        query q1                       -- query 1 
+        `select                                     
+         from a`;                                          
+  
+        query q2                       -- query 2 
+        `select x as ax                                    
+        from a`;                                              
+  
+        verify q1 q2;                  -- verify the equivalence """
+        res = solver.solve(wrong_query)
+        json_res = json.loads(res)
+        self.assertEqual(json_res["result"], 'ERROR', "test syntax error")
+
 if __name__ == '__main__':
     unittest.main()

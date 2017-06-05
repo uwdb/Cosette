@@ -50,6 +50,9 @@ def solve(cos_source, cos_folder=".", show_compiled=False):
                     continue
         ret = parse_results(results)
     else: # either coq_parse or ros_parse is False
+        # the entire result is error
+        ret["result"] = "ERROR"
+
         if coq_parse: # then rosette must not parse
             ret["coq_log"] = "Coq code generation succeed."
             ret["coq_result"] = "STOPED"
