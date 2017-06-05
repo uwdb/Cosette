@@ -32,4 +32,4 @@ This will enter the bash of the container. You can enter the `Cosette` folder an
 
 ### Web Service API
 
-We are building an HTTP API for others to integrate Cosette into their tools (our [demo website](http://demo.cosette.cs.washington.edu) is an example). Stay tuned for details!
+We are building a HTTP API for others to integrate Cosette into their tools (our [demo website](http://demo.cosette.cs.washington.edu) is an example). Stay tuned for details!
