@@ -78,5 +78,10 @@ class EndToEndTests(unittest.TestCase):
         json_res = json.loads(res)
         self.assertEqual(json_res["result"], 'ERROR', "test syntax error")
 
+    def test_exist(self):
+        """ test exist """
+        self.assertEqual(
+            get_status("./examples/inequal_queries/inline-exists.cos"), 'NEQ', "countbug")
+
 if __name__ == '__main__':
     unittest.main()

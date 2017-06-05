@@ -1,0 +1,17 @@
+schema es(name:int, dept:int, emp:int);
+
+schema ds(dept:int, loc:int, mgr:int);
+
+table emp(es); 
+table dept(ds); 
+
+query q1    
+`select x.name as xn from emp x
+ where exists (select * from dept y 
+               where y.loc = 3 and x.emp = y.mgr and x.dept = y.dept)`;
+
+query q2                -- define query q2 likewise
+`select x.name as xn 
+ from emp x`;
+
+verify q1 q2;           -- does q1 equal to q2?
