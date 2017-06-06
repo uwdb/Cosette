@@ -243,5 +243,6 @@
     [(eq? l '()) #t]
     [else (&& (distinct-to-all-list (car l) (cdr l)) (list-distinct? (cdr l)))]))
 
+;; here, we treat two empty list 'distinct' 
 (define (distinct-to-all-list x l)
   (foldl && #t (map (lambda (y) (not (eq? x y))) l)))

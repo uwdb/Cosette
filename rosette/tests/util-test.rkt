@@ -19,7 +19,7 @@
 (time (verify
         #:assume (begin
                    (assert-table-ordered st)
-                   (assert-table-col-distinct st 1))
+                   (assert-table-cols-distinct st 1))
         #:guarantee (same (test-q st) (test-q2 st))))
 
 

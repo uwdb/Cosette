@@ -7,7 +7,8 @@
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
          assert-table-non-empty ;; assert that a table is not empty
          assert-table-ordered ;; assert that the table is ordered
-         assert-table-col-distinct ;; assert that all values in a column is distinct from each other
+         assert-table-cols-distinct ;; assert that all values in a list of columns is distinct from each other
+         table-cols-distinct? 
          same ;; assert two queries are the same 
          neq) ;; assert two queries are not the same
 
@@ -57,14 +58,18 @@
 (define (filter-zero table)
   (filter (lambda (r) (not (eq? (cdr r) 0))) table))
 
-; assert that all element in a column is distinct, it enforces that all multiplicity set to 1
+; check that all element in a list of columns is distinct, it enforces that all multiplicity set to 1
 ; col-nums: a list of column indices
-(define (assert-table-col-distinct table col-nums)
+(define (assert-table-cols-distinct table col-nums)
+  (assert (table-cols-distinct? table col-nums)))
+
+(define (table-cols-distinct? table col-indices)
   (let ([ftable (filter-zero (get-content table))])
-    (assert 
-     (and (list-distinct? (map (lambda (r) (map (lambda (x) (list-ref (car r) x)) col-nums))
+    (or
+     (empty? col-indices)
+     (and (list-distinct? (map (lambda (r) (map (lambda (x) (list-ref (car r) x)) col-indices))
                                ftable))
-          (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) ftable))))))
+          (foldl && #t (map (lambda (r) (eq? (cdr r) 1)) ftable))))))
 
 ;; assertions
 
