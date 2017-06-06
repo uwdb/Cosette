@@ -1,0 +1,16 @@
+schema s1(id:int, n:int);
+schema s2(id:int, t1_id:int, n:int);
+
+table t1(s1);
+table t2(s2);
+
+query q1 
+`select y.id as t2id, y.n as t2n
+ from t1 x, t2 y
+ where x.id = y.t1_id`;
+
+query q2 
+`select y.id as t2id
+ from t2 y`;
+
+ verify q1 q2;
