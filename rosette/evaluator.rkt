@@ -114,6 +114,7 @@
                   (dedup (filter (lambda (x)(not (equal? (car ele) (car x))))
                                  (cdr table))))]))]))
 
+; normalized table, merge the mutiplicity of the same tuples
 (define (dedup-accum table)
   (cond 
     [(equal? '() table) '()]

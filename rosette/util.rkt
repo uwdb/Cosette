@@ -53,11 +53,18 @@
 (define (assert-table-ordered table)
   (assert (table-content-ascending? (get-content table))))
 
+; filter all zero mul. tuples. input type is table content.
+(define (filter-zero table)
+  (filter (lambda (r) (not (eq? (cdr r) 0))) table))
+
 ; assert that all element in a column is distinct, it enforces that all multiplicity set to 1
-(define (assert-table-col-distinct table col-num)
-  (assert 
-    (and (list-distinct? (map (lambda (r) (list-ref (car r) col-num)) (get-content table)))
-         (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) (get-content table))))))
+; col-nums: a list of column indices
+(define (assert-table-col-distinct table col-nums)
+  (let ([ftable (filter-zero (get-content table))])
+    (assert 
+     (and (list-distinct? (map (lambda (r) (map (lambda (x) (list-ref (car r) x)) col-nums))
+                               ftable))
+          (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) ftable))))))
 
 ;; assertions
 

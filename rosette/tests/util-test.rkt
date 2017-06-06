@@ -37,7 +37,7 @@
 (time (verify
         #:assume (begin
                    (assert-table-ordered st)
-                   (assert-table-col-distinct st 1))
+                   (assert-table-col-distinct st (list 1)))
         #:guarantee (same (test-2-q st) (test-2-q2 st))))
 
 ;(let* ([ct (evaluate st cex)]
