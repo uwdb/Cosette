@@ -57,12 +57,14 @@
                    (set! t1-fk-pk k)
                    (set! t2-fk n)
                    #t)])))
+; do the search here
 (time
 (for* ([i (in-range 3)]
        [j (in-range 2)]
        [k (in-range 3)]
        [n (in-range 2)])
        #:break (stop-condition i j k n)
+       (clear-asserts!)
        (println (list i j k n))
  ))
 ;(verify (same q1 q2))

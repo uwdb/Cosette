@@ -11,6 +11,7 @@
          table-cols-distinct? ;; check the projection of certern cols of a table is distinct or not
          list-subset? ;; check whether the set of elements of a list is a subset of the set of elements of another list
          foreign-key-constraint? ;; check whether two tables and specified cols conform pk-fk constraint
+         filter-zero
          same ;; assert two queries are the same 
          neq) ;; assert two queries are not the same
 
