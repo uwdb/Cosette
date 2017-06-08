@@ -1,0 +1,4 @@
+name: DopCert
+markdown: kramdown
+highlighter: rouge
+baseurl: http://cosette.cs.washington.edu
