@@ -5,14 +5,23 @@ group: "navigation"
 id: home
 ---
 
+
+<div style="text-align: center; margin-top: 10px;">
+  <a class="github-button" href="https://github.com/uwdb/cosette" data-icon="octicon-star" data-show-count="true" aria-label="Star uwdb/cosette on GitHub">Star</a>
+  <a class="github-button" href="https://github.com/uwdb/cosette/fork" data-icon="octicon-repo-forked" aria-label="Fork uwdb/cosette on GitHub">Fork</a>
+  <a class="github-button" href="https://github.com/uwdb/cosette/issues" data-icon="octicon-issue-opened" aria-label="Issue uwdb/cosette on GitHub">Issue</a>
+</div>
+
 Cosette is an automated prover for checking equivalences of SQL queries. It formalizes a substantial fragment of SQL in the Coq Proof Assistant and the Rosette symbolic virtual machine. It returns either a formal proof of equivalance or a counterexample for a pair of given queries. 
 
 <div class="boxed" align="center">
-<font color="red">We will be releasing Cosette in next few weeks.<br>
-Please stay tuned and sign up on our <a href="https://mailman.cs.washington.edu/mailman/listinfo/cosette">mailing list</a></font>!  
+<font color="red">We will release Cosette in next few weeks.<br>
+Stay tuned and sign up on our <a href="https://mailman.cs.washington.edu/mailman/listinfo/cosette">mailing list</a></font>!  
 </div>
 
-### Asserting SQL Equivalences in Cosette
+### Checking SQL Equivalences in Cosette
+
+You can try the Cosette [demo](http://demo.cosette.cs.washington.edu) online, or download its [source code](https://github.com/uwdb/Cosette) from github.
 
 <div>
 	<a href='http://demo.cosette.cs.washington.edu'><img src="{{ site.baseurl}}/images/cosette-ui.png" class="img-responsive" alt="Screenshot of the cosette web UI"></a>
@@ -27,10 +36,6 @@ Cosette compiles input queries to constraints over symbolic relations and calls 
   <center><img src="{{ site.baseurl}}/images/cosette-arch.png" id="cosettearch" alt="Cosette Architecture"></center>
   <center><p class="text-center text-muted">Cosette System Architecture</p></center>
 </div>
-
-### Using Cosette
-
-You can try the Cosette [demo](http://demo.cosette.cs.washington.edu) online, or download cosette [Source Code](https://github.com/uwdb/Cosette) and run it on your own.
 
 ### Publications
 *  Demonstration of the Cosette Automated SQL Prover. \[ [paper](https://github.com/stechu/stechu.github.io/raw/master/papers/cosette-demo.pdf) \] *SIGMOD 2017 <span style="color:red">(best demo award)</span>*
