@@ -14,7 +14,7 @@ This project is in active development. Shoot us a message (cosette@cs.washington
 SQL equivalences are expressed using the Cosette language. Below is an example (Click on the image to try the online demo). 
 
 <div>
-<a href="https://demo.cosette.cs.washington.edu/"> <img src="https://github.com/uwdb/Cosette-Website/blob/gh-pages/images/cosette-ui.png" class="img-responsive" alt="image of Cosette web interface"> </a>
+<a href="https://demo.cosette.cs.washington.edu/"> <img src="https://github.com/uwdb/Cosette/blob/gh-pages/images/cosette-ui.png" class="img-responsive" alt="image of Cosette web interface"> </a>
 </div>
 
 
