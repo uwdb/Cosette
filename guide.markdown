@@ -1,13 +1,13 @@
 ---
 layout: plain
-title: Tutorial
+title: Guide
 group: "navigation"
-id: tutorial
+id: guide
 ---
 
 ### Getting Started
 
-(The tutorial is under construction ...)
+(This guide is under construction ... ... ... how did you get to this page???)
 
 ### Contact
 
