@@ -72,15 +72,20 @@ a {
 
 .project-name {
   margin-top: 0;
-  margin-bottom: 0.1rem; }
+  margin-bottom: 0.1rem; 
+}
 
 @media screen and (min-width: 64em) {
   .project-name {
-    font-size: 3.25rem; } }
+    font-size: 3.25rem; 
+  } 
+}
 
 @media screen and (min-width: 42em) and (max-width: 64em) {
   .project-name {
-    font-size: 2.25rem; } }
+    font-size: 2.25rem; 
+  } 
+}
 
 @media screen and (max-width: 42em) {
   .project-name {
@@ -255,14 +260,14 @@ div.header {
 #logodiv{
     display:inline-block;
     margin-left:10px;
-    height: 130px;
+    height: 100px;
 }
 
 #titlediv{
     text-align: left;
     display:inline-block;
     margin-left:70px;
-    height: 130px;
+    height: 100px;
 }
 
 #cosettearch{
