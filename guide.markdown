@@ -8,13 +8,12 @@ id: guide
 ## Getting Started on Cosette
 
 
-```sql
-
-```
-
 ## Cosette Syntax
 
+<pre><code class="sql">Select * From T Where ok!</code></pre>
+
 (This guide is under construction ... ... ... how did you get to this page???)
+
 
 ## Contact
 
