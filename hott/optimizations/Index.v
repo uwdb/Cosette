@@ -23,6 +23,92 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   
   Definition Index {s t0 t1} (R: SQL empty s) (k: Column t0 s) (ic: Column t1 s) :=
     SELECT2 (variable (right⋅k)), (variable (right⋅ic)) FROM1 R.
+  
+  Definition isKey1 {s t} (k: Column t s) (R: SQL empty s) :=
+    ⟦ empty ⊢ R : _ ⟧ =
+    ⟦ empty ⊢ ((project (right⋅left)) (FROM R, R
+                WHERE equal (variable (right⋅left⋅k))
+                (variable (right⋅right⋅k)))): _ ⟧.
+
+  Definition isKey3 {s t} (k: Column t s) (R: SQL empty s) :=
+    forall (t1:Tuple s), denoteSQL R tt t1 -> {t: Tuple s & (⟦k⟧ t1 = ⟦ k ⟧ t) * denoteSQL R tt t}  <~> Unit.
+
+  Lemma sum_pair_subst {A B}:
+    forall (a:A) (F: A * B -> Type), {ab: A * B &  F ab * (fst ab = a)} <~> {b: B & F (a, b)}.
+  Proof.
+    intros a F.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [[a' b'] [f e]].
+      exists b'.
+      destruct e.
+      exact f.
+    }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [b f].
+      exists (a, b).
+      refine (f, _).
+      reflexivity. }
+    + unfold Sect.
+      reflexivity.
+    + unfold Sect.
+      intros [[a' b'] [f e]].
+      destruct e.
+      reflexivity.
+    + intros [[a' b'] [f e]].
+      destruct e.
+      reflexivity.
+  Defined.
+
+  Lemma sum_prod_comm {A B C}:
+    {a: A & (B a) * (C a)} <~> {a: A & (C a) * (B a)}.
+  Proof.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a [b c]].
+      exact (a; (c, b)). }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [a [c b]].
+      exact (a; (b, c)). }
+    + unfold Sect.
+      reflexivity.
+    + unfold Sect.
+      reflexivity.
+    + reflexivity.
+  Defined.
+
+  Lemma unit_idenpotent:
+    forall (A:Type) (B:Type), (A -> B <~> Unit) -> A * B <~> A.
+  Proof.
+    intros A B H.
+    apply hprop_prod_r_eq in H.
+    rewrite (path_universe_uncurried (prod_unit_r A)) in H.
+    exact H.
+  Defined.
+  
+  Lemma keySelfJoinEq:
+    forall s t (k:Column t s) (R: SQL empty s), isKey3 k R -> isKey1 k R.
+  Proof.
+    intros s t k R H.
+    unfold isKey3 in H.
+    simpl in H.
+    unfold isKey1.
+    simpl.
+    start.
+    simpl in g.
+    rewrite (path_universe_uncurried (sum_pair_subst _ _)).
+    simpl.
+    rewrite (path_universe_uncurried sum_prod_comm).
+    rewrite <- (path_universe_uncurried sum_prod_assoc).
+    rewrite (path_universe_uncurried sum_prod_comm).
+    rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
+    destruct g.
+    rewrite (path_universe_uncurried sum_prod_comm).
+    specialize (H t0).
+    apply unit_idenpotent in H.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    apply path_universe_uncurried.
+    exact H.
+  Defined.
 
   Lemma sum_pair_split' {A B C}:
     {ab: A * B & C ab} <~> {a:A & {b:B & C (a, b)}}.
@@ -293,7 +379,7 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     reflexivity.
   Defined.  
 
-  Definition IndexExampleProof0: IndexExample0.
+  Definition IndexExampleProof0: IndexExample0.    
     unfold IndexExample0.
     unfold Index.
     intros.
