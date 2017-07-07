@@ -55,7 +55,7 @@ declares a table with schema s1. Two tables could have the same schema.
 
 After declaring schemas and tables, now you can declar queries to be checked. Query is declared in a SQL like syntax. Within the Query, you can use tables and attributes (in their schema) declared before as well as integer literals such as `42`. Below is an example of query:
 
-<code><pre> query q1
+<pre><code> query q1
 `select (x.x + x.x) as ax
  from a x where x.x = x.y`;</code></pre> 
 
