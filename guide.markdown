@@ -53,13 +53,14 @@ declares a table with schema s1. Two tables could have the same schema.
 
 ### 2.3 Query
 
-After declaring schemas and tables, now you can declar queries to be checked. Query is declared in a SQL like syntax. Within the Query, you can use tables and attributes (in their schema) declared before as well as integer literals such as `42`. Below is an example of query:
+After declaring schemas and tables, now you can write queries to be checked. Query is declared in a SQL like syntax. Within the Query, you can use tables and attributes (in their schema) declared before as well as integer literals such as `42`. Below is an example of query:
 
 <pre><code> query q1
 `select (x.x + x.x) as ax
  from a x where x.x = x.y`;</code></pre> 
 
 Cosette's SQL syntax are more restricted than SQL. These restrictions are helpful to precisely express the SQL semantics:
+
 1. In `select` clause, each field is required to be in the form of `<select-expression> as <field-alias>` such as `(x.x + x.x) as ax`.
 2. In `from` clause, each table or subquery is required to be in the form of `<table-or-subquery> <table-alias>` such as `a x`.
 3. The reference to an attribute is required in the form of `<table-alias>.<attribute-name>` such as `x.x`.
@@ -68,14 +69,48 @@ Cosette supports a substantial fraction of, but not all SQL features ([detailed 
 
 ### 2.4 Symbolic Predicate
 
+To reason the equivalences of templated SQL queries, Cosette support symbolic predicate in addition to concrete predicate (e.g. `a.x = 1` is a concrete predicate). Below is a Cosette program with symbolic predicates.
+
+<pre><code>schema s(??);
+
+table r(s);
+
+predicate b1(s);    -- symbolic predicate b1 on s
+predicate b2(s);    -- symbolic predicate b2 on s
+
+query q1
+`select distinct * from r x where b1(x) or b2(x)`;
+
+query q2
+`select distinct *
+ from ((select * from r x where b1(x)) 
+       union all (select * from r y where b2(y))) x`;
+ 
+verify q1 q2;
+</code></pre> 
+
+In line 5 and line 6, we defined two symbolic predicates `b1` and `b2`. Symbolic predicates represent any possible predicate that can be applied to a tuple with certain schema. Here, we define `b1` and `b2` on schema `s`. When using symbolic predicate in queries to be checked, a table alias where this predicate is applied is needed. The table alias indicating where the symbolic predicate is applied should have the same schema as the declared one. In `q1`, both `b1` and `b2` are applied to tuples from a table with alias `x`, thus `b1(x)` and `b2(x)`. 
+In `q2`, `b1` is applied to tuples from a table with alias `x` and `b2` is applied to tuples from a table with alias `y`.
+
 ### 2.5 Verify
 
+Verify statement calls the solver to check the equivalences of the two SQL queries. 
+
 ## 2. SQL Features Covered <a id="sql"> </a>
+
+* `SELECT-FROM-WHERE` queries
+* `DISTINCT` queries
+* `UNION ALL`
+* `GROUP BY` (one or more attributes, currently we don't support expressions in GROUP BY yet)
+* `=` predicate, `>` and `<` predicate
+*  `AND`, `OR`, and `NOT` in predicate
+* Aggregate (`SUM`, `COUNT`)
+* Correlated (`EXISTS`) and Non-Correlated Subqueries (Subqueries in `FROM` clause). 
 
 ## 3. Cosette Web API <a id="api"> </a>
 
 ## Contact
 
-If you have any question, want to contribute to the project, or just want to say hi, email us at 
+If you have any question, want to contribute to the project, email us at 
 [cosette@cs.washington.edu](mailto:cosette@cs.washington.edu). 
 
