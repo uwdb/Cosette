@@ -109,6 +109,24 @@ Verify statement calls the solver to check the equivalences of the two SQL queri
 
 ## 3. Cosette Web API <a id="api"> </a>
 
+You can use our Web API to integrate cosette as part of your application. First, you need to register as a user of Cosette Web Service. Simply go to [Cosette Demo](http://demo.cosette.cs.washington.edu) and register. After you finished registration or logged in as a return user, you will notice a link on the upper left corner of the demo web page (see below). Click it and get your API key!
+
+<div>
+<a href='http://demo.cosette.cs.washington.edu'><img src="{{ site.baseurl}}/images/api_key.png" class="img-responsive" alt="Screenshot of the cosette API key"></a>
+</div>
+
+To use the web service, all you need is to send a POST request containing your API key and query to https://demo.cosette.cs.washington.edu/solve (Note: It is a https URL!). For example, if your are using python, you can just do:
+
+```python
+import requests
+
+r = requests.post("https://demo.cosette.cs.washington.edu/solve", data={"api_key":"<your api key>", "query":"<your cosette program>"})
+
+print r.text
+```
+
+You will get a json response, which include the result and all the other informations. The result is shown in "result" field. It could be "EQ", "NEQ", "UNKNOWN", and "ERROR". If the result is "NEQ", there is another field named "counterexamples" whose value is the counter examples. If the result is "ERROR", then there is another field named "error_msg" indicating the details of the error. You can look into "rosette_source" and "coq_source" to check the generated Rosette and Coq code as well. 
+
 ## Contact
 
 If you have any question, want to contribute to the project, email us at 
