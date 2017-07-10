@@ -21,7 +21,7 @@ Stay tuned and sign up on our <a href="https://mailman.cs.washington.edu/mailman
 
 ### Checking SQL Equivalences in Cosette
 
-You can try the Cosette [demo](http://demo.cosette.cs.washington.edu) online, or download its [source code](https://github.com/uwdb/Cosette) from github.
+You can try the Cosette [demo](http://demo.cosette.cs.washington.edu) online, using [Cosette Web API](http://cosette.cs.washington.edu/guide#api) or download its [source code](https://github.com/uwdb/Cosette) from github. Read [the Cosette Guide](http://cosette.cs.washington.edu/guide) to learn how to use Cosette, it is very easy to use!
 
 <div>
 	<a href='http://demo.cosette.cs.washington.edu'><img src="{{ site.baseurl}}/images/cosette-ui.png" class="img-responsive" alt="Screenshot of the cosette web UI"></a>
