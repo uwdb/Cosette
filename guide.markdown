@@ -9,7 +9,8 @@ id: guide
 
 by [Shumo Chu](www.shumochu.com)
 
-This document is an introduction to checking SQL equivalences of Cosette, and how to use Cosette web API to build your own tool. 
+This document discusses how Cosette checks equivalence of SQL queries, 
+and how to use Cosette web API to build your own tool. 
 
 ## Table of Contents
 * [The Cosette Language](#lang)
@@ -20,58 +21,81 @@ This document is an introduction to checking SQL equivalences of Cosette, and ho
 
 The get a flavor of the Cosette language, Let's start with a simple Cosette program: 
 
-<pre><code>schema s1(x:int, y:int, ??);
+<pre><code>
+schema s1(x:int, y:int, ??);   -- schema declaration
 
 table a(s1);                   -- table a of schema s1
 
-query q1                       -- query 1
+query q1                       -- query 1 on table a
 `select (x.x + x.x) as ax
- from a x where x.x = x.y`;
+ from a x 
+ where x.x = x.y`;
 
-query q2                       -- query 2
+query q2                       -- query 2 on table a
 `select (x.x + x.y) as ax
- from a x where x.x = x.y`;
+ from a x 
+ where x.x = x.y`;
 
-verify q1 q2;                  -- verify the equivalence
+verify q1 q2;                  -- does q1 equal to q2?
 </code></pre>
 
 ### 2.1 Schema 
 
-A schema can be declared with a set of attribute names and their data types. In addition to known attributes, `??` can be used to indicate that there could be more attributes in the declared schema, then Cosette will reason about the equivalence assuming that the declared schema has known attributes but could have potentially more attributes. For example, 
+To use Cosette, we start by defining a schema for the tables that we will query on.
+A schema is declared with a set of attribute names and their data types. In
+addition to known attributes, we use `??` to indicate that there could be
+more 'generic' attributes in the declared schema but they aren't used in queries. 
+For example, 
 
 <pre><code> schema s1(x:int, y:int, ??); </code></pre> 
 
 Here `s1` can contain any number of attributes, but it has to at least contain integer attributes `x` and `y`. 
 
+If Cosette concludes that two queries with generic attributes are equivalent, 
+then they are equivalent regardless of what those generic attributes are instantiated with.
+
 ### 2.2 Table
 
-A table can be declared with its schema. Such as 
+We next declare tables using the defined schemas. For instance:
 
 <pre><code> table a(s1); </code></pre> 
 
-declares a table with schema s1. Two tables could have the same schema. 
+declares a table with schema `s1`. Multiple tables can have the same schema. 
 
 ### 2.3 Query
 
-After declaring schemas and tables, now you can write queries to be checked. Query is declared in a SQL like syntax. Within the Query, you can use tables and attributes (in their schema) declared before as well as integer literals such as `42`. Below is an example of query:
+After declaring schemas and tables, we can now write the queries to be checked.
+A Cosette query is written using a SQL-like syntax. Within the Query, we can use tables
+and attributes declared earlier as well as integer literals
+such as `42`. Here is an example of query:
 
 <pre><code> query q1
 `select (x.x + x.x) as ax
- from a x where x.x = x.y`;</code></pre> 
+ from a x 
+ where x.x = x.y`;</code></pre> 
 
-Cosette's SQL syntax are more restricted than SQL. These restrictions are helpful to precisely express the SQL semantics:
+Note the use of \` \` to denote the query itself. 
+Cosette's SQL syntax are more restricted (say compared to that of MySQL or T-SQL).
+These restrictions are helpful to precisely express query semantics:
 
-1. In `select` clause, each field is required to be in the form of `<select-expression> as <field-alias>` such as `(x.x + x.x) as ax`.
-2. In `from` clause, each table or subquery is required to be in the form of `<table-or-subquery> <table-alias>` such as `a x`.
-3. The reference to an attribute is required in the form of `<table-alias>.<attribute-name>` such as `x.x`.
+1. In the `select` clause, each projected attribute must be named using `<select-expression> as <field-alias>` such as `(x.x + x.x) as ax`.
+2. In the `from` clause, each table or subquery is of the form `<table-or-subquery> <table-alias>` such as `a x`.
+3. Each attribute reference must be fully qualified with `<table-alias>.<attribute-name>` such as `x.x`.
 
-Cosette supports a substantial fraction of, but not all SQL features ([detailed list](#sql)). If a SQL feature is important to you but not currently supported in Cosette, don't hesitate to submit a [GitHub issue](https://github.com/uwdb/Cosette/issues).
+Currently Cosette supports a substantial fraction of, but not all SQL features
+([detailed list](#sql)). If a SQL feature is important to you but not currently
+supported in Cosette, don't hesitate to submit a 
+[GitHub issue](https://github.com/uwdb/Cosette/issues).
 
-### 2.4 Symbolic Predicate
+### 2.4 Symbolic Predicates
 
-To reason the equivalences of templated SQL queries, Cosette support symbolic predicate in addition to concrete predicate (e.g. `a.x = 1` is a concrete predicate). Below is a Cosette program with symbolic predicates.
+To reason the equivalences of templated SQL queries, Cosette support symbolic
+predicates in addition to concrete predicates (`a.x = 1` is a concrete
+predicate). This is similar to generic attributes mentioned earlier.
+Here is a Cosette program with symbolic predicates:
 
-<pre><code>schema s(??);
+<pre><code>
+schema s(??);       -- a generic schema with arbitrary attributes
 
 table r(s);
 
@@ -89,33 +113,53 @@ query q2
 verify q1 q2;
 </code></pre> 
 
-In line 5 and line 6, we defined two symbolic predicates `b1` and `b2`. Symbolic predicates represent any possible predicate that can be applied to a tuple with certain schema. Here, we define `b1` and `b2` on schema `s`. When using symbolic predicate in queries to be checked, a table alias where this predicate is applied is needed. The table alias indicating where the symbolic predicate is applied should have the same schema as the declared one. In `q1`, both `b1` and `b2` are applied to tuples from a table with alias `x`, thus `b1(x)` and `b2(x)`. 
-In `q2`, `b1` is applied to tuples from a table with alias `x` and `b2` is applied to tuples from a table with alias `y`.
+In lines 5 and 6, we defined two symbolic predicates `b1` and `b2`. Symbolic
+predicates represent *any* predicate that can be applied to a tuple with
+the specified schema (schema `s` in `b1` and `b2` above). When using
+symbolic predicates in queries, we need to provide which table is the predicate
+applied to using table aliases, and the table that the predicate is
+applied to should have the same schema as that in the predicate's 
+declaration.
+
+For instance, in `q1`, both `b1`
+and `b2` are applied to tuples from a table with alias `x`, i.e., `b1(x)` and
+`b2(x)`. While in `q2`, `b1` is applied to tuples from a table with alias `x` and
+`b2` is applied to tuples from a table with alias `y`.
 
 ### 2.5 Verify
 
-Verify statement calls the solver to check the equivalences of the two SQL queries. 
+Finally, 
+the verify statement calls the solver to check the equivalences of the two SQL queries. 
+**Alvin: add what is returned**
 
 ## 2. SQL Features Covered <a id="sql"> </a>
 
 * `SELECT-FROM-WHERE` queries
 * `DISTINCT` queries
 * `UNION ALL`
-* `GROUP BY` (one or more attributes, currently we don't support expressions in GROUP BY yet)
-* `=` predicate, `>` and `<` predicate
-*  `AND`, `OR`, and `NOT` in predicate
-* Aggregate (`SUM`, `COUNT`)
-* Correlated (`EXISTS`) and Non-Correlated Subqueries (Subqueries in `FROM` clause). 
+* `GROUP BY` (one or more attributes, currently we don't support expressions in `GROUP BY` yet)
+* `=`, `>`, and `<` predicates
+*  `AND`, `OR`, and `NOT` predicates
+* Aggregates (`SUM`, `COUNT`)
+* Correlated queries (`EXISTS`) and non-Correlated Subqueries (Subqueries in `FROM` clause). 
 
 ## 3. Cosette Web API <a id="api"> </a>
 
-You can use our Web API to integrate cosette as part of your application. First, you need to register as a user of Cosette Web Service. Simply go to [Cosette Demo](http://demo.cosette.cs.washington.edu) and register. After you finished registration or logged in as a return user, you will notice a link on the upper left corner of the demo web page (see below). Click it and get your API key!
+Cosette provides a web REST API for you to integrate our tool in your application.
+First, register as a user of Cosette Web Service by going to
+[Cosette Demo](http://demo.cosette.cs.washington.edu). After you
+finished registration or logged in as a returning user, you will notice a link on
+the upper left corner of the demo web page (see below). Click it and get your
+API key!
 
 <div>
 <a href='http://demo.cosette.cs.washington.edu'><img src="{{ site.baseurl}}/images/api_key.png" class="img-responsive" alt="Screenshot of the cosette API key"></a>
 </div>
 
-To use the web service, all you need is to send a POST request containing your API key and query to https://demo.cosette.cs.washington.edu/solve (Note: It is a https URL!). For example, if your are using python, you can just do:
+To use the web service, all you need is to send a POST request containing your
+API key and query to `https://demo.cosette.cs.washington.edu/solve` (Note: It is
+a https URL!). For example, do the following if you use python:
+**Alvin: add javascript**
 
 ```python
 import requests
@@ -125,10 +169,19 @@ r = requests.post("https://demo.cosette.cs.washington.edu/solve", data={"api_key
 print r.text
 ```
 
-You will get a json response, which include the result and all the other informations. The result is shown in "result" field. It could be "EQ", "NEQ", "UNKNOWN", and "ERROR". If the result is "NEQ", there is another field named "counterexamples" whose value is the counter examples. If the result is "ERROR", then there is another field named "error_msg" indicating the details of the error. You can look into "rosette_source" and "coq_source" to check the generated Rosette and Coq code as well. 
+You will get a json response, which include the result and other
+information. The result is shown in the `result` field and can be `EQ`, `NEQ`,
+`UNKNOWN`, or `ERROR`. If the result is `NEQ`, there will be another field named
+`counterexamples` that shows the counter examples. If the result is
+`ERROR`, then there is another field named "error_msg" indicating the details
+of the error. You can look into `rosette_source` and `coq_source` to check the
+generated Rosette and Coq code as well. 
+
+**Alvin: Can you document the call formally? see example:
+`https://developers.google.com/drive/v2/reference/files/get`**
 
 ## Contact
 
-If you have any question, want to contribute to the project, email us at 
+If you have any questions, comments, want to contribute to the project, email us at 
 [cosette@cs.washington.edu](mailto:cosette@cs.washington.edu). 
 
