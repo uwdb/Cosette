@@ -7,7 +7,7 @@ id: guide
 
 # The Cosette Guide
 
-by [Shumo Chu](www.shumochu.com)
+by [Shumo Chu](www.shumochu.com) and [Alvin Cheung](https://homes.cs.washington.edu/~akcheung/)
 
 This document discusses how Cosette checks equivalence of SQL queries, 
 and how to use Cosette web API to build your own tool. 
