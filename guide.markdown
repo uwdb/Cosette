@@ -44,15 +44,15 @@ verify q1 q2;                  -- does q1 equal to q2?
 To use Cosette, we start by defining a schema for the tables that we will query on.
 A schema is declared with a set of attribute names and their data types. In
 addition to known attributes, we use `??` to indicate that there could be
-more 'generic' attributes in the declared schema but they aren't used in queries. 
+more "symbolic" attributes in the declared schema but they aren't used in queries. 
 For example, 
 
 <pre><code> schema s1(x:int, y:int, ??); </code></pre> 
 
 Here `s1` can contain any number of attributes, but it has to at least contain integer attributes `x` and `y`. 
 
-If Cosette concludes that two queries with generic attributes are equivalent, 
-then they are equivalent regardless of what those generic attributes are instantiated with.
+If Cosette concludes that two queries with symbolic attributes are equivalent, 
+then they are equivalent regardless of what those symbolic attributes are instantiated with.
 
 ### 2.2 Table
 
@@ -91,10 +91,10 @@ supported in Cosette, don't hesitate to submit a
 
 To reason the equivalences of templated SQL queries, Cosette support symbolic
 predicates in addition to concrete predicates (`a.x = 1` is a concrete
-predicate). This is similar to generic attributes mentioned earlier.
+predicate). This is similar to symbolic attributes mentioned earlier.
 Here is a Cosette program with symbolic predicates:
 
-<pre><code>schema s(??);       -- a generic schema with arbitrary attributes
+<pre><code>schema s(??);       -- a schema with arbitrary (symbolic) attributes
 
 table r(s);
 
