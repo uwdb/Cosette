@@ -1,10 +1,10 @@
 schema s(??);
 
-table r1(s);
-table r2(s);
+table r(s);
+table s(s);
 
-query q1 `select * from (r1 union all r2) x`;
+query q1 `select * from (r union all s) x`;
 
-query q2 `(select * from r1 x) union all (select * from r2 y)`;
+query q2 `(select * from r x) union all (select * from s y)`;
 
 verify q1 q2;

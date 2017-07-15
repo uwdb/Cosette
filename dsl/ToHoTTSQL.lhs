@@ -431,6 +431,21 @@ dedup list (this does not preserve the order)
 > dedup :: Ord a => [a] -> [a]
 > dedup = toList . fromList
 
+add a prefix to schema name to avoid naming confliction.
+
+> prefixScm :: String -> String
+> prefixScm s = "scm_" ++ s
+
+add a prefix to relation name to avoid naming confliction.
+
+> prefixRel :: String -> String
+> prefixRel r = "rel_" ++ r
+
+add a prefix to predicate name to avoid naming confliction.
+
+> prefixPred :: String -> String
+> prefixPred p = "pred_" ++ p
+
 > instance Coqable HSValueExpr where
 >   toCoq (HSDIden t a) = addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op', toCoq v1, toCoq v2]
@@ -450,7 +465,7 @@ convert valueExpr to projection strings.
 >   toCoq HSTrue = "true"
 >   toCoq HSFalse = "false"
 >   toCoq (HSPredVar v sl) = addParen $ uw ["castPred (combine left",
->                                          (f sl) ++ ")", v]
+>                                          (f sl) ++ ")", prefixPred v]
 >     where f [x] = addParen $ x
 >           f (t:h) = addParen $ uw ["combine", addParen t, f h]
 >           f [] = "ERROR"
@@ -466,7 +481,7 @@ convert valueExpr to projection strings.
 
 
 > instance Coqable HSTableRef where
->   toCoq (HSTRBase x) = addParen $ uw ["table", x]
+>   toCoq (HSTRBase x) = addParen $ uw ["table", prefixRel x]
 >   toCoq (HSTRQuery q) = addParen $ toCoq q
 >   toCoq HSUnitTable = "unit"
 >   toCoq (HSProduct t1 t2) = addParen $ uw ["product", toCoq t1, toCoq t2]
@@ -544,8 +559,9 @@ assemble the theorem definition.
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
->     snames = unwords $ map hsSName sl
->     tables = unwords $ map (\t -> "(" ++ (fst t) ++ ": relation " ++ (snd t) ++ ")") tsl
+>     snames = unwords $ map (prefixScm . hsSName) sl
+>     tables = unwords $ map (\t -> "(" ++ (prefixRel (fst t)) ++ ": relation "
+>                                    ++ (prefixScm (snd t)) ++ ")") tsl
 >     scms = "( Γ " ++ snames ++ ": Schema) "
 >     tbls = tables ++ " "
 >     attrs = unwords $ map attrDecs sl
@@ -573,13 +589,16 @@ generate attribute (column) declarations from schemas, TODO: everything is int f
 >         attrs = hsAttrs s
 >         genAttr t = if (fst t) == "unknowns"
 >                     then ""
->                     else "(" ++ sn ++ "_" ++ (fst t) ++ " : Column int " ++ sn ++ ")"
+>                     else "(" ++ sn ++ "_" ++ (fst t) ++ " : Column int " ++ (prefixScm sn) ++ ")"
 
 generate predicate declarations
 
 > predDecs :: (String, [String]) -> String
-> predDecs t = "(" ++ (fst t) ++ " : Pred (Γ++" ++ "" ++ scms ++ "))"
->   where scms = foldr (\a b -> if b == "" then a else a ++ "++" ++ b) "" (snd t)
+> predDecs t = "(" ++ (prefixPred (fst t)) ++ " : Pred (Γ++" ++ "" ++
+>               scms ++ "))"
+>   where scms = foldr (\a b -> if b == "" then prefixScm a
+>                               else (prefixScm a) ++ "++" ++ (prefixScm b))
+>                       "" (snd t)
 
 > headers :: [String]
 > headers = ["Require Import HoTT.",
