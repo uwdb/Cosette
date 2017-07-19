@@ -1,11 +1,12 @@
 [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/uwdb/Cosette)
 [![Build Status](https://travis-ci.org/uwdb/Cosette.svg?branch=master)](https://travis-ci.org/uwdb/Cosette)
 
-dd=======
+Cosette
+=======
 
 Cosette is a langague and an automated solver for reasoning SQL equivalences. 
 
-* Read [the medium post][]
+* Read [the medium post][blog]
 * See [the Cosette Guide][guide] to see how to use Cosette
 * Try Cosette [online demo][demo]
 * Check out cosette [website][web] for research papers about Cosette
