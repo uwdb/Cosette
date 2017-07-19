@@ -15,8 +15,8 @@ id: home
 Cosette is an automated prover for checking equivalences of SQL queries. It formalizes a substantial fragment of SQL in the Coq Proof Assistant and the Rosette symbolic virtual machine. It returns either a formal proof of equivalance or a counterexample for a pair of given queries. 
 
 <div class="boxed" align="center">
-<font color="red">We will release Cosette in next few weeks.<br>
-Stay tuned and sign up on our <a href="https://mailman.cs.washington.edu/mailman/listinfo/cosette">mailing list</a></font>!  
+<font color="red"> Cosette 1.0 is released!<br>
+<a href="https://medium.com/@uwdb/introducing-cosette-527898504bd6">Our medium article</a></font> 
 </div>
 
 ### Checking SQL Equivalences in Cosette
