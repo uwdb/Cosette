@@ -4,7 +4,7 @@
 Cosette
 =======
 
-Cosette is a langague and an automated solver for reasoning SQL equivalences. 
+Cosette is a language, and an automated solver for reasoning SQL equivalences. 
 
 * Read [Introducing Cosette](https://medium.com/@uwdb/introducing-cosette-527898504bd6) 
 * See [the Cosette Guide](http://cosette.cs.washington.edu/guide) to see how to use Cosette
