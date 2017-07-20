@@ -15,7 +15,7 @@ This project is in active development. Shoot us a message (cosette@cs.washington
 
 
 [web]: http://cosette.cs.washington.edu/.
-[guide]: http://cosette.cs.washington.edu/guide.
+[guide]: http://cosette.cs.washington.edu/guide/.
 [demo]: http://demo.cosette.cs.washington.edu/.
 [blog]: https://medium.com/@uwdb/introducing-cosette-527898504bd6.
 
