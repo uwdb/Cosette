@@ -290,7 +290,7 @@ get number literals from Cosette AST.
 
 > getNumberLiterals :: QueryExpr -> [Integer]
 > getNumberLiterals (UnionAll q1 q2) =
->   getNumberLiterals q1 ++ getNumberLiterals q1
+>   getNumberLiterals q1 ++ getNumberLiterals q2
 > getNumberLiterals (Select sl fr wh _ _) =
 >   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh   
 >   where getNumSI (Proj v _) = getNumVE v

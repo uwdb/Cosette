@@ -81,7 +81,12 @@ class EndToEndTests(unittest.TestCase):
     def test_exist(self):
         """ test exist """
         self.assertEqual(
-            get_status("./examples/inequal_queries/inline-exists.cos"), 'NEQ', "countbug")
+            get_status("./examples/inequal_queries/inline-exists.cos"), 'NEQ', "inline-exists")
+   
+    def test_issue29(self):
+        """ test issue 29 """
+        self.assertEqual(
+            get_status("./examples/inequal_queries/issue29.cos"), 'NEQ', "issue29-union")
 
 if __name__ == '__main__':
     unittest.main()

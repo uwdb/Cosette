@@ -149,6 +149,8 @@ def parse_results(results):
         ret["result"] = "NEQ"
     elif ret["coq_result"] == "EQ" and ret["rosette_result"] == "UNSAT":
         ret["result"] = "EQ"
+    elif ret["coq_result"] == "UNKNOWN" and ret["rosette_result"] == "UNSAT":
+        ret["result"] = "UNKNOWN"
     elif ret["coq_result"] == "EQ" and ret["rosette_result"] == "NEQ":
         ret["result"] = "ERROR"
         ret["error_msg"] = "Coq and Rosette executions doesn't agree. File an issue!"
