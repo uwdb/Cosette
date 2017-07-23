@@ -1,0 +1,12 @@
+schema s1(x:int);
+
+table a(s1);            -- define table a using schema s1
+
+query q1                -- define query q1 on tables a and b
+`select * from a x UNION ALL
+ select * from a x where false`;
+
+query q2                -- define query q2 likewise
+`select * from a x`;
+
+verify q1 q2;           -- does q1 equal to q2? 
