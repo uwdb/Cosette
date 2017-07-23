@@ -543,8 +543,8 @@ convert ValueExpr to sexp
 convert Predicate to sexp
 
 > instance Sexp RosPredicate where
->   toSexp RosTRUE = "#t"
->   toSexp RosFALSE = "#f"
+>   toSexp RosTRUE = "(TRUE)"
+>   toSexp RosFALSE = "(FALSE)"
 >   toSexp (RosNaryOp p al) = addParen $
 >     uw (["NARY-OP", p] ++ (map (\a-> "\"" ++ a ++ "\"") al))
 >   toSexp (RosAnd p1 p2) = addParen $ uw ["AND", toSexp p1, toSexp p2]
@@ -601,7 +601,7 @@ convert RosQueryExpr to s-expression string without adding schema.
 >   where sl' = addParen $ uw ("VALS": map toSexp sl)
 >         fl' = case fl of Nothing -> "UNIT"
 >                          Just fr -> toSexp $ head fr -- assuming converted from list to singleton
->         p' =  case p of Nothing -> addParen $ "F-EMPTY"
+>         p' =  case p of Nothing -> addParen $ "TRUE"
 >                         Just wh -> toSexp wh
 >         sel = if dis then "SELECT-DISTINCT" else "SELECT"
 

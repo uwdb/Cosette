@@ -124,7 +124,7 @@
 		  FROM (AS q2-part ["t" (list "x_uid" "x_uname" "x_city" "y_uid" "y_size")])
 		  WHERE (AND (BINOP "t.x_uid" = "table.x_uid") (BINOP "t.x_uname" = "table.x_uname")))))
     FROM q2-part
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 ; an alternative solution, using new syntax
 (define q2-new

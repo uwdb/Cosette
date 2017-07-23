@@ -16,7 +16,7 @@
   (SELECT (VALS "x1.a")
           FROM (JOIN (AS (SELECT (VALS "x.a" "x.k")
                                  FROM (NAMED sx)
-                                 WHERE (F-EMPTY))
+                                 WHERE (TRUE))
                          ["x1" (list "a" "k")])
                      (NAMED sy))
           WHERE (BINOP "x1.k" eq? "y.k")))

@@ -28,7 +28,7 @@
   (SELECT-GROUP (NAMED t) (list "votes.story_id") aggr-sum "votes.aggrf"))
 
 (define (test-2-q2 t)
-  (SELECT (VALS "votes.story_id" "votes.aggrf") FROM (NAMED t) WHERE (F-EMPTY)))
+  (SELECT (VALS "votes.story_id" "votes.aggrf") FROM (NAMED t) WHERE (TRUE)))
 
 (time (verify
         #:assume (begin (assert-table-ordered st))

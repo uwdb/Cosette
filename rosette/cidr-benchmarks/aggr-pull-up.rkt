@@ -13,7 +13,7 @@
                           FROM (AS (NAMED t1) ["t2" (list "c4" "c5" "c6")])
                           WHERE (BINOP "t2.c4" = "t1.c1"))))
     FROM (NAMED t1)
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 (define subq-aggr-2
   (SELECT-DISTINCT 
@@ -30,9 +30,9 @@
                                            WHERE (AND (BINOP "t3.c1" = "t2.c1") (BINOP "t3.c2" = "t2.c2")))))
                              FROM (AS (NAMED t1) ["t2" (list "c1" "c2" "c3")])
                              WHERE (BINOP "t2.c1" = "t1.c1")) ["t4" (list "c1" "c2" "c3")])
-                  WHERE (F-EMPTY))))
+                  WHERE (TRUE))))
     FROM (NAMED t1)
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 (define subq-aggr-wrong-2
   (SELECT-DISTINCT 
@@ -46,7 +46,7 @@
                           FROM (AS (NAMED t1) ["t2" (list "c1" "c2" "c3")])
                           WHERE (BINOP "t2.c1" = "t1.c1"))))
     FROM (NAMED t1)
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 (define part-ag2 
   (SELECT-DISTINCT 
@@ -57,12 +57,12 @@
                   FROM (AS (NAMED t1) ["t3" (list "c1" "c2" "c3")])
                   WHERE (AND (BINOP "t3.c1" = "t2.c1") (BINOP "t3.c2" = "t2.c2")))))
     FROM (AS (NAMED t1) ["t2" (list "c1" "c2" "c3")])
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 (define part-ag22 (SELECT-DISTINCT 
                     (VALS "t2.c1" "t2.c2" "t2.c3")
                     FROM (AS (NAMED t1) ["t2" (list "c1" "c2" "c3")])
-                    WHERE (F-EMPTY)))
+                    WHERE (TRUE)))
 
 ;(run subq-aggr-2)
 ;(run subq-aggr-1)

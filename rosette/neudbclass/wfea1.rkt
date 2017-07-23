@@ -43,7 +43,7 @@
    (SELECT
     (VALS "Courses.cid" (VAL-BINOP "Courses.ch" * "Courses.ppch"))
     FROM (NAMED Courses)
-    WHERE (F-EMPTY))
+    WHERE (TRUE))
    ["q1" (list "cid" "cost")]))
 
 ; CREATE VIEW q2 [
@@ -115,9 +115,9 @@
 
 (define wfea
   (SELECT
-   (VALS (AGGR aggr-count (SELECT (VALS "q3.isbn") FROM q3 WHERE (F-EMPTY))))
+   (VALS (AGGR aggr-count (SELECT (VALS "q3.isbn") FROM q3 WHERE (TRUE))))
    FROM (NAMED (UNIT))
-   WHERE (F-EMPTY)))
+   WHERE (TRUE)))
 
 
 ; ------ Second query (WFA) ------
@@ -126,9 +126,9 @@
 
 (define wfa
   (SELECT
-   (VALS (AGGR aggr-count (SELECT (VALS "q3a.isbn") FROM q3a WHERE (F-EMPTY))))
+   (VALS (AGGR aggr-count (SELECT (VALS "q3a.isbn") FROM q3a WHERE (TRUE))))
    FROM (NAMED (UNIT))
-   WHERE (F-EMPTY)))
+   WHERE (TRUE)))
 
 (time (verify (same wfea wfa)))
 

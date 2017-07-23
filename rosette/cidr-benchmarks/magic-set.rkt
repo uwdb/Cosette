@@ -7,7 +7,7 @@
 (define self-join-1
   (SELECT-DISTINCT (VALS "R.A" "R.B")
      FROM (NAMED t1)
-     WHERE (F-EMPTY)))
+     WHERE (TRUE)))
 
 (define self-join-2
   (SELECT-DISTINCT (VALS "X.A" "X.B")

@@ -178,7 +178,8 @@
      `(lambda (e) (not (,(denote-filter (filter-not-f1 f) nmap) e)))]
     [(filter-exists? f)
      `(lambda (e) (if (table-content-empty? (Table-content (,(denote-sql (filter-exists-query f) nmap) e))) #f #t))]
-    [(filter-empty? f) `(lambda (e) #t)]
+    [(filter-true? f) `(lambda (e) #t)]
+    [(filter-false? f) `(lambda (e) #f)]
     [(filter-nary-op? f)
      `(lambda (e)
         (apply

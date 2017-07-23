@@ -33,5 +33,6 @@
 (struct filter-disj (f1 f2) #:transparent)
 (struct filter-not (f1) #:transparent)
 (struct filter-exists (query) #:transparent)
-(struct filter-empty () #:transparent)
+(struct filter-true () #:transparent)
+(struct filter-false () #:transparent)
 (struct filter-nary-op (f args) #:transparent) ; n-ary-operator

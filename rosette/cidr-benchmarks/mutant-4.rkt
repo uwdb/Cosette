@@ -45,7 +45,7 @@
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
 		FROM q1
-		WHERE (F-EMPTY)))
+		WHERE (TRUE)))
 
 
 ; === mutant 1 === (JOIN --> LEFT JOIN)
@@ -70,7 +70,7 @@
 					   FROM (AS q4 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
 		FROM q4
-		WHERE (F-EMPTY)))
+		WHERE (TRUE)))
 
 ; === mutant 2 (aggregator mutant)
 
@@ -81,7 +81,7 @@
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
 		FROM q1
-		WHERE (F-EMPTY)))
+		WHERE (TRUE)))
 
 ; === mutant 3 (aggregator mutant)
 
@@ -92,7 +92,7 @@
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
 		FROM q1
-		WHERE (F-EMPTY)))
+		WHERE (TRUE)))
 ; expect model
 ;(run q2)
 ;(run q5)

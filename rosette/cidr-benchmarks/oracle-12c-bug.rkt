@@ -97,7 +97,7 @@
 (define q4
   (SELECT (VALS "t0.tid1" "t0.name" "t0.status1" "t0.status2")
           FROM q3
-          WHERE (F-EMPTY)))
+          WHERE (TRUE)))
 
 ; === wrong query ===
 
@@ -127,7 +127,7 @@
 (define q4-r
   (SELECT (VALS "t0.tid1" "t0.name" "t0.status1" "t0.status2")
           FROM q3-r
-          WHERE (F-EMPTY)))
+          WHERE (TRUE)))
 
 ; expect model
 ; (run count-bug-q1)

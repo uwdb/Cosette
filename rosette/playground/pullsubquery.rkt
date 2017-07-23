@@ -22,7 +22,7 @@
                 FROM (NAMED s)
                 WHERE (NARY-OP b "s.a1"))
                ["s" (list "a1")]))
-   WHERE (F-EMPTY)))
+   WHERE (TRUE)))
 
 ; select * from r, s where b(s)
 

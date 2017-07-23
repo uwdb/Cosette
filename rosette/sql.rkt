@@ -29,12 +29,12 @@
     (append (map (lambda (x) (VAL x)) gb-fields)
             (list (VAL (AGGR aggrf (SELECT 
                                      (VALS (string-append "tmp." target))
-                                     FROM (AS (SELECT (append (map (lambda (x) (VAL x)) gb-fields) (list (VAL target))) FROM q WHERE (F-EMPTY)) 
+                                     FROM (AS (SELECT (append (map (lambda (x) (VAL x)) gb-fields) (list (VAL target))) FROM q WHERE (TRUE)) 
                                               ["tmp" (append gb-fields (list target))])
-                                     WHERE (foldl (lambda (x y) (AND x y)) (F-EMPTY) 
+                                     WHERE (foldl (lambda (x y) (AND x y)) (TRUE) 
                                                   (map (lambda (z) (BINOP z = (string-append "tmp." z))) gb-fields)))))))
     FROM q
-    WHERE (F-EMPTY)))
+    WHERE (TRUE)))
 
 (define-syntax-rule
   (SELECT-DISTINCT v FROM q WHERE f)
@@ -97,7 +97,9 @@
 (define-syntax-rule (EXISTS q)
                     (filter-exists q))
 
-(define-syntax-rule (F-EMPTY) (filter-empty))
+(define-syntax-rule (TRUE) (filter-true))
+
+(define-syntax-rule (FALSE) (filter-false))
 
 ; f can be uninterpreted functions
 ; f should be of type int->int->...->int->bool

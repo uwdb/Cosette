@@ -82,11 +82,16 @@ class EndToEndTests(unittest.TestCase):
         """ test exist """
         self.assertEqual(
             get_status("./examples/inequal_queries/inline-exists.cos"), 'NEQ', "inline-exists")
-   
+
     def test_issue29(self):
         """ test issue 29 """
         self.assertEqual(
             get_status("./examples/inequal_queries/issue29.cos"), 'NEQ', "issue29-union")
+
+    def test_union_empty(self):
+        """ test union empty, for now at least it should not be NEQ, wait Coq part to return EQ """
+        self.assertNotEqual(
+            get_status("./examples/sqlrewrites/unionEmpty.cos"), 'NEQ', "union_empty")
 
 if __name__ == '__main__':
     unittest.main()

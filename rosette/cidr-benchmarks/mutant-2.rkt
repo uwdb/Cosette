@@ -49,7 +49,7 @@
   (SELECT (VALS "t1.id1" "t1.name" "t1.cname" "t1.id2")
    FROM (AS (LEFT-OUTER-JOIN (NAMED teaches) (NAMED instructor) 1 0)
       	["t1" (list "cname" "id2" "id1" "name")])
-   WHERE (F-EMPTY)))
+   WHERE (TRUE)))
 ; expect model
 ;(run q2)
 ;(run q4)

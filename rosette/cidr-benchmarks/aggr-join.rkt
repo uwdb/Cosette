@@ -24,7 +24,7 @@
                                              FROM (AS (NAMED tb) ["S2" (list "C" "D")])
                                              WHERE (BINOP "S2.C" = "S.C"))))
                    FROM (NAMED tb)
-                   WHERE (F-EMPTY)))
+                   WHERE (TRUE)))
 
 (define subq-aggr-2
   (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 

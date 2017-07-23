@@ -64,9 +64,9 @@
                                                     (AS (NAMED t2) ["s" (list "id")]))
                                        WHERE (BINOP "v.story_id" = "s.id"))))
           FROM (NAMED t3)
-          WHERE (F-EMPTY)))
+          WHERE (TRUE)))
 
-(define q2 (SELECT (VALS (VAL-BINOP 12 * "t.sum") 1) FROM (NAMED t3) WHERE (F-EMPTY)))
+(define q2 (SELECT (VALS (VAL-BINOP 12 * "t.sum") 1) FROM (NAMED t3) WHERE (TRUE)))
 
 (define q3 
   (SELECT (VALS "j.s1")
