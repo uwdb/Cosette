@@ -16,6 +16,10 @@ Module Type Cards.
     refine (@Trunc_ind 0 hSet (fun x => Card) _ (fun b' => card (BuildhSet (a' + b'))) b).
   Defined.
 
+  Definition cplus': Card -> Card -> Card.
+    Check Trunc_rec.
+    
+
   Definition cmul : Card -> Card -> Card.
     refine (fun a => _).
     refine (@Trunc_ind 0 hSet (fun (x: Card) => Card -> Card) _ (fun a' b => _) a).
@@ -24,7 +28,7 @@ Module Type Cards.
 
   Definition card_sum_comm : forall (a b: Card), (cplus a b) = (cplus b a).
     intros.
-    unfold cplus.   
+    unfold cplus.
     Admitted.
         
   End Cards.
