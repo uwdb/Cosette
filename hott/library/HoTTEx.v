@@ -164,6 +164,15 @@ Definition trunc_eq_refl {A} {a b:A}: Trunc (-1) (a = b) = Trunc (-1) (b = a).
     exact (tr r).
 Defined.
 
+Lemma unit_idenpotent:
+    forall (A:Type) (B:Type), (A -> B <~> Unit) -> A * B <~> A.
+  Proof.
+    intros A B H.
+    apply hprop_prod_r_eq in H.
+    rewrite (path_universe_uncurried (prod_unit_r A)) in H.
+    exact H.
+  Defined.
+
 Lemma sumPair {A B C} : {ab : A * B & C ab} <~> {ba : B * A & C (snd ba, fst ba)}.
   simple refine (BuildEquiv _ _ _ _). {
     intros [[a b] c].
@@ -185,7 +194,6 @@ Lemma sumPair {A B C} : {ab : A * B & C ab} <~> {ba : B * A & C (snd ba, fst ba)
     intros.
     reflexivity.
 Qed.
-
 
 Lemma eqSum {A P} {x:A} : P x <~> ∑ x', P x' * (x' = x).
   simple refine (BuildEquiv _ _ _ _). {
@@ -315,7 +323,7 @@ Proof.
     reflexivity.
 Defined.
 
-Lemma sum_prod_assoc {A B C D}:
+Lemma equiv_sigma_prod_assoc {A B C D}:
   {a: A & (B a) * ((C a) * (D a))} <~> {a:A & (B a) * (C a) * (D a)}.
 Proof.
   simple refine (BuildEquiv _ _ _ _). {
@@ -331,6 +339,47 @@ Proof.
   + unfold Sect.
     reflexivity.
  Defined.
+
+  Lemma sum_pair_split' {A B C}:
+    {ab: A * B & C ab} <~> {a:A & {b:B & C (a, b)}}.
+  Proof.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [[a b] c].
+      exists a.
+      exists b.
+      exact c. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [a [b c]].
+      exists (a, b).
+      exact c. }
+    + unfold Sect.
+      intros.
+      reflexivity.
+    + unfold Sect.
+      intros.
+      reflexivity.
+    + reflexivity.
+  Qed.
+
+  Lemma sum_commute {A B C}:
+    {a:A & {b: B & C (a, b)}} <~> {b:B & {a:A & C (a, b)}}.
+  Proof.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a [b c]].
+      exists b.
+      exists a.
+      exact c. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [b [a c]].
+      exists a.
+      exists b.
+      exact c. }
+    + unfold Sect.
+      reflexivity.
+    + unfold Sect.
+      reflexivity.
+    + reflexivity.
+  Qed.
 
 Definition equiv_prod_sigma_r I A (B: I -> Type):
     ∑ i, (B i) * A <~> (∑ i, B i) * A .
