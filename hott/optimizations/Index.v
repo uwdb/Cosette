@@ -33,6 +33,55 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   Definition isKey3 {s t} (k: Column t s) (R: SQL empty s) :=
     forall (t1:Tuple s), denoteSQL R tt t1 -> {t: Tuple s & (⟦k⟧ t1 = ⟦ k ⟧ t) * denoteSQL R tt t}  <~> Unit.
 
+  Definition isKey2 {s ty} (k: Column ty s) (R: SQL empty s) :=
+    forall (t: Tuple s), denoteSQL R tt t = {t': Tuple s & (⟦k⟧ t' = ⟦ k ⟧ t) * (denoteSQL R tt t') * denoteSQL R tt t}. 
+
+  Lemma equiv_sigma_sigma_prod {A B C D}:
+    {a: A & B a * {c:C & D a c}} = {a: A & {c:C & B a * D a c}}.
+    f_ap.
+    by_extensionality a.
+    apply path_universe_uncurried.
+    refine (equiv_prod_sigma _ _ _).
+  Defined.
+    
+  Definition IndexQ0: Type.
+    refine (forall r (R: SQL empty r) t0 (l: constant t0)
+              (a: Column t0 r) t1 (k: Column t1 r) (ik: isKey2 k R), _).
+    pose (Index R k a) as I.
+    pose (empty ++ (singleton t1 ++ singleton t0 ++ empty) ++ r) as qs.
+    pose (@variable _ qs (right⋅left⋅right⋅left⋅star)) as ia.
+    pose (@variable _ qs (right⋅left⋅left⋅star)) as ik'.
+    pose (@variable _ qs (right⋅right⋅k)) as rk.
+    refine (⟦ empty ⊢ (SELECT * FROM1 R
+                       WHERE equal (variable (right⋅a)) (constantExpr l)): _ ⟧ =
+            ⟦ empty ⊢ (project (right⋅right) (FROM I, R
+                       WHERE and (equal ia (constantExpr l))
+                                 (equal ik' rk) )) : _ ⟧).
+  Defined.
+
+  Definition indexFact0 {s ty} {k: Column ty s} {R: SQL empty s} (p: isKey2 k R) :
+    forall (t:Tuple s) (p: Tuple s -> Type),
+      {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t'}
+      = {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t}.
+   Admitted.
+
+  Arguments IndexQ0 /.
+
+  Definition IndexProof0: IndexQ0.
+    simpl.
+    intros.
+    by_extensionality g.
+    by_extensionality t.
+    pose (indexFact0 ik) as pf.
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite equiv_sigma_sigma_prod.
+    
+  
+  
   Lemma sum_pair_subst {A B}:
     forall (a:A) (F: A * B -> Type), {ab: A * B &  F ab * (fst ab = a)} <~> {b: B & F (a, b)}.
   Proof.
@@ -58,31 +107,6 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
       destruct e.
       reflexivity.
   Defined.
-
-  Lemma sum_prod_comm {A B C}:
-    {a: A & (B a) * (C a)} <~> {a: A & (C a) * (B a)}.
-  Proof.
-    simple refine (BuildEquiv _ _ _ _). {
-      intros [a [b c]].
-      exact (a; (c, b)). }
-    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
-      intros [a [c b]].
-      exact (a; (b, c)). }
-    + unfold Sect.
-      reflexivity.
-    + unfold Sect.
-      reflexivity.
-    + reflexivity.
-  Defined.
-
-  Lemma unit_idenpotent:
-    forall (A:Type) (B:Type), (A -> B <~> Unit) -> A * B <~> A.
-  Proof.
-    intros A B H.
-    apply hprop_prod_r_eq in H.
-    rewrite (path_universe_uncurried (prod_unit_r A)) in H.
-    exact H.
-  Defined.
   
   Lemma keySelfJoinEq:
     forall s t (k:Column t s) (R: SQL empty s), isKey3 k R -> isKey1 k R.
@@ -96,12 +120,12 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     simpl in g.
     rewrite (path_universe_uncurried (sum_pair_subst _ _)).
     simpl.
-    rewrite (path_universe_uncurried sum_prod_comm).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _)).
     rewrite <- (path_universe_uncurried sum_prod_assoc).
-    rewrite (path_universe_uncurried sum_prod_comm).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _)).
     rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
     destruct g.
-    rewrite (path_universe_uncurried sum_prod_comm).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _)).
     specialize (H t0).
     apply unit_idenpotent in H.
     rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
@@ -110,46 +134,6 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     exact H.
   Defined.
 
-  Lemma sum_pair_split' {A B C}:
-    {ab: A * B & C ab} <~> {a:A & {b:B & C (a, b)}}.
-  Proof.
-    simple refine (BuildEquiv _ _ _ _). {
-      intros [[a b] c].
-      exists a.
-      exists b.
-      exact c. }
-    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
-      intros [a [b c]].
-      exists (a, b).
-      exact c. }
-    + unfold Sect.
-      intros.
-      reflexivity.
-    + unfold Sect.
-      intros.
-      reflexivity.
-    + reflexivity.
-  Qed.
-
-  Lemma sum_commute {A B C}:
-    {a:A & {b: B & C (a, b)}} <~> {b:B & {a:A & C (a, b)}}.
-  Proof.
-    simple refine (BuildEquiv _ _ _ _). {
-      intros [a [b c]].
-      exists b.
-      exists a.
-      exact c. }
-    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
-      intros [b [a c]].
-      exists a.
-      exists b.
-      exact c. }
-    + unfold Sect.
-      reflexivity.
-    + unfold Sect.
-      reflexivity.
-    + reflexivity.
-  Qed.
   
   Definition IntroProj: Type.
     refine (forall r (R: SQL empty r) t0 (l: constant t0)
