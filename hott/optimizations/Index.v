@@ -20,7 +20,8 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     ⟦ empty ⊢ ((project (right⋅left)) (FROM R, R
                 WHERE equal (variable (right⋅left⋅k))
                 (variable (right⋅right⋅k)))): _ ⟧.
-  
+
+  (* TODO: Change index definition here *)
   Definition Index {s t0 t1} (R: SQL empty s) (k: Column t0 s) (ic: Column t1 s) :=
     SELECT2 (variable (right⋅k)), (variable (right⋅ic)) FROM1 R.
   
@@ -38,10 +39,46 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
 
   Lemma equiv_sigma_sigma_prod {A B C D}:
     {a: A & B a * {c:C & D a c}} = {a: A & {c:C & B a * D a c}}.
+  Proof.
     f_ap.
     by_extensionality a.
     apply path_universe_uncurried.
     refine (equiv_prod_sigma _ _ _).
+  Defined.
+
+  Lemma equiv_sigma_eq_subst {A B}:
+    forall a1:A, {a0:A & (a0 = a1) * B a0} <~> B a1.
+  Proof.
+    intro a1.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a0 [e ba1]].
+      rewrite e in ba1.
+      exact ba1. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros ba1.
+      refine (a1; (_, _)).
+      reflexivity.
+      exact ba1. }
+    + unfold Sect.
+      intro x.
+      reflexivity.
+    + unfold Sect.
+      intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+    + intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_eq_subst {A B C}:
+    forall (f: A -> B),
+      {a:A & {b0:B & (b0 = f a) * C a b0}} = {a: A & C a (f a)}.
+  Proof.
+    intros f.
+    f_ap.
+    by_extensionality a.
+    exact (path_universe_uncurried (equiv_sigma_eq_subst (f a))).
   Defined.
     
   Definition IndexQ0: Type.
@@ -68,18 +105,20 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   Arguments IndexQ0 /.
 
   Definition IndexProof0: IndexQ0.
-    simpl.
+    unfold IndexQ0.
     intros.
     by_extensionality g.
     by_extensionality t.
     pose (indexFact0 ik) as pf.
     rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
-    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
-    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
-    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    (* "destruc" t on RHS *)
+    rewrite <- (path_universe_uncurried (equiv_sigma_prod _)).
+    rewrite equiv_2sigma_eq_subst.
+    (* move sum around on RHS *)
     rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
     rewrite equiv_sigma_sigma_prod.
-    
+    rewrite (path_universe_uncurried (equiv_sigma_symm _)).
+    rewrite (equiv_2sigma_eq_subst _ _).
   
   
   Lemma sum_pair_subst {A B}:
