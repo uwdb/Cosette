@@ -398,6 +398,107 @@ Proof.
     reflexivity.
 Defined.
 
+  Lemma equiv_sigma_sigma_prod {A B C D}:
+    {a: A & B a * {c:C & D a c}} = {a: A & {c:C & B a * D a c}}.
+  Proof.
+    f_ap.
+    by_extensionality a.
+    apply path_universe_uncurried.
+    refine (equiv_prod_sigma _ _ _).
+  Defined.
+
+  Lemma equiv_sigma_eq_subst {A B}:
+    forall a1:A, {a0:A & (a0 = a1) * B a0} <~> B a1.
+  Proof.
+    intro a1.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [a0 [e ba1]].
+      rewrite e in ba1.
+      exact ba1. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros ba1.
+      refine (a1; (_, _)).
+      reflexivity.
+      exact ba1. }
+    + unfold Sect.
+      intro x.
+      reflexivity.
+    + unfold Sect.
+      intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+    + intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+  Defined.
+
+  Lemma equiv_sigma_eq_subst_r {A B}:
+    forall a1:A, {a0:A & (a1 = a0) * B a0} <~> B a1.
+  Proof.
+    intro a1.
+     simple refine (BuildEquiv _ _ _ _). {
+      intros [a0 [e ba1]].
+      destruct e.
+      exact ba1. }
+     simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+       intros ba1.
+       refine (a1; (_, _)).
+       reflexivity.
+       exact ba1. }
+    + unfold Sect.
+      intros.
+      reflexivity.
+    + unfold Sect.
+      intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+    + intros [a0 [e ba0]].
+      destruct e.
+      reflexivity.
+  Defined.
+    
+
+  Lemma equiv_2sigma_eq_subst {A B C}:
+    forall (f: A -> B),
+      {a:A & {b0:B & (b0 = f a) * C a b0}} = {a: A & C a (f a)}.
+  Proof.
+    intros f.
+    f_ap.
+    by_extensionality a.
+    exact (path_universe_uncurried (equiv_sigma_eq_subst (f a))).
+  Defined.
+
+  Lemma equiv_2sigma_eq_subst_r {A B C}:
+    forall (f: A -> B),
+      {a:A & {b0:B & (f a = b0) * C a b0}} = {a: A & C a (f a)}.
+  Proof.
+    intros f.
+    f_ap.
+    by_extensionality a.
+    exact (path_universe_uncurried (equiv_sigma_eq_subst_r (f a))).
+  Defined.
+
+  Lemma equiv_2sigma_prod_assoc {A B C D E}:
+    {a: A & {b: B & C a b * (D a b * E a b)}} <~> {a: A & {b: B & C a b * D a b * E a b}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_prod_symm {A B C D}:
+    {a: A & {b: B & C a b * D a b}} <~> {a: A & {b: B & D a b * C a b}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    reflexivity.
+  Defined.
+
+
 Definition unit_eq: forall g:Unit, g = tt.
   intro.
   apply equiv_path_unit.
@@ -416,4 +517,5 @@ Definition pair_f_eq {A B}: forall (a1 a2: A) (b1 b2: B),
     * rewrite X.
       reflexivity.
     * assumption.
+      
 Defined.
