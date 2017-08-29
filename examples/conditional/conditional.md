@@ -41,3 +41,24 @@ where v1.D = "Security" and v1.P = v2.P and v1.E = v2.E and v1.D = v2.D
 ```
 
 Q1 is only equivalent to Q1 if "Security" uses only its own employees on the projects it runs. 
+
+2. Using foreign key to do join elimination. [blog article about oracle](https://danischnider.wordpress.com/2015/12/01/foreign-key-constraints-in-an-oracle-data-warehouse/)
+
+Assume a fact table SALES and 3 dimension tables PRODUCTS, CUSTOMERS and TIMES. There are 3 foreign keys (prod_id, cust_id, time_id) in SALES referring to primary keys of each demension table. 
+
+(I removed group by in the original queries for readablity).
+
+Q1
+```
+SELECT p.prod_cat, s.amount_sold
+FROM sales s, product p, customers c, times t
+WHERE s.prod_id = p.prod_id AND s.cust_id = c.cust_id AND s.time_id = c.time_id AND
+      t.calendar_year = 2014 
+```
+
+Q2
+```
+SELECT p.prod_cat, s.amount_sold
+FROM sales s, product p, times t
+WHERE s.prod_id = p.prod_id AND s.time_id = c.time_id AND t.calendar_year = 2014 
+```
