@@ -34,8 +34,9 @@ context
 
 > data HSContext = HSNode HSContext HSContext
 >                | HSAbsScm String HSSchema           -- abstract schema
->                | HSScm String HSContext HSContext    -- concrete schema
->                | HSLeaf String String                -- single attribute: name, type
+>                | HSScm String HSContext HSContext   -- concrete schema
+>                | HSSglScm String String String      -- concrete singleton schema 
+>                | HSLeaf String String               -- single attribute: name, type
 >                | HSEmpty
 >                  deriving (Eq, Show)
 
@@ -43,6 +44,7 @@ context
 > renameCtx (HSNode c1 c2) n = HSScm n c1 c2
 > renameCtx (HSAbsScm a s) n = HSAbsScm n s
 > renameCtx (HSScm a c1 c2) n = HSScm n c1 c2
+> renameCtx (HSLeaf a t) n = HSSglScm n a t
 > renameCtx others n = others
 
 value expression
@@ -188,9 +190,14 @@ it returns (path, schema) or nothing
 > nameToPath' :: HSContext -> String -> Either String ([String], HSContext)
 > nameToPath' HSEmpty s = Left $ "cannot find alias " ++ s
 > nameToPath' (HSAbsScm al sch) s =
->   if al == s then Right ([], (HSAbsScm al sch)) else Left $ "cannot find alias " ++ s
+>   if al == s then Right ([], (HSAbsScm al sch))
+>   else Left $ "cannot find alias " ++ s
 > nameToPath' (HSScm al lt rt) s =
->   if al == s then Right ([], (HSScm al lt rt)) else nameToPath' (HSNode lt rt) s 
+>   if al == s then Right ([], (HSScm al lt rt))
+>   else nameToPath' (HSNode lt rt) s 
+> nameToPath' (HSSglScm al at ty) s =
+>   if al == s then Right ([], (HSSglScm al at ty))
+>   else Left $ "cannot find alias " ++ s
 > nameToPath' (HSNode lt rt) s =
 >   case nameToPath' rt s of Left _ -> do t <- nameToPath' lt s
 >                                         return ("left":(fst t), snd t)
@@ -224,9 +231,12 @@ convert Cosette value expression to HoTTSQL expression
 >        then Right [hsSName hs ++ "_" ++ a]
 >        else Left $ "cannot find attribute " ++ a
 >      attrToPath (HSScm rn lf rt) a = attrToPath (HSNode lf rt) a
+>      attrToPath (HSSglScm al at ty) a = attrToPath (HSLeaf at ty) a 
 >      attrToPath (HSLeaf at ty) a =
 >        if a == at then Right []
->        else Left $ "cannot find attribute " ++ a                                     
+>        else Left $ "cannot find attribute " ++ a
+>      attrToPath HSEmpty a = Left $ "cannot find attribute " ++ a
+
 > convertVE env ctx (BinOp v1 op v2) = HSBinOp <$> convertVE env ctx v1
 >                                          <*> Right op
 >                                          <*> convertVE env ctx v2
@@ -319,7 +329,12 @@ get number literals from Cosette AST.
 > intToConst :: Integer -> String
 > intToConst i = "integer_" ++ (show i)
 
-(recursively) replace star with an attribute
+(recursively) replace star with an attribute when there is a star in aggregate.
+
+It works as the following:
+
+For query like "SELECT COUNT(*) FROM R, S", it replaces * with an attribute from S.
+   To to this, it will first find a relation (`findRel`) and an attribute (`findLeaf`).
 
 > elimStar :: HSEnv -> HSContext -> QueryExpr
 >          -> Either String QueryExpr
@@ -327,7 +342,7 @@ get number literals from Cosette AST.
 >   UnionAll <$> elimStar env ctx q1 <*> elimStar env ctx q2
 > elimStar env ctx (Select sl fr wh gr di) =
 >   do ctx' <- getCtx env ctx fr
->      (r, c) <- findRel ctx'                                         -- find a leaf's paths
+>      (r, c) <- findRel ctx'      -- find a leaf node's paths
 >      a <- findLeaf c 
 >      sl' <- checkListErr $ map (convSI (DIden r a) (HSNode ctx ctx')) sl
 >      fr' <- convFr env ctx fr
@@ -340,7 +355,8 @@ get number literals from Cosette AST.
 >                                    (Right a, Left e) -> Right a
 >         findRel (HSAbsScm a s) = Right (a, (HSAbsScm a s))
 >         findRel (HSScm a t1 t2) = Right (a, (HSScm a t1 t2))
->         findRel other = Left "Error in elimSatr (ToHoTTSQL.lhs)."
+>         findRel (HSSglScm a at ty) = Right (a, HSSglScm a at ty)
+>         findRel other = Left "Error in elimStar (ToHoTTSQL.lhs)."
 >         findLeaf (HSNode t1 t2) = case (findLeaf t1, findLeaf t2) of
 >                                     (Left e1, Left e2) -> Left e1
 >                                     (Left err, Right a) -> Right a
@@ -348,6 +364,7 @@ get number literals from Cosette AST.
 >                                     (Right a, Left err) -> Right a
 >         findLeaf (HSAbsScm a s) = Right ((fst . last) $ hsAttrs s)
 >         findLeaf (HSScm sn t1 t2) =  findLeaf (HSNode t1 t2)
+>         findLeaf (HSSglScm a at ty) = Right at
 >         findLeaf (HSLeaf at ty) = Right at
 >         findLeaf HSEmpty = Left "cannot find a leaf."
 >         convSI v ctx (Proj (Agg f AStar) aname) =
@@ -447,7 +464,10 @@ add a prefix to predicate name to avoid naming confliction.
 > prefixPred p = "pred_" ++ p
 
 > instance Coqable HSValueExpr where
->   toCoq (HSDIden t a) = addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
+>   toCoq (HSDIden t a) =
+>     if a == ""
+>     then addParen $ uw ["variable", t]
+>     else addParen $ uw ["variable", addParen $ t ++ "⋅" ++ a]
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op', toCoq v1, toCoq v2]
 >     where op' = case lookup op binOps of
 >                   Just o -> o
@@ -458,7 +478,9 @@ add a prefix to predicate name to avoid naming confliction.
 convert valueExpr to projection strings.
 
 > veToProj :: HSValueExpr -> String
-> veToProj (HSDIden t a) = addParen $ t ++ "⋅" ++ a
+> veToProj (HSDIden t a) =
+>   if a == "" then addParen t
+>   else addParen $ t ++ "⋅" ++ a
 > veToProj v = addParen $ uw ["e2p", toCoq v]
 
 > instance Coqable HSPredicate where

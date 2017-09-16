@@ -93,5 +93,10 @@ class EndToEndTests(unittest.TestCase):
         self.assertNotEqual(
             get_status("./examples/sqlrewrites/unionEmpty.cos"), 'NEQ', "union_empty")
 
+    def test_proj_join_trans(self):
+        """ test project join transpose, for now at least it should not be ERROR """
+        self.assertNotEqual(
+            get_status("./examples/sqlrewrites/projectJoinTranspose.cos"), 'ERROR',"project_join_transpose")
+
 if __name__ == '__main__':
     unittest.main()
