@@ -456,7 +456,16 @@ Defined.
       destruct e.
       reflexivity.
   Defined.
-    
+
+  Lemma equiv_sigma_eq_subst_r' {A B}:
+    forall a1:A, {a0:A &  B a0 * (a1 = a0)} <~> B a1.
+  Proof.
+    intro a1.
+    rewrite <- (path_universe_uncurried (equiv_sigma_eq_subst_r a1)).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    apply equiv_path.
+    reflexivity.
+  Defined.
 
   Lemma equiv_2sigma_eq_subst {A B C}:
     forall (f: A -> B),
