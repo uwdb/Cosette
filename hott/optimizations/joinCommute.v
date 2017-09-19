@@ -35,7 +35,7 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
   Defined. 
   Arguments Rule /. 
  
-  Lemma ruleStand: Rule. 
+  Lemma ruleStand: Rule.
     start.
     rewrite (path_universe_uncurried equiv_sigma_prod_symm_m).
     rewrite (path_universe_uncurried sum_pair_split').

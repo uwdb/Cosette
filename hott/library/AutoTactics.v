@@ -36,11 +36,46 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
     try ring1;
     try rewrite (path_universe_uncurried (hprop_prod_prod _)).
 
+  Ltac transform1 :=
+    rewrite (path_universe_uncurried equiv_sigma_prod_symm_m);
+    rewrite (path_universe_uncurried sum_pair_split');
+    rewrite (path_universe_uncurried sum_pair_split');
+    rewrite (path_universe_uncurried (equiv_sigma_symm _)).
+
+  Ltac transform2 :=
+    rewrite (path_universe_uncurried (equiv_sigma_eq_subst' _));
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma_r _ _ _));
+    rewrite equiv_sigma_sigma_prod;
+    rewrite (path_universe_uncurried sum_pair_split');
+    f_ap;
+    let a := fresh "a" in
+    by_extensionality a;
+    f_ap;
+    let b := fresh "b" in
+    by_extensionality b;
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    symmetry;
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    f_ap;
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
+    symmetry;
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _));
+    f_ap;
+    rewrite (path_universe_uncurried (equiv_pair_assemble _));
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
 
 
   Ltac hott_ring' :=
     repeat rewrite (path_universe_uncurried (sum_distrib_l _ _ _));
-    try first [ simp_solve | (ring1; simp_solve) | (ring2; simp_solve) | (ring3; simp_solve) | (transform; simp_solve)].
+    try first [ simp_solve | (ring1; simp_solve) | (ring2; simp_solve) | (ring3; simp_solve) | (transform; simp_solve) | (transform1; simp_solve) | (transform2; simp_solve)].
   
   (* Poor men's ring tactic *)
   Ltac hott_ring :=

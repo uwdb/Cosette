@@ -467,6 +467,16 @@ Defined.
       reflexivity.
   Defined.
 
+  Lemma equiv_sigma_eq_subst' {A B}:
+    forall a1:A, {a0:A &  B a0 * (a0 = a1)} <~> B a1.
+  Proof.
+    intro a1.
+    rewrite <- (path_universe_uncurried (equiv_sigma_eq_subst a1)).
+    rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
+    apply equiv_path.
+    reflexivity.
+  Defined.
+
   Lemma equiv_sigma_eq_subst_r' {A B}:
     forall a1:A, {a0:A &  B a0 * (a1 = a0)} <~> B a1.
   Proof.
@@ -536,5 +546,19 @@ Definition pair_f_eq {A B}: forall (a1 a2: A) (b1 b2: B),
     * rewrite X.
       reflexivity.
     * assumption.
+ Defined.
+
+ Lemma equiv_pair_assemble {A B} `{IsHSet A} `{IsHSet B} {a:A} {b:B}:
+    forall c:A*B, ((a,b) = c) <~> (a = (fst c))* (b = (snd c)).
+  Proof.
+    intros c.
+    apply equiv_iff_hprop_uncurried.
+    constructor.
+    + intros p. rewrite <- p. simpl.
+      constructor; reflexivity.
+    + intros [p1 p2].
+      rewrite p1. rewrite p2.
+      reflexivity.
+  Defined.
+
       
-Defined.
