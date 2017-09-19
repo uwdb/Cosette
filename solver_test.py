@@ -48,6 +48,17 @@ class EndToEndTests(unittest.TestCase):
             get_status("./examples/sqlrewrites/projectionDistributesOverUnion.cos"), 'EQ',
             "projectionDistributesOverUnion")
 
+    def test_proj_join_trans(self):
+        """ test project join transpose """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/projectJoinTranspose.cos"),
+            'EQ', "project_join_transpose")
+
+    def test_join_commmute(self):
+        """ test project join commute """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/joinCommute.cos"), 'EQ', "join_commute")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """
@@ -92,11 +103,6 @@ class EndToEndTests(unittest.TestCase):
         """ test union empty, for now at least it should not be NEQ, wait Coq part to return EQ """
         self.assertNotEqual(
             get_status("./examples/sqlrewrites/unionEmpty.cos"), 'NEQ', "union_empty")
-
-    def test_proj_join_trans(self):
-        """ test project join transpose, for now at least it should not be ERROR """
-        self.assertNotEqual(
-            get_status("./examples/sqlrewrites/projectJoinTranspose.cos"), 'ERROR',"project_join_transpose")
 
 if __name__ == '__main__':
     unittest.main()
