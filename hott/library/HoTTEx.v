@@ -398,6 +398,16 @@ Proof.
     reflexivity.
 Defined.
 
+  Lemma equiv_sigma_prod_symm_m {A B C D E}:
+    {a: A & B a * ((C a) * (D a)) * E a} <~> {a:A & B a * (D a * C a) * E a}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.    
+    rewrite (path_universe_uncurried (equiv_prod_symm (C a) (D a))).
+    reflexivity.
+  Defined.
+
   Lemma equiv_sigma_sigma_prod {A B C D}:
     {a: A & B a * {c:C & D a c}} = {a: A & {c:C & B a * D a c}}.
   Proof.
