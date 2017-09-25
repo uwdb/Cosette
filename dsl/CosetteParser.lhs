@@ -39,6 +39,7 @@ Syntax and Parser for Cosette.
 >                ,"group"
 >                ,"having"
 >                ,"order"
+>                , "as"
 >                ]
 
 == Abstract Syntax
@@ -290,8 +291,9 @@ TODO: for now, only base relations can be unioned in from clause.
 >       <|> baseTe
 
 > fromItem :: Parser TableRef
-> fromItem =  TR <$> tableExpr <*> aliasIdentifier             
->   where aliasIdentifier = identifierBlacklist sqlKeywords
+> fromItem = try (TR <$> tableExpr <*> aliasIdentifier)
+>        <|> TR <$> tableExpr <*> (keyword_ "as" *> aliasIdentifier)
+>             where aliasIdentifier = identifierBlacklist sqlKeywords
 
 > fromClause :: Parser [TableRef]
 > fromClause = keyword_ "from" *> commaSep1 fromItem
