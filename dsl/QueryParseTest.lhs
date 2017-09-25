@@ -94,9 +94,9 @@
 >    ("select * from a x, (select * from b y where b0(y)) z where b1(x, z)", testQuery7),
 >    ("select x1.a as x1a from (select x.a as a, x.k as k from x x) x1, y y where x1.k = y.k",
 >     testQuery8),
->    ("select distinct x.x as ax from a x, b y where x.ya = y.yb", testQuery9),
+>    ("select distinct x.x as ax from a as x, b y where x.ya = y.yb", testQuery9),
 >    ("select * union all (select * union all select * from a a)", testQuery10),
->    ("select * from (a union all b union all c) x", testQuery11),
+>    ("select * from (a union all b union all c) as x", testQuery11),
 >    ("select x.uid as xu, count(*) as xn from a x group by x.uid, x.uname", testQuery12)]
 
 > main :: IO Counts
