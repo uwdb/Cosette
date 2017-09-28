@@ -10,7 +10,7 @@
 
 (define (denote-and-run q)
   (let ([query-in-rkt (denote-sql q (make-hash))])
-;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
+    ;    (println query-in-rkt) ;; if we want to debug the query after denotation, uncomment this line
     ((eval query-in-rkt ns) '())))
 
 ;; query: the sql query to denote to
@@ -87,19 +87,19 @@
     ; denote aggregation query
     [(query-aggr? query)
      (let* ([inner-q (query-aggr-query query)]
-             [schema (extract-schema inner-q)]
-             [name-hash (hash-copy index-map)])
-        (map (lambda (col-name idx)
-               (hash-set! name-hash col-name (+ idx (hash-count index-map))))
-             schema (range (length schema)))
-          `(lambda (e) 
-             (let ([content (aggr-raw 
-                              (get-content (,(denote-sql (query-aggr-query query) index-map) e)) 
-                              ;;; it is very tricky below, we need to pass down single quote ' to make the list a list to make it runnable 
-                              ',(map (lambda (x) (hash-ref name-hash x)) (query-aggr-aggr-fields query)) 
-                              ,(query-aggr-aggr-fun query) 
-                              ,(hash-ref name-hash (query-aggr-target query)))])
-               (Table "dummy" ',(extract-schema query) content))))]
+            [schema (extract-schema inner-q)]
+            [name-hash (hash-copy index-map)])
+       (map (lambda (col-name idx)
+              (hash-set! name-hash col-name (+ idx (hash-count index-map))))
+            schema (range (length schema)))
+       `(lambda (e) 
+          (let ([content (aggr-raw 
+                           (get-content (,(denote-sql (query-aggr-query query) index-map) e)) 
+                           ;;; it is very tricky below, we need to pass down single quote ' to make the list a list to make it runnable 
+                           ',(map (lambda (x) (hash-ref name-hash x)) (query-aggr-aggr-fields query)) 
+                           ,(query-aggr-aggr-fun query) 
+                           ,(hash-ref name-hash (query-aggr-target query)))])
+            (Table "dummy" ',(extract-schema query) content))))]
     ; denote select distinct query
     [(query-select-distinct? query)
      (let ([args (query-select-distinct-select-args query)]
@@ -166,8 +166,8 @@
     [(filter-binop? f)
      `(lambda (e)
         (,(filter-binop-op f)
-         (,(denote-value (filter-binop-val1 f) nmap) e)
-         (,(denote-value (filter-binop-val2 f) nmap) e)))]
+          (,(denote-value (filter-binop-val1 f) nmap) e)
+          (,(denote-value (filter-binop-val2 f) nmap) e)))]
     [(filter-conj? f)
      `(lambda (e) (and (,(denote-filter (filter-conj-f1 f) nmap) e)
                        (,(denote-filter (filter-conj-f2 f) nmap) e)))]
@@ -183,11 +183,11 @@
     [(filter-nary-op? f)
      `(lambda (e)
         (apply
-         ,(filter-nary-op-f f)
-         ;push a quote "list" to make the list a list 
-         ,(append '(list) (map (lambda (x)
-                 `(,(denote-value x nmap) e))
-               (filter-nary-op-args f)))))]))
+          ,(filter-nary-op-f f)
+          ;push a quote "list" to make the list a list 
+          ,(append '(list) (map (lambda (x)
+                                  `(,(denote-value x nmap) e))
+                                (filter-nary-op-args f)))))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")

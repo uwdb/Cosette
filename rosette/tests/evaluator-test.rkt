@@ -34,7 +34,11 @@
 (define content-c (list))
 
 ; tests
-; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2)))
+; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2))) 
+(time (println (group-by-raw content-b (list 0) (build-list 3 values))))
+(time (println (group-by-raw content-b (list 0 1) (list 1 2))))
+(time (println (group-by-raw content-c (list 0 1) (list 2))))
+(time (println (group-by-raw content-d (list 0 1) (list 2))))
 ; (println (xproduct-raw content-a content-b))
 ; (println (get-content (left-outer-join table-a table-b 2 2)))
 ; (left-outer-join-raw content-c content-c 0 0 3 3)

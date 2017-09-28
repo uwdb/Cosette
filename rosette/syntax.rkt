@@ -19,6 +19,10 @@
 (struct query-left-outer-join-2 (query1 query2 join-result) #:transparent)
 (struct query-union-all (query1 query2))
 (struct query-aggr (query aggr-fields aggr-fun target) #:transparent)
+(struct query-aggr-general (query aggr-fields select-vals having-filter) #:transparent)
+
+;;; special val representing aggregation
+(struct val-aggrf-col (aggr-func column-name) #:transparent)
 
 ;;; values
 (struct val-const (val) #:transparent)

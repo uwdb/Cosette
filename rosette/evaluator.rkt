@@ -20,7 +20,8 @@
          xproduct
          xproduct-raw
          sqlnull
-         aggr-raw)
+         aggr-raw
+         group-by-raw)
 
 (define sqlnull "sqlnull")
 
@@ -100,6 +101,40 @@
                     aggr-field-indices
                     raw-aggr-fun
                     target-index)))]))
+
+; perform aggregation on a table :table, result as follows:
+; e.g., if we group by a table on column 1, 2, and target columns is column 3
+;       the result would looks like this
+; |-------------------------------|
+; |  1  |  2  | [(3 . 5) (2 . 6)] |
+; |-----|-----|-------------------|
+; | ... | ... |       .....       |
+; each cell contain a list of tuples, specifying each value appear in the group and the number of times it appears
+; Arguments:
+;     table: the table to be aggregated, which contains only table-content but not schema
+;     group-by-indices: indices of the fields to be aggregated, reprented in a list
+;     target-indice: the target fields to be used in aggregation 
+;                    (we only collect them without actually perform any aggregation)
+(define (group-by-raw table group-by-indices target-indices)
+  (cond 
+    [(equal? '() table) '()]
+    [else 
+      (let* ([row (car table)]
+             [gb-key-vals (map (lambda (i) (list-ref (car row) i)) group-by-indices)])
+        (cons
+          (let ([same-val-rows 
+                  (map (lambda (r) 
+                         (map (lambda (idx) (cons (list-ref (car r) idx) (cdr r))) target-indices))
+                       (filter (lambda (r) (equal? gb-key-vals
+                                                   (map (lambda (i) (list-ref (car r) i)) group-by-indices)))
+                               table))])
+            (append gb-key-vals same-val-rows)) 
+          (group-by-raw 
+            (filter (lambda (r) 
+                      (not (equal? gb-key-vals (map (lambda (i) (list-ref (car r) i)) group-by-indices)))) 
+                    (cdr table))
+            group-by-indices
+            target-indices)))]))
 
 (define (dedup table)
   (cond
