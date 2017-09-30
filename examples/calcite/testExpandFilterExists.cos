@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT EMP.EMPNO FROM EMP AS EMP WHERE EXISTS (SELECT * FROM EMP AS EMP0 WHERE EMP0.EMPNO < 20) OR EMP.SAL < 100`;
+
+query q2 `SELECT EMP1.EMPNO FROM EMP AS EMP1 LEFT JOIN (SELECT TRUE AS i FROM EMP AS EMP2 WHERE EMP2.EMPNO < 20 GROUP BY TRUE) AS t4 ON TRUE WHERE t4.i IS NOT NULL OR EMP1.SAL < 100`;
+
+verify q1 q2;
