@@ -5,7 +5,7 @@ Calcite Tests
 
 1. `name`: corresponding to the test name in `RelOptRuleTest.java`.
 2. `q1`: converted from query plan (not the input SQL) before optimizer's rewrite.
-3. `q3`: converted from query plan after optimzier's rewrite.
+3. `q2`: converted from query plan after optimzier's rewrite.
 
 The following preprocessing has been done in `calcite_test.json`.
 
