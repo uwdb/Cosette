@@ -12,8 +12,9 @@ def solve(cos_source, cos_folder=".", show_compiled=False):
         cos_folder: path of cosette folder, default is current "."
         return the result of runing a cosette query
     """
-    coq_parse, coq_out = gen_coq(cos_source, cos_folder)
-    ros_parse, ros_out = gen_rosette(cos_source, cos_folder)
+    # sql is case insensitive, change source to lower first
+    coq_parse, coq_out = gen_coq(cos_source.lower(), cos_folder)
+    ros_parse, ros_out = gen_rosette(cos_source.lower(), cos_folder)
 
     ret = {
         "result": "",           # can be EQ, NEQ, UNKNOWN, ERROR
