@@ -6,13 +6,13 @@ table a(s1);            -- define table a using schema s1
 table b(s2);            -- define table b using schema s1
 
 query q1                -- define query q1 on tables a and b
-`select x.a1 as a1, x.a2 as a2, y.b1 as b1, y.b2 as b2 
+`select x.A1 as a1, x.a2 as a2, y.b1 as b1, y.b2 as b2 
  from a x, b y
  where x.a1 = y.b1`;
 
 query q2                -- define query q2 likewise
 `select y.a1 as a1, y.a2 as a2, x.b1 as b1, x.b2 as b2
- from b x, a y 
+ from b x, A y 
  where y.a1 = x.b1`;
 
 verify q1 q2;           -- does q1 equal to q2?
