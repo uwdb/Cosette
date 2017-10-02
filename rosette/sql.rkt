@@ -40,21 +40,10 @@
   (SELECT-DISTINCT v FROM q WHERE f)
   (query-select-distinct v q f))
 
-(define-syntax-rule
-  (UNION-ALL q1 q2)
-  (query-union-all q1 q2))
-
-(define-syntax-rule
-  (TABLE-UNION-ALL t1 t2)
-  (union-all t1 t2)
-)
-
-(define-syntax-rule
-  (JOIN q1 q2)
-  (query-join q1 q2))
-
-(define-syntax-rule (NAMED t)
-                    (query-named t))
+(define-syntax-rule (UNION-ALL q1 q2) (query-union-all q1 q2))
+(define-syntax-rule (TABLE-UNION-ALL t1 t2) (union-all t1 t2))
+(define-syntax-rule (JOIN q1 q2) (query-join q1 q2))
+(define-syntax-rule (NAMED t) (query-named t))
 
 ; rename the result of q with name t, and fields l (a list of string)
 ;(define-syntax-rule (AS q [t l])
@@ -66,9 +55,7 @@
     [(AS q [t l]) (query-rename-full q t l)]
     [(AS q [t]) (query-rename q t)]))
 
-(define-syntax-rule
-  (RENAME t name)
-  (rename-table t name))
+(define-syntax-rule (RENAME t name) (rename-table t name))
 
 (define-syntax-rule (VAL v)
                     (cond
@@ -124,9 +111,7 @@
 (define-syntax-rule (UNIT) unit-table)
 
 ;; UNIT table is a table with 1 row and empty schema
-(define unit-table
-  (Table "UNIT" (list)
-         (list (cons (list) 1))))
+(define unit-table (Table "UNIT" (list) (list (cons (list) 1))))
 
 ;; aggregation functions
 ;; input to these functions:
@@ -144,24 +129,3 @@
 
 (define (aggr-min l)
   (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))
-
-(define test-table1
-  (list
-    (cons (list 1 1 2) 2)
-    (cons (list 1 1 2) 2)
-    (cons (list 0 1 2) 2)
-    (cons (list 1 2 1) 1)
-    (cons (list 1 2 3) 1)
-    (cons (list 2 1 0) 3)))
-(define table1 (Table "t1" (list "c1" "c2" "c3") test-table1))
-
-(define q (query-select 
-            (list (val-column-ref "t1.c1") (val-column-ref "t1.c2"))
-            (query-named table1)
-            (filter-binop < (val-column-ref "t1.c1") (val-column-ref "t1.c2"))))
-
-(define q2 (query-rename-full (query-named table1) "qt" (list "c12" "c22" "c32")))
-
-(define q3 (query-join (query-named table1) (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3"))))
-
-(define part-of-q3 (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3")))
