@@ -36,7 +36,7 @@
 
 (define table1 (Table "t1" '("a" "b" "c") content-b))
 
-(define q 
+(define q                                                                                                                                                     
   (query-aggr-general 
     (query-named table1) 
     (list "t1.a" "t1.b") 
@@ -47,6 +47,18 @@
           (val-aggr-uexpr aggr-sum (val-column-ref "t1.c")))
     (filter-true)))
 
+(define q2
+  (query-aggr-general 
+    (query-named table1) 
+    (list "t1.a" "t1.b") 
+    (list (val-aggr-group-col "t1.a") 
+          (val-aggr-group-col "t1.b") 
+          (val-aggr-uexpr aggr-sum (val-bexpr (val-column-ref "t1.b") + (val-column-ref "t1.c"))) 
+          (val-aggr-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+          (val-aggr-uexpr aggr-sum (val-column-ref "t1.c")))
+    (filter-binop > (val-aggr-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
+    ;(filter-binop > (val-const 120) (val-const 105))))
+
 (define b_plus (broad-casting-bexpr-wrapper +))
 
 (b_plus 1 2)
@@ -55,3 +67,4 @@
 
 table1
 (denote-and-run q)
+(denote-and-run q2)

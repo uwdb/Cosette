@@ -105,15 +105,12 @@
         ,(let* ([inner-q (query-aggr-general-query query)]
                 [schema (extract-schema inner-q)]
                 [name-hash (hash-copy index-map)])
-           (println inner-q)
-           (println schema)
            (map (lambda (col-name index)
                   (hash-set! name-hash col-name (+ index (hash-count index-map))))
                 schema (range (length schema)))
-           (println name-hash)
            ; generating racket functions after denotation (no evaluation) and keep them around
            (let* ([from-clause (eval (denote-sql inner-q index-map) ns)]
-                  [having-clause (eval (denote-filter (query-aggr-general-having-filter query) name-hash) ns)]
+                  [having-clause (eval (denote-filter-w-broadcasting (query-aggr-general-having-filter query) name-hash) ns)]
                   [aggr-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-aggr-fields query))]
                   ; look, we need a ' again before ,aggr-fields to make it a list!
                   [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',aggr-fields)]
@@ -257,6 +254,33 @@
           ,(append '(list) (map (lambda (x)
                                   `(,(denote-value x nmap) e))
                                 (filter-nary-op-args f)))))]))
+
+
+;;; denote filters returns tuple -> bool
+(define (denote-filter-w-broadcasting f nmap)
+  (cond
+    [(filter-binop? f)
+     `(lambda (e)
+        (,(filter-binop-op f)
+          (,(denote-value-w-broadcasting (filter-binop-val1 f) nmap) e)
+          (,(denote-value-w-broadcasting (filter-binop-val2 f) nmap) e)))]
+    [(filter-conj? f)
+     `(lambda (e) (and (,(denote-filter-w-broadcasting (filter-conj-f1 f) nmap) e)
+                       (,(denote-filter-w-broadcasting (filter-conj-f2 f) nmap) e)))]
+    [(filter-disj? f)
+     `(lambda (e) (or (,(denote-filter-w-broadcasting (filter-disj-f1 f) nmap) e)
+                      (,(denote-filter-w-broadcasting (filter-disj-f2 f) nmap) e)))]
+    [(filter-not? f)
+     `(lambda (e) (not (,(denote-filter-w-broadcasting (filter-not-f1 f) nmap) e)))]
+    [(filter-exists? f) (denote-filter f nmap)]
+    [(filter-true? f) (denote-filter f nmap)]
+    [(filter-false? f) (denote-filter f nmap)]
+    [(filter-nary-op? f)
+     `(lambda (e)
+        (apply ,(filter-nary-op-f f)
+               ;push a quote "list" to make the list a list 
+               ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap) e))
+                                     (filter-nary-op-args f)))))]))
 
 ;;(define test-query1
 ;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
