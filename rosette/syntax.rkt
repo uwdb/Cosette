@@ -24,12 +24,12 @@
 ;;; special val representing aggregation
 ;;; ones with aggr-function means performing aggregation
 (struct val-aggr-target (aggr-func val) #:transparent)
-(struct val-aggr-group-col (column-name) #:transparent)
+(struct val-group-by-col (column-name) #:transparent)
 
 ;;; values
 (struct val-const (val) #:transparent)
 (struct val-column-ref (column-name) #:transparent)
-(struct val-agg (agg-func query) #:transparent)
+(struct val-aggr-subq (agg-func query) #:transparent)
 (struct val-bexpr (binop v1 v2) #:transparent)
 (struct val-uexpr (op val) #:transparent)
 

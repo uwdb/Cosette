@@ -6,8 +6,7 @@
 
 ;; the interface to run sql, 
 ;; note that ns is the namespace defined in denotation
-(define (run q)
-  (denote-and-run q))
+(define (run q) (denote-and-run q))
 
 ;;;;;;;;; query level syntax macros ;;;;;;;;;;;;
 
@@ -55,7 +54,6 @@
     FROM q
     WHERE (TRUE)))
 
-
 ;;;;;;;;;;;;;;;;;;; value-level syntax macros ;;;;;;;;;;;;;;;;;;;
 
 (define-syntax-rule (VAL v)
@@ -63,15 +61,15 @@
                       [(equal? v sqlnull) (val-const sqlnull)]
                       [(string? v) (val-column-ref v)]
                       [(int? v) (val-const v)]
-                      [(val-agg? v) v]
+                      [(val-aggr-subq? v) v]
                       [(val-bexpr? v) v]
                       [(val-uexpr? v) v]
                       [(val-aggr-target? v) v]
-                      [(val-aggr-group-col? v) v]))
+                      [(val-group-by-col? v) v]))
 
 (define-syntax-rule (VAL-BINOP v1 op v2) (val-bexpr op (VAL v1) (VAL v2)))
 (define-syntax-rule (VAL-UNOP op val) (val-uexpr op (VAL val)))
-(define-syntax-rule (AGGR-SUBQ aggr-fun q) (val-agg aggr-fun q))
+(define-syntax-rule (AGGR-SUBQ aggr-fun q) (val-aggr-subq aggr-fun q))
 (define (VALS . v) (map (lambda (x) (VAL x)) v))
 
 ;;;;;;;;;;;;;;;;;; filter-level syntax macros ;;;;;;;;;;;;;;;;;;;

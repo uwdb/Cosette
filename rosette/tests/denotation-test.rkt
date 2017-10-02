@@ -2,7 +2,6 @@
 
 (require "../sql.rkt" "../evaluator.rkt" "../denotation.rkt" "../table.rkt" "../syntax.rkt")
 
-
 ;; several test xproduct
 (define content-a
   (list
@@ -40,23 +39,23 @@
   (query-aggr-general 
     (query-named table1) 
     (list "t1.a" "t1.b") 
-    (list (val-aggr-group-col "t1.a") 
-          (val-aggr-group-col "t1.b") 
-          (val-aggr-uexpr aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
-          (val-aggr-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
-          (val-aggr-uexpr aggr-sum (val-column-ref "t1.c")))
+    (list (val-group-by-col "t1.a") 
+          (val-group-by-col "t1.b") 
+          (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-sum (val-column-ref "t1.c")))
     (filter-true)))
 
 (define q2
   (query-aggr-general 
     (query-named table1) 
     (list "t1.a" "t1.b") 
-    (list (val-aggr-group-col "t1.a") 
-          (val-aggr-group-col "t1.b") 
-          (val-aggr-uexpr aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
-          (val-aggr-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
-          (val-aggr-uexpr aggr-sum (val-column-ref "t1.c")))
-    (filter-binop > (val-aggr-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
+    (list (val-group-by-col "t1.a") 
+          (val-group-by-col "t1.b") 
+          (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-sum (val-column-ref "t1.c")))
+    (filter-binop > (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
     ;(filter-binop > (val-const 120) (val-const 105))))
 
 (define b_plus (broad-casting-bexpr-wrapper +))

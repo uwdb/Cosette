@@ -182,11 +182,11 @@
                                             (,(denote-value (val-bexpr-v2 value) nmap) e)))]
     [(val-uexpr? value)
      `(lambda (e) (,(val-uexpr-op value) (,(denote-value (val-uexpr-val value) nmap) e)))]
-    [(val-agg? value)
+    [(val-aggr-subq? value)
      `(lambda (e) 
-        (,(val-agg-agg-func value) 
+        (,(val-aggr-subq-agg-func value) 
           (map (lambda (r) (cons (car (car r)) (cdr r))) 
-               (get-content (,(denote-sql (val-agg-query value) nmap) e)))))]))
+               (get-content (,(denote-sql (val-aggr-subq-query value) nmap) e)))))]))
 
 
 (define (denote-value-w-broadcasting value nmap)
@@ -200,14 +200,14 @@
     [(val-uexpr? value)
      `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
                     (,(denote-value-w-broadcasting (val-uexpr-val value) nmap) e)))]
-    [(val-agg? value) (denote-value value nmap)]
+    [(val-aggr-subq? value) (denote-value value nmap)]
     [(val-aggr-target? value)
      `(lambda (e)
         (,(val-aggr-target-aggr-func value) ; extract the aggregation function and apply it on the function
           (,(denote-value-w-broadcasting (val-aggr-target-val value) nmap) e)))]
-    [(val-aggr-group-col? value)
+    [(val-group-by-col? value)
      `(lambda (e)
-        (car (car (list-ref e ,(hash-ref nmap (val-aggr-group-col-column-name value))))))]))
+        (car (car (list-ref e ,(hash-ref nmap (val-group-by-col-column-name value))))))]))
 
 ;;; broad casting a binary operator into a a binary operator over lists / numbers / or mixed
 ;;; note that lists should be a list of pairs with multiplicity, thus this better only used in group by internally
