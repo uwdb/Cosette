@@ -80,7 +80,7 @@
                       [(val-uexpr? v) v]))
 
 (define-syntax-rule (VAL-BINOP v1 op v2)
-                    (val-bexpr (VAL v1) op (VAL v2)))
+                    (val-bexpr op (VAL v1) (VAL v2)))
 
 (define-syntax-rule (VAL-UNOP op val)
                     (val-uexpr op (VAL val)))
