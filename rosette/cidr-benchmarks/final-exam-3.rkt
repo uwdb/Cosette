@@ -58,7 +58,7 @@
 (define q1
   (SELECT 
     (VALS "Usr.uid" "Usr.uname" 
-    	(AGGR aggr-count 
+    	(AGGR-SUBQ aggr-count 
 	  (SELECT 
 	    (VALS "Picture.uid" "Picture.size")
 	    FROM (NAMED Picture)
@@ -88,7 +88,7 @@
 (define q2
   (SELECT-DISTINCT 
     (VALS "table.x_uid" "table.x_uname" 
-	  (AGGR aggr-count 
+	  (AGGR-SUBQ aggr-count 
 		(SELECT 
 		  (VALS "t.x_uid" "t.x_uname" "t.x_city" "t.y_uid" "t.y_size")
 		  FROM (AS q2-part ["t" (list "x_uid" "x_uname" "x_city" "y_uid" "y_size")])

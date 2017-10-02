@@ -10,7 +10,7 @@
 (define tb (Table "S" (list "C" "D") (gen-sym-schema 2 2)))
 
 (define subq-aggr-1
-  (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 
+  (SELECT-DISTINCT (VALS "R.A" (AGGR-SUBQ aggr-sum 
                                      (SELECT (VALS "S2.D")
                                              FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
                                                         (AS (NAMED tb) ["S2" (list "C" "D")]))
@@ -19,7 +19,7 @@
                    WHERE (BINOP "R.B" = "S.C")))
 
 (define part-subq-2 
-  (SELECT-DISTINCT (VALS "S.C" (AGGR aggr-sum
+  (SELECT-DISTINCT (VALS "S.C" (AGGR-SUBQ aggr-sum
                                      (SELECT (VALS "S2.D")
                                              FROM (AS (NAMED tb) ["S2" (list "C" "D")])
                                              WHERE (BINOP "S2.C" = "S.C"))))
@@ -27,7 +27,7 @@
                    WHERE (TRUE)))
 
 (define subq-aggr-2
-  (SELECT-DISTINCT (VALS "R.A" (AGGR aggr-sum 
+  (SELECT-DISTINCT (VALS "R.A" (AGGR-SUBQ aggr-sum 
                                      (SELECT (VALS "S3.D")
                                              FROM (JOIN (AS (NAMED ta) ["R2" (list "A" "B")]) 
                                                         (AS (NAMED tb) ["S3" (list "C" "D")]))

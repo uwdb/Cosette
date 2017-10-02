@@ -115,7 +115,7 @@
 
 (define wfea
   (SELECT
-   (VALS (AGGR aggr-count (SELECT (VALS "q3.isbn") FROM q3 WHERE (TRUE))))
+   (VALS (AGGR-SUBQ aggr-count (SELECT (VALS "q3.isbn") FROM q3 WHERE (TRUE))))
    FROM (NAMED (UNIT))
    WHERE (TRUE)))
 
@@ -126,7 +126,7 @@
 
 (define wfa
   (SELECT
-   (VALS (AGGR aggr-count (SELECT (VALS "q3a.isbn") FROM q3a WHERE (TRUE))))
+   (VALS (AGGR-SUBQ aggr-count (SELECT (VALS "q3a.isbn") FROM q3a WHERE (TRUE))))
    FROM (NAMED (UNIT))
    WHERE (TRUE)))
 

@@ -59,7 +59,7 @@
 ; SELECT SUM(vote) AS sumv FROM votes AS v INNER JOIN stories AS s ON v.story_id = s.id;
 
 (define q1
-  (SELECT (VALS (AGGR aggr-sum (SELECT (VALS "v.vote")
+  (SELECT (VALS (AGGR-SUBQ aggr-sum (SELECT (VALS "v.vote")
                                        FROM   (JOIN (AS (NAMED t1) ["v" (list "vote" "story_id")]) 
                                                     (AS (NAMED t2) ["s" (list "id")]))
                                        WHERE (BINOP "v.story_id" = "s.id"))))

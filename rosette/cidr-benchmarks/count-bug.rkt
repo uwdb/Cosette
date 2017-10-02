@@ -34,7 +34,7 @@
    (VALS "parts.pnum")
    FROM (NAMED parts)
    WHERE (BINOP "parts.qoh" = 
-                (AGGR aggr-count
+                (AGGR-SUBQ aggr-count
                       (SELECT
                        (VALS "supply.shipdate")
                        FROM (NAMED supply)
@@ -49,7 +49,7 @@
   (SELECT-DISTINCT
    (VALS
     "supply.pnum"
-    (AGGR aggr-count
+    (AGGR-SUBQ aggr-count
           (SELECT
            (VALS "s2.shipdate")
            FROM (AS (NAMED supply) ["s2" (list "pnum" "shipdate")])

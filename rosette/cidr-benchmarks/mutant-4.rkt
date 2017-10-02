@@ -40,7 +40,7 @@
 
 (define q2
   (SELECT-DISTINCT (VALS "t.dept" 
-			 (AGGR aggr-count
+			 (AGGR-SUBQ aggr-count
 			       (SELECT-DISTINCT (VALS "t0.cid1")
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
@@ -65,7 +65,7 @@
 
 (define q5
   (SELECT-DISTINCT (VALS "t.dept" 
-			 (AGGR aggr-count
+			 (AGGR-SUBQ aggr-count
 			       (SELECT-DISTINCT (VALS "t0.cid1")
 					   FROM (AS q4 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
@@ -76,7 +76,7 @@
 
 (define q6
   (SELECT-DISTINCT (VALS "t.dept" 
-			 (AGGR aggr-count
+			 (AGGR-SUBQ aggr-count
 			       (SELECT (VALS "t0.cid1")
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))
@@ -87,7 +87,7 @@
 
 (define q7
   (SELECT-DISTINCT (VALS "t.dept" 
-			 (AGGR aggr-sum
+			 (AGGR-SUBQ aggr-sum
 			       (SELECT-DISTINCT (VALS "t0.cid1")
 					   FROM (AS q1 ["t0" (list "cid1" "dept" "id" "cid2")])
 					  WHERE (BINOP "t0.dept" equal? "t.dept"))))

@@ -111,9 +111,9 @@
            ; generating racket functions after denotation (no evaluation) and keep them around
            (let* ([from-clause (eval (denote-sql inner-q index-map) ns)]
                   [having-clause (eval (denote-filter-w-broadcasting (query-aggr-general-having-filter query) name-hash) ns)]
-                  [aggr-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-aggr-fields query))]
-                  ; look, we need a ' again before ,aggr-fields to make it a list!
-                  [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',aggr-fields)]
+                  [gb-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-gb-fields query))]
+                  ; look, we need a ' again before ,gb-fields to make it a list!
+                  [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',gb-fields)]
                   [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting arg name-hash) ns)) (query-aggr-general-select-args query))]
                   [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
              ; quoted part, the real function after denotation
@@ -201,10 +201,10 @@
      `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
                     (,(denote-value-w-broadcasting (val-uexpr-val value) nmap) e)))]
     [(val-agg? value) (denote-value value nmap)]
-    [(val-aggr-uexpr? value)
+    [(val-aggr-target? value)
      `(lambda (e)
-        (,(val-aggr-uexpr-aggr-func value) ; extract the aggregation function and apply it on the function
-          (,(denote-value-w-broadcasting (val-aggr-uexpr-val value) nmap) e)))]
+        (,(val-aggr-target-aggr-func value) ; extract the aggregation function and apply it on the function
+          (,(denote-value-w-broadcasting (val-aggr-target-val value) nmap) e)))]
     [(val-aggr-group-col? value)
      `(lambda (e)
         (car (car (list-ref e ,(hash-ref nmap (val-aggr-group-col-column-name value))))))]))
@@ -216,15 +216,15 @@
   (lambda (x y) 
     (cond 
       [(and (list? x) (list? y)) (map (lambda (a b) (cons (f (car a) (car b)) (cdr a))) x y)]
-      [(and (list? x) (number? y)) (map (lambda (a) (cons (f (car a) y) (cdr a))) x)]
-      [(and (number? x) (list? y)) (map (lambda (b) (cons (f x (car b)) (cdr b))) y)]
-      [(and (number? x) (number? y)) (f x y)])))
+      [(and (list? x) (not (list? y))) (map (lambda (a) (cons (f (car a) y) (cdr a))) x)]
+      [(and (not (list? x)) (list? y)) (map (lambda (b) (cons (f x (car b)) (cdr b))) y)]
+      [(and (not (list? x)) (not (list? y))) (f x y)])))
 
 (define (broad-casting-uexpr-wrapper f)
   (lambda (x) 
     (cond 
-      [(number? x) (f x)]
-      [(list? x) (map (lambda (a) (cons (f (car a)) (cdr a))) x)])))
+      [(list? x) (map (lambda (a) (cons (f (car a)) (cdr a))) x)]
+      [else (f x)])))
 
 ;;; denote filters returns tuple -> bool
 (define (denote-filter f nmap)
