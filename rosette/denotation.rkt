@@ -100,6 +100,34 @@
                            ,(query-aggr-aggr-fun query) 
                            ,(hash-ref name-hash (query-aggr-target query)))])
             (Table "dummy" ',(extract-schema query) content))))]
+    [(query-aggr-general? query)
+     `(lambda (e)
+        ,(let* ([inner-q (query-aggr-general-query query)]
+                [schema (extract-schema inner-q)]
+                [name-hash (hash-copy index-map)])
+           (println inner-q)
+           (println schema)
+           (map (lambda (col-name index)
+                  (hash-set! name-hash col-name (+ index (hash-count index-map))))
+                schema (range (length schema)))
+           (println name-hash)
+           ; generating racket functions after denotation (no evaluation) and keep them around
+           (let* ([from-clause (eval (denote-sql inner-q index-map) ns)]
+                  [having-clause (eval (denote-filter (query-aggr-general-having-filter query) name-hash) ns)]
+                  [aggr-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-aggr-fields query))]
+                  ; look, we need a ' again before ,aggr-fields to make it a list!
+                  [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',aggr-fields)]
+                  [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting arg name-hash) ns)) (query-aggr-general-select-args query))]
+                  [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
+             ; quoted part, the real function after denotation
+             `(let* ([table-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) ,from-table-content)]
+                     ; we perform having before performing val function application,
+                     ; aggregation functions can be directly used in the having clause
+                     [post-filter (filter (lambda (r) (,having-clause (car r))) table-w-env)]
+                     [content (map (lambda (r) (cons (,row-func-wrap (car r)) (cdr r))) post-filter)]
+                     [new-name "dummy"]
+                     [new-schema (,extract-schema ,query)])
+                (Table new-name new-schema content)))))]
     ; denote select distinct query
     [(query-select-distinct? query)
      (let ([args (query-select-distinct-select-args query)]
@@ -141,7 +169,10 @@
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]
     [(query-aggr? query)
-     (append (query-aggr-aggr-fields query) (list (query-aggr-target query)))]))
+     (append (query-aggr-aggr-fields query) (list (query-aggr-target query)))]
+    [(query-aggr-general? query)
+     (map (lambda (x) "dummy") (query-aggr-general-select-args query))]))
+
 
 ;;; denote value returns tuple -> value
 (define (denote-value value nmap)
@@ -159,6 +190,44 @@
         (,(val-agg-agg-func value) 
           (map (lambda (r) (cons (car (car r)) (cdr r))) 
                (get-content (,(denote-sql (val-agg-query value) nmap) e)))))]))
+
+
+(define (denote-value-w-broadcasting value nmap)
+  (cond                                                                                                                                                       
+    [(val-const? value) (denote-value value nmap)]
+    [(val-column-ref? value) (denote-value value nmap)]
+    [(val-bexpr? value)
+     `(lambda (e) (,(broad-casting-bexpr-wrapper (val-bexpr-binop value)) 
+                    (,(denote-value-w-broadcasting (val-bexpr-v1 value) nmap) e)
+                    (,(denote-value-w-broadcasting (val-bexpr-v2 value) nmap) e)))]
+    [(val-uexpr? value)
+     `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
+                    (,(denote-value-w-broadcasting (val-uexpr-val value) nmap) e)))]
+    [(val-agg? value) (denote-value value nmap)]
+    [(val-aggr-uexpr? value)
+     `(lambda (e)
+        (,(val-aggr-uexpr-aggr-func value) ; extract the aggregation function and apply it on the function
+          (,(denote-value-w-broadcasting (val-aggr-uexpr-val value) nmap) e)))]
+    [(val-aggr-group-col? value)
+     `(lambda (e)
+        (car (car (list-ref e ,(hash-ref nmap (val-aggr-group-col-column-name value))))))]))
+
+;;; broad casting a binary operator into a a binary operator over lists / numbers / or mixed
+;;; note that lists should be a list of pairs with multiplicity, thus this better only used in group by internally
+;;; e.g. '((1 . 2) (3 . 5)) + '((2 . 2) (5 . 5)) = '((3 . 2) (8 . 5))
+(define (broad-casting-bexpr-wrapper f)
+  (lambda (x y) 
+    (cond 
+      [(and (list? x) (list? y)) (map (lambda (a b) (cons (f (car a) (car b)) (cdr a))) x y)]
+      [(and (list? x) (number? y)) (map (lambda (a) (cons (f (car a) y) (cdr a))) x)]
+      [(and (number? x) (list? y)) (map (lambda (b) (cons (f x (car b)) (cdr b))) y)]
+      [(and (number? x) (number? y)) (f x y)])))
+
+(define (broad-casting-uexpr-wrapper f)
+  (lambda (x) 
+    (cond 
+      [(number? x) (f x)]
+      [(list? x) (map (lambda (a) (cons (f (car a)) (cdr a))) x)])))
 
 ;;; denote filters returns tuple -> bool
 (define (denote-filter f nmap)

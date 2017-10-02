@@ -60,7 +60,6 @@
          (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) (get-content table))))))
 
 ;; assertions
-
 (define (same q1 q2)
   (assert (bag-equal (get-content (run q1)) (get-content (run q2)))))
 

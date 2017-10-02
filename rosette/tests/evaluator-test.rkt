@@ -21,7 +21,8 @@
     (cons (list 1 2 4) 2)
     (cons (list 2 1 0) 3)
     (cons (list 1 2 1) 3)
-    (cons (list 2 1 3) 3)))
+    (cons (list 2 1 3) 3)
+    (cons (list 3 4 9) 0)))
 
 (define content-d
   (list
@@ -33,12 +34,20 @@
 
 (define content-c (list))
 
+(define list2d 
+  (list (list 1 2 3)
+        (list 4 5 6)
+        (list 7 8 9)
+        (list 3 5 6)))
+
+(transpose list2d)
+
 ; tests
 ; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2))) 
-(time (println (group-by-raw content-b (list 0) (build-list 3 values))))
-(time (println (group-by-raw content-b (list 0 1) (list 1 2))))
-(time (println (group-by-raw content-c (list 0 1) (list 2))))
-(time (println (group-by-raw content-d (list 0 1) (list 2))))
+(time (println (group-by-raw content-b (list ))))
+(time (println (group-by-raw content-b (list 0 1))))
+(time (println (group-by-raw content-c (list 0 1))))
+(time (println (group-by-raw content-d (list 0 1))))
 ; (println (xproduct-raw content-a content-b))
 ; (println (get-content (left-outer-join table-a table-b 2 2)))
 ; (left-outer-join-raw content-c content-c 0 0 3 3)

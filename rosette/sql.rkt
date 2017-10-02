@@ -140,10 +140,10 @@
   (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
 
 (define (aggr-max l)
-  (max (map (lambda (x) (car x)) l)))
+  (foldl (lambda (v r) (if (> v r) v r)) -inf.0 (map (lambda (x) (car x)) l)))
 
 (define (aggr-min l)
-  (min (map (lambda (x) (car x)) l)))
+  (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))
 
 (define test-table1
   (list

@@ -21,7 +21,8 @@
          xproduct-raw
          sqlnull
          aggr-raw
-         group-by-raw)
+         group-by-raw
+         transpose)
 
 (define sqlnull "sqlnull")
 
@@ -103,38 +104,45 @@
                     target-index)))]))
 
 ; perform aggregation on a table :table, result as follows:
-; e.g., if we group by a table on column 1, 2, and target columns is column 3
-;       the result would looks like this
-; |-------------------------------|
-; |  1  |  2  | [(3 . 5) (2 . 6)] |
-; |-----|-----|-------------------|
-; | ... | ... |       .....       |
+;   we segment a table into a list of tables and each table is the result of a group
 ; each cell contain a list of tuples, specifying each value appear in the group and the number of times it appears
 ; Arguments:
 ;     table: the table to be aggregated, which contains only table-content but not schema
 ;     group-by-indices: indices of the fields to be aggregated, reprented in a list
 ;     target-indice: the target fields to be used in aggregation 
 ;                    (we only collect them without actually perform any aggregation)
-(define (group-by-raw table group-by-indices target-indices)
+(define (group-by-raw table group-by-indices)
   (cond 
     [(equal? '() table) '()]
     [else 
       (let* ([row (car table)]
+             [target-indices (range (length (car row)))]
              [gb-key-vals (map (lambda (i) (list-ref (car row) i)) group-by-indices)])
         (cons
-          (let ([same-val-rows 
-                  (map (lambda (r) 
-                         (map (lambda (idx) (cons (list-ref (car r) idx) (cdr r))) target-indices))
-                       (filter (lambda (r) (equal? gb-key-vals
-                                                   (map (lambda (i) (list-ref (car r) i)) group-by-indices)))
-                               table))])
-            (append gb-key-vals same-val-rows)) 
+          (let* ([same-val-rows 
+                   (map (lambda (r) 
+                          (cons (map (lambda (idx) (cons (list-ref (car r) idx) (cdr r))) target-indices) (cdr r)))
+                        (filter (lambda (r) (equal? gb-key-vals
+                                                    (map (lambda (i) (list-ref (car r) i)) group-by-indices)))
+                                table))]
+                 [multiplicity (foldl (lambda (v r) (if (> v 0) 1 r)) 0 (map (lambda (r) (cdr r)) same-val-rows))]
+                 [col-store-val-seg (transpose (map (lambda (r) (car r)) same-val-rows))])
+            (cons col-store-val-seg multiplicity))
+                  ; the multiplicity here indicates the multiplicity of the table 
+                  ; after applying aggregation function instead of multiplicity of the rows
           (group-by-raw 
             (filter (lambda (r) 
                       (not (equal? gb-key-vals (map (lambda (i) (list-ref (car r) i)) group-by-indices)))) 
                     (cdr table))
-            group-by-indices
-            target-indices)))]))
+            group-by-indices)))]))
+
+;;; transpose a 2d list (from ij -> ji, e.g.)
+(define (transpose list2d)
+  (cond 
+    [(equal? '() list2d) '()]
+    [else (map (lambda (i) (map (lambda (r) (list-ref r i)) list2d))
+               (range (length (car list2d))))]))
+
 
 (define (dedup table)
   (cond
