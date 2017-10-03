@@ -46,7 +46,38 @@
           (val-aggr-target aggr-sum (val-column-ref "t1.c")))
     (filter-true)))
 
-(define q2
+(define q-macro
+  (SELECT (VALS (val-group-by-col "t1.a") (val-group-by-col "t1.b") 
+                (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-sum (val-column-ref "t1.c")))
+   FROM (NAMED table1)
+   GROUP-BY '("t1.a" "t1.b")
+   HAVING (TRUE)))
+
+
+(define q2                                                                                                                                                    
+  (query-aggr-general 
+    (query-named table1) 
+    (list) 
+    (list (val-group-by-col "t1.a") 
+          (val-group-by-col "t1.b") 
+          (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+          (val-aggr-target aggr-sum (val-column-ref "t1.c")))
+    (filter-true)))
+
+(define q2-macro
+  (SELECT (VALS (val-group-by-col "t1.a") (val-group-by-col "t1.b") 
+                (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-sum (val-column-ref "t1.c")))
+   FROM (NAMED table1)
+   GROUP-BY '()
+   HAVING (TRUE)))
+
+
+(define q3                                                                                                                                                    
   (query-aggr-general 
     (query-named table1) 
     (list "t1.a" "t1.b") 
@@ -55,8 +86,16 @@
           (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
           (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
           (val-aggr-target aggr-sum (val-column-ref "t1.c")))
-    (filter-binop > (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
-    ;(filter-binop > (val-const 120) (val-const 105))))
+    (filter-binop < (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
+
+(define q3-macro
+  (SELECT (VALS (val-group-by-col "t1.a") (val-group-by-col "t1.b") 
+                (val-aggr-target aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
+                (val-aggr-target aggr-sum (val-column-ref "t1.c")))
+   FROM (NAMED table1)
+   GROUP-BY (list "t1.a" "t1.b")
+   HAVING (filter-binop < (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
 
 (define b_plus (broad-casting-bexpr-wrapper +))
 
@@ -65,5 +104,14 @@
 (b_plus '((1 . 2) (3 . 5)) '((9 . 2) (11 . 5)))
 
 table1
+(println "q1")
 (denote-and-run q)
+(denote-and-run q-macro)
+
+(println "q2")
 (denote-and-run q2)
+(denote-and-run q2-macro)
+
+(println "q3")
+(denote-and-run q3)
+(denote-and-run q3-macro)
