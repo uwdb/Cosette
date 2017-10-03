@@ -66,7 +66,7 @@ SUPPORTED_TESTS = ["testUnionToDistinctRule",
 
 # from MockCatalogReader.java
 SCHEMA_TABLE_DECS = """
-schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, deptno:int, slacker:int);
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
 schema dept(deptno:int, name:int);
 schema bonus(ename:int, job:int, sal:int, comm:int);
 schema account(acctno:int, type:int, balance:int);

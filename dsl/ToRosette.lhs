@@ -538,7 +538,7 @@ convert ValueExpr to sexp
 >   toSexp (RosDIden s1 s2) = "\"" ++ s1 ++ "." ++ s2 ++ "\""
 >   toSexp (RosBinOp v1 op v2) =  addParen 
 >     $ unwords ["VAL-BINOP", toSexp v1, op, toSexp v2]
->   toSexp (RosAggVQE af q) = addParen $ uw ["AGGR", af, toSexpSchemaless q]    -- need to unwrap relation to value, currently only support aggregate without groupby
+>   toSexp (RosAggVQE af q) = addParen $ uw ["AGGR-SUBQ", af, toSexpSchemaless q]    -- need to unwrap relation to value, currently only support aggregate without groupby
  
 convert Predicate to sexp
 
