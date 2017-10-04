@@ -40,6 +40,7 @@ Syntax and Parser for Cosette.
 >                ,"having"
 >                ,"order"
 >                , "as"
+>                , "distinct"
 >                ]
 
 == Abstract Syntax
@@ -194,8 +195,9 @@ currently, only supporting "agg(*)" or "agg(a.b)"
 > distSelectList = keyword_ "select" *> keyword_ "distinct" *> commaSep1 selectItem
 
 > proj :: Parser SelectItem
-> proj = Proj <$> valueExpr [] <*> alias
->   where alias = keyword_ "as" *> identifierBlacklist ["from"]
+> proj = try (Proj <$> valueExpr sqlKeywords <*> alias)
+>        <|> (Proj <$> valueExpr sqlKeywords <*> return "")
+>   where alias = keyword_ "as" *> identifierBlacklist sqlKeywords
 
 > selectItem :: Parser SelectItem
 > selectItem = star <|> try dstar <|> proj
@@ -331,7 +333,7 @@ Query with distinct
 Query expression
 
 > spjQueryExpr :: Parser QueryExpr
-> spjQueryExpr = try bagQuery <|> setQuery <|> (parens queryExpr)
+> spjQueryExpr = try setQuery <|> bagQuery <|> (parens queryExpr)
 
 > unionQueryExpr :: Parser QueryExpr
 > unionQueryExpr = UnionAll <$>
@@ -404,6 +406,59 @@ Parse cosette program
 
 > cosetteProgram :: Parser [CosetteStmt]
 > cosetteProgram = (`sepEndBy1` semiColon) $ cosetteStmt
+
+extra pass on QueryExpr to infer alias if there no alias
+
+> addAlias :: QueryExpr -> Either String QueryExpr
+> addAlias (Select sl fr w g d) = do
+>  sl' <- checkListErr $ map f sl
+>  return (Select sl' fr w g d)
+>   where f (Proj v s) = if s == ""
+>                        then Proj <$> Right v <*> toName v
+>                        else Right (Proj v s)
+>         f other = Right other
+> addAlias (UnionAll q1 q2) = UnionAll <$> addAlias q1 <*> addAlias q2 
+
+> class Namely a where
+>   toName :: a -> Either String String
+
+you must explicitly name a query expr
+
+> instance Namely ValueExpr where
+>   toName (NumLit n) = Right $ "num" ++ (show n)
+>   toName (DIden r a) = Right a
+>   toName (BinOp v1 op v2) = do
+>      s1 <- toName v1
+>      so <- opToName op
+>      s2 <- toName v2
+>      return (s1 ++ "_" ++ so ++ "_" ++ s2)
+>   toName (Constant s) = Right s
+>   toName (Agg s ae) = do
+>      an <- toName ae
+>      return (s ++ "_" ++ an)
+>   toName (VQE _) = Left "a query must be explicitly named."
+
+> opToName :: String -> Either String String
+> opToName "+" = Right "add"
+> opToName "-" = Right "minus"
+> opToName "*" = Right "times"
+> opToName "/" = Right "div"
+> opToName other = Left $ "unsupported op: " ++ other
+
+> instance Namely AggExpr where
+>   toName (AV v) = toName v
+>   toName AStar = Right "star"
+
+The function should be used to parse cosette program
+
+> parseCosette :: String -> Either String [CosetteStmt]
+> parseCosette source = 
+>   let cs = parse (whitespace *> cosetteProgram <* eof) "" source in
+>   case cs of
+>     Left emsg -> Left (show emsg)
+>     Right asts -> checkListErr $ map processCos asts 
+>   where processCos (Query n q) = Query <$> Right n <*> (addAlias q)
+>         processCos  o = Right o
 
 == tokens
 
@@ -502,8 +557,12 @@ Parse cosette program
 
 == the parser api
 
-> parseQueryExpr :: String -> Either ParseError QueryExpr
-> parseQueryExpr = parse (whitespace *> queryExpr <* eof) ""
+> parseQueryExpr :: String -> Either String QueryExpr
+> parseQueryExpr source = 
+>   let r = parse (whitespace *> queryExpr <* eof) "" source in
+>   case r of
+>     Left e -> Left (show e)
+>     Right ast -> addAlias ast
 
 > parseValueExpr :: String -> Either ParseError ValueExpr
 > parseValueExpr = parse (whitespace *> valueExpr [] <* eof) ""
@@ -517,9 +576,9 @@ Parse cosette program
 >                     ,qGroup = Nothing
 >                     ,qDistinct = False}
 
-> makeTest :: (Eq a, Show a) => Parser a -> (String,a) -> Test
-> makeTest parser (src,expected) = TestLabel src $ TestCase $ do
->     let gote = parse (whitespace *> parser <* eof) "" src
+> makeTest :: (String, QueryExpr) -> Test
+> makeTest (src, expected) = TestLabel src $ TestCase $ do
+>     let gote = parseQueryExpr src
 >     case gote of
->       Left e -> assertFailure $ show e
+>       Left e -> assertFailure $ e
 >       Right got -> assertEqual src expected got

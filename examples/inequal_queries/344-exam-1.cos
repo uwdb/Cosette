@@ -5,8 +5,8 @@ table user(user_schema);
 table picture(pic_schema);
 
 query q1 
-`select x.uid as uid, x.uname as uname, 
-        (select count(*) as cnt from picture y
+`select x.uid as uid, x.uname, 
+        (select count(*) from picture y
          where x.uid = y.uid and y.size > 1000000) as cnt
  from user x
  where x.city = 3`;
