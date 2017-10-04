@@ -45,7 +45,7 @@
 ; denote to the new interface
 (define-syntax-rule (SELECT-GROUP q gb-fields aggrf target) 
                     (SELECT (append (map (lambda (x) (val-group-by-col x)) gb-fields) 
-                                    (list (val-aggr-target aggrf (VAL target)))) 
+                                    (list (val-uexpr aggrf (VAL target)))) 
                      FROM q 
                      WHERE (TRUE)
                      GROUP-BY gb-fields
@@ -72,11 +72,7 @@
                       [(equal? v sqlnull) (val-const sqlnull)]
                       [(string? v) (val-column-ref v)]
                       [(int? v) (val-const v)]
-                      [(val-aggr-subq? v) v]
-                      [(val-bexpr? v) v]
-                      [(val-uexpr? v) v]
-                      [(val-aggr-target? v) v]
-                      [(val-group-by-col? v) v]))
+                      [else v]))
 
 (define-syntax-rule (VAL-BINOP v1 op v2) (val-bexpr op (VAL v1) (VAL v2)))
 (define-syntax-rule (VAL-UNOP op val) (val-uexpr op (VAL val)))
@@ -97,12 +93,3 @@
 (define-syntax-rule (OR f1 f2) (filter-disj f1 f2))
 (define-syntax-rule (AND f1 f2) (filter-conj f1 f2))
 (define-syntax-rule (NOT f) (filter-not f))
-
-;;;;;;;;;;;;;;;;;; library aggregation functions ;;;;;;;;;;;;;;;;;
-;; input to these functions:
-;;    [(v1 . m1), (v2 . m2), ..., (vn . mn)]
-;; output is the aggregation result of the list
-(define (aggr-count l) (foldl + 0 (map cdr l)))
-(define (aggr-sum l) (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
-(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) -inf.0 (map (lambda (x) (car x)) l)))
-(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))

@@ -23,7 +23,6 @@
 
 ;;; special val representing aggregation
 ;;; ones with aggr-function means performing aggregation
-(struct val-aggr-target (aggr-func val) #:transparent)
 (struct val-group-by-col (column-name) #:transparent)
 
 ;;; values

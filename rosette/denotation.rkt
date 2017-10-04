@@ -209,10 +209,6 @@
      `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
                     (,(denote-value-w-broadcasting (val-uexpr-val value) nmap) e)))]
     [(val-aggr-subq? value) (denote-value value nmap)]
-    [(val-aggr-target? value)
-     `(lambda (e)
-        (,(val-aggr-target-aggr-func value) ; extract the aggregation function and apply it on the function
-          (,(denote-value-w-broadcasting (val-aggr-target-val value) nmap) e)))]
     [(val-group-by-col? value)
      `(lambda (e)
         (car (car (list-ref e ,(hash-ref nmap (val-group-by-col-column-name value))))))]))
@@ -231,7 +227,9 @@
 (define (broad-casting-uexpr-wrapper f)
   (lambda (x) 
     (cond 
-      [(list? x) (map (lambda (a) (cons (f (car a)) (cdr a))) x)]
+      [(list? x) 
+       (cond [(is-aggr-func? f) (f x)]
+             [else (map (lambda (a) (cons (f (car a)) (cdr a))) x)])]
       [else (f x)])))
 
 ;;; denote filters returns tuple -> bool

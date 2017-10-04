@@ -2,29 +2,28 @@
 
 (require "table.rkt")
 
-(provide dedup
-         dedup-accum
-         projection
-         cross-prod
-         get-row-count
-         equi-join
-         left-outer-join
-         left-outer-join-2
-         left-outer-join-raw
-         table-content-empty?
-         table-content-ascending?
-         list-distinct?
-         table-diff
-         union-all
-         extend-each-row
-         xproduct
-         xproduct-raw
-         sqlnull
-         aggr-raw
-         group-by-raw
-         transpose)
+(provide (all-defined-out))
 
 (define sqlnull "sqlnull")
+
+;;;;;;;;;;;;;;;;;; library aggregation functions ;;;;;;;;;;;;;;;;;
+;; input to these functions:
+;;    [(v1 . m1), (v2 . m2), ..., (vn . mn)]
+;; output is the aggregation result of the list
+(define (aggr-count l) (foldl + 0 (map cdr l)))
+(define (aggr-sum l) (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
+(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) -inf.0 (map (lambda (x) (car x)) l)))
+(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))
+(define (aggr-count-distinct l) 
+  (cond [(eq? l '()) 0]
+        [else (+ 1 (aggr-count-distinct (filter (lambda (x) (not (eq? (car l) x))) (cdr l))))]))
+; function used to determine if a function is aggregation function
+(define (is-aggr-func? f) 
+  (or (eq? f aggr-count) 
+      (eq? f aggr-sum) 
+      (eq? f aggr-max) 
+      (eq? f aggr-min) 
+      (eq? f aggr-count-distinct)))
 
 ;; rawTable -> rawTable -> rawTable
 (define (xproduct-raw a b)
