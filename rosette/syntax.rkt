@@ -21,10 +21,6 @@
 (struct query-aggr (query aggr-fields aggr-fun target) #:transparent)
 (struct query-aggr-general (query where-filter gb-fields select-args having-filter) #:transparent)
 
-;;; special val representing aggregation
-;;; ones with aggr-function means performing aggregation
-(struct val-group-by-col (column-name) #:transparent)
-
 ;;; values
 (struct val-const (val) #:transparent)
 (struct val-column-ref (column-name) #:transparent)
