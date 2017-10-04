@@ -19,7 +19,7 @@
 (struct query-left-outer-join-2 (query1 query2 join-result) #:transparent)
 (struct query-union-all (query1 query2))
 (struct query-aggr (query aggr-fields aggr-fun target) #:transparent)
-(struct query-aggr-general (query gb-fields select-args having-filter) #:transparent)
+(struct query-aggr-general (query where-filter gb-fields select-args having-filter) #:transparent)
 
 ;;; special val representing aggregation
 ;;; ones with aggr-function means performing aggregation

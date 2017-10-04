@@ -110,6 +110,7 @@
                 schema (range (length schema)))
            ; generating racket functions after denotation (no evaluation) and keep them around
            (let* ([from-clause (eval (denote-sql inner-q index-map) ns)]
+                  [where-clause (eval (denote-filter (query-aggr-general-where-filter query) name-hash) ns)]
                   [having-clause (eval (denote-filter-w-broadcasting (query-aggr-general-having-filter query) name-hash) ns)]
                   [gb-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-gb-fields query))]
                   ; look, we need a ' again before ,gb-fields to make it a list!
@@ -117,11 +118,18 @@
                   [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting arg name-hash) ns)) (query-aggr-general-select-args query))]
                   [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
              ; quoted part, the real function after denotation
-             `(let* ([table-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) ,from-table-content)]
+             `(let* ([from-table-content (Table-content (,from-clause e))]
+                     [from-table-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) from-table-content)]
+                     ; calculate the bv for masking rows that we don't want
+                     [where-bv (map (lambda (r) (,where-clause (car r))) from-table-w-env)]
+                     [post-where (map (lambda (r b) (cons (car r) (if b (cdr r) 0))) from-table-content where-bv)]
+                     ;[post-where (map (lambda (r) (cons (car r) (cdr r))) (filter (lambda (r) (,where-clause (car r))) from-table-w-env))]
+                     [post-gb-table-content (group-by-raw post-where ',gb-fields)]
+                     [post-gb-table-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) post-gb-table-content)]
                      ; we perform having before performing val function application,
                      ; aggregation functions can be directly used in the having clause
-                     [post-filter (filter (lambda (r) (,having-clause (car r))) table-w-env)]
-                     [content (map (lambda (r) (cons (,row-func-wrap (car r)) (cdr r))) post-filter)]
+                     [post-having (filter (lambda (r) (,having-clause (car r))) post-gb-table-w-env)]
+                     [content (map (lambda (r) (cons (,row-func-wrap (car r)) (cdr r))) post-having)]
                      [new-name "dummy"]
                      [new-schema (,extract-schema ,query)])
                 (Table new-name new-schema content)))))]

@@ -38,6 +38,7 @@
 (define q                                                                                                                                                     
   (query-aggr-general 
     (query-named table1) 
+    (filter-true)
     (list "t1.a" "t1.b") 
     (list (val-group-by-col "t1.a") 
           (val-group-by-col "t1.b") 
@@ -52,13 +53,15 @@
                 (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
                 (val-aggr-target aggr-sum (val-column-ref "t1.c")))
    FROM (NAMED table1)
+   WHERE (TRUE)
    GROUP-BY '("t1.a" "t1.b")
    HAVING (TRUE)))
 
 
 (define q2                                                                                                                                                    
   (query-aggr-general 
-    (query-named table1) 
+    (query-named table1)
+    (filter-true)
     (list) 
     (list (val-group-by-col "t1.a") 
           (val-group-by-col "t1.b") 
@@ -73,6 +76,7 @@
                 (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
                 (val-aggr-target aggr-sum (val-column-ref "t1.c")))
    FROM (NAMED table1)
+   WHERE (TRUE)
    GROUP-BY '()
    HAVING (TRUE)))
 
@@ -80,6 +84,7 @@
 (define q3                                                                                                                                                    
   (query-aggr-general 
     (query-named table1) 
+    (filter-binop < (val-column-ref "t1.c") (val-const 3))
     (list "t1.a" "t1.b") 
     (list (val-group-by-col "t1.a") 
           (val-group-by-col "t1.b") 
@@ -94,6 +99,7 @@
                 (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
                 (val-aggr-target aggr-sum (val-column-ref "t1.c")))
    FROM (NAMED table1)
+   WHERE (TRUE)
    GROUP-BY (list "t1.a" "t1.b")
    HAVING (filter-binop < (val-aggr-target aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
 

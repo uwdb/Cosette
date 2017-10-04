@@ -13,7 +13,7 @@
 ;; easy syntax rules to write sql queries
 (define-syntax SELECT 
   (syntax-rules () [(SELECT v FROM q WHERE f) (query-select v q f)]
-                   [(SELECT v FROM q GROUP-BY c HAVING f) (query-aggr-general q c v f)]))
+                   [(SELECT v FROM q WHERE f GROUP-BY g HAVING h) (query-aggr-general q f g v h)]))
 
 (define-syntax-rule (SELECT-DISTINCT v FROM q WHERE f) (query-select-distinct v q f))
 ;; group by syntax, values in v can refer to aggregation values
@@ -47,6 +47,7 @@
                     (SELECT (append (map (lambda (x) (val-group-by-col x)) gb-fields) 
                                     (list (val-aggr-target aggrf (VAL target)))) 
                      FROM q 
+                     WHERE (TRUE)
                      GROUP-BY gb-fields
                      HAVING (TRUE)))
 
