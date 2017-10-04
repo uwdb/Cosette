@@ -19,7 +19,7 @@
 >         Left err -> "ERROR: " ++ (show err) ++ "\n" ++ (show cs)
 >     Left err -> "ERROR: " ++ (show err)
 >   where
->     cs = (parse (whitespace *> cosetteProgram <* eof) "" p)
+>     cs = parseCosette p
 
 > main = do
 >   hSetEncoding stdout utf8

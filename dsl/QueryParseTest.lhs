@@ -83,6 +83,9 @@
 >               (Just [DIden "x" "uid",DIden "x" "uname"])
 >               False
 
+> testQuery13 :: QueryExpr
+> testQuery13 = Select {qSelectList = [Proj (DIden "x" "a") "a",Proj (Agg "count" AStar) "count_star"], qFrom = Just [TR (TRBase "a") "x"], qWhere = Nothing, qGroup = Nothing, qDistinct = False}
+
 > queryParseTests :: [(String, QueryExpr)]
 > queryParseTests =
 >   [("select x.*, x.a as a from a x, (select *) y where TRUE", testQuery1),
@@ -97,7 +100,8 @@
 >    ("select distinct x.x as ax from a as x, b y where x.ya = y.yb", testQuery9),
 >    ("select * union all (select * union all select * from a a)", testQuery10),
 >    ("select * from (a union all b union all c) as x", testQuery11),
->    ("select x.uid as xu, count(*) as xn from a x group by x.uid, x.uname", testQuery12)]
+>    ("select x.uid as xu, count(*) as xn from a x group by x.uid, x.uname", testQuery12),
+>    ("select x.a, count(*) from a x", testQuery13)]
 
 > main :: IO Counts
-> main =  runTestTT $ TestList $ makeTest queryExpr <$> queryParseTests
+> main =  runTestTT $ TestList $ makeTest <$> queryParseTests
