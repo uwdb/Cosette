@@ -214,7 +214,10 @@ the base case
 > makeRosVE tl al (DIden r a) = Right (RosDIden r a)
 > makeRosVE tl al (BinOp v1 o v2) =  RosBinOp
 >                                    <$> makeRosVE tl al v1
->                                    <*> Right o <*> makeRosVE tl al v2
+>                                    <*> makeBinOp o <*> makeRosVE tl al v2
+>   where makeBinOp op = case lookup op binOps of
+>                          Just op' -> Right op'
+>                          Nothing -> Left $ "ERROR: do not support " ++ op ++ "."
 > makeRosVE tl al (VQE q) = RosVQE <$> cosToRos tl al q "anyname"
 > makeRosVE tl al (Agg o e) =
 >   case (map toLower o) of
@@ -225,6 +228,12 @@ the base case
 >     o' -> Left (o' ++ " is not supported as an aggregation function.")
 >   where aggToVE (AV (DIden t a)) = Right $ RosDIden t a
 >         aggToVE _ = Left "only support aggregate on an attribute."
+
+> binOps :: [(String, String)]
+> binOps = [("+", "+"),
+>           ("-", "-"),
+>           ("*", "*"),
+>           ("/", "div_")]
 
 convert select
 
@@ -539,7 +548,9 @@ convert ValueExpr to sexp
 >   toSexp (RosBinOp v1 op v2) =  addParen 
 >     $ unwords ["VAL-BINOP", toSexp v1, op, toSexp v2]
 >   toSexp (RosAggVQE af q) = addParen $ uw ["AGGR-SUBQ", af, toSexpSchemaless q]    -- need to unwrap relation to value, currently only support aggregate without groupby
- 
+
+
+
 convert Predicate to sexp
 
 > instance Sexp RosPredicate where
@@ -686,7 +697,8 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 >            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
 >            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n",
 >            "(provide ros-instance)\n",
->            "(current-bitwidth #f)\n"]
+>            "(current-bitwidth #f)\n",
+>            "(define-symbolic div_ (~> integer? integer? integer?))"]
 
 > genQ :: String -> String -> String
 > genQ qn q = "(define (" ++ qn ++ " tables) \n  " ++ q ++ ")\n\n"
