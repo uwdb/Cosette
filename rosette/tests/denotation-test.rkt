@@ -40,16 +40,16 @@
     (query-named table1) 
     (filter-true)
     (list "t1.a" "t1.b") 
-    (list (val-group-by-col "t1.a") 
-          (val-group-by-col "t1.b") 
+    (list (val-column-ref "t1.a") 
+          (val-column-ref "t1.b") 
           (val-uexpr aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
           (val-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
           (val-uexpr aggr-sum (val-column-ref "t1.c")))
     (filter-true)))
 
 (define q-macro
-  (SELECT (VALS (val-group-by-col "t1.a") 
-                (val-group-by-col "t1.b") 
+  (SELECT (VALS "t1.a" 
+                "t1.b" 
                 (VAL-UNOP aggr-sum (VAL-BINOP "t1.b" + "t1.c")) 
                 (VAL-UNOP aggr-min (VAL-UNOP (lambda (x) (+ x 100)) "t1.c"))
                 (VAL-UNOP aggr-sum "t1.c"))
@@ -64,16 +64,16 @@
     (query-named table1)
     (filter-true)
     (list) 
-    (list (val-group-by-col "t1.a") 
-          (val-group-by-col "t1.b") 
+    (list (val-column-ref "t1.a") 
+          (val-column-ref "t1.b")
           (val-uexpr aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
           (val-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
           (val-uexpr aggr-sum (VAL "t1.c")))
     (filter-true)))
 
 (define q2-macro
-  (SELECT (VALS (val-group-by-col "t1.a") 
-                (val-group-by-col "t1.b") 
+  (SELECT (VALS "t1.a" 
+                "t1.b" 
                 (VAL-UNOP aggr-sum (VAL-BINOP "t1.b" +  "t1.c")) 
                 (VAL-UNOP aggr-min (VAL-UNOP (lambda (x) (+ x 100))  "t1.c")) 
                 (VAL-UNOP aggr-sum (val-column-ref "t1.c")))
@@ -88,16 +88,16 @@
     (query-named table1) 
     (filter-binop < (val-column-ref "t1.c") (val-const 3))
     (list "t1.a" "t1.b") 
-    (list (val-group-by-col "t1.a") 
-          (val-group-by-col "t1.b") 
+    (list (val-column-ref "t1.a") 
+          (val-column-ref "t1.b")
           (val-uexpr aggr-sum (val-bexpr + (val-column-ref "t1.b") (val-column-ref "t1.c"))) 
           (val-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) 
           (val-uexpr aggr-sum (val-column-ref "t1.c")))
     (filter-binop < (val-uexpr aggr-min (val-uexpr (lambda (x) (+ x 100)) (val-column-ref "t1.c"))) (val-const 105))))
 
 (define q3-macro
-  (SELECT (VALS (val-group-by-col "t1.a") 
-                (val-group-by-col "t1.b") 
+  (SELECT (VALS "t1.a"
+                "t1.b"
                 (VAL-UNOP aggr-sum (VAL-BINOP "t1.b" + "t1.c"))
                 (VAL-UNOP aggr-min (VAL-UNOP (lambda (x) (+ x 100)) "t1.c"))
                 (VAL-UNOP aggr-sum "t1.c"))

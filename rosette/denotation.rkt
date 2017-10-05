@@ -111,11 +111,15 @@
            ; generating racket functions after denotation (no evaluation) and keep them around
            (let* ([from-clause (eval (denote-sql inner-q index-map) ns)]
                   [where-clause (eval (denote-filter (query-aggr-general-where-filter query) name-hash) ns)]
-                  [having-clause (eval (denote-filter-w-broadcasting (query-aggr-general-having-filter query) name-hash) ns)]
+                  [having-clause (eval (denote-filter-w-broadcasting 
+                                         (query-aggr-general-having-filter query) name-hash 
+                                         (query-aggr-general-gb-fields query)) ns)]
                   [gb-fields (map (lambda (x) (hash-ref name-hash x)) (query-aggr-general-gb-fields query))]
                   ; look, we need a ' again before ,gb-fields to make it a list!
                   [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',gb-fields)]
-                  [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting arg name-hash) ns)) (query-aggr-general-select-args query))]
+                  [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting 
+                                                        arg name-hash (query-aggr-general-gb-fields query)) ns)) 
+                                  (query-aggr-general-select-args query))]
                   [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
              ; quoted part, the real function after denotation
              `(let* ([from-table-content (Table-content (,from-clause e))]
@@ -197,21 +201,22 @@
                (get-content (,(denote-sql (val-aggr-subq-query value) nmap) e)))))]))
 
 
-(define (denote-value-w-broadcasting value nmap)
+(define (denote-value-w-broadcasting value nmap gb-fields)
   (cond                                                                                                                                                       
     [(val-const? value) (denote-value value nmap)]
-    [(val-column-ref? value) (denote-value value nmap)]
+    [(val-column-ref? value)
+     (cond [(member (val-column-ref-column-name value) gb-fields)
+            `(lambda (e)
+               (car (car (list-ref e ,(hash-ref nmap (val-column-ref-column-name value))))))] 
+           [else (denote-value value nmap)])]
     [(val-bexpr? value)
      `(lambda (e) (,(broad-casting-bexpr-wrapper (val-bexpr-binop value)) 
-                    (,(denote-value-w-broadcasting (val-bexpr-v1 value) nmap) e)
-                    (,(denote-value-w-broadcasting (val-bexpr-v2 value) nmap) e)))]
+                    (,(denote-value-w-broadcasting (val-bexpr-v1 value) nmap gb-fields) e)
+                    (,(denote-value-w-broadcasting (val-bexpr-v2 value) nmap gb-fields) e)))]
     [(val-uexpr? value)
      `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
-                    (,(denote-value-w-broadcasting (val-uexpr-val value) nmap) e)))]
-    [(val-aggr-subq? value) (denote-value value nmap)]
-    [(val-group-by-col? value)
-     `(lambda (e)
-        (car (car (list-ref e ,(hash-ref nmap (val-group-by-col-column-name value))))))]))
+                    (,(denote-value-w-broadcasting (val-uexpr-val value) nmap gb-fields) e)))]
+    [(val-aggr-subq? value) (denote-value value nmap)]))
 
 ;;; broad casting a binary operator into a a binary operator over lists / numbers / or mixed
 ;;; note that lists should be a list of pairs with multiplicity, thus this better only used in group by internally
@@ -263,21 +268,21 @@
 
 
 ;;; denote filters returns tuple -> bool
-(define (denote-filter-w-broadcasting f nmap)
+(define (denote-filter-w-broadcasting f nmap gb-fields)
   (cond
     [(filter-binop? f)
      `(lambda (e)
         (,(filter-binop-op f)
-          (,(denote-value-w-broadcasting (filter-binop-val1 f) nmap) e)
-          (,(denote-value-w-broadcasting (filter-binop-val2 f) nmap) e)))]
+          (,(denote-value-w-broadcasting (filter-binop-val1 f) nmap gb-fields) e)
+          (,(denote-value-w-broadcasting (filter-binop-val2 f) nmap gb-fields) e)))]
     [(filter-conj? f)
-     `(lambda (e) (and (,(denote-filter-w-broadcasting (filter-conj-f1 f) nmap) e)
-                       (,(denote-filter-w-broadcasting (filter-conj-f2 f) nmap) e)))]
+     `(lambda (e) (and (,(denote-filter-w-broadcasting (filter-conj-f1 f) nmap gb-fields) e)
+                       (,(denote-filter-w-broadcasting (filter-conj-f2 f) nmap gb-fields) e)))]
     [(filter-disj? f)
-     `(lambda (e) (or (,(denote-filter-w-broadcasting (filter-disj-f1 f) nmap) e)
-                      (,(denote-filter-w-broadcasting (filter-disj-f2 f) nmap) e)))]
+     `(lambda (e) (or (,(denote-filter-w-broadcasting (filter-disj-f1 f) nmap gb-fields) e)
+                      (,(denote-filter-w-broadcasting (filter-disj-f2 f) nmap gb-fields) e)))]
     [(filter-not? f)
-     `(lambda (e) (not (,(denote-filter-w-broadcasting (filter-not-f1 f) nmap) e)))]
+     `(lambda (e) (not (,(denote-filter-w-broadcasting (filter-not-f1 f) nmap gb-fields) e)))]
     [(filter-exists? f) (denote-filter f nmap)]
     [(filter-true? f) (denote-filter f nmap)]
     [(filter-false? f) (denote-filter f nmap)]
@@ -285,7 +290,7 @@
      `(lambda (e)
         (apply ,(filter-nary-op-f f)
                ;push a quote "list" to make the list a list 
-               ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap) e))
+               ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap gb-fields) e))
                                      (filter-nary-op-args f)))))]))
 
 ;;(define test-query1

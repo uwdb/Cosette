@@ -44,7 +44,7 @@
 
 ; denote to the new interface
 (define-syntax-rule (SELECT-GROUP q gb-fields aggrf target) 
-                    (SELECT (append (map (lambda (x) (val-group-by-col x)) gb-fields) 
+                    (SELECT (append (map (lambda (x) (val-column-ref x)) gb-fields) 
                                     (list (val-uexpr aggrf (VAL target)))) 
                      FROM q 
                      WHERE (TRUE)
