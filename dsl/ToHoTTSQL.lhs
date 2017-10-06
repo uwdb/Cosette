@@ -400,36 +400,25 @@ For query like "SELECT COUNT(*) FROM R, S", it replaces * with an attribute from
 convert Cosette AST to HoTTSQL AST
 
 > toHSQuery :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
-> toHSQuery env ctx q = case q of
->                         Select sl fr wh Nothing ds ->
->                           do ctx' <- getCtx env ctx fr
->                              ft' <- convertFrom env ctx fr
->                              sl' <- convertSelect env (HSNode ctx ctx') sl
->                              wh' <- convertWhere env (HSNode ctx ctx') wh
->                              gr' <- Right []
->                              return (HSSelect sl' ft' wh' gr' ds)
->                         Select sl fr wh gr ds ->
->                           case last sl of
->                             Proj (Agg f v) _ ->         -- last proj is a aggregate
->                               do ctx' <- getCtx env ctx fr
->                                  fr' <- convertFrom env ctx fr
->                                  sl' <- case checkListErr $ map noOnAgg initFields of
->                                    Left e -> Left e
->                                    Right _ -> convertSelect env (HSNode ctx ctx') sl
->                                  wh' <- convertWhere env (HSNode ctx ctx') wh
->                                  gr' <- convertGroup (HSNode ctx ctx') gr
->                                  return (HSSelect sl' fr' wh' gr' ds)
->                             _ -> case checkListErr $ map noOnAgg sl of 
->                                    Left e -> Left e
->                                    Right _ -> toHSQuery env ctx (Select sl fr wh Nothing True)
->                           where err = "only support single group by with single aggregation at the end of SELECT list"
->                                 noOnAgg (Proj (Agg _ _) _) = Left err
->                                 noOnAgg other = Right other
->                                 lastField = last sl
->                                 initFields = init sl
->                         UnionAll q1 q2 ->
->                              HSUnionAll <$>
->                              toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
+> toHSQuery env ctx (Select sl fr wh Nothing d) =
+>   do ctx' <- getCtx env ctx fr
+>      ft' <- convertFrom env ctx fr
+>      sl' <- convertSelect env (HSNode ctx ctx') sl
+>      wh' <- convertWhere env (HSNode ctx ctx') wh
+>      return (HSSelect sl' ft' wh' [] d)
+> toHSQuery env ctx (Select sl fr wh gr d) =
+>   do ctx' <- getCtx env ctx fr
+>      ft' <- convertFrom env ctx fr
+>      sl' <- convertSelect env (HSNode ctx ctx') sl
+>      wh' <- convertWhere env (HSNode ctx ctx') wh
+>      gr' <- convertGroup (HSNode ctx ctx') gr
+>      return (if foldl (||) False (map isAgg sl)
+>              then HSSelect sl' ft' wh' gr' d
+>              else HSSelect sl' ft' wh' [] True) -- if no aggregate, then convert to distinct
+>   where  isAgg (Proj (Agg _ _) _) = True
+>          isAgg other = False
+> toHSQuery env ctx (UnionAll q1 q2) =
+>   HSUnionAll <$> toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
 
 convert "select count(*) from a" to "select (count (select * form a)) from unitTable"
 
@@ -499,6 +488,8 @@ convert valueExpr to projection strings.
 >   else addParen $ t ++ "⋅" ++ a
 > veToProj v = addParen $ uw ["e2p", toCoq v]
 
+HSPredicate to Coq
+
 > instance Coqable HSPredicate where
 >   toCoq HSTrue = "true"
 >   toCoq HSFalse = "false"
@@ -517,6 +508,7 @@ convert valueExpr to projection strings.
 >   toCoq (HSLt v1 v2) =
 >     addParen $ uw ["castPred (combine", veToProj v2, veToProj v1, ") gt"]
 
+HSTableRef to Coq
 
 > instance Coqable HSTableRef where
 >   toCoq (HSTRBase x) = addParen $ uw ["table", prefixRel x]
@@ -525,10 +517,15 @@ convert valueExpr to projection strings.
 >   toCoq (HSProduct t1 t2) = addParen $ uw ["product", toCoq t1, toCoq t2]
 >   toCoq (HSTableUnion t1 t2) = addParen $ uw [toCoq t1, "UNION ALL", toCoq t2]
 
+HSSelect to Coq
+
 > instance Coqable HSSelectItem where
 >   toCoq HSStar = "*"
 >   toCoq (HSDStar x) = addParen $ (x ++ "⋅star")
+>   toCoq (HSProj (HSAgg af ve)) =  (map toUpper af) ++ (toCoq ve)
 >   toCoq (HSProj v) = veToProj v
+
+HSQueryExpr to Coq
 
 > instance Coqable HSQueryExpr where
 >   toCoq (HSUnionAll q1 q2) = (addParen $ toCoq q1) ++ " UNION ALL " ++
@@ -549,9 +546,10 @@ convert valueExpr to projection strings.
 >           -- always valid here, replace * in COUNT(*) with right
 >           -- the pattern matching is intended to be imcomplete,
 >           -- last field can only AGG
->           f [HSProj (HSAgg af HSVStar)] = (map toUpper af) ++ (addParen $ "right") 
->           f [HSProj (HSAgg af ve)] =  (map toUpper af) ++ (addParen $ toCoq ve) 
->           f (h:t) = addParen $ uw ["combine'", "PLAIN" ++ (addParen $ uw ["variable", toCoq h]), f t]
+>           f [t] =  convGSI t 
+>           f (h:t) = addParen $ uw ["combine'", convGSI h, f t]
+>           convGSI (HSProj (HSAgg af ve)) = addParen $ toCoq  (HSProj (HSAgg af ve))
+>           convGSI (HSProj v) = "PLAIN" ++ (addParen $ uw ["variable", toCoq $ HSProj v])
 >           w = if (wh == HSTrue)
 >               then ""
 >               else "WHERE " ++ (toCoq wh)
