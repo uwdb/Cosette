@@ -433,19 +433,6 @@ convert "select count(*) from a" to "select (count (select * form a)) from unitT
 >         boxFr other = other
 
 
-convert "select count(*) from a" to "select (count (select * form a)) from unitTable"
-
-> boxAggQuery :: HSQueryExpr -> HSQueryExpr
-> boxAggQuery q =
->   case q of
->     HSSelect [HSProj (HSAgg f v)] fr wh [] d ->
->       HSSelect [HSProj (HSAggVQE f (HSSelect [HSProj v] fr wh [] d))] HSUnitTable HSTrue [] d
->     HSSelect sl fr wh g d -> q
->     HSUnionAll q1 q2 -> HSUnionAll (boxAggQuery q1) (boxAggQuery q2)
->   where boxFr (HSTRQuery q') = HSTRQuery (boxAggQuery q')
->         boxFr other = other
-
-
 > cosToHS :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
 > cosToHS env ctx q = do q1 <- elimStar env ctx q
 >                        q2 <- toHSQuery env ctx q1
