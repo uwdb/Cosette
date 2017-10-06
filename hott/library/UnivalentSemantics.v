@@ -72,6 +72,24 @@ Module Type Relations (T : Types) (S : Schemas T).
 
   Parameter relation : Schema -> Type.
   Parameter denotationRelation : forall s, Denotation (relation s) (Relation s).
+
+  Parameter sqlUnit : type.
+  Parameter sqlTt  : constant sqlUnit.
+  Parameter denoteSqlUnit : @paths Type ⟦ sqlUnit ⟧ Unit.
+
+
+  Definition DenoteSqlTt : Type.
+    refine (⟦ sqlTt ⟧ = _).
+    rewrite denoteSqlUnit.
+    exact tt.
+  Defined.
+  
+  Parameter denoteSqlTt : DenoteSqlTt. 
+
+  Parameter unitTable_ : relation (leaf sqlUnit).
+
+  Parameter denoteUnitTable : @paths (_ -> Type) ⟦ unitTable_ ⟧ (fun _ => Unit).
+  
 End Relations.
 
 Module Type Aggregators (T : Types) (S : Schemas T).
