@@ -58,6 +58,11 @@ class EndToEndTests(unittest.TestCase):
         """ test project join commute """
         self.assertEqual(
             get_status("./examples/sqlrewrites/joinCommute.cos"), 'EQ', "join_commute")
+    
+    def test_times_div(self):
+        """ test times and  div """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/timesAndDiv.cos"), 'EQ', "timesAndDiv")
 
     # inequal sql queries
     def test_344_exam_0(self):

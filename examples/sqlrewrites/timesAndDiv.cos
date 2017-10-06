@@ -1,0 +1,14 @@
+-- define schema r with attributes a and b
+schema s(a:int, b:int); 
+
+table r(s);            -- define table r using schema s
+
+query q1                -- define query q1 
+`select x.a + x.b, x.a/x.b as a 
+ from r x`;
+
+query q2                -- define query q2 likewise
+`select y.a + y.b, y.a/y.b as a 
+ from r y`;
+
+verify q1 q2;           -- does q1 equal to q2?

@@ -102,8 +102,10 @@ HoTTSQL query
 == supported binary operators (op, Coq translation)
 
 > binOps :: [(String, String)]
-> binOps = [("+", "binaryExpr add"),
->           ("-", "binaryExpr minus")]
+> binOps = [("+", "binaryExpr add_"),
+>           ("-", "binaryExpr minus_"),
+>           ("*", "binaryExpr times_"),
+>           ("/", "binaryExpr divide_")]
 
 == convert Cosette to HoTTSQL
 
@@ -471,7 +473,7 @@ add a prefix to predicate name to avoid naming confliction.
 >   toCoq (HSBinOp v1 op v2) = addParen $ uw [op', toCoq v1, toCoq v2]
 >     where op' = case lookup op binOps of
 >                   Just o -> o
->                   Nothing -> "ERROR: do not support " ++ " op."             
+>                   Nothing -> "ERROR: do not support " ++ op ++ "."             
 >   toCoq (HSConstant c) = addParen $ uw ["constantExpr", c]
 >   toCoq (HSAggVQE f q) = addParen $ uw ["aggregate", f, toCoq q]
 
@@ -640,8 +642,10 @@ generate predicate declarations
 >            "  Module CQTac := CQTactics T S R A.",
 >            "  Import CQTac. \n",
 >            "  Parameter int: type.",
->            "  Parameter add: binary int int int.",
->            "  Parameter minus: binary int int int. \n",
+>            "  Parameter add_: binary int int int.",
+>            "  Parameter minus_: binary int int int.",
+>            "  Parameter times_: binary int int int.",
+>            "  Parameter divide_: binary int int int.",
 >            "  Notation combine' := combineGroupByProj.\n",
 >            "  Parameter count : forall {T}, aggregator T int.",
 >            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e). \n",
