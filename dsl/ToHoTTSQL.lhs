@@ -246,14 +246,15 @@ convert Cosette value expression to HoTTSQL expression
 > convertVE env ctx (VQE (Select sl fr wh gb di)) =
 >   case sl of
 >     [Proj (Agg f v) a] -> if (gb == Nothing)
->                           then let q = (Select [newSI f v a] fr wh gb di) in
+>                           then let q = (Select [newSI v a] fr wh gb di) in
 >                                  HSAggVQE f <$> toHSQuery env ctx q
+>                            -- call normal toHSQuery (without boxing)
 >                           else Left err
 >     _ -> Left err
 >   where err = "Currently only support aggregate without group by as value expression"
->         newSI f v a = case v of
->                         AV v' -> Proj v' a
->                         AStar -> Star
+>         newSI v a = case v of
+>                       AV v' -> Proj v' a
+>                       AStar -> Star
 > convertVE env ctx (VQE others) = Left "Currently only support aggregate without group by as value expression"
 > convertVE env ctx (Agg f ae) = case ae of
 >                                  AV v -> HSAgg f <$> convertVE env ctx v
@@ -430,10 +431,23 @@ convert Cosette AST to HoTTSQL AST
 >                              HSUnionAll <$>
 >                              toHSQuery env ctx q1 <*> (toHSQuery env ctx q2)
 
+convert "select count(*) from a" to "select (count (select * form a)) from unitTable"
+
+> boxAggQuery :: HSQueryExpr -> HSQueryExpr
+> boxAggQuery q =
+>   case q of
+>     HSSelect [HSProj (HSAgg f v)] fr wh [] d ->
+>       HSSelect [HSProj (HSAggVQE f (HSSelect [HSProj v] fr wh [] d))] HSUnitTable HSTrue [] d
+>     HSSelect sl fr wh g d -> q
+>     HSUnionAll q1 q2 -> HSUnionAll (boxAggQuery q1) (boxAggQuery q2)
+>   where boxFr (HSTRQuery q') = HSTRQuery (boxAggQuery q')
+>         boxFr other = other
+
+
 > cosToHS :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
 > cosToHS env ctx q = do q1 <- elimStar env ctx q
 >                        q2 <- toHSQuery env ctx q1
->                        return q2
+>                        return (boxAggQuery q2)
 
 convert HoTTSQL AST to string (Coq program)
 
@@ -507,7 +521,7 @@ convert valueExpr to projection strings.
 > instance Coqable HSTableRef where
 >   toCoq (HSTRBase x) = addParen $ uw ["table", prefixRel x]
 >   toCoq (HSTRQuery q) = addParen $ toCoq q
->   toCoq HSUnitTable = "unit"
+>   toCoq HSUnitTable = "(table unitTable_)"
 >   toCoq (HSProduct t1 t2) = addParen $ uw ["product", toCoq t1, toCoq t2]
 >   toCoq (HSTableUnion t1 t2) = addParen $ uw [toCoq t1, "UNION ALL", toCoq t2]
 
