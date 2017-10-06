@@ -18,7 +18,6 @@
 (struct query-left-outer-join (query1 query2 key1 key2) #:transparent)
 (struct query-left-outer-join-2 (query1 query2 join-result) #:transparent)
 (struct query-union-all (query1 query2))
-(struct query-aggr (query aggr-fields aggr-fun target) #:transparent)
 (struct query-aggr-general (query where-filter gb-fields select-args having-filter) #:transparent)
 
 ;;; values

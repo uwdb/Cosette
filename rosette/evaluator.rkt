@@ -17,6 +17,7 @@
 (define (aggr-count-distinct l) 
   (cond [(eq? l '()) 0]
         [else (+ 1 (aggr-count-distinct (filter (lambda (x) (not (eq? (car l) x))) (cdr l))))]))
+
 ; function used to determine if a function is aggregation function
 (define (is-aggr-func? f) 
   (or (eq? f aggr-count) 

@@ -22,10 +22,10 @@
                    (list (cons (list 0 0 0) 0))))
 (define ct22 (Table "t2" (list "J2" "G2") 
                    (list (cons (list 0 0) 0))))
-;(define t1 ct1)
-;(define t2 ct2)
-(define t1 st1)
-(define t2 st2)
+(define t1 ct1)
+(define t2 ct2)
+;(define t1 st1)
+;(define t2 st2)
 
 (define q1s
   (SELECT-GROUP-SUBQ
@@ -73,8 +73,8 @@
     aggr-sum
     "t3.Sum1"))
 
-;(writeln (run q1))
-;(writeln (run q2))
+(writeln (run q1))
+(writeln (run q2))
 
 (time (verify (same q1 q2)))
 (time (verify (same q1s q2s)))
