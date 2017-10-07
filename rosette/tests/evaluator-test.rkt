@@ -44,10 +44,21 @@
 
 ; tests
 ; (time (println (raw-aggr content-b (list 0 1) raw-aggr-sum 2))) 
-(time (println (group-by-raw content-b (list ))))
-(time (println (group-by-raw content-b (list 0 1))))
-(time (println (group-by-raw content-c (list 0 1))))
-(time (println (group-by-raw content-d (list 0 1))))
+(println "q1")
+(println (group-by-raw content-b (list )))
+(println (static-group-by-raw content-b (list '(1 1 1 1 1 1))))
+
+(println "q1")
+(println (group-by-raw content-b (list 0 1)))
+(println (static-group-by-raw content-b (list '(1 1 0 1 0 0) '(0 0 1 0 1 0) '(0 0 0 0 0 1))))
+
+(println "q1")
+(println (group-by-raw content-c (list 0 1)))
+(println (static-group-by-raw content-c (list)))
+
+(println "q1")
+(println (group-by-raw content-d (list 0 1)))
+(println (static-group-by-raw content-d (list '(1 0) '(0 1))))
 ; (println (xproduct-raw content-a content-b))
 ; (println (get-content (left-outer-join table-a table-b 2 2)))
 ; (left-outer-join-raw content-c content-c 0 0 3 3)

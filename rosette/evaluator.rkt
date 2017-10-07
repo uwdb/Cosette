@@ -136,6 +136,19 @@
                     (cdr table))
             group-by-indices)))]))
 
+; group a table statically based on bv index list
+(define (static-group-by-raw table group-bv-list)
+  (cond 
+    [(equal? '() group-bv-list) '()]
+    [else 
+      (let* ([bv (car group-bv-list)]
+             [same-val-rows (foldl (lambda (r b l) (if (eq? b 1) (append l (list r)) l)) '() table bv)]
+             [multiplicity (foldl (lambda (v r) (if (> v 0) 1 r)) 0 (map (lambda (r) (cdr r)) same-val-rows))]
+             [col-store-val-seg (transpose (map (lambda (r) (map (lambda (v) (cons v (cdr r))) (car r))) same-val-rows))]
+             )
+        (cons (cons col-store-val-seg multiplicity)
+              (static-group-by-raw table (cdr group-bv-list))))]))
+        
 ;;; transpose a 2d list (from ij -> ji, e.g.)
 (define (transpose list2d)
   (cond 
