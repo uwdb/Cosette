@@ -49,13 +49,7 @@
 >                              ,rosDistinct :: Bool
 >                              ,rosSchema :: (String, [String])
 >                              }
->                   | RosQueryUnion RosQueryExpr RosQueryExpr
->                   | RosQueryAgg {rosAggQE:: RosQueryExpr
->                                 ,rosAggGB::[RosValueExpr]
->                                 ,rosAggFun:: String
->                                 ,rosAggTarget:: RosValueExpr
->                                 ,rosAggSchema:: (String, [String])}
->                         -- to SELECT-GROUP 
+>                   | RosQueryUnion RosQueryExpr RosQueryExpr 
 >                   deriving (Eq, Show)
 
 > data RosSchema =
@@ -378,18 +372,17 @@ pass 1 on Rosette AST, handle aggregate without group by
 > handleAgg :: [RosSchema] -> [RosSchema] -> RosQueryExpr
 >           -> Either String RosQueryExpr
 > handleAgg tl al q =
->   if length sl == 1 then
->     case head sl of
->       RosAgg af ve -> case rosGroup q of
->                         Just gl -> Right q            -- already group by, do nothing
->                         Nothing -> Right (RosQuery sl -- group by with empty group 
->                                            (rosFrom q)
->                                            (rosWhere q)
->                                            (Just [])
->                                            (rosDistinct q)
->                                            (rosSchema q))
->       _ -> Right q
->   else Right q
+>   case sl of
+>     [RosAgg af ve] ->
+>       case rosGroup q of
+>         Just gl -> Right q            -- already group by, do nothing
+>         Nothing -> Right (RosQuery sl -- group by with empty group 
+>                            (rosFrom q)
+>                            (rosWhere q)
+>                            (Just [])
+>                            (rosDistinct q)
+>                            (rosSchema q))
+>     _ -> Right q
 >   where sl = (rosSelectList q)
   
 pass 2 on Rosette AST, handle QueryExpr in ValueExpr,
@@ -421,47 +414,6 @@ currently only support aggregate without group by
 >         convWhere Nothing = Right Nothing
 >         convWhere (Just p) = Just <$> convPred p
 
-
-pass 3 on Rosette AST, handle group by. Only need to do basic query form here.
-Union is handled in applyPass.
-
-> handleGroupBy :: [RosSchema] -> [RosSchema] -> RosQueryExpr
->               -> Either String RosQueryExpr
-> handleGroupBy tl al q =
->   case rosGroup q of
->     Nothing -> Right q           -- do nothing if there is no group by
->     Just gbc ->                  -- to RosQueryAgg
->       case lastField of
->         RosAgg aggf target -> RosQueryAgg
->                           <$> Right (RosQuery (initFields ++ [target])
->                                       (rosFrom q)
->                                       (rosWhere q)
->                                       (rosGroup q)
->                                       (rosDistinct q)
->                                       (rosSchema q))
->                           <*> sl
->                           <*> Right aggf
->                           <*> Right tar
->                           <*> Right (rosSchema q)
->         _ -> Right $ RosQuery     -- to distinct if no aggregation 
->                        (rosSelectList q)
->                        (rosFrom q)
->                        (rosWhere q)
->                        Nothing
->                        True
->                        (rosSchema q)
->       where scm = rosSchema q
->             lastField = last $ rosSelectList q
->             initFields = init $ rosSelectList q
->             alias = last $ snd (rosSchema q)
->             noOnAgg (RosAgg _ _) = Left "We currently only support single aggregation in the end of SELECT list."
->             noOnAgg other = Right other
->             sl = case checkListErr $ map noOnAgg initFields of
->                    Left err -> Left err
->                    Right _ -> Right $ map (RosDIden (fst scm)) (init $ snd scm) 
->             (n, attrs) = rosSchema q
->             tar = RosDIden n alias
-
 > type RosPass =
 >   [RosSchema] -> [RosSchema] -> RosQueryExpr -> Either String RosQueryExpr
 
@@ -471,8 +423,6 @@ recursively apply query passes to query. query pass must has type RosPass
 >           -> Either String RosQueryExpr
 > applyPass p tl al (RosQueryUnion q1 q2) =
 >   RosQueryUnion <$> p tl al q1 <*> p tl al q2
-> applyPass p tl al (RosQueryAgg q sl aggf target scm) =
->   Right (RosQueryAgg q sl aggf target scm)   -- handleGroupBy is the last call, no need go deeper 
 > applyPass p tl al (RosQuery sl fr wh gr d scm) =
 >   let qPrev = (RosQuery sl fr wh gr d scm)
 >   in let qNew = RosQuery
@@ -518,8 +468,7 @@ do all the passes here.
 >   do ros1 <- cosToRos tl al q s
 >      ros2 <- applyPass handleAgg tl al ros1
 >      ros3 <- applyPass handleQueryAsValue tl al ros2
->      ros4 <- applyPass handleGroupBy tl al ros3
->      return ros4
+>      return ros3
 
 === RosQuery to sexp string
 
@@ -548,7 +497,9 @@ convert ValueExpr to sexp
 >   toSexp (RosBinOp v1 op v2) =  addParen 
 >     $ unwords ["VAL-BINOP", toSexp v1, op, toSexp v2]
 >   toSexp (RosAggVQE af q) = addParen $ uw ["AGGR-SUBQ", af, toSexpSchemaless q]    -- need to unwrap relation to value, currently only support aggregate without groupby
-
+>   toSexp (RosAgg f (RosDIden r a)) =
+>     addParen $ uw ["VAL-UNOP", f, addParen $ uw ["val-column-ref", toSexp $ RosDIden r a ]]
+>   toSexp (RosAgg f v) = addParen $ uw ["VAL-UNOP", f, toSexp v]
 
 
 convert Predicate to sexp
@@ -594,7 +545,6 @@ Since query with only aggregation (no group by) and group by query requires thei
 >     where spj = toSexpSchemaless q
 >           sch' = case q of
 >                    RosQueryUnion q1 q2 -> rosSchema q1
->                    RosQueryAgg _ _ _ _ scm -> scm
 >                    _ -> rosSchema q
 >           sch = addSParen $ uw [addEscStr (fst sch'), al]
 >           al = addParen $ uw ("list":(addEscStr <$> snd sch'))
@@ -602,12 +552,9 @@ Since query with only aggregation (no group by) and group by query requires thei
 convert RosQueryExpr to s-expression string without adding schema. 
 
 > toSexpSchemaless :: RosQueryExpr -> String
-> toSexpSchemaless (RosQueryAgg q gb f tar _) =
->   addParen $ uw ["SELECT-GROUP", toSexp q, gb', f, toSexp tar]
->   where gb'  = addParen $ uw ("list" : map toSexp gb)
 > toSexpSchemaless (RosQueryUnion q1 q2) =
 >   addParen $ uw ["UNION-ALL", toSexpSchemaless q1, toSexpSchemaless q2]
-> toSexpSchemaless (RosQuery sl fl p _ dis _) = 
+> toSexpSchemaless (RosQuery sl fl p Nothing dis _) = 
 >   addParen $ uw [sel, sl', "\n  FROM", fl', "\n  WHERE", p']
 >   where sl' = addParen $ uw ("VALS": map toSexp sl)
 >         fl' = case fl of Nothing -> "UNIT"
@@ -615,6 +562,14 @@ convert RosQueryExpr to s-expression string without adding schema.
 >         p' =  case p of Nothing -> addParen $ "TRUE"
 >                         Just wh -> toSexp wh
 >         sel = if dis then "SELECT-DISTINCT" else "SELECT"
+> toSexpSchemaless (RosQuery sl fl p (Just g) d _) =
+>   addParen $ uw [sel, "\n FROM", fl', "\n WHERE", p', gb, "HAVING (TRUE)" ]
+>   where sel = uw ["SELECT", addParen $ uw ("VALS": (toSexp <$> sl))]
+>         fl' = case fl of Nothing -> "UNIT"
+>                          Just fr -> toSexp $ head fr
+>         p' =  case p of Nothing -> addParen $ "TRUE"
+>                         Just wh -> toSexp wh
+>         gb = uw ["GROUP-BY", addParen $ uw ("list":(toSexp <$> g))]
 
 generate rosette code.
 
@@ -694,8 +649,7 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 
 > headers :: [String]
 > headers = ["#lang rosette \n",
->            "(require \"../cosette.rkt\" \"../util.rkt\" \"../table.rkt\"",
->            "         \"../sql.rkt\" \"../evaluator.rkt\" \"../equal.rkt\") \n",
+>            "(require \"../cosette.rkt\" \"../sql.rkt\" \"../evaluator.rkt\" \"../syntax.rkt\") \n",
 >            "(provide ros-instance)\n",
 >            "(current-bitwidth #f)\n",
 >            "(define-symbolic div_ (~> integer? integer? integer?))"]
