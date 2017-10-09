@@ -453,7 +453,7 @@ The function should be used to parse cosette program
 
 > parseCosette :: String -> Either String [CosetteStmt]
 > parseCosette source = 
->   let cs = parse (whitespace *> cosetteProgram <* eof) "" source in
+>   let cs = parse (whitespace *> cosetteProgram <* eof) "" (toLower <$> source) in
 >   case cs of
 >     Left emsg -> Left (show emsg)
 >     Right asts -> checkListErr $ map processCos asts 

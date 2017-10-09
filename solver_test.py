@@ -75,6 +75,12 @@ class EndToEndTests(unittest.TestCase):
             get_status("./examples/calcite/testAggregateConstantKeyRule2.cos"), 'EQ',
             "testAggregateConstantKeyRule2")
 
+    def test_group_set_project_merge(self):
+        """ testAggregateGroupingSetsProjectMerge from calcite """
+        status = get_status("./examples/calcite/testAggregateGroupingSetsProjectMerge.cos")
+        self.assertNotEqual(status, 'NEQ', "testAggregateGroupingSetsProjectMerge")
+        self.assertNotEqual(status, 'ERROR', "testAggregateGroupingSetsProjectMerge")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """

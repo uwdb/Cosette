@@ -653,14 +653,15 @@ generate predicate declarations
 >            "  Import AutoTac.",
 >            "  Module CQTac := CQTactics T S R A.",
 >            "  Import CQTac. \n",
->            "  Parameter int: type.",
->            "  Parameter add_: binary int int int.",
->            "  Parameter minus_: binary int int int.",
->            "  Parameter times_: binary int int int.",
->            "  Parameter divide_: binary int int int.",
 >            "  Notation combine' := combineGroupByProj.\n",
 >            "  Parameter count : forall {T}, aggregator T int.",
->            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e). \n",
+>            "  Notation \"'COUNT' ( e )\" := (aggregatorGroupByProj count e).",
+>            "  Parameter sum : forall {T}, aggregator T int.",
+>            "  Notation \"'SUM' ( e )\" := (aggregatorGroupByProj sum e).",
+>            "  Parameter max : forall {T}, aggregator T int.",
+>            "  Notation \"'max' ( e )\" := (aggregatorGroupByProj max e).",
+>            "  Parameter min : forall {T}, aggregator T int.",
+>            "  Notation \"'min' ( e )\" := (aggregatorGroupByProj min e).\n",
 >            "  Parameter gt: Pred (node (leaf int) (leaf int)). \n"]
 
 > openDef :: String

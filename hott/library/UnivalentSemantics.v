@@ -16,6 +16,12 @@ Module Type Types.
   Parameter denotationConstant : forall S, Denotation (constant S) ⟦ S ⟧.
   Parameter denotationUnary : forall S T, Denotation (unary S T) (⟦ S ⟧ -> ⟦ T ⟧).
   Parameter denotationBinary : forall S T U, Denotation (binary S T U) (⟦ S ⟧ -> ⟦ T ⟧ -> ⟦ U ⟧).
+
+  Parameter int: type.
+  Parameter add_: binary int int int.
+  Parameter minus_: binary int int int.
+  Parameter times_: binary int int int.
+  Parameter divide_: binary int int int.  
 End Types.
 
 Inductive Tree (A:Type) := 
@@ -97,6 +103,7 @@ Module Type Aggregators (T : Types) (S : Schemas T).
   
   Parameter aggregator : type -> type -> Type.
   Parameter denotationAggregator : forall S T, Denotation (aggregator S T) (Relation (leaf S) -> ⟦ T ⟧).
+
 End Aggregators.
 
 (* We have SQL depend on modules instead of type class instances
