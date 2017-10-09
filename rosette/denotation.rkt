@@ -100,7 +100,7 @@
                   ; look, we need a ' again before ,gb-fields to make it a list!
                   [from-table-content `(group-by-raw (Table-content (,from-clause e)) ',gb-fields)]
                   [row-funcs (map (lambda (arg) (eval (denote-value-w-broadcasting 
-                                                        arg name-hash (query-aggr-general-gb-fields query)) ns)) 
+                                                        arg name-hash (query-aggr-general-gb-fields query) #t) ns)) 
                                   (query-aggr-general-select-args query))]
                   [row-func-wrap (lambda (r) (map (lambda (f) (f r)) row-funcs))])
              ; quoted part, the real function after denotation
@@ -181,21 +181,22 @@
                (get-content (,(denote-sql (val-aggr-subq-query value) nmap) e)))))]))
 
 
-(define (denote-value-w-broadcasting value nmap gb-fields)
+(define (denote-value-w-broadcasting value nmap gb-fields val-mode)
   (cond                                                                                                                                                       
     [(val-const? value) (denote-value value nmap)]
     [(val-column-ref? value)
-     (cond [(member (val-column-ref-column-name value) gb-fields)
+     (cond [(and (member (val-column-ref-column-name value) gb-fields) val-mode)
             `(lambda (e)
                (car (car (list-ref e ,(hash-ref nmap (val-column-ref-column-name value))))))] 
            [else (denote-value value nmap)])]
     [(val-bexpr? value)
      `(lambda (e) (,(broad-casting-bexpr-wrapper (val-bexpr-binop value)) 
-                    (,(denote-value-w-broadcasting (val-bexpr-v1 value) nmap gb-fields) e)
-                    (,(denote-value-w-broadcasting (val-bexpr-v2 value) nmap gb-fields) e)))]
+                    (,(denote-value-w-broadcasting (val-bexpr-v1 value) nmap gb-fields val-mode) e)
+                    (,(denote-value-w-broadcasting (val-bexpr-v2 value) nmap gb-fields val-mode) e)))]
     [(val-uexpr? value)
-     `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
-                    (,(denote-value-w-broadcasting (val-uexpr-val value) nmap gb-fields) e)))]
+     (let ([mode (if (is-aggr-func? (val-uexpr-op value)) #f val-mode)])
+      `(lambda (e) (,(broad-casting-uexpr-wrapper (val-uexpr-op value)) 
+                    (,(denote-value-w-broadcasting (val-uexpr-val value) nmap gb-fields mode) e))))]
     [(val-aggr-subq? value) (denote-value value nmap)]))
 
 ;;; broad casting a binary operator into a a binary operator over lists / numbers / or mixed
@@ -253,8 +254,8 @@
     [(filter-binop? f)
      `(lambda (e)
         (,(filter-binop-op f)
-          (,(denote-value-w-broadcasting (filter-binop-val1 f) nmap gb-fields) e)
-          (,(denote-value-w-broadcasting (filter-binop-val2 f) nmap gb-fields) e)))]
+          (,(denote-value-w-broadcasting (filter-binop-val1 f) nmap gb-fields #t) e)
+          (,(denote-value-w-broadcasting (filter-binop-val2 f) nmap gb-fields #t) e)))]
     [(filter-conj? f)
      `(lambda (e) (and (,(denote-filter-w-broadcasting (filter-conj-f1 f) nmap gb-fields) e)
                        (,(denote-filter-w-broadcasting (filter-conj-f2 f) nmap gb-fields) e)))]
@@ -270,7 +271,7 @@
      `(lambda (e)
         (apply ,(filter-nary-op-f f)
                ;push a quote "list" to make the list a list 
-               ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap gb-fields) e))
+               ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap gb-fields #t) e))
                                      (filter-nary-op-args f)))))]))
 
 ;;(define test-query1
