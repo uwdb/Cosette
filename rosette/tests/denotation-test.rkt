@@ -106,6 +106,13 @@
    GROUP-BY (list "t1.a" "t1.b")
    HAVING (BINOP (VAL-UNOP aggr-min (VAL-UNOP (lambda (x) (+ x 100)) "t1.c")) < 105)))
 
+(define q4
+  (SELECT (VALS "t1.a" (VAL-UNOP aggr-sum (val-column-ref "t1.b")))
+   FROM (NAMED table1)
+   WHERE (TRUE)
+   GROUP-BY (list "t1.a" "t1.b")
+   HAVING (TRUE))) 
+
 (define b_plus (broad-casting-bexpr-wrapper +))
 
 (b_plus 1 2)
@@ -124,3 +131,6 @@ table1
 (println "q3")
 (denote-and-run q3)
 (denote-and-run q3-macro)
+
+(println "q4")
+(denote-and-run q4)
