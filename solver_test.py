@@ -69,6 +69,12 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(
             get_status("./examples/sqlrewrites/countProject.cos"), 'EQ', "countProject")
 
+    def test_agg_constant_key_rule_2(self):
+        """ testAggregateConstantKeyRule2 from calcite """
+        self.assertEqual(
+            get_status("./examples/calcite/testAggregateConstantKeyRule2.cos"), 'EQ',
+            "testAggregateConstantKeyRule2")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """
