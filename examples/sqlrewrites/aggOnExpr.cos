@@ -1,0 +1,16 @@
+-- define schema r with attributes a and b
+schema s(a:int, b:int); 
+
+table r(s);            -- define table r using schema s
+
+query q1                -- define query q1 
+`select x.a, sum(x.a + x.b) 
+ from r x
+ group by x.a`;
+
+query q2                -- define query q2 likewise
+`select y.a, sum(y.a + y.b) 
+ from r y
+ group by y.a`;
+
+verify q1 q2;           -- does q1 equal to q2?
