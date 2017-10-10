@@ -81,6 +81,11 @@ class EndToEndTests(unittest.TestCase):
         self.assertNotEqual(status, 'NEQ', "testAggregateGroupingSetsProjectMerge")
         self.assertNotEqual(status, 'ERROR', "testAggregateGroupingSetsProjectMerge")
 
+    def test_agg_on_expr(self):
+        """ test aggregate on expression """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/aggOnExpr.cos"), 'EQ', "countProject")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """

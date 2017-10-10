@@ -168,7 +168,7 @@ valueExpr
 currently, only supporting "agg(*)" or "agg(a.b)"
 
 > aggExpr :: Parser AggExpr
-> aggExpr = AV <$> dIden
+> aggExpr = AV <$> valueExpr []
 >       <|> AStar <$ symbol "*"
 
 > valueExpr' :: [String] -> Parser ValueExpr

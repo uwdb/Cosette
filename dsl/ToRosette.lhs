@@ -203,6 +203,7 @@ the base case
 >   Left (s ++ ".* shouldn't appear at this stage \n")
 
 > makeRosVE :: [RosSchema] -> [RosSchema] -> ValueExpr
+> 
 >           -> Either String RosValueExpr
 > makeRosVE tl al (NumLit i) = Right (RosNumLit i)
 > makeRosVE tl al (DIden r a) = Right (RosDIden r a)
@@ -220,8 +221,7 @@ the base case
 >     "max" -> RosAgg "aggr-max" <$> aggToVE e
 >     "min" -> RosAgg "aggr-min" <$> aggToVE e
 >     o' -> Left (o' ++ " is not supported as an aggregation function.")
->   where aggToVE (AV (DIden t a)) = Right $ RosDIden t a
->         aggToVE _ = Left "only support aggregate on an attribute."
+>   where aggToVE (AV v) = makeRosVE tl al v
 
 > binOps :: [(String, String)]
 > binOps = [("+", "+"),
