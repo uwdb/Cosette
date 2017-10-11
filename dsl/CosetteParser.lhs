@@ -95,11 +95,14 @@ consider add the following to the definition of TableRef
 if convert list of relation to nested join is move to Cosette AST level
 
 > data TableRef = TR TableExpr String           -- table expr, alias
+>               | TRJoin TableRef JoinType TableRef (Maybe Predicate) 
+>                 deriving (Eq, Show)
+
+> data JoinType = InnerJoin | LeftJoin | RightJoin | FullOuterJoin
 >                 deriving (Eq, Show)
 
 > getTe :: TableRef -> TableExpr
 > getTe (TR t _) = t
-> 
 
 > getAlias :: TableRef -> String
 > getAlias (TR _ s) = s
@@ -292,13 +295,29 @@ TODO: for now, only base relations can be unioned in from clause.
 > unionTe = try (TRUnion <$> baseTe <*> (unionall *> unionTe))
 >       <|> baseTe
 
-> fromItem :: Parser TableRef
-> fromItem = try (TR <$> tableExpr <*> aliasIdentifier)
+> baseTableRef :: Parser TableRef
+> baseTableRef = try (TR <$> tableExpr <*> aliasIdentifier)
 >        <|> TR <$> tableExpr <*> (keyword_ "as" *> aliasIdentifier)
 >             where aliasIdentifier = identifierBlacklist sqlKeywords
 
+only support inner join now
+
+> joinType :: Parser JoinType
+> joinType = InnerJoin <$ keyword_ "inner" <* keyword_ "join"
+>        <|> InnerJoin <$ keyword_ "join"
+
+> joinCondition :: Parser Predicate
+> joinCondition = keyword_ "on" *> predicate
+
+> tableRef :: Parser TableRef
+> tableRef = baseTableRef >>= suffixWrapper joinTableRef
+>   where joinTableRef t =
+>           (do TRJoin t
+>               <$> joinType <*> baseTableRef <*> optionMaybe joinCondition)
+>           >>= suffixWrapper joinTableRef
+
 > fromClause :: Parser [TableRef]
-> fromClause = keyword_ "from" *> commaSep1 fromItem
+> fromClause = keyword_ "from" *> commaSep1 tableRef
 
 === grouping clause
 
