@@ -84,7 +84,13 @@ class EndToEndTests(unittest.TestCase):
     def test_agg_on_expr(self):
         """ test aggregate on expression """
         self.assertEqual(
-            get_status("./examples/sqlrewrites/aggOnExpr.cos"), 'EQ', "countProject")
+            get_status("./examples/sqlrewrites/aggOnExpr.cos"), 'EQ', "aggOnExpr")
+
+    def test_remove_semi_join_r(self):
+        """ test remove semi join right """
+        self.assertEqual(
+            get_status("./examples/calcite/testRemoveSemiJoinRight.cos"), 'EQ',
+            "testRemoveSemiJoinRight")
 
     # inequal sql queries
     def test_344_exam_0(self):

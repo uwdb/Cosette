@@ -426,18 +426,6 @@ Parse cosette program
 > cosetteProgram :: Parser [CosetteStmt]
 > cosetteProgram = (`sepEndBy1` semiColon) $ cosetteStmt
 
-extra pass on QueryExpr to infer alias if there no alias
-
-> addAlias :: QueryExpr -> Either String QueryExpr
-> addAlias (Select sl fr w g d) = do
->  sl' <- checkListErr $ map f sl
->  return (Select sl' fr w g d)
->   where f (Proj v s) = if s == ""
->                        then Proj <$> Right v <*> toName v
->                        else Right (Proj v s)
->         f other = Right other
-> addAlias (UnionAll q1 q2) = UnionAll <$> addAlias q1 <*> addAlias q2 
-
 > class Namely a where
 >   toName :: a -> Either String String
 
@@ -468,16 +456,98 @@ you must explicitly name a query expr
 >   toName (AV v) = toName v
 >   toName AStar = Right "star"
 
-The function should be used to parse cosette program
+extra pass 1: infer alias if there no alias
+
+> addAlias :: QueryExpr -> Either String QueryExpr
+> addAlias (Select sl fr w g d) = do
+>  sl' <- checkListErr $ map f sl
+>  return (Select sl' fr w g d)
+>   where f (Proj v s) = if s == ""
+>                        then Proj <$> Right v <*> toName v
+>                        else Right (Proj v s)
+>         f other = Right other 
+
+extra pass 2: remove inner join
+
+> removeIJ :: QueryExpr -> Either String QueryExpr
+> removeIJ (Select sl fr w g d) =
+>   let (trs, newP) = rmInFr fr in
+>     Right $ Select sl trs (conj newP <$> wh) g d 
+>   where wh = if w == Nothing then Just TRUE else w
+>         rmInFr Nothing = (Nothing, TRUE)
+>         rmInFr (Just fl) =
+>           let (newF, p) = foldl m ([], TRUE) (rmJoin <$> fl)
+>               in (Just newF, p)
+>         m x y = (fst x ++ fst y, conj (snd x) (snd y))
+>         conj a b = case (a, b) of
+>                      (TRUE, TRUE) -> TRUE
+>                      (TRUE, x') -> x'
+>                      (x', TRUE) -> x'
+>                      (x', y') -> And x' y'
+>         rmJoin (TR te a) = ([TR te a], TRUE)
+>         rmJoin (TRJoin tr1 InnerJoin tr2 (Just p)) =
+>            let (t, p') = m (rmJoin tr1) (rmJoin tr2) in (t, conj p' p)
+>         rmJoin (TRJoin tr1 InnerJoin tr2 Nothing) = m (rmJoin tr1) (rmJoin tr2)
+
+> applyCosPass :: (QueryExpr -> Either String QueryExpr) -> QueryExpr
+>              -> Either String QueryExpr
+> applyCosPass p (UnionAll q1 q2) = UnionAll <$> applyCosPass p q1 <*> applyCosPass p q2
+> applyCosPass p (Select sl f w g d) =
+>   do (Select sl' f' w' g' d') <- p (Select sl f w g d)
+>      nsl <- (checkListErr $ map convSI sl')
+>      nf <- newFr f'
+>      nw <- newWh w'
+>      return $ Select nsl nf nw g' d'        
+>   where convVE (BinOp v1 op v2) = BinOp <$> convVE v1 <*> Right op <*> convVE v2
+>         convVE (VQE q) = VQE <$> applyCosPass p q
+>         convVE other = Right other
+>         convSI (Proj v a) = Proj <$> convVE v <*> Right a
+>         convSI other = Right other
+>         convTR (TR te a) = TR <$> convTE te <*> Right a
+>         convTR (TRJoin t1 jt t2 mp) =
+>           do newMp <- case mp of
+>                         Nothing -> Right Nothing
+>                         Just p -> Just <$> convP p
+>              t1' <- convTR t1
+>              t2' <- convTR t2
+>              return $ TRJoin t1' jt t2' newMp
+>         convTE (TRUnion t1 t2) = TRUnion <$> convTE t1 <*> convTE t2
+>         convTE (TRQuery q) = TRQuery <$> applyCosPass p q
+>         convTE other = Right other
+>         newFr from = case from of
+>                        Nothing -> Right Nothing
+>                        Just fl -> Just <$> (checkListErr $ map convTR fl)
+>         convP (And p1 p2) = And <$> convP p1 <*> convP p2
+>         convP (Or p1 p2) = And <$> convP p1 <*> convP p2
+>         convP (Not p') = Not <$> convP p'
+>         convP (Exists q) = Exists <$> applyCosPass p q
+>         convP (Veq v1 v2) = Veq <$> convVE v1 <*> convVE v2
+>         convP (Vgt v1 v2) = Vgt <$> convVE v1 <*> convVE v2
+>         convP (Vlt v1 v2) = Vlt <$> convVE v1 <*> convVE v2
+>         convP other = Right other
+>         newWh wh = case wh of
+>                      Nothing -> Right Nothing
+>                      Just wh' -> Just <$> (convP wh')
+
+This function should be used to parse cosette program
 
 > parseCosette :: String -> Either String [CosetteStmt]
 > parseCosette source = 
 >   let cs = parse (whitespace *> cosetteProgram <* eof) "" (toLower <$> source) in
 >   case cs of
 >     Left emsg -> Left (show emsg)
->     Right asts -> checkListErr $ map processCos asts 
->   where processCos (Query n q) = Query <$> Right n <*> (addAlias q)
->         processCos  o = Right o
+>     Right asts -> checkListErr $ map passCos asts 
+
+
+> passCos :: CosetteStmt -> Either String CosetteStmt
+> passCos (Query n q) = Query n <$> passQuery q           
+> passCos o = Right o
+
+> passQuery :: QueryExpr -> Either String QueryExpr
+> passQuery q =
+>   do q1 <- applyCosPass addAlias q
+>      q2 <- applyCosPass removeIJ q1
+>      return q2
 
 == tokens
 
@@ -576,12 +646,15 @@ The function should be used to parse cosette program
 
 == the parser api
 
+> parseQueryExpr' :: String -> Either ParseError QueryExpr
+> parseQueryExpr' = parse (whitespace *> queryExpr <* eof) "" 
+
 > parseQueryExpr :: String -> Either String QueryExpr
 > parseQueryExpr source = 
->   let r = parse (whitespace *> queryExpr <* eof) "" source in
+>   let r = parseQueryExpr' (toLower <$> source) in
 >   case r of
 >     Left e -> Left (show e)
->     Right ast -> addAlias ast
+>     Right ast -> passQuery ast
 
 > parseValueExpr :: String -> Either ParseError ValueExpr
 > parseValueExpr = parse (whitespace *> valueExpr [] <* eof) ""
