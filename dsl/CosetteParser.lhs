@@ -14,7 +14,8 @@ Syntax and Parser for Cosette.
 > import Control.Monad
 > import Data.Maybe
 > import Data.Char
-> import Test.HUnit
+> import Data.List (nub)
+> import Test.HUnit.Base (Test (TestLabel, TestCase), assertEqual, assertFailure)
 > import FunctionsAndTypesForParsing
 > import Utilities
 > import Debug.Trace
@@ -464,10 +465,29 @@ you must explicitly name a query expr
 >   toName (AV v) = toName v
 >   toName AStar = Right "star"
 
+AST transformations.
+
+define a type class of context for apply passes on Cosette ASTs.
+
+> class CosCtx a where
+>   update :: a -> a
+
+do nothing.
+
+> data Void = VOID
+
+> instance CosCtx Void where
+>   update a = a
+
+> newtype Counter = MakeCounter Integer
+ 
+> instance CosCtx Counter where
+>   update (MakeCounter i) = MakeCounter $ i + 1
+
 extra pass 1: infer alias if there no alias
 
-> addAlias :: QueryExpr -> Either String QueryExpr
-> addAlias (Select sl fr w g d) = do
+> addAlias :: Void -> QueryExpr -> Either String QueryExpr
+> addAlias _ (Select sl fr w g d) = do
 >  sl' <- checkListErr $ map f sl
 >  return (Select sl' fr w g d)
 >   where f (Proj v s) = if s == ""
@@ -477,8 +497,8 @@ extra pass 1: infer alias if there no alias
 
 extra pass 2: remove inner join
 
-> removeIJ :: QueryExpr -> Either String QueryExpr
-> removeIJ (Select sl fr w g d) =
+> removeIJ :: Void -> QueryExpr -> Either String QueryExpr
+> removeIJ _ (Select sl fr w g d) =
 >   let (trs, newP) = rmInFr fr in
 >     Right $ Select sl trs (conj newP <$> wh) g d 
 >   where wh = if w == Nothing then Just TRUE else w
@@ -497,17 +517,72 @@ extra pass 2: remove inner join
 >            let (t, p') = m (rmJoin tr1) (rmJoin tr2) in (t, conj p' p)
 >         rmJoin (TRJoin tr1 InnerJoin tr2 Nothing) = m (rmJoin tr1) (rmJoin tr2)
 
-> applyCosPass :: (QueryExpr -> Either String QueryExpr) -> QueryExpr
->              -> Either String QueryExpr
-> applyCosPass p (UnionAll q1 q2) = UnionAll <$> applyCosPass p q1 <*> applyCosPass p q2
-> applyCosPass p (Select sl f w g d) =
->   do (Select sl' f' w' g' d') <- p (Select sl f w g d)
+extra pass 3: convert having
+Note this pass is only required when generating Coq code
+
+> removeHaving :: Counter -> QueryExpr -> Either String QueryExpr
+> removeHaving (MakeCounter i) (Select sl fr w (Just (GroupBy gl (Just p))) d) = 
+>   do  asl <- checkListErr $ (makeSl <$> aggs)
+>       subq <- Right $ Select (sl ++ asl) fr w (Just $ GroupBy gl Nothing) False
+>       newP <- convP qn p
+>       newSl <- checkListErr $ (convS qn <$> sl)
+>       return $ Select newSl (Just [TR (TRQuery subq) qn]) (Just newP) Nothing d
+>   where qn = "sub_q" ++ (show i) ++ "_"
+>         aggs = nub $ collectAgg p
+>         makeSl v = Proj v  <$> toName v
+>         -- substitute rel name in having, and put it to where in outer query
+>         convP n (And p1 p2) = And <$> convP n p1 <*> convP n p2
+>         convP n (Or p1 p2) = Or <$> convP n p1 <*> convP n p2
+>         convP n (Not pr) = Not <$> convP n pr
+>         convP n (Exists q) = Left "do not support subq in having"
+>         convP n (Veq v1 v2) = Veq <$> convV n v1 <*> convV n v2
+>         convP n (Vgt v1 v2) = Vgt <$> convV n v1 <*> convV n v2
+>         convP n (Vlt v1 v2) = Vlt <$> convV n v1 <*> convV n v2
+>         convP n other = Right other
+>         convV n (DIden r a) = Right $ DIden n a
+>         convV n (BinOp v1 op v2) =
+>           BinOp <$> convV n v1 <*> Right op <*> convV n v2
+>         convV n (Agg f a) = DIden n <$> toName (Agg f a)
+>         convV n other = Right other
+>         -- substitute rel name in select clause
+>         convS n (Proj v a) = Proj <$> convV n v <*> Right a
+>         convS n other = Right other
+> -- do nothing for queries without having         
+> removeHaving (MakeCounter i) (Select sl fr w g d) = Right $ Select sl fr w g d
+
+collect aggregation from Predicate
+
+> collectAgg :: Predicate -> [ValueExpr]
+> collectAgg (And p1 p2) = (collectAgg p1) ++ (collectAgg p2)
+> collectAgg (Or p1 p2) = (collectAgg p1) ++ (collectAgg p2)
+> collectAgg (Not p) = collectAgg p
+> collectAgg (Veq v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
+> collectAgg (Vgt v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
+> collectAgg (Vlt v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
+> collectAgg other = []
+
+collect aggregation from ValueExpr
+
+> collectAggVE :: ValueExpr -> [ValueExpr]
+> collectAggVE (Agg f a) = [Agg f a]
+> collectAggVE (BinOp v1 op v2) = (collectAggVE v1) ++ (collectAggVE v2)
+> collectAggVE other = []
+
+apply transformation pass recursively on Cosette ASTs
+
+> applyCosPass :: CosCtx a => (a -> QueryExpr -> Either String QueryExpr)
+>                  -> a -> QueryExpr -> Either String QueryExpr
+> applyCosPass p c (UnionAll q1 q2) =
+>   UnionAll <$> applyCosPass p c q1 <*> applyCosPass p c q2
+> applyCosPass p c (Select sl f w g d) =
+>   do (Select sl' f' w' g' d') <- p c (Select sl f w g d)
 >      nsl <- (checkListErr $ map convSI sl')
 >      nf <- newFr f'
 >      nw <- newWh w'
 >      return $ Select nsl nf nw g' d'        
->   where convVE (BinOp v1 op v2) = BinOp <$> convVE v1 <*> Right op <*> convVE v2
->         convVE (VQE q) = VQE <$> applyCosPass p q
+>   where c' = update c
+>         convVE (BinOp v1 op v2) = BinOp <$> convVE v1 <*> Right op <*> convVE v2
+>         convVE (VQE q) = VQE <$> applyCosPass p c' q
 >         convVE other = Right other
 >         convSI (Proj v a) = Proj <$> convVE v <*> Right a
 >         convSI other = Right other
@@ -520,7 +595,7 @@ extra pass 2: remove inner join
 >              t2' <- convTR t2
 >              return $ TRJoin t1' jt t2' newMp
 >         convTE (TRUnion t1 t2) = TRUnion <$> convTE t1 <*> convTE t2
->         convTE (TRQuery q) = TRQuery <$> applyCosPass p q
+>         convTE (TRQuery q) = TRQuery <$> applyCosPass p c' q
 >         convTE other = Right other
 >         newFr from = case from of
 >                        Nothing -> Right Nothing
@@ -528,7 +603,7 @@ extra pass 2: remove inner join
 >         convP (And p1 p2) = And <$> convP p1 <*> convP p2
 >         convP (Or p1 p2) = And <$> convP p1 <*> convP p2
 >         convP (Not p') = Not <$> convP p'
->         convP (Exists q) = Exists <$> applyCosPass p q
+>         convP (Exists q) = Exists <$> applyCosPass p c' q
 >         convP (Veq v1 v2) = Veq <$> convVE v1 <*> convVE v2
 >         convP (Vgt v1 v2) = Vgt <$> convVE v1 <*> convVE v2
 >         convP (Vlt v1 v2) = Vlt <$> convVE v1 <*> convVE v2
@@ -553,8 +628,8 @@ This function should be used to parse cosette program
 
 > passQuery :: QueryExpr -> Either String QueryExpr
 > passQuery q =
->   do q1 <- applyCosPass addAlias q
->      q2 <- applyCosPass removeIJ q1
+>   do q1 <- applyCosPass addAlias VOID q
+>      q2 <- applyCosPass removeIJ VOID q1
 >      return q2
 
 == tokens
