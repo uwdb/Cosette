@@ -115,10 +115,13 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 >                {qSelectList :: [SelectItem]
 >                ,qFrom :: Maybe [TableRef]
 >                ,qWhere :: Maybe Predicate
->                ,qGroup :: Maybe [ValueExpr]
+>                ,qGroup :: Maybe Grouping
 >                ,qDistinct:: Bool}
 >                | UnionAll QueryExpr QueryExpr
 >                deriving (Eq, Show)
+
+> data Grouping = GroupBy [ValueExpr] (Maybe Predicate)
+>                 deriving (Eq, Show)
 
 === Cosette Statement
 
@@ -324,8 +327,13 @@ only support inner join now
 > groupby :: Parser ()
 > groupby = keyword_ "group" *> keyword_ "by"
 
-> groupList :: Parser [ValueExpr]
-> groupList = groupby *> commaSep1 dIden
+> having :: Parser ()
+> having = keyword_ "having"
+
+> grouping :: Parser Grouping
+> grouping = GroupBy
+>            <$> (groupby *> commaSep1 dIden)
+>            <*> optionMaybe (having *> predicate)
 
 === queryExpr
 
@@ -336,7 +344,7 @@ Query without distinct
 >            <$> selectList
 >            <*> optionMaybe fromClause
 >            <*> optionMaybe whereClause
->            <*> optionMaybe groupList
+>            <*> optionMaybe grouping
 >            <*> (do return False)
 
 Query with distinct
@@ -346,7 +354,7 @@ Query with distinct
 >            <$> distSelectList
 >            <*> optionMaybe fromClause
 >            <*> optionMaybe whereClause
->            <*> optionMaybe groupList
+>            <*> optionMaybe grouping
 >            <*> (do return True)
 
 Query expression
