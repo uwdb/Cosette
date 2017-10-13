@@ -97,6 +97,11 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(
             get_status("./examples/sqlrewrites/havingToWhere.cos"), 'EQ', "havingToWhere")
 
+    def test_pull_subquery(self):
+        """ test pull subquery"""
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/pullSubquery.cos"), 'EQ', "pullSubquery")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """

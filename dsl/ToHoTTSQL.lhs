@@ -632,11 +632,10 @@ generate attribute (column) declarations from schemas, TODO: everything is int f
 generate predicate declarations
 
 > predDecs :: (String, [String]) -> String
-> predDecs t = "(" ++ (prefixPred (fst t)) ++ " : Pred (Γ++" ++ "" ++
->               scms ++ "))"
->   where scms = foldr (\a b -> if b == "" then prefixScm a
->                               else (prefixScm a) ++ "++" ++ (prefixScm b))
->                       "" (snd t)
+> predDecs (p,s) = "(" ++ (prefixPred p) ++ " : Pred (Γ++" ++ scms ++ "))"
+>   where scms = foldr (\a b -> if b == "" then a
+>                               else a ++ "++" ++ b)
+>                       "" (prefixScm <$> s)
 
 > headers :: [String]
 > headers = ["Require Import HoTT.",
