@@ -14,7 +14,7 @@ Syntax and Parser for Cosette.
 > import Control.Monad
 > import Data.Maybe
 > import Data.Char
-> import Data.List (nub)
+> import Data.List (nub, find)
 > import Test.HUnit.Base (Test (TestLabel, TestCase), assertEqual, assertFailure)
 > import FunctionsAndTypesForParsing
 > import Utilities
@@ -38,10 +38,11 @@ Syntax and Parser for Cosette.
 >                ,"select"
 >                ,"where"
 >                ,"group"
+>                ,"by"
 >                ,"having"
 >                ,"order"
->                , "as"
->                , "distinct"
+>                ,"as"
+>                ,"distinct"
 >                ]
 
 == Abstract Syntax
@@ -150,10 +151,20 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 > constant :: Parser ValueExpr
 > constant = Constant <$> identifier
 
+
+> aggExpr :: Parser AggExpr
+> aggExpr = AV <$> valueExpr []
+>       <|> AStar <$ symbol "*"
+
+
+> aggTerm :: Parser ValueExpr
+> aggTerm = Agg <$> identifier <*> parens aggExpr
+
 term
 
 > term :: [String] -> Parser ValueExpr
 > term blackList = try dIden
+>              <|> try aggTerm
 >              <|> num
 >              <|> constant
 >              <|> parens (valueExpr [])
@@ -172,18 +183,11 @@ operators on values
 
 valueExpr
 
-currently, only supporting "agg(*)" or "agg(a.b)"
-
-> aggExpr :: Parser AggExpr
-> aggExpr = AV <$> valueExpr []
->       <|> AStar <$ symbol "*"
-
 > valueExpr' :: [String] -> Parser ValueExpr
 > valueExpr' blackList = E.buildExpressionParser vtable (term blackList)
 
 > valueExpr :: [String] -> Parser ValueExpr
-> valueExpr blacklist = try (Agg <$> identifier <*> parens aggExpr)
->                   <|> try (VQE <$> queryExpr)
+> valueExpr blacklist = try (VQE <$> queryExpr)
 >                   <|> valueExpr' blacklist
 
 
@@ -523,50 +527,94 @@ Note this pass is only required when generating Coq code
 > removeHaving :: Counter -> QueryExpr -> Either String QueryExpr
 > removeHaving (MakeCounter i) (Select sl fr w (Just (GroupBy gl (Just p))) d) = 
 >   do  asl <- checkListErr $ (makeSl <$> aggs)
->       subq <- Right $ Select (sl ++ asl) fr w (Just $ GroupBy gl Nothing) False
->       newP <- convP qn p
+>       esl <- checkListErr $ (mc2SI <$> missCols)
+>       subq <- Right $ Select (sl ++ esl  ++ asl) fr w (Just $ GroupBy gl Nothing) False
+>       newP <- convP sl qn p
 >       newSl <- checkListErr $ (convS qn <$> sl)
 >       return $ Select newSl (Just [TR (TRQuery subq) qn]) (Just newP) Nothing d
 >   where qn = "sub_q" ++ (show i) ++ "_"
 >         aggs = nub $ collectAgg p
 >         makeSl v = Proj v  <$> toName v
 >         -- substitute rel name in having, and put it to where in outer query
->         convP n (And p1 p2) = And <$> convP n p1 <*> convP n p2
->         convP n (Or p1 p2) = Or <$> convP n p1 <*> convP n p2
->         convP n (Not pr) = Not <$> convP n pr
->         convP n (Exists q) = Left "do not support subq in having"
->         convP n (Veq v1 v2) = Veq <$> convV n v1 <*> convV n v2
->         convP n (Vgt v1 v2) = Vgt <$> convV n v1 <*> convV n v2
->         convP n (Vlt v1 v2) = Vlt <$> convV n v1 <*> convV n v2
->         convP n other = Right other
->         convV n (DIden r a) = Right $ DIden n a
->         convV n (BinOp v1 op v2) =
->           BinOp <$> convV n v1 <*> Right op <*> convV n v2
->         convV n (Agg f a) = DIden n <$> toName (Agg f a)
->         convV n other = Right other
+>         convP dic n (And p1 p2) = And <$> convP dic n p1 <*> convP dic n p2
+>         convP dic n (Or p1 p2) = Or <$> convP dic n p1 <*> convP dic n p2
+>         convP dic n (Not pr) = Not <$> convP dic n pr
+>         convP dic n (Exists q) = Left "do not support subq in having"
+>         convP dic n (Veq v1 v2) = Veq <$> convV dic n v1 <*> convV dic n v2
+>         convP dic n (Vgt v1 v2) = Vgt <$> convV dic n v1 <*> convV dic n v2
+>         convP dic n (Vlt v1 v2) = Vlt <$> convV dic n v1 <*> convV dic n v2
+>         convP dic n other = Right other
+>         convV dic n (DIden r a) =
+>           Right $ DIden n (case findVinSl (DIden r a) sl of
+>                               Just (Proj v' a') -> a'
+>                               _ -> a)
+>         convV dic n (BinOp v1 op v2) =
+>           BinOp <$> convV dic n v1 <*> Right op <*> convV dic n v2
+>         convV dic n (Agg f a) = DIden n <$> toName (Agg f a)
+>         convV dic n other = Right other
+>         findVinSl v sel = find (\x -> case x of
+>                                         Proj v' a -> v == v'
+>                                         _ -> False) sel
 >         -- substitute rel name in select clause
->         convS n (Proj v a) = Proj <$> convV n v <*> Right a
+>         convS n (Proj v a) = Right $ Proj (DIden n a) a
 >         convS n other = Right other
+>         -- get the pure column refs from orginal select clause
+>         colDic = getPureCols sl
+>         -- get column refs that are used in having
+>         hvCols = collectColRef p
+>         -- get column refs that in having but not in select
+>         missCols = filter rFind hvCols
+>         rFind x = case lookup x colDic of
+>                     Just x' -> False
+>                     Nothing -> True
+>         mc2SI c = if elem c gl
+>                   then Proj c <$> toName c
+>                   else Left "cannot use a non group by column in having"
 > -- do nothing for queries without having         
 > removeHaving (MakeCounter i) (Select sl fr w g d) = Right $ Select sl fr w g d
 
 collect aggregation from Predicate
 
 > collectAgg :: Predicate -> [ValueExpr]
-> collectAgg (And p1 p2) = (collectAgg p1) ++ (collectAgg p2)
-> collectAgg (Or p1 p2) = (collectAgg p1) ++ (collectAgg p2)
-> collectAgg (Not p) = collectAgg p
-> collectAgg (Veq v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
-> collectAgg (Vgt v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
-> collectAgg (Vlt v1 v2) = (collectAggVE v1) ++ (collectAggVE v1)
-> collectAgg other = []
+> collectAgg p = nub $ findVinP f p
+>   where f (Agg f a) = True
+>         f other = False
+
+collect column refs from Predicate
+
+> collectColRef :: Predicate -> [ValueExpr]
+> collectColRef p = nub $ findVinP f p
+>   where f (DIden v c) = True
+>         f other = False
+
+> findVinP :: (ValueExpr -> Bool) -> Predicate -> [ValueExpr]
+> findVinP f (And p1 p2) = (findVinP f p1) ++ (findVinP f p2)
+> findVinP f (Or p1 p2) = (findVinP f p1) ++ (findVinP f p2)
+> findVinP f (Not p) = findVinP f p
+> findVinP f (Veq v1 v2) = (findVinV f v1) ++ (findVinV f v2)
+> findVinP f (Vgt v1 v2) = (findVinV f v1) ++ (findVinV f v2)
+> findVinP f (Vlt v1 v2) = (findVinV f v1) ++ (findVinV f v2)
+> findVinP f other = []
 
 collect aggregation from ValueExpr
 
-> collectAggVE :: ValueExpr -> [ValueExpr]
-> collectAggVE (Agg f a) = [Agg f a]
-> collectAggVE (BinOp v1 op v2) = (collectAggVE v1) ++ (collectAggVE v2)
-> collectAggVE other = []
+> findVinV :: (ValueExpr -> Bool) -> ValueExpr -> [ValueExpr]
+> findVinV f v =
+>   if f v
+>   then [v]
+>   else case v of
+>     BinOp v1 op v2 -> (findVinV f v1) ++ (findVinV f v2)
+>     other -> []
+
+get a collection of pure column ref projection (VE, alias)
+
+> getPureCols :: [SelectItem] -> [(ValueExpr, String)]
+> getPureCols sl = nub $ f sl
+>   where f [Proj (DIden r c) a] = [(DIden r c, a)]
+>         f [other] = []
+>         f (h:t) = case h of
+>                    Proj (DIden r c) a -> (DIden r c, a) : (f t)
+>                    other -> f t
 
 apply transformation pass recursively on Cosette ASTs
 

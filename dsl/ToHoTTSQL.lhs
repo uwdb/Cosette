@@ -294,9 +294,10 @@ convert where
 > convertWhere env ctx Nothing = Right HSTrue
 > convertWhere env ctx (Just p) = convertPred env ctx p
 
-> convertGroup :: HSContext -> Maybe [ValueExpr] -> Either String [HSValueExpr]
-> convertGroup ctx Nothing = Right []
-> convertGroup ctx (Just g) = checkListErr $ (convertVE emptyEnv ctx <$> g)
+> convertGroup :: HSContext -> Grouping -> Either String [HSValueExpr]
+> convertGroup ctx (GroupBy g Nothing) =
+>   checkListErr $ (convertVE emptyEnv ctx <$> g)
+> convertGroup ctx (GroupBy g (Just _)) = Left "having should be removed already"
 
 
 get number literals from Cosette AST.
@@ -406,7 +407,7 @@ convert Cosette AST to HoTTSQL AST
 >      sl' <- convertSelect env (HSNode ctx ctx') sl
 >      wh' <- convertWhere env (HSNode ctx ctx') wh
 >      return (HSSelect sl' ft' wh' [] d)
-> toHSQuery env ctx (Select sl fr wh gr d) =
+> toHSQuery env ctx (Select sl fr wh (Just gr) d) =
 >   do ctx' <- getCtx env ctx fr
 >      ft' <- convertFrom env ctx fr
 >      sl' <- convertSelect env (HSNode ctx ctx') sl
@@ -434,7 +435,8 @@ convert "select count(*) from a" to "select (count (select * form a)) from unitT
 
 
 > cosToHS :: HSEnv -> HSContext -> QueryExpr -> Either String HSQueryExpr
-> cosToHS env ctx q = do q1 <- elimStar env ctx q
+> cosToHS env ctx q = do q0 <- applyCosPass removeHaving (MakeCounter 1) q
+>                        q1 <- elimStar env ctx q0
 >                        q2 <- toHSQuery env ctx q1
 >                        return (boxAggQuery q2)
 
