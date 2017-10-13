@@ -100,7 +100,7 @@ class EndToEndTests(unittest.TestCase):
     def test_pull_subquery(self):
         """ test pull subquery"""
         self.assertEqual(
-            get_status("./examples/sqlrewrites/pullSubquery.cos"), 'EQ', "pullSubquery")
+            get_status("./examples/sqlrewrites/pullsubquery.cos"), 'EQ', "pullSubquery")
 
     # inequal sql queries
     def test_344_exam_0(self):
