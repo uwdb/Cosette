@@ -42,10 +42,13 @@
 >                   | RosVlt RosValueExpr RosValueExpr   -- less than
 >                  deriving (Eq, Show)
 
+> data RosGrouping = RosGroupBy [RosValueExpr] (Maybe RosPredicate)
+>                    deriving (Eq, Show)
+
 > data RosQueryExpr = RosQuery {rosSelectList :: [RosValueExpr]
 >                              ,rosFrom :: Maybe [RosTableRef]
 >                              ,rosWhere :: Maybe RosPredicate
->                              ,rosGroup :: Maybe [RosValueExpr]
+>                              ,rosGroup :: Maybe RosGrouping
 >                              ,rosDistinct :: Bool
 >                              ,rosSchema :: (String, [String])
 >                              }
@@ -89,9 +92,12 @@ It returns [(tableSchema, indexStr)] or error message.
 >      sl' <- checkListErr (map (starToSelect rs scms) sl)
 >      fr' <- convFr fr
 >      wh' <- convWh wh
->      return (Select (foldl (++) [] sl') fr' wh' g d)
+>      g' <- case g of
+>              Nothing -> Right Nothing
+>              Just gr -> Just <$> elimStarInGrouping rs [] gr
+>      return (Select (foldl (++) [] sl') fr' wh' g' d)
 >   where convWh Nothing = Right Nothing
->         convWh (Just w) = Just <$> elimStarInPred scms w
+>         convWh (Just w) = Just <$> elimStarInPred [] scms w
 >         convFr Nothing  = Right Nothing
 >         convFr (Just tl) = Just <$> (checkListErr $ map convTR tl)
 >         convTR (TR te a) = TR <$> convTE te <*> Right a
@@ -150,25 +156,26 @@ sl: the schema list from the env, this is needed for subqueries in SELECT
 
 remove star in predicate
 
-> elimStarInPred :: [RosSchema] -> Predicate -> Either String Predicate
-> elimStarInPred sl (And p1 p2) = And
->                                 <$> elimStarInPred sl p1
->                                 <*> elimStarInPred sl p2
-> elimStarInPred sl (Or p1 p2) = Or
->                                <$> elimStarInPred sl p1
->                                <*> elimStarInPred sl p2
-> elimStarInPred sl (Not p) = Not <$> elimStarInPred sl p
-> elimStarInPred sl (Exists q) = Exists <$> elimStar sl q
-> elimStarInPred sl (Veq v1 v2) = Veq
->                                 <$> elimStarInVE [] sl v1
->                                 <*> elimStarInVE [] sl v2
-> elimStarInPred sl (Vgt v1 v2) = Vgt
->                                 <$> elimStarInVE [] sl v1
->                                 <*> elimStarInVE [] sl v2
-> elimStarInPred sl (Vlt v1 v2) = Vlt
->                                 <$> elimStarInVE [] sl v1
->                                 <*> elimStarInVE [] sl v2
-> elimStarInPred sl other = Right other
+> elimStarInPred :: [RosSchema] -> [RosSchema] -> Predicate
+>                   -> Either String Predicate
+> elimStarInPred rs sl (And p1 p2) = And
+>                                 <$> elimStarInPred rs sl p1
+>                                 <*> elimStarInPred rs sl p2
+> elimStarInPred rs sl (Or p1 p2) = Or
+>                                <$> elimStarInPred rs sl p1
+>                                <*> elimStarInPred rs sl p2
+> elimStarInPred rs sl (Not p) = Not <$> elimStarInPred rs sl p
+> elimStarInPred rs sl (Exists q) = Exists <$> elimStar sl q
+> elimStarInPred rs sl (Veq v1 v2) = Veq
+>                                 <$> elimStarInVE rs sl v1
+>                                 <*> elimStarInVE rs sl v2
+> elimStarInPred rs sl (Vgt v1 v2) = Vgt
+>                                 <$> elimStarInVE rs sl v1
+>                                 <*> elimStarInVE rs sl v2
+> elimStarInPred rs sl (Vlt v1 v2) = Vlt
+>                                 <$> elimStarInVE rs sl v1
+>                                 <*> elimStarInVE rs sl v2
+> elimStarInPred rs sl other = Right other
 
 remove star in value expression
 
@@ -190,6 +197,13 @@ sl: the schema list from the env, this is needed for subqueries in SELECT
 >                   else Left ("you cannot use * in aggregation " ++ s)
 >         f (AV v) = AV <$> elimStarInVE rs sl v
 > elimStarInVE rs sl other = Right other
+
+> elimStarInGrouping :: [RosSchema] -> [RosSchema] -> Grouping
+>                       -> Either String Grouping
+> elimStarInGrouping rs sl (GroupBy gl (Just p)) =
+>   do newP <- elimStarInPred rs sl p
+>      return $ GroupBy gl (Just newP)
+> elimStarInGrouping rs sl other = Right other
 
 === convert select
 
@@ -325,10 +339,12 @@ name: alias of the query
 >         convFr Nothing = Right []
 >         convFr (Just fl) = checkListErr $ map (getTRScm tl) fl
 >         convGr Nothing =  Right Nothing
->         convGr (Just grl) =
->           case checkListErr $ map (makeRosVE tl al) grl of
->             Right l -> Right (Just l)
->             Left e -> Left e
+>         convGr (Just (GroupBy grl having)) =
+>           do l <- checkListErr $ map (makeRosVE tl al) grl 
+>              h <- case having of
+>                     Nothing -> Right Nothing
+>                     Just p -> Just <$> makeRosPred tl al p
+>              return (Just $ RosGroupBy l h) 
  
 convert list of tables (or subqueries) in from clause to joins
 
@@ -379,7 +395,7 @@ pass 1 on Rosette AST, handle aggregate without group by
 >         Nothing -> Right (RosQuery sl -- group by with empty group 
 >                            (rosFrom q)
 >                            (rosWhere q)
->                            (Just [])
+>                            (Just $ RosGroupBy [] Nothing)
 >                            (rosDistinct q)
 >                            (rosSchema q))
 >     _ -> Right q
@@ -399,7 +415,7 @@ currently only support aggregate without group by
 >            <*> Right sch
 >   where convVE (RosVQE (RosQuery sl' fr' wh' gr' dis' sch')) =
 >           case sl' of
->             [RosAgg af v] -> if gr' == Just []
+>             [RosAgg af v] -> if gr' == (Just $ RosGroupBy [] Nothing)
 >                              then Right (RosAggVQE af (RosQuery [v] fr' wh' gr' dis' sch'))
 >                              else Left "QueryExpr as Value can only be aggregate."
 >             _ -> Left "QueryExpr as Value can only be aggregate."
@@ -562,14 +578,17 @@ convert RosQueryExpr to s-expression string without adding schema.
 >         p' =  case p of Nothing -> addParen $ "TRUE"
 >                         Just wh -> toSexp wh
 >         sel = if dis then "SELECT-DISTINCT" else "SELECT"
-> toSexpSchemaless (RosQuery sl fl p (Just g) d _) =
->   addParen $ uw [sel, "\n FROM", fl', "\n WHERE", p', gb, "HAVING (TRUE)" ]
+> toSexpSchemaless (RosQuery sl fl p (Just (RosGroupBy g h)) d _) =
+>   addParen $ uw [sel, "\n FROM", fl', "\n WHERE", p', gb, "\n HAVING", hv ]
 >   where sel = uw ["SELECT", addParen $ uw ("VALS": (toSexp <$> sl))]
 >         fl' = case fl of Nothing -> "UNIT"
 >                          Just fr -> toSexp $ head fr
 >         p' =  case p of Nothing -> addParen $ "TRUE"
 >                         Just wh -> toSexp wh
 >         gb = uw ["GROUP-BY", addParen $ uw ("list":(toSexp <$> g))]
+>         hv = case h of
+>                Nothing -> "(TRUE)"
+>                Just hp -> toSexp hp
 
 generate rosette code.
 

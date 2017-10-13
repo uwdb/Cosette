@@ -92,6 +92,11 @@ class EndToEndTests(unittest.TestCase):
             get_status("./examples/calcite/testRemoveSemiJoinRight.cos"), 'EQ',
             "testRemoveSemiJoinRight")
 
+    def test_having_to_where(self):
+        """ test having to where """
+        self.assertEqual(
+            get_status("./examples/sqlrewrites/havingToWhere.cos"), 'EQ', "havingToWhere")
+
     # inequal sql queries
     def test_344_exam_0(self):
         """ 344-exam-1 """
