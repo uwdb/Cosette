@@ -1,4 +1,3 @@
-
 schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
 schema dept(deptno:int, name:int);
 schema bonus(ename:int, job:int, sal:int, comm:int);
@@ -10,8 +9,8 @@ table bonus(bonus);
 table account(account);
 table t(t);
 
-query q1 `SELECT DEPT.NAME AS C1 FROM DEPT AS DEPT WHERE DEPT.NAME > 'b' GROUP BY DEPT.NAME HAVING DEPT.NAME > 'c' AND (COUNT(*) > 30 OR DEPT.NAME < 'z')`;
+query q1 `SELECT DEPT.NAME AS C1 FROM DEPT AS DEPT WHERE DEPT.NAME > 1 GROUP BY DEPT.NAME HAVING DEPT.NAME > 2 AND (COUNT(*) > 30 OR DEPT.NAME < 3)`;
 
-query q2 `SELECT t6.C1 FROM (SELECT DEPT0.NAME AS C1 FROM DEPT AS DEPT0 WHERE DEPT0.NAME > 'b') AS t5 WHERE t5.C1 > 'c' GROUP BY t6.C1 HAVING COUNT(*) > 30 OR t6.C1 < 'z'`;
+query q2 `SELECT t6.C1 FROM (SELECT DEPT0.NAME AS C1 FROM DEPT AS DEPT0 WHERE DEPT0.NAME > 1) AS t6 WHERE t6.C1 > 2 GROUP BY t6.C1 HAVING COUNT(*) > 30 OR t6.C1 < 3`;
 
 verify q1 q2;

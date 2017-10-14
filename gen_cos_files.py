@@ -3,6 +3,9 @@ Generate cos files from calcite test cases
 """
 
 import json
+import os.path
+
+CALCITE_RULE_PATH = "./examples/calcite/"
 
 SUPPORTED_TESTS = ["testUnionToDistinctRule",
                    "testAddRedundantSemiJoinRule",
@@ -82,7 +85,7 @@ def gen_cos_files():
     """
     generate cos file
     """
-    with open('calcite_tests.json') as input_file:
+    with open(CALCITE_RULE_PATH+'calcite_tests.json') as input_file:
         data = json.load(input_file)
 
     supported_tests = set(SUPPORTED_TESTS)
@@ -90,16 +93,25 @@ def gen_cos_files():
     count = 0
     for i in data:
         if i["name"] in supported_tests:
-            print "writing {}.cos".format(i["name"])
-            with open("{}.cos".format(i["name"]), 'w') as output_file:
-                output_file.write("{}\n{}\n{}\n{}".format(
-                    SCHEMA_TABLE_DECS,
-                    gen_q_stmt("q1", i["q1"]),
-                    gen_q_stmt("q2", i["q2"]),
-                    gen_v_stmt("q1", "q2")))
-                count += 1
+            fname = "{}.cos".format(i["name"])
+            if os.path.isfile(CALCITE_RULE_PATH+fname):
+                print "{} already exists. ".format(fname)
+            else:
+                print "writing {}.".format(CALCITE_RULE_PATH+fname)
+                with open(fname, 'w') as output_file:
+                    output_file.write(gen_cos_source(i["q1"], i["q2"]))
+                    count += 1
 
     print "converted {} test cases to cosette programs.".format(count)
+
+
+def gen_cos_source(q1, q2):
+    """ generate cosette source code """
+    return "{}\n{}\n{}\n{}".format(
+                SCHEMA_TABLE_DECS,
+                gen_q_stmt("q1", q1),
+                gen_q_stmt("q2", q2),
+                gen_v_stmt("q1", "q2"))
 
 
 def gen_q_stmt(name, query):
