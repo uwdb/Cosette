@@ -108,10 +108,10 @@ def gen_cos_files():
 def gen_cos_source(q1, q2):
     """ generate cosette source code """
     return "{}\n{}\n{}\n{}".format(
-                SCHEMA_TABLE_DECS,
-                gen_q_stmt("q1", q1),
-                gen_q_stmt("q2", q2),
-                gen_v_stmt("q1", "q2"))
+        SCHEMA_TABLE_DECS,
+        gen_q_stmt("q1", q1),
+        gen_q_stmt("q2", q2),
+        gen_v_stmt("q1", "q2"))
 
 
 def gen_q_stmt(name, query):

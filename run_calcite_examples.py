@@ -29,10 +29,13 @@ def run_calcite_examples(write=False):
             cos = generated_rules[rname]
         else:
             cos = gen_cos_files.gen_cos_source(rule["q1"], rule["q2"])
+            if write: # generate .cos file
+                with open("{}{}.cos".format(calcite_path, rname), 'w') as ofile:
+                    ofile.write(cos)
 
         result = json.loads(solver.solve(cos))
         print "{},{}".format(rname, result["result"])
 
 
 if __name__ == '__main__':
-    run_calcite_examples()
+    run_calcite_examples(write=True)
