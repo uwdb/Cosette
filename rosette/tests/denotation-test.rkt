@@ -106,10 +106,12 @@
    GROUP-BY (list "t1.a" "t1.b")
    HAVING (BINOP (VAL-UNOP aggr-min (VAL-UNOP (lambda (x) (+ x 100)) "t1.c")) < 105)))
 
+(define-symbolic* str_charlie_ integer?)
+
 (define q4
   (SELECT (VALS "t1.a" (VAL-UNOP aggr-sum (val-column-ref "t1.b")))
    FROM (NAMED table1)
-   WHERE (TRUE)
+   WHERE (BINOP "t1.c" < str_charlie_)
    GROUP-BY (list "t1.a" "t1.b")
    HAVING (TRUE))) 
 
