@@ -660,9 +660,11 @@ generate predicate declarations
 >            "  Parameter sum : forall {T}, aggregator T int.",
 >            "  Notation \"'SUM' ( e )\" := (aggregatorGroupByProj sum e).",
 >            "  Parameter max : forall {T}, aggregator T int.",
->            "  Notation \"'max' ( e )\" := (aggregatorGroupByProj max e).",
+>            "  Notation \"'MAX' ( e )\" := (aggregatorGroupByProj max e).",
 >            "  Parameter min : forall {T}, aggregator T int.",
->            "  Notation \"'min' ( e )\" := (aggregatorGroupByProj min e).\n",
+>            "  Notation \"'MIN' ( e )\" := (aggregatorGroupByProj min e).",
+>            "  Parameter avg : forall {T}, aggregator T int.",
+>            "  Notation \"'AVG' ( e )\" := (aggregatorGroupByProj avg e).\n",
 >            "  Parameter gt: Pred (node (leaf int) (leaf int)). \n"]
 
 > openDef :: String
