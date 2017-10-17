@@ -50,6 +50,7 @@ Syntax and Parser for Cosette.
 === value expression
 
 > data ValueExpr = NumLit Integer
+>                | StrLit String
 >                | DIden String String              -- a.b
 >                | BinOp ValueExpr String ValueExpr -- a.b + b.c etc
 >                | Constant String                  -- constant variable
@@ -145,6 +146,9 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 > num :: Parser ValueExpr
 > num = NumLit <$> integer
 
+> str :: Parser ValueExpr
+> str = StrLit <$> stringToken
+
 > dIden :: Parser ValueExpr
 > dIden = DIden <$> identifier <*> (dot *> identifier)
 
@@ -165,6 +169,7 @@ term
 > term :: [String] -> Parser ValueExpr
 > term blackList = try dIden
 >              <|> try aggTerm
+>              <|> str
 >              <|> num
 >              <|> constant
 >              <|> parens (valueExpr [])
@@ -616,6 +621,28 @@ get a collection of pure column ref projection (VE, alias)
 >                    Proj (DIden r c) a -> (DIden r c, a) : (f t)
 >                    other -> f t
 
+extra pass 4, after collecting string literals, convert string literals to constant
+
+> removeStr :: Void -> QueryExpr -> Either String QueryExpr
+> removeStr _ (Select sl f w g d) =
+>   Right $ Select (convSI <$> sl) f (convWh w) (convG g) d
+>   where convSI (Proj v a) = Proj (convVE v) a
+>         convSI other = other
+>         convVE (StrLit s) = Constant (strToConst s)
+>         convVE (BinOp v1 o v2) = BinOp (convVE v1) o (convVE v2)
+>         convVE other = other
+>         convWh Nothing = Nothing
+>         convWh (Just p) = Just (convP p)
+>         convP (And p1 p2) = And (convP p1) (convP p2)
+>         convP (Or p1 p2) = Or (convP p1) (convP p2)
+>         convP (Not p) = Not (convP p)
+>         convP (Veq v1 v2) = Veq (convVE v1) (convVE v2)
+>         convP (Vgt v1 v2) = Vgt (convVE v1) (convVE v2)
+>         convP (Vlt v1 v2) = Vlt (convVE v1) (convVE v2)
+>         convP other = other
+>         convG (Just (GroupBy g (Just p))) = Just (GroupBy g (Just $ convP p))
+>         convG other = other
+
 apply transformation pass recursively on Cosette ASTs
 
 > applyCosPass :: CosCtx a => (a -> QueryExpr -> Either String QueryExpr)
@@ -667,18 +694,60 @@ This function should be used to parse cosette program
 >   let cs = parse (whitespace *> cosetteProgram <* eof) "" (toLower <$> source) in
 >   case cs of
 >     Left emsg -> Left (show emsg)
->     Right asts -> checkListErr $ map passCos asts 
+>     Right asts -> passCos asts 
 
+> getStrLit :: QueryExpr -> [String]
+> getStrLit (UnionAll q1 q2) = getStrLit q1 ++ getStrLit q2
+> getStrLit (Select s f w g _) =
+>   nub ((foldl (++) [] $ getStrSI <$> s) ++ getStrFr f ++ getStrWh w ++ getStrGr g)
+>   where getStrSI (Proj v _) = getStrVE v
+>         getStrSI other = []
+>         getStrVE (StrLit s) = [s]
+>         getStrVE (BinOp v1 _ v2) = getStrVE v1 ++ getStrVE v2
+>         getStrVE (VQE q) = getStrLit q
+>         getStrVE other = []
+>         getStrFr Nothing = []
+>         getStrFr (Just trs) = (foldl (++) [] $ getStrTR <$> trs)
+>         getStrTR (TR te _) = getStrTE te
+>         getStrTE (TRQuery q) = getStrLit q
+>         getStrTE (TRUnion t1 t2) = getStrTE t1 ++ getStrTE t2
+>         getStrTE other = []
+>         getStrWh Nothing = []
+>         getStrWh (Just p) = getStrPred p
+>         getStrPred (Exists q) = getStrLit q
+>         getStrPred (Veq v1 v2) = getStrVE v1 ++ getStrVE v2
+>         getStrPred (Vgt v1 v2) = getStrVE v1 ++ getStrVE v2
+>         getStrPred (Vlt v1 v2) = getStrVE v1 ++ getStrVE v2
+>         getStrPred (And p1 p2) = getStrPred p1 ++ getStrPred p2
+>         getStrPred (Or p1 p2) = getStrPred p1 ++ getStrPred p2
+>         getStrPred (Not p) = getStrPred p
+>         getStrPred others = []
+>         getStrGr Nothing = []
+>         getStrGr (Just (GroupBy _ Nothing)) = []
+>         getStrGr (Just (GroupBy _ (Just p))) = getStrPred p
 
-> passCos :: CosetteStmt -> Either String CosetteStmt
-> passCos (Query n q) = Query n <$> passQuery q           
-> passCos o = Right o
+In this pass, we collect all string literals, and make constant declarations for them.
+
+> passCos :: [CosetteStmt] -> Either String [CosetteStmt]
+> passCos (Query n q:tail)  =
+>   do q' <- passQuery q
+>      nq <- applyCosPass removeStr VOID q'
+>      qs <- Right $ Query n nq
+>      consts <- Right $ (\x -> Const (strToConst x) "int") <$> getStrLit q'
+>      re <- passCos tail
+>      return $ (consts ++ [qs]) ++ re
+> passCos (other:tail) =  (:) other <$> passCos tail
+> passCos [] = Right []
+
+> strToConst :: String -> String
+> strToConst s = "str_" ++ s ++ "_"
 
 > passQuery :: QueryExpr -> Either String QueryExpr
 > passQuery q =
 >   do q1 <- applyCosPass addAlias VOID q
 >      q2 <- applyCosPass removeIJ VOID q1
 >      return q2
+
 
 == tokens
 
@@ -786,6 +855,10 @@ This function should be used to parse cosette program
 >   case r of
 >     Left e -> Left (show e)
 >     Right ast -> passQuery ast
+
+do q1 <- passQuery ast
+                     q2 <- applyCosPass removeStr VOID q1
+                     return q2
 
 > parseValueExpr :: String -> Either ParseError ValueExpr
 > parseValueExpr = parse (whitespace *> valueExpr [] <* eof) ""
