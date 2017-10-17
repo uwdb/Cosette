@@ -312,6 +312,7 @@ get number literals from Cosette AST.
 >         getNumVE (NumLit i) = [i]
 >         getNumVE (BinOp v1 o v2) = getNumVE v1 ++ getNumVE v2
 >         getNumVE (VQE q) = getNumberLiterals q
+>         getNumVE (Agg f (AV v)) = getNumVE v
 >         getNumVE others = []
 >         getNumFr Nothing = []
 >         getNumFr (Just trs) = (foldl (++) [] $ map getNumTR trs)
