@@ -75,6 +75,12 @@ class EndToEndTests(unittest.TestCase):
             get_status("./examples/calcite/testAggregateConstantKeyRule2.cos"), 'EQ',
             "testAggregateConstantKeyRule2")
 
+    def test_remove_semijoin_r_with_f(self):
+        """ testAggregateGroupingSetsProjectMerge from calcite """
+        status = get_status("./examples/calcite/testRemoveSemiJoinRightWithFilter.cos")
+        self.assertNotEqual(status, 'NEQ', "testRemoveSemiJoinRightWithFilter")
+        self.assertNotEqual(status, 'ERROR', "testRemoveSemiJoinRightWithFilter")
+    
     def test_group_set_project_merge(self):
         """ testAggregateGroupingSetsProjectMerge from calcite """
         status = get_status("./examples/calcite/testAggregateGroupingSetsProjectMerge.cos")

@@ -5,7 +5,7 @@
 
 > import CosetteParser
 > import Text.Parsec.Error as PE
-> import Data.List (unwords, lookup, findIndex)
+> import Data.List (unwords, lookup, findIndex, nub)
 > import Data.Char (toLower)
 > import Data.Foldable (foldMap)
 > import Utilities
@@ -236,6 +236,7 @@ the base case
 >     "min" -> RosAgg "aggr-min" <$> aggToVE e
 >     o' -> Left (o' ++ " is not supported as an aggregation function.")
 >   where aggToVE (AV v) = makeRosVE tl al v
+> makeRosVE tl al (Constant c) = Right (RosConstant c)
 
 > binOps :: [(String, String)]
 > binOps = [("+", "+"),
@@ -516,7 +517,7 @@ convert ValueExpr to sexp
 >   toSexp (RosAgg f (RosDIden r a)) =
 >     addParen $ uw ["VAL-UNOP", f, addParen $ uw ["val-column-ref", toSexp $ RosDIden r a ]]
 >   toSexp (RosAgg f v) = addParen $ uw ["VAL-UNOP", f, toSexp v]
-
+>   toSexp (RosConstant c) = c
 
 convert Predicate to sexp
 
@@ -625,11 +626,12 @@ statement list
 >      rs2 <- Right (toSexpSchemaless rsq2)
 >      preds <- predDecs pl sl
 >      tbs <- tableDecs sl'
->      return ((joinWithBr headers) ++ tbs ++ preds ++ (genQ q1 rs1) ++ (genQ q2 rs2) ++ (genSolve sl' q1 q2))
+>      return ((joinWithBr headers) ++ tbs ++ preds ++ consts ++ (genQ q1 rs1) ++ (genQ q2 rs2) ++ (genSolve sl' q1 q2))
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
 >                      Nothing -> Left ("Cannot find " ++ q' ++ ".")
+>     consts = (joinWithBr $ (\x -> addParen $ uw ["define-symbolic*", fst x, "integer?"]) <$> nub cl) ++ "\n"
 
 generate declarations of symbolic predicate (generic predicate)
 
@@ -671,7 +673,7 @@ Number of rows of symbolic relations, to be replaced by incremental solving
 >            "(require \"../cosette.rkt\" \"../sql.rkt\" \"../evaluator.rkt\" \"../syntax.rkt\") \n",
 >            "(provide ros-instance)\n",
 >            "(current-bitwidth #f)\n",
->            "(define-symbolic div_ (~> integer? integer? integer?))"]
+>            "(define-symbolic div_ (~> integer? integer? integer?))\n"]
 
 > genQ :: String -> String -> String
 > genQ qn q = "(define (" ++ qn ++ " tables) \n  " ++ q ++ ")\n\n"
