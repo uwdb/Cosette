@@ -305,8 +305,8 @@ get number literals from Cosette AST.
 > getNumberLiterals :: QueryExpr -> [Integer]
 > getNumberLiterals (UnionAll q1 q2) =
 >   getNumberLiterals q1 ++ getNumberLiterals q2
-> getNumberLiterals (Select sl fr wh _ _) =
->   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh   
+> getNumberLiterals (Select sl fr wh g _) =
+>   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh ++ getNumG g  
 >   where getNumSI (Proj v _) = getNumVE v
 >         getNumSI others = []
 >         getNumVE (NumLit i) = [i]
@@ -329,6 +329,8 @@ get number literals from Cosette AST.
 >         getNumPred (Or p1 p2) = getNumPred p1 ++ getNumPred p2
 >         getNumPred (Not p) = getNumPred p
 >         getNumPred others = []
+>         getNumG (Just (GroupBy _ (Just p))) = getNumPred p
+>         getNumG others = []
 
 > intToConst :: Integer -> String
 > intToConst i = "integer_" ++ (show i)
