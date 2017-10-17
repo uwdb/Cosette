@@ -30,9 +30,9 @@ def analyze_result():
     # result_count.plot.bar()
     # plt.tight_layout()
     # plt.show()
-    # agg_count.plot.bar()
-    # plt.tight_layout()
-    # plt.show()
+    agg_count.plot.bar()
+    plt.tight_layout()
+    plt.show()
 
 if __name__ == '__main__':
     analyze_result()

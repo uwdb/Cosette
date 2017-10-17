@@ -112,7 +112,7 @@ testPushFilterThroughSemiJoin,ERROR,ERROR,check first
 testPushMinThroughUnion,ERROR,GROUPBY,check
 testPushSumConstantGroupingSetsThroughUnion,ERROR,GROUPBY,check
 testPushFilterPastAggWithGroupingSets1,ERROR,ERROR,check first
-testPushFilterPastAggWithGroupingSets2,ERROR,ERROR,check first
+testPushFilterPastAggWithGroupingSets2,ERROR,CALCITEBUG,check first
 testTransitiveInferenceUnion3way,ERROR,ERROR,
 testCastInAggregateReduceFunctions,ERROR,CAST,
 testPullConstantThroughConstLast,ERROR,GROUPBY,
@@ -122,7 +122,7 @@ testTransitiveInferenceLeftOuterJoin,ERROR,OUTERJOIN,
 testPushMaxNullableGroupingSetsThroughUnion,ERROR,GROUPBY,
 testReduceConstants2,ERROR,VALUES,
 testPushJoinThroughUnionOnRight,UNKNOWN,,
-testFullOuterJoinSimplificationToInner,ERROR,ERROR,check first
+testFullOuterJoinSimplificationToInner,ERROR,OUTERJOIN,
 testPushAvgGroupingSetsThroughUnion,ERROR,GROUPBY,check first (avg)
 testReduceOrCaseWhen,ERROR,NULL,
 testReduceAverage,ERROR,CAST,
@@ -181,11 +181,11 @@ testMergeIntersect,ERROR,INTERSECT,
 testPushSumConstantThroughUnion,ERROR,GROUPBY,
 testAddRedundantSemiJoinRule,NEQ,,
 testExpandProjectExists,ERROR,GROUPBY,
-testRemoveSemiJoinWithFilter,ERROR,ERROR,check(string)
+testRemoveSemiJoinWithFilter,UNKNOWN,,
 testRightOuterJoinSimplificationToInner,ERROR,OUTERJOIN,
 testDistinctCountMixed,ERROR,CAST,
 testPushJoinCondDownToProject,UNKNOWN,,
-testRemoveSemiJoinRightWithFilter,ERROR,ERROR,check(string)
+testRemoveSemiJoinRightWithFilter,UNKNOWN,,
 testFullOuterJoinSimplificationToLeftOuter,ERROR,OUTERJOIN,
 testPullConstantThroughAggregatePermutedConstFirst,ERROR,GROUPBY,
 testTransitiveInferenceUnion,ERROR,ERROR,check
@@ -197,7 +197,7 @@ testPullConstantThroughAggregateAllLiterals,ERROR,GROUPBY,
 testSwapOuterJoin,ERROR,OUTERJOIN,
 testPushJoinThroughUnionOnLeft,UNKNOWN,,
 testMergeUnionMixed2,ERROR,UNION,
-testPushFilterPastAggThree,ERROR,ERROR,check(first)
+testPushFilterPastAggThree,EQ,,
 testReduceConstantsEliminatesFilter,ERROR,VALUES,
 testExpandFilterExists,ERROR,OUTERJOIN,
 testAggregateProjectPullUpConstants,UNKNOWN,,
