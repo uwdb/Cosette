@@ -1,5 +1,8 @@
 
+
 > module Utilities where
+
+> import Data.Foldable
 
 shared utilities function
 
@@ -24,4 +27,10 @@ check a list and return the first error.
 join strings with line breaks
 
 > joinWithBr :: [String] -> String
-> joinWithBr = foldr (\a b -> if a == "" then b else a ++ " \n" ++ b) "" 
+> joinWithBr = foldr (\a b -> if a == "" then b else a ++ " \n" ++ b) ""
+
+flat map
+
+> flatMap :: Data.Foldable.Foldable t => (a -> t b) -> [a] -> [b]
+> flatMap f = concatMap (Data.Foldable.toList . f)
+

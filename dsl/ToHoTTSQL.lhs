@@ -6,7 +6,7 @@
 
 > import CosetteParser
 > import Text.Parsec.Error as PE
-> import Data.List (unwords, intercalate, filter)
+> import Data.List (unwords, intercalate, filter, nub)
 > import Data.Set (toList, fromList)
 > import Data.Char (toUpper)
 > import FunctionsAndTypesForParsing
@@ -305,8 +305,8 @@ get number literals from Cosette AST.
 > getNumberLiterals :: QueryExpr -> [Integer]
 > getNumberLiterals (UnionAll q1 q2) =
 >   getNumberLiterals q1 ++ getNumberLiterals q2
-> getNumberLiterals (Select sl fr wh _ _) =
->   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh   
+> getNumberLiterals (Select sl fr wh g _) =
+>   (foldl (++) [] $ map getNumSI sl) ++ getNumFr fr ++ getNumWh wh ++ getNumG g  
 >   where getNumSI (Proj v _) = getNumVE v
 >         getNumSI others = []
 >         getNumVE (NumLit i) = [i]
@@ -329,6 +329,8 @@ get number literals from Cosette AST.
 >         getNumPred (Or p1 p2) = getNumPred p1 ++ getNumPred p2
 >         getNumPred (Not p) = getNumPred p
 >         getNumPred others = []
+>         getNumG (Just (GroupBy _ (Just p))) = getNumPred p
+>         getNumG others = []
 
 > intToConst :: Integer -> String
 > intToConst i = "integer_" ++ (show i)
@@ -592,7 +594,8 @@ assemble the theorem definition.
 >      qs1 <- Right (toCoq hsq1)
 >      qs2 <- Right (toCoq hsq2)
 >      vs <- Right (verifyDecs qs1 qs2)
->      return ((joinWithBr headers) ++ (constDecs (nl1++nl2)) ++ openDef ++ decs ++ vs ++ endDef ++ (genProof tactics) ++ ending)
+>      consts <- Right $ (numConsts $ nl1 ++ nl2) ++ constDecs 
+>      return ((joinWithBr headers) ++ consts ++ openDef ++ decs ++ vs ++ endDef ++ (genProof tactics) ++ ending)
 >   where
 >     findQ q' ql' = case lookup q' ql' of
 >                      Just qe -> Right qe
@@ -605,7 +608,8 @@ assemble the theorem definition.
 >     attrs = unwords $ map attrDecs sl
 >     preds = unwords $ map predDecs pl
 >     decs = addRefine $ "forall " ++ scms ++ tbls ++ attrs ++ preds ++ ", _"
->     constDecs consts = (joinWithBr $ map (\a -> "  Variable " ++ (intToConst a) ++ ": constant int.") (dedup consts)) ++ "\n" 
+>     numConsts consts = (joinWithBr $ map (\a -> "  Variable " ++ (intToConst a) ++ ": constant int.") (dedup consts)) ++ "\n"
+>     constDecs = (joinWithBr $ (\x -> "  Variable " ++ (fst x) ++ ": constant int.") <$> nub cl) ++ "\n"
 
 extract data types that are needed. e.g. schema s(a:t1, b:t2, c:t1, ??) -> [t1, t2] 
 

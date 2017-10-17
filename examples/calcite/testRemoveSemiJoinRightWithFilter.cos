@@ -1,0 +1,11 @@
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+
+table emp(emp);
+table dept(dept);
+
+query q1 `SELECT EMP.ENAME FROM EMP AS EMP, DEPT AS DEPT, EMP AS EMP0 WHERE EMP.DEPTNO = DEPT.DEPTNO AND DEPT.DEPTNO = EMP0.DEPTNO AND DEPT.NAME = 'foo'`;
+
+query q2 `SELECT EMP1.ENAME FROM EMP AS EMP1 INNER JOIN (SELECT * FROM DEPT AS DEPT0 WHERE DEPT0.NAME = 'foo') AS t1 ON EMP1.DEPTNO = t1.DEPTNO INNER JOIN EMP AS EMP2 ON t1.DEPTNO = EMP2.DEPTNO`;
+
+verify q1 q2;
