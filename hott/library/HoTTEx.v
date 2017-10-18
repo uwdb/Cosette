@@ -561,4 +561,43 @@ Definition pair_f_eq {A B}: forall (a1 a2: A) (b1 b2: B),
       reflexivity.
   Defined.
 
+
+Definition equiv_sig_sum_prod_distr_l {A B C D}:
+  {a: A & B a * (C a + D a)} <~> {a:A & B a * C a + B a * D a}.
+  apply equiv_path.
+  f_ap.
+  by_extensionality a.
+  rewrite (path_universe_uncurried (sum_distrib_l _ _ _)).
+  reflexivity.
+Defined.
+
+Definition equiv_sig_sum_prod_distr_r {A B C D}:
+  {a: A & (C a + D a) * B a} <~> {a:A & C a * B a + D a * B a}.
+  apply equiv_path.
+  f_ap.
+  by_extensionality a.
+  rewrite (path_universe_uncurried (sum_distrib_r _ _ _)).
+  reflexivity.
+ Defined.
+
+Definition equiv_sig_break_pair {A B T1} `{IsHSet A} `{IsHSet T1}:
+  forall (t1: T1) (t2:T1*A), {a: A & B a * ((t1, a) = t2)} = {a: A & B a * (t1 = fst t2) * (a = snd t2)}.
+  intros.
+  f_ap.
+  by_extensionality a.
+  rewrite (path_universe_uncurried (equiv_pair_assemble _)).
+  rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+  reflexivity.
+Defined.
+  
+Definition equiv_prod_sigma2_r {A B C D}:
+  {a: A &  {b:B & C a b} * D a } <~> {a: A & {b:B & C a b * D a}}.
+  apply equiv_path.
+  f_ap.
+  by_extensionality a.
+  rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
+  reflexivity.
+Defined.
+
+
       
