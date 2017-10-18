@@ -12,5 +12,6 @@ Stats of Proven Rewrites
 | Subquery.v                 |   2               |
 | Commonexp.v                |   1               |
 | aggGroupSetsProjectMerge.v |   1               |
+| PullConstantThroughUnion.v |   1               |
 
 Total: 28
