@@ -17,13 +17,13 @@ testMergeMinus,ERROR,EXCEPT,
 testDecorrelateTwoExists,ERROR,NULL,
 testEmptyMinus,ERROR,VALUES,
 testReduceValuesUnderProject,ERROR,VALUES,
-testAggregateConstantKeyRule,UNKNOWN,,
+testAggregateConstantKeyRule,UNKNOWN,,Later
 testExpandFilterExistsSimpleAnd,ERROR,GROUPBY,
 testReduceValuesUnderFilter,ERROR,VALUES,
 testReduceConstantsDup,ERROR,EMPTYTABLE,
 testAggregateProjectMerge,UNKNOWN,,
 testRemoveSemiJoin,EQ,,
-testPullConstantThroughUnion,UNKNOWN,,
+testPullConstantThroughUnion,MP,,interesting
 testWhereNotInCorrelated2,ERROR,OUTERJOIN,
 testReduceNot,ERROR,,
 testDistinctWithGrouping,ERROR,ERROR,
@@ -107,7 +107,7 @@ testTransitiveInferenceConstantEquiPredicate,EQ,,
 testReduceValuesToEmpty,ERROR,VALUES,
 testPushProjectPastFilter,ERROR,STRING,
 testDistinctNonDistinctTwoAggregatesWithGrouping,ERROR,GROUPBY,
-testAggregateGroupingSetsProjectMerge,UNKNOWN,,
+testAggregateGroupingSetsProjectMerge,MP,,
 testPushFilterThroughSemiJoin,ERROR,ERROR,check first
 testPushMinThroughUnion,ERROR,GROUPBY,check
 testPushSumConstantGroupingSetsThroughUnion,ERROR,GROUPBY,check
