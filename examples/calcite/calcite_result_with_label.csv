@@ -37,19 +37,19 @@ testWhereExpressionInCorrelated,ERROR,IN,
 testExpandFilterInComposite,ERROR,OUTERJOIN,
 testPullFilterThroughAggregateGroupingSets,ERROR,CALCITEBUG,
 testReduceConstantsRequiresExecutor,ERROR,NULL,
-testTransitiveInferenceJoin3wayAgg,UNKNOWN,,
+testTransitiveInferenceJoin3wayAgg,UNKNOWN,,Later
 testReduceConstantsProjectNullable,ERROR,CAST,
 testWhereOrSubQuery,ERROR,IN,
 testTransitiveInferencePreventProjectPullUp,ERROR,ERROR,
 testDecorrelateExists,NEQ,,
-testTransitiveInferenceJoin3way,UNKNOWN,,
+testTransitiveInferenceJoin3way,UNKNOWN,,Later
 testPushCountStarThroughUnion,ERROR,GROUPBY,
 testRemoveSemiJoinRight,EQ,,
 testCustomColumnResolvingInNonCorrelatedSubQuery,ERROR,IN,
 testReduceExpressionsNot,ERROR,VALUES,
 testPushProjectPastInnerJoin,ERROR,CASE,
 testPushAggregateFunctionsThroughJoin,ERROR,CAST,
-testTransitiveInferenceProject,UNKNOWN,,
+testTransitiveInferenceProject,UNKNOWN,,Later
 testPushAvgThroughUnion,ERROR,GROUPBY,check
 testPushProjectPastFullJoinStrong,ERROR,CASE,
 testReduceConstantsCalc,ERROR,STRING,
@@ -69,7 +69,7 @@ testPullConstantThroughAggregatePermutedConstGroupBy,ERROR,GROUPBY,
 testPushSumCountStarThroughUnion,ERROR,GROUPBY,check
 testPushFilterWithRank,ERROR,PARTITION,
 testPushSumNullableGroupingSetsThroughUnion,ERROR,GROUPBY,check
-testMergeFilter,UNKNOWN,CALCITEBUG,
+testMergeFilter,MP,CALCITEBUG,can be automated
 testDistinctCountGroupingSets1,ERROR,GROUPBY,
 testDistinctCountGroupingSets2,ERROR,GROUPBY,
 testPushProjectPastSetOp,UNKNOWN,,
@@ -80,7 +80,7 @@ testEmptyJoin,ERROR,EMPTYTABLE,check
 testEmptySort,ERROR,ORDERBY,
 testMultipleDistinctWithGrouping,ERROR,GROUPBY,
 testReduceConstantsIsNull,ERROR,NULL,
-testTransitiveInferenceJoin,UNKNOWN,,
+testTransitiveInferenceJoin,UNKNOWN,,second
 testPushCountNullableGroupingSetsThroughUnion,ERROR,NULL,
 testPushProjectPastRightJoinStrong,ERROR,OUTERJOIN,
 testPushProjectPastRightJoinSwapStrong,ERROR,OUTERJOIN,
@@ -121,7 +121,7 @@ testEmptyJoinRight,ERROR,OUTERJOIN,
 testTransitiveInferenceLeftOuterJoin,ERROR,OUTERJOIN,
 testPushMaxNullableGroupingSetsThroughUnion,ERROR,GROUPBY,
 testReduceConstants2,ERROR,VALUES,
-testPushJoinThroughUnionOnRight,UNKNOWN,,
+testPushJoinThroughUnionOnRight,MP,,
 testFullOuterJoinSimplificationToInner,ERROR,OUTERJOIN,
 testPushAvgGroupingSetsThroughUnion,ERROR,GROUPBY,check first (avg)
 testReduceOrCaseWhen,ERROR,NULL,
@@ -138,7 +138,7 @@ testPushAggregateThroughJoin4,ERROR,GROUPBY,check
 testPushAggregateThroughJoin5,ERROR,ERROR,check
 testReduceConstants,ERROR,NULL,
 testPushSumNullConstantThroughUnion,ERROR,NULL,
-testMergeJoinFilter,UNKNOWN,,
+testMergeJoinFilter,MP,,
 testMergeUnionDistinct,ERROR,UNION,
 testStrengthenJoinType,ERROR,CAST,
 testPushAggregateSumThroughJoin,ERROR,CAST,
@@ -146,7 +146,7 @@ testExpandFilterIn,ERROR,NULL,
 testReduceConstantsCaseEquals,ERROR,CASE,
 testTransitiveInferenceNoPullUpExprs,EQ,,
 testEmptyProject,ERROR,VALUES,
-testTransitiveInferenceConjunctInPullUp,UNKNOWN,,
+testTransitiveInferenceConjunctInPullUp,UNKNOWN,,Later
 testPullConstantThroughAggregateSimpleNonNullable,ERROR,GROUPBY,
 testUnionToDistinctRule,ERROR,UNION,
 testPushSemiJoinPastFilter,ERROR,ERROR,check
@@ -155,7 +155,7 @@ testPullConstantIntoFilter,UNKNOWN,,
 testPushSumNullableThroughUnion,ERROR,GROUPBY,
 testEmptyAggregate,ERROR,EMPTYTABLE,
 testTransitiveInferencePullUpThruAlias,ERROR,ERROR,check (first)
-testTransitiveInferenceAggregate,UNKNOWN,,
+testTransitiveInferenceAggregate,UNKNOWN,,second
 testEmptySortLimitZero,ERROR,ORDERBY,
 testCastInAggregateExpandDistinctAggregatesRule,ERROR,CAST,
 testDistinctCount1,ERROR,GROUPBY,
@@ -174,7 +174,7 @@ testPullConstantThroughAggregateConstGroupBy,ERROR,GROUPBY,
 testPullConstantThroughAggregatePermuted,ERROR,GROUPBY,
 testEmptyIntersect,ERROR,INTERSECT,
 testPushProjectPastRightJoinSwap,ERROR,OUTERJOIN,
-testPullConstantIntoProject,UNKNOWN,,
+testPullConstantIntoProject,UNKNOWN,,Not provable
 testTransitiveInferenceUnionAlwaysTrue,ERROR,ERROR,
 testReduceCompositeInSubQuery,ERROR,IN,
 testMergeIntersect,ERROR,INTERSECT,
@@ -184,8 +184,8 @@ testExpandProjectExists,ERROR,GROUPBY,
 testRemoveSemiJoinWithFilter,UNKNOWN,,
 testRightOuterJoinSimplificationToInner,ERROR,OUTERJOIN,
 testDistinctCountMixed,ERROR,CAST,
-testPushJoinCondDownToProject,UNKNOWN,,
-testRemoveSemiJoinRightWithFilter,UNKNOWN,,
+testPushJoinCondDownToProject,UNKNOWN,,later
+testRemoveSemiJoinRightWithFilter,MP,,
 testFullOuterJoinSimplificationToLeftOuter,ERROR,OUTERJOIN,
 testPullConstantThroughAggregatePermutedConstFirst,ERROR,GROUPBY,
 testTransitiveInferenceUnion,ERROR,ERROR,check
