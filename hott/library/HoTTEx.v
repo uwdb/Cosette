@@ -599,5 +599,58 @@ Definition equiv_prod_sigma2_r {A B C D}:
   reflexivity.
 Defined.
 
+Definition hprop_prod_trunc {A B} `{IsHProp A}:
+    A * Trunc(-1) B <~> Trunc(-1) (A * B).
+    apply equiv_iff_hprop_uncurried.
+    constructor.
+    + intros [a b].
+      strip_truncations.
+      apply tr.
+      exact (a, b).
+    + intros ab.
+      strip_truncations.
+      destruct ab as [a b].
+      refine (a, tr b).
+  Defined.
 
-      
+  Definition hprop_prod_trunc_r {A B} `{IsHProp B}:
+    Trunc (-1) A * B <~> Trunc(-1) (A * B).
+    apply equiv_iff_hprop_uncurried.
+    constructor.
+    + intros [a b].
+      strip_truncations.
+      apply tr.
+      exact (a, b).
+    + intros ab.
+      strip_truncations.
+      destruct ab as [a b].
+      refine (tr a, b).
+  Defined.
+  
+  Definition hprop_prod_trunc_in_sig {A:Type} {B: A -> hProp} {C D: A -> Type}:
+    {a:A & B a * Trunc (-1) (C a) * D a} <~> {a:A & Trunc (-1) (B a * C a) * D a}.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried hprop_prod_trunc).
+    reflexivity.
+  Defined.
+
+  Definition hprop_prod_trunc_in_sig_r {A:Type} {B: A -> Type} {C: A -> hProp}:
+    {a:A & Trunc (-1) (B a) * C a} <~> {a:A & Trunc (-1) (B a * C a)}.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried hprop_prod_trunc_r).
+    reflexivity.
+  Defined.
+
+  Definition equiv_sig_break_pair_f {A B C D} `{IsHSet A} `{IsHSet C} `{IsHSet D}:
+  forall (f: A -> C * D) (t:C * D), {a: A & B a * (f a = t)} = {a: A & B a * ((fst (f a)) = fst t) * ((snd (f a)) = snd t)}.
+  intros.
+  f_ap.
+  by_extensionality a.
+  rewrite (path_universe_uncurried (equiv_pair_assemble _)).
+  rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+  reflexivity.
+Defined.
