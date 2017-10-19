@@ -13,9 +13,6 @@ Module AutoTactics (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggrega
   Module CQTac := CQTactics T S R A.
   Import CQTac.
 
-  Ltac simp_solve :=
-    first [reflexivity | assumption].
-
   Ltac ring1 :=
     repeat rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _));
     try f_ap;

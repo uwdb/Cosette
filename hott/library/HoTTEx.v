@@ -10,6 +10,18 @@ Ltac start :=
   by_extensionality g;
   by_extensionality t.
 
+Ltac simp_solve :=
+    first [reflexivity | assumption].
+
+Ltac break_and_rewrite :=
+  repeat match goal with
+    | |- ?A -> ?B => intros
+    | t: ?A * ?B |- _ => destruct t
+    | t: _ = _ |- _ => destruct t
+    | |- ?A * ?B => constructor
+    | |- _ => try first [simp_solve | symmetry; simp_solve] 
+    end.
+
 Lemma onePlusOneNeqOne : ~(Unit <~> Unit + Unit).
   intros h.
   destruct h as [f [g eq _ _]].
@@ -654,3 +666,18 @@ Definition hprop_prod_trunc {A B} `{IsHProp A}:
   rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
   reflexivity.
 Defined.
+
+Definition path_trans {A} `{IsHSet A}:
+    forall (a b c: A), (a = b) * (a = c) <~> (a = b) * (a = c) * (b = c).
+    intros a b c.
+    apply equiv_iff_hprop_uncurried.
+    constructor; break_and_rewrite.
+  Defined.
+  
+Definition path_trans_pred {A} {P: A -> hProp} `{IsHSet A}:
+    forall (a b: A), (a = b) * P a = (a = b) * P a * P b.
+    intros.
+    apply path_universe_uncurried.
+    apply equiv_iff_hprop_uncurried.
+    constructor; break_and_rewrite.
+  Defined.
