@@ -17,13 +17,14 @@ def analyze_result():
     neq = result['Result'] == "NEQ"
     unknown = result['Result'] == "UNKNOWN"
     equiv = result['Result'] == "EQ"
-    unsupported = result[~(neq|unknown|equiv)] 
+    manual = result['Result'] == 'MP'
+    unsupported = result[~(neq|unknown|equiv|manual)] 
     # get frequency of reasons
     print "reasons for unsupported cases"
     reason_count = unsupported['Reason'].value_counts()
     print reason_count
     
-    supported_cases = result[neq|unknown|equiv]
+    supported_cases = result[neq|unknown|equiv|manual]
     scount = pd.Series(data=[supported_cases.shape[0]], index=["COSETTE_OK"])
     agg_count = scount.append(reason_count)
     print agg_count
