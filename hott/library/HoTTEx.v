@@ -22,6 +22,21 @@ Ltac break_and_rewrite :=
     | |- _ => try first [simp_solve | symmetry; simp_solve] 
     end.
 
+Ltac break_and_rewrite_trunc' :=
+     match goal with
+        | |- ?A -> ?B => intros
+        | t: ?A * ?B |- _ => destruct t
+        | t: (_, _) = (_, _) |- _ => rewrite <- (path_universe_uncurried (equiv_path_prod _ _)) in t; simpl in *
+        | t: _ = _ |- _ => destruct t
+        | |- ?A * ?B => constructor
+        | t: { _ : ?T & _ } |- _ => destruct t
+        | t: Trunc (-1) _ |- _ => strip_truncations
+       end.
+
+Ltac simp_solve' := try first [simp_solve | symmetry; simp_solve].
+
+Ltac break_and_rewrite_trunc := repeat first [simp_solve | break_and_rewrite_trunc'].
+
 Lemma onePlusOneNeqOne : ~(Unit <~> Unit + Unit).
   intros h.
   destruct h as [f [g eq _ _]].

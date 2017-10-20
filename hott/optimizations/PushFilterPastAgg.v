@@ -66,7 +66,6 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
       by_extensionality t1.
       symmetry.
       rewrite (path_universe_uncurried (equiv_sigma_eq_subst' _)).
-      Check equiv_prod_sigma.
       rewrite (path_universe_uncurried (equiv_prod_sigma _ _ _)).
       rewrite (path_universe_uncurried (equiv_prod_sigma _ _ _)).
       f_ap.
