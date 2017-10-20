@@ -676,7 +676,7 @@ apply transformation pass recursively on Cosette ASTs
 >                        Nothing -> Right Nothing
 >                        Just fl -> Just <$> (checkListErr $ map convTR fl)
 >         convP (And p1 p2) = And <$> convP p1 <*> convP p2
->         convP (Or p1 p2) = And <$> convP p1 <*> convP p2
+>         convP (Or p1 p2) = Or <$> convP p1 <*> convP p2
 >         convP (Not p') = Not <$> convP p'
 >         convP (Exists q) = Exists <$> applyCosPass p c' q
 >         convP (Veq v1 v2) = Veq <$> convVE v1 <*> convVE v2
