@@ -1,12 +1,11 @@
 Conditional SQL Rewrite
 =======================
 
-1. From Deutsch et al. (Penn TR 2001). NOTE: While supported by their chase algorithm, this rewrite cannot be expressed by our current language of preconditions.
-
+1. From Deutsch et al. (Penn TR 2001) see `fkPennTR.cos`. 
     ```
-    schema depts(DName:int, DProjs:int, pn:int);
-    schema teams(TProj:int, TMember:int);
-    schema payroll(PDept:int, Empl:int);
+    schema depts(DName:int, DProj:int);
+    schema teams(TProj:int, TMember:int); -- TMember is a fk to payroll.Empl
+    schema payroll(PDept:int, Empl:int); -- Empl is pk
     table Depts(depts);
     table Teams(teams);
     table Payroll(payroll)；
@@ -14,14 +13,14 @@ Conditional SQL Rewrite
 
     ```
     create view V1 (
-        SELECT d.DName as D, d.pn as P, p.Empl as E
-        FROM Depts d, Payroll p
+        SELECT d.DName as D, d.DProj as P, p.Empl as E
+        FROM depts d, payroll p
         WHERE d.DName = p.PDept
     );
 
     create view V2 (
         SELECT t.TMember as E, p.PDept as D, t.TProj as P
-        FROM Teams t, Payroll p
+        FROM teams t, payroll p
         WHERE t.TMember = p.Empl
     )
     ```
@@ -30,14 +29,14 @@ Conditional SQL Rewrite
     ```
     SELECT t.TMember
     FROM Depts d, Teams t
-    WHERE pn = t.TProj and d.DName = "Security"
+    WHERE d.Dproj = t.TProj and d.DName = 'Security'
     ```
 
     Q2
     ```
     SELECT v1.E
     FROM V1 v1, V2 v2
-    WHERE v1.D = "Security" and v1.P = v2.P and v1.E = v2.E and v1.D = v2.D
+    WHERE v1.D = 'Security' and v1.P = v2.P and v1.E = v2.E and v1.D = v2.D
     ```
 
     Q1 is only equivalent to Q1 if "Security" uses only its own employees on the projects it runs. 

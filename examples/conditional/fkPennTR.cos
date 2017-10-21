@@ -1,0 +1,23 @@
+schema depts(DName:int, DProj:int);
+schema teams(TProj:int, TMember:int); -- TMember is a fk to payroll.Empl
+schema payroll(PDept:int, Empl:int); -- Empl is pk
+table depts(depts);
+table teams(teams);
+table payroll(payroll);
+
+query q1 
+`SELECT t.TMember
+    FROM Depts d, Teams t
+    WHERE d.Dproj = t.TProj and d.DName = 'Security'`;
+    
+query q2
+` SELECT v1.E
+  FROM (SELECT d.DName as D, d.DProj as P, p.Empl as E
+        FROM depts d, payroll p
+        WHERE d.DName = p.PDept) v1, 
+        (SELECT t.TMember as E, p.PDept as D, t.TProj as P
+        FROM teams t, payroll p
+        WHERE t.TMember = p.Empl) v2
+  WHERE v1.D = 'Security' and v1.P = v2.P and v1.E = v2.E and v1.D = v2.D`;
+  
+verify q1 q2;
