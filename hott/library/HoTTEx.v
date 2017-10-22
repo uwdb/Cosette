@@ -696,3 +696,38 @@ Definition path_trans_pred {A} {P: A -> hProp} `{IsHSet A}:
     apply equiv_iff_hprop_uncurried.
     constructor; break_and_rewrite.
   Defined.
+
+Definition equiv_sigma_prod_assoc_h {A B C D E}:
+    {a: A & B a * ((C a) * (D a)) * E a} <~> {a:A & B a * C a * D a * E a}.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    reflexivity.
+  Defined.
+ 
+Definition equiv_prod_eq_sbust {A B}:
+    forall (a1 a2:A), (a1 = a2) * B a1 <~> (a1 = a2) * B a2.
+    intros a1 a2.
+    simple refine (BuildEquiv _ _ _ _). {
+      intros [h b].
+      destruct h.
+      refine (_, b).
+      reflexivity. }
+    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
+      intros [h b].
+      destruct h.
+      refine (_, b).
+      reflexivity. }
+    + unfold Sect.
+      intros [h b].
+      destruct h.
+      reflexivity.
+    + unfold Sect.
+      intros [h b].
+      destruct h.
+      reflexivity.
+    + intros [h b].
+      destruct h.
+      reflexivity.
+  Defined.

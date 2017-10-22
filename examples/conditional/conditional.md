@@ -89,20 +89,20 @@ Conditional SQL Rewrite
 
 4. Remove redundant join attribute. (Example 2.2, Query processing utilizing dependencies and horizontal decomposition, Kambayashi etc SIGMOD 83)
 
-    The paper assumes a FD: A -> B. Here we assume that A is the key of R2 and R3.
+    The paper assumes a FD: A -> B. Here we assume that A is the key.
 
     Q1
     ```
-        SELECT R3.A, R3.B
-        FROM R1, R2, R3
-        WHERE R1.A = R2.A AND R2.A = R3.A AND R1.A = R3.A AND R2.B = R3.B
+        SELECT z.A, z.B
+        FROM R1 x, R2 y, R2 z
+        WHERE x.A = y.A AND y.A = z.A AND x.A = z.A AND y.B = z.B
     ```
 
     Q2
     ```
-        Select R3.A, R3.B
-        FROM R1, R2, R3
-        WHERE R1.A = R2.A AND R2.A = R3.A AND R1.A = R3.A
+        Select z.A, z.B
+        FROM R1 x, R2 x, R2 x
+        WHERE x.A = y.A AND y.A = R3.A AND R1.A = R3.A
     ```
 
 
