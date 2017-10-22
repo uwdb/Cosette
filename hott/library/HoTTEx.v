@@ -706,7 +706,7 @@ Definition equiv_sigma_prod_assoc_h {A B C D E}:
     reflexivity.
   Defined.
  
-Definition equiv_prod_eq_sbust {A B}:
+Definition equiv_prod_eq_subst {A B}:
     forall (a1 a2:A), (a1 = a2) * B a1 <~> (a1 = a2) * B a2.
     intros a1 a2.
     simple refine (BuildEquiv _ _ _ _). {

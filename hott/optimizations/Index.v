@@ -32,7 +32,7 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
 
   Definition IndexProof0: IndexQ0.
     start.
-    pose (indexFact0 ik) as pf.
+    pose (keyLemma2 ik) as pf.
     rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
     (* "destruc" t on RHS *)
     rewrite <- (path_universe_uncurried (equiv_sigma_prod _)).

@@ -329,18 +329,32 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
     forall (t: Tuple s), denoteSQL R tt t = {t': Tuple s & (⟦k⟧ t' = ⟦ k ⟧ t) * (denoteSQL R tt t') * denoteSQL R tt t}.
 
   Parameter keyAxiom:
+    forall {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) (t t':Tuple s),
+      (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) 
+      = (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * ( t = t') .
+  
+  Definition keyLemma1:
     forall {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) (t t':Tuple s) (p: Tuple s -> Type),
       (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t'
       = (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t.
+    intros.
+    pose (keyAxiom kp t t') as pf.
+    rewrite pf.
+    rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    symmetry.
+    rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    f_ap.
+    exact (path_universe_uncurried (equiv_prod_eq_subst _ _)).
+  Defined.
 
-  Definition indexFact0 {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) :
+  Definition keyLemma2 {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) :
     forall (t:Tuple s) (p: Tuple s -> Type),
       {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t'}
       = {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t}.
    intros.
    f_ap.
    by_extensionality t'.
-   exact (keyAxiom kp t t' p).
+   exact (keyLemma1 kp t t' p).
   Defined.
   
 End SQL.
