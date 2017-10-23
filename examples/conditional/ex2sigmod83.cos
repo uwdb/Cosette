@@ -1,0 +1,17 @@
+schema r1(a:int, b:int);
+schema r2(a:int, b:int); -- a is primary key
+
+table r1(r1);
+table r2(r2);
+
+query q1
+`SELECT z.A, z.B
+ FROM R1 x, R2 y, R2 z 
+ WHERE x.A = y.A AND y.A = z.A AND x.A = z.A AND y.B = z.B`;
+
+query q2 
+`Select z.A, z.B
+ FROM R1 x, R2 y, R2 z
+ WHERE x.A = y.A AND y.A = z.A AND x.A = z.A`;
+
+ verify q1 q2;
