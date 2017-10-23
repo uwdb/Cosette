@@ -33,54 +33,6 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
   Parameter gt: Pred (node (leaf int) (leaf int)). 
  
   Variable integer_29: constant int. 
-
-  Lemma equiv_2sigma_eq_subst' {A B : Type} {C : A -> B -> Type}:
-    forall f, {a:A & {b:B & C a b * (b = f a)}} = ∑ a, C a (f a).
-  Proof.
-    intro f.
-    f_ap.
-    by_extensionality a.
-    exact (path_universe_uncurried (equiv_sigma_eq_subst' _)).
-  Defined.
-
-  Lemma equiv_2sigma_eq_subst_r' {A B : Type} {C : A -> B -> Type}:
-    forall f, {a:A & {b:B & C a b * (f a = b)}} = ∑ a, C a (f a).
-  Proof.
-    intro f.
-    f_ap.
-    by_extensionality a.
-    exact (path_universe_uncurried (equiv_sigma_eq_subst_r' _)).
-  Defined.
-
-  Definition equiv_prod_2sigma_l {A B C D}:
-    {a: A & D a * {b:B & C a b} } <~> {a: A & {b:B & D a * C a b}}.
-    apply equiv_path.
-    f_ap.
-    by_extensionality a.
-    rewrite (path_universe_uncurried (equiv_prod_sigma _ _ _)).
-    reflexivity.
-  Defined.
-
-  Lemma equiv_sigma_prod_symm_m {A B C D E}:
-    {a: A & (B a) * (C a * D a) * E a} <~> {a:A & (B a) * (D a * C a) * E a}.
-    apply equiv_path.
-    f_ap.
-    by_extensionality a.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    symmetry.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    f_ap.
-    f_ap.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    reflexivity.
-  Defined.
-
-  Definition hset_eq_symm {A} `{IsHSet A}:
-    forall (a b:A), (a = b) <~> (b = a).
-    intros.
-    apply equiv_iff_hprop_uncurried.
-    constructor; break_and_rewrite.
-  Defined.
   
   Definition Rule: Type. 
     refine (forall ( Γ scm_applicant scm_payroll: Schema) (rel_applicant: relation scm_applicant) (rel_payroll: relation scm_payroll) (applicant_ssno : Column int scm_applicant) (applicant_jobtitile : Column int scm_applicant) (applicant_officeno : Column int scm_applicant) (payroll_ssno : Column int scm_payroll) (payroll_deptno : Column int scm_payroll) (ik: isKey payroll_ssno rel_payroll), _). 

@@ -161,25 +161,21 @@ Conditional SQL Rewrite
 
 7. Second distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
 
+    Assume itemno is the primary key of itm.
     Q1
-    ```
-    CREATE VIEW itemprice AS
-    ( SELECT DISTINCT itp.itemno, itp.NegotiatedPrice 
-      FROM itp
-      WHERE NegotiatedPrice > 1000);
-    
-    SELECT itemprice.NegotiatedPrice, itm.type
-    FROM itemprice, itm
+    ```  
+    SELECT itemprice.NegotiatedPrice, itm.type, itm.itemno
+    FROM (SELECT DISTINCT itp.itemno, itp.NegotiatedPrice 
+          FROM itp
+          WHERE NegotiatedPrice > 1000) itemprice, itm itm
     WHERE itemprice.itemno = itm.itemno;
     ```
 
     Q2
     ```
-    SELECT NeogitatePrice, type
-    FROM
-        (SELECT DISTINCT itp.NegotiatePrice, itm.type, itm.itemno
-         FROM itp, itm
-         WHERE itp.NegotiatedPrice > 1000 AND itp.itemno = itm.itemno)
+    SELECT DISTINCT itp.NegotiatePrice, itm.type, itm.itemno
+    FROM itp, itm
+    WHERE itp.NegotiatedPrice > 1000 AND itp.itemno = itm.itemno
     ```
  
 8. Third distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).   
@@ -188,9 +184,9 @@ Conditional SQL Rewrite
     ```
     SELECT * FROM itp
     WHERE itm.itemn IN
-        ( SELECT itl.itemn 
-          FROM itl
-          WHERE itl.wkcen = 468 AND itl.locan = 0);
+        (SELECT itl.itemn 
+         FROM itl
+         WHERE itl.wkcen = 468 AND itl.locan = 0);
     ```
 
     Q2

@@ -1,0 +1,15 @@
+schema s(a:int, b:int, c:int);
+
+table r(s);
+
+query q1 
+`select x.b as xb
+ from r x
+ where x.a = 5 and x.c < 1`;
+
+ query q2
+ `select x.b as xb
+  from r x
+  where x.a < 10`;
+
+  verify q1 q2;
