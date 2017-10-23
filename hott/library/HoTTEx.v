@@ -810,20 +810,6 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     reflexivity.
   Defined.
 
-  Lemma equiv_sigma_prod_symm_m {A B C D E}:
-    {a: A & (B a) * (C a * D a) * E a} <~> {a:A & (B a) * (D a * C a) * E a}.
-    apply equiv_path.
-    f_ap.
-    by_extensionality a.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    symmetry.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    f_ap.
-    f_ap.
-    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
-    reflexivity.
-  Defined.
-
   Definition hset_eq_symm {A} `{IsHSet A}:
     forall (a b:A), (a = b) <~> (b = a).
     intros.
