@@ -321,22 +321,22 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Notation "'SELECT' proj 'FROM1' a 'GROUP' 'BY' v " := (groupBy proj a v) (at level 45).
 
   (* Database constraints *)
-  Definition Index {s t0 t1} (R: SQL empty s) (k: Column t0 s) (ic: Column t1 s) :=
+  Definition Index {Γ s t0 t1} (R: SQL Γ s) (k: Column t0 s) (ic: Column t1 s) :=
     SELECT2 (variable (right⋅k)), (variable (right⋅ic)) FROM1 R.
 
   (* We would like a more fundamental definition like Dan proposed, but for now, we just use this one.*)
-  Definition isKey {s ty} (k: Column ty s) (R: SQL empty s) :=
-    forall (t: Tuple s), denoteSQL R tt t = {t': Tuple s & (⟦k⟧ t' = ⟦ k ⟧ t) * (denoteSQL R tt t') * denoteSQL R tt t}.
-
+  Definition isKey {s ty} (k: Column ty s) (R: relation s) :=
+    forall (t: Tuple s),  ⟦R⟧ t = {t': Tuple s & (⟦k⟧ t' = ⟦ k ⟧ t) * ⟦ R ⟧ t' * ⟦ R ⟧ t}.
+  
   Parameter keyAxiom:
-    forall {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) (t t':Tuple s),
-      (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) 
-      = (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * ( t = t') .
+    forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) (t t':Tuple s),
+      (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t 
+      = (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t * ( t = t') .
   
   Definition keyLemma1:
-    forall {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) (t t':Tuple s) (p: Tuple s -> Type),
-      (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t'
-      = (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t.
+    forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) (t t':Tuple s) (p: Tuple s -> Type),
+      (denoteProj k t' = denoteProj k t) * ⟦R⟧ t'* ⟦R⟧ t * p t'
+      = (denoteProj k t' = denoteProj k t) * ⟦R⟧ t'* ⟦R⟧ t * p t.
     intros.
     pose (keyAxiom kp t t') as pf.
     rewrite pf.
@@ -347,10 +347,10 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
     exact (path_universe_uncurried (equiv_prod_eq_subst _ _)).
   Defined.
 
-  Definition keyLemma2 {s ty} {k: Column ty s} {R: SQL empty s} (kp: isKey k R) :
+  Definition keyLemma2 {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R):
     forall (t:Tuple s) (p: Tuple s -> Type),
-      {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t'}
-      = {t': Tuple s & (denoteProj k t' = denoteProj k t) * (denoteSQL R tt t') * (denoteSQL R tt t) * p t}.
+      {t': Tuple s & (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t  * p t'}
+      = {t': Tuple s & (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t * p t}.
    intros.
    f_ap.
    by_extensionality t'.

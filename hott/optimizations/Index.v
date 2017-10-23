@@ -12,18 +12,18 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
   Import T S R A.
   Module SQL_TSRA := SQL T S R A.
   Import SQL_TSRA.
-  
+
   Definition IndexQ0: Type.
-    refine (forall r (R: SQL empty r) t0 (l: constant t0)
+    refine (forall Γ r (R: relation r) t0 (l: constant t0)
               (a: Column t0 r) t1 (k: Column t1 r) (ik: isKey k R), _).
-    pose (Index R k a) as I.
-    pose (empty ++ (singleton t1 ++ singleton t0 ++ empty) ++ r) as qs.
+    pose (Index (@table Γ _ R) k a) as I.
+    pose (Γ ++ (singleton t1 ++ singleton t0 ++ empty) ++ r) as qs.
     pose (@variable _ qs (right⋅left⋅right⋅left⋅star)) as ia.
     pose (@variable _ qs (right⋅left⋅left⋅star)) as ik'.
     pose (@variable _ qs (right⋅right⋅k)) as rk.
-    refine (⟦ empty ⊢ (SELECT * FROM1 R
+    refine (⟦ Γ ⊢ (SELECT * FROM1  (table R)
                        WHERE equal (variable (right⋅a)) (constantExpr l)): _ ⟧ =
-            ⟦ empty ⊢ (project (right⋅right) (FROM I, R
+            ⟦ Γ ⊢ (project (right⋅right) (FROM I, (table R)
                        WHERE and (equal ia (constantExpr l))
                                  (equal ik' rk) )) : _ ⟧).
   Defined. 
@@ -56,8 +56,6 @@ Module Index (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggregators T
     rewrite (path_universe_uncurried (equiv_sigma_prod_symm _ _ _)).
     rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
     rewrite (path_universe_uncurried equiv_sigma_prod_assoc_h).
-    (* consolidate tt and g first *)
-    rewrite <- (@eta_unit g).
     (* apply A1 *)
     rewrite (pf _ _).
     rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).

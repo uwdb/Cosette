@@ -31,10 +31,11 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
   Notation "'AVG' ( e )" := (aggregatorGroupByProj avg e).
  
   Parameter gt: Pred (node (leaf int) (leaf int)). 
-
-  Definition Rule: Type. 
-    refine (forall ( Γ scm_r2 scm_r1: Schema) (rel_r2: relation scm_r2) (rel_r1: relation scm_r1) (r2_a : Column int scm_r2) (r2_b : Column int scm_r2) (r1_a : Column int scm_r1) (r1_b : Column int scm_r1) (ik: isKey r2_a (table rel_r2)), _). 
-    refine (⟦ Γ ⊢ (SELECT1 (combine (right⋅right⋅right⋅r2_a) (right⋅right⋅right⋅r2_b)) FROM1 (product (table rel_r1) (product (table rel_r2) (table rel_r2))) WHERE (and (and (and (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅left⋅r2_a))) (equal (variable (right⋅right⋅left⋅r2_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅right⋅left⋅r2_b)) (variable (right⋅right⋅right⋅r2_b))))) : _ ⟧ =  ⟦ Γ ⊢ (SELECT1 (combine (right⋅right⋅right⋅r2_a) (right⋅right⋅right⋅r2_b)) FROM1 (product (table rel_r1) (product (table rel_r2) (table rel_r2))) WHERE (and (and (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅left⋅r2_a))) (equal (variable (right⋅right⋅left⋅r2_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅right⋅r2_a))))) : _ ⟧). 
+  
+  Definition Rule: Type.
+    refine (forall ( Γ scm_r2 scm_r1: Schema) (rel_r2: relation scm_r2) (rel_r1: relation scm_r1) (r2_a : Column int scm_r2) (r2_b : Column int scm_r2) (r1_a : Column int scm_r1) (r1_b : Column int scm_r1) (ik: isKey r2_a rel_r2), _). 
+    refine (⟦ Γ ⊢ (SELECT1 (combine (right⋅right⋅right⋅r2_a) (right⋅right⋅right⋅r2_b)) FROM1 (product (table rel_r1) (product (table rel_r2) (table rel_r2))) WHERE (and (and (and (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅left⋅r2_a))) (equal (variable (right⋅right⋅left⋅r2_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅right⋅left⋅r2_b)) (variable (right⋅right⋅right⋅r2_b))))) : _ ⟧
+            =  ⟦ Γ ⊢ (SELECT1 (combine (right⋅right⋅right⋅r2_a) (right⋅right⋅right⋅r2_b)) FROM1 (product (table rel_r1) (product (table rel_r2) (table rel_r2))) WHERE (and (and (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅left⋅r2_a))) (equal (variable (right⋅right⋅left⋅r2_a)) (variable (right⋅right⋅right⋅r2_a)))) (equal (variable (right⋅left⋅r1_a)) (variable (right⋅right⋅right⋅r2_a))))) : _ ⟧).
   Defined. 
   Arguments Rule /. 
  
