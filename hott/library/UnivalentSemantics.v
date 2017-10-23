@@ -356,5 +356,8 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
    by_extensionality t'.
    exact (keyLemma1 kp t t' p).
   Defined.
+
+  Definition fKey {s1 s2 ty} (k: Column ty s1) (fk: Column ty s2) (R: relation s1) (S: relation s2) (pk: isKey k R) :=
+    forall (t: Tuple s2), ⟦S⟧ t = {t': Tuple s1 & (⟦k⟧ t' = ⟦ fk ⟧ t) * ⟦ R ⟧ t' * ⟦ S ⟧ t}.
   
 End SQL.
