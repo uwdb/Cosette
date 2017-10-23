@@ -597,7 +597,7 @@ Definition equiv_sig_break_pair {A B T1} `{IsHSet A} `{IsHSet T1}:
   reflexivity.
 Defined.
   
-Definition equiv_prod_sigma2_r {A B C D}:
+Definition equiv_prod_2sigma_r {A B C D}:
   {a: A &  {b:B & C a b} * D a } <~> {a: A & {b:B & C a b * D a}}.
   apply equiv_path.
   f_ap.

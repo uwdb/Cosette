@@ -47,7 +47,7 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
     rewrite (path_universe_uncurried equiv_sig_sum_prod_distr_r).
     rewrite <- (path_universe_uncurried (equiv_sum_sigma _ _ _)).
     repeat rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
-    rewrite <- (path_universe_uncurried equiv_prod_sigma2_r).
+    rewrite <- (path_universe_uncurried equiv_prod_2sigma_r).
     rewrite (path_universe_uncurried (equiv_sigma_eq_subst_r' _)).
     reflexivity.
   Qed. 
