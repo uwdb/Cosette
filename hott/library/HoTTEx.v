@@ -388,26 +388,6 @@ Proof.
     + reflexivity.
   Qed.
 
-  Lemma sum_commute {A B C}:
-    {a:A & {b: B & C (a, b)}} <~> {b:B & {a:A & C (a, b)}}.
-  Proof.
-    simple refine (BuildEquiv _ _ _ _). {
-      intros [a [b c]].
-      exists b.
-      exists a.
-      exact c. }
-    simple refine (BuildIsEquiv _ _ _ _ _ _ _). {
-      intros [b [a c]].
-      exists a.
-      exists b.
-      exact c. }
-    + unfold Sect.
-      reflexivity.
-    + unfold Sect.
-      reflexivity.
-    + reflexivity.
-  Qed.
-
 Definition equiv_prod_sigma_r I A (B: I -> Type):
     ∑ i, (B i) * A <~> (∑ i, B i) * A .
 Proof.
@@ -730,4 +710,75 @@ Definition equiv_prod_eq_subst {A B}:
     + intros [h b].
       destruct h.
       reflexivity.
+  Defined.
+
+Lemma sum2_pair_split {D A B C}:
+    {d: D & {ab: A * B & C d ab}} <~> {d:D & {a:A & {b:B & C d (a, b)}}}.
+  Proof.
+  apply equiv_path.
+  f_ap.
+  by_extensionality d.
+  exact (path_universe_uncurried sum_pair_split').
+  Defined.
+
+Lemma sigma_path_trans_l {A B E f} `{IsHSet B}:
+  forall (b c:B),
+    {a:A & (b = c) * (b = f a) * E a } <~> {a:A & (b = c) * (b = f a) * (c = f a) * E a}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a0.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    f_ap.
+    symmetry.
+    exact (path_universe_uncurried (path_trans b c _)).
+  Defined.
+
+ 
+Lemma sigma_path_trans_l' {A B E f} `{IsHSet B}:
+    forall (b c:B),
+      {a:A & (b = c) * (c = f a) * E a } <~> {a:A & (b = c) * (b = f a) * (c = f a) * E a}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a0.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    f_ap.
+    apply path_universe_uncurried.
+    apply equiv_iff_hprop_uncurried.
+    constructor;
+    break_and_rewrite.
+  Defined.
+
+Lemma sigma_prod_path_symm' {A B D} `{IsHSet B}:
+    forall (b: B) (f: A -> B), {a:A & (b = f a) * D a} <~> {a:A & (f a = b) * D a}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    f_ap.
+    apply path_universe_uncurried.
+    apply equiv_iff_hprop_uncurried.
+    constructor;
+    break_and_rewrite.
+  Defined.
+
+Lemma equiv_sigma_prod_symm_f {A B C D}:
+    {a: A & B a * C a * D a} <~> {a:A & C a * B a * D a}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.    
+    rewrite (path_universe_uncurried (equiv_prod_symm (B a) (C a))).
+    reflexivity.
   Defined.

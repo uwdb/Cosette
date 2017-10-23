@@ -69,7 +69,7 @@ Conditional SQL Rewrite
 
     Q1
     ``` 
-        SELECT *
+        SELECT applicant.*
         FROM payroll, applicant
         WHERE payroll.ssno = applicant.ssno AND payroll.deptno = 29
     ```
@@ -81,7 +81,7 @@ Conditional SQL Rewrite
         FROM payroll
         );
 
-        SELECT 
+        SELECT applicant.*
         FROM payroll, idx_payroll, applicant
         WHERE payroll.ssno = idx.ssno AND applicant.ssno = payroll.ssno AND 
             idx_payroll.deptno = 29 
