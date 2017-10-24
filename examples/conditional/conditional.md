@@ -105,38 +105,9 @@ Conditional SQL Rewrite
         WHERE x.A = y.A AND y.A = R3.A AND R1.A = R3.A
     ```
 
-
-5. Remove redundant join attribute. (Example 3, Query processing utilizing dependencies and horizontal decomposition, Kambayashi etc SIGMOD 83)
-
-    The paper assumes a FD: A -> J. Here we assume that A is the key of enrollment, class.
-
-    schemas:
-    ```
-    supervisor(p:int, s:int, a:int);
-    enrollment(s:int, j:int, a:int);
-    class(j:int, p:int, a:int);
-    office(p:int, r:int);
-    ```
-
-    Q1:
-    ```
-        SELECT s.p, s.s, s.a, e.j, c.p, o.r
-        FROM s, e, c, o
-        WHERE s.p = o.p AND s.s = e.s AND s.a = e.a AND e.j = c.j AND e.a = c.a AND
-            s.p = c.p AND c.p = o.p 
-    ```
-
-    Q2:
-    ```
-        SELECT s.p, s.s, s.a, e.j, c.p, o.r
-        FROM s, e, c, o
-        WHERE s.p = o.p AND s.s = e.s AND s.a = e.a AND e.a = c.a AND
-            s.p = c.p AND c.p = o.p 
-    ```
-
-
-6. Distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
+5. Distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
     
+   Preconditon: itemn is the primary key of itm.
     Q1:
     ``` 
     CREATE VIEW itpv AS
@@ -156,10 +127,9 @@ Conditional SQL Rewrite
     WHERE itp.ponum = pur.ponum AND itm.itemn = itp.itemn AND pur.odate > 85 AND
         itm.itemn > 1 AND itm.itemn < 20;
     ```
-    unfortunately, the condition is unknown. But there must be some preconditions since Q1 and Q2 are not universally equivalent.
 
 
-7. Second distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
+6. Second distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
 
     Assume itemno is the primary key of itm.
     Q1
@@ -178,15 +148,16 @@ Conditional SQL Rewrite
     WHERE itp.NegotiatedPrice > 1000 AND itp.itemno = itm.itemno
     ```
  
-8. Third distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).   
+7. Third distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).   
 
+    itemn is a key of itp. 
     Q1
     ```
     SELECT * FROM itp
-    WHERE itm.itemn IN
-        (SELECT itl.itemn 
+    WHERE EXISTS
+        (SELECT * 
          FROM itl
-         WHERE itl.wkcen = 468 AND itl.locan = 0);
+         WHERE itl.itemn = itp.itemn itl.wkcen = 468 AND itl.locan = 0);
     ```
 
     Q2
