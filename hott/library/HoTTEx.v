@@ -838,3 +838,13 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     reflexivity.
   Defined.
+
+  Definition hprop_prod_path_trunc_in_sig {A:Type} {B} {C D: A -> Type} `{IsHSet B}:
+    forall (f1 f2: A -> B), {a:A & (f1 a = f2 a) * Trunc (-1) (C a) * D a} <~> {a:A & Trunc (-1) ((f1 a = f2 a) * C a) * D a}.
+    intros b c.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried hprop_prod_trunc).
+    reflexivity.
+  Defined.
