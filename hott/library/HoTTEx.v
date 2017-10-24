@@ -816,3 +816,25 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     apply equiv_iff_hprop_uncurried.
     constructor; break_and_rewrite.
   Defined.
+
+  Lemma equiv_sigma_prod_symm_t {A B C D}:
+    {a: A & B a * C a * D a} <~> {a:A & B a * D a * C a}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    rewrite (path_universe_uncurried (equiv_prod_symm (C a) (D a))).
+    reflexivity.
+  Defined.
+
+  Definition equiv_sig_break_pair_f' {A B C D} `{IsHSet C} `{IsHSet D}:
+    forall (f1:A -> C) (f2: A -> D) f3 f4, {a: A & B a * ((f1 a, f2 a) = (f3 a, f4 a))} = {a: A & B a * (f1 a = f3 a) * (f2 a = f4 a)}.    
+    intros.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_pair_assemble _)).
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    reflexivity.
+  Defined.

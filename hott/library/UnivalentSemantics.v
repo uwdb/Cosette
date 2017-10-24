@@ -360,4 +360,12 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Definition fKey {s1 s2 ty} (k: Column ty s1) (fk: Column ty s2) (R: relation s1) (S: relation s2) (pk: isKey k R) :=
     forall (t: Tuple s2), ⟦S⟧ t = {t': Tuple s1 & (⟦k⟧ t' = ⟦ fk ⟧ t) * ⟦ R ⟧ t' * ⟦ S ⟧ t}.
   
+  Parameter keyAxiom2:
+    forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) c,
+       IsHProp {t: Tuple s & ⟦R⟧ t * (denoteProj k t = c)}.
+  
+  (*a doid axiom assumed. *)
+  Parameter equiv_trunc_sigma_prod:
+    forall {A B} `{IsHProp {a:A & B a}} C, {a:A & Trunc (-1) (C a) * B a} <~> Trunc (-1) {a:A & Trunc (-1) (C a) * B a}.
+
 End SQL.
