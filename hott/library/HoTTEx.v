@@ -888,3 +888,81 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     reflexivity.
   Defined.
 
+  Lemma equiv_2sigma_prod_assoc_m {A B C D E F}:
+    {a: A & {b: B & C a b * (D a b * E a b) * F a b}} <~> {a: A & {b: B & C a b * D a b * E a b * F a b}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc_h).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_prod_symm_m {A B C D E F}:
+    {a: A & {b: B & C a b * D a b * E a b * F a b}} <~> {a: A & {b: B & C a b * E a b * D a b * F a b}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite <- (path_universe_uncurried equiv_sigma_prod_assoc_h).
+    rewrite (path_universe_uncurried equiv_sigma_prod_symm_m).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc_h).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_prod_symm_h {A B C D E}:
+    {a: A & {b: B & C a b * D a b * E a b}} <~> {a: A & {b: B & D a b * C a b * E a b}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    f_ap.
+    by_extensionality b.
+    rewrite (path_universe_uncurried (equiv_prod_symm (C a b) _)).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_path_trans_reduce_r {A B C D} `{IsHSet D}:
+  forall (fa fb fc: A -> B -> D),
+    {a:A & {b: B & C a b * (fa a b = fb a b) * (fa a b = fc a b)}} <~> {a:A & {b: B & C a b * (fa a b = fb a b) * (fb a b = fc a b)}}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    f_ap.
+    by_extensionality b.
+    repeat rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    f_ap.
+    apply path_universe_uncurried.
+    apply equiv_iff_hprop_uncurried.
+    constructor;
+    break_and_rewrite.
+  Defined.
+
+  Lemma sigma_prod_path_symm {A B D} `{IsHSet B}:
+    forall (f1 f2: A -> B), {a:A & (f1 a = f2 a) * D a} <~> {a:A & (f2 a = f1 a) * D a}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    f_ap.
+    apply path_universe_uncurried.
+    apply equiv_iff_hprop_uncurried.
+    constructor;
+    break_and_rewrite.
+  Defined.
+
+  Lemma equiv_prod_sigma_prod {A B C D E}:
+  {a: A & E a * {b:B & C a b} * D a } <~> {a: A & E a * {b:B & C a b * D a}}.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    reflexivity.
+  Defined.

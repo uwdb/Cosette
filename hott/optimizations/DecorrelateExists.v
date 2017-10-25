@@ -70,4 +70,4 @@ Module Optimization (T : Types) (S : Schemas T) (R : Relations T S)  (A : Aggreg
     reflexivity.
   Qed. 
  
-End Optimization. 
+End Optimization.

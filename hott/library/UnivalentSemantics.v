@@ -372,5 +372,49 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Parameter keyAxiom3:
     forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) t,
        IsHProp (⟦R⟧ t).
+  
+  (* some lemmas about constraints *)
+
+  Lemma iskey_reduce_2sigma {s ty A B} {k: Column ty s} {R: relation s} (ik: isKey k R): 
+    forall (t: Tuple s), {a: A & B a * ⟦ R ⟧ t} = {a: A & {t': Tuple s & B a * (⟦k⟧ t' = ⟦ k ⟧ t) * ⟦ R ⟧ t' * ⟦ R ⟧ t }}.
+  Proof.
+    intro t.
+    f_ap.
+    by_extensionality a.
+    repeat rewrite <- (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    f_ap.
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (ik t).
+    reflexivity.
+  Defined.
+
+  Lemma iskey_reduce_2sigma' {s ty A B} {k: Column ty s} {R: relation s} (ik: isKey k R): 
+    forall (t: Tuple s), {a: A & B a * ⟦ R ⟧ t} = {a: A & {t': Tuple s & B a * (⟦k⟧ t = ⟦ k ⟧ t') * ⟦ R ⟧ t' * ⟦ R ⟧ t }}.
+  Proof.
+    intro t.
+    f_ap.
+    by_extensionality a.
+    repeat rewrite <- (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    f_ap.
+    rewrite (path_universe_uncurried (sigma_prod_path_symm _ _)).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (ik t).
+    reflexivity.
+  Defined.
+
+   Lemma iskey_reduce' {s ty B} {k: Column ty s} {R: relation s} (ik: isKey k R): 
+    forall (t: Tuple s), B * ⟦ R ⟧ t =  {t': Tuple s & B * (⟦k⟧ t = ⟦ k ⟧ t') * ⟦ R ⟧ t' * ⟦ R ⟧ t }.
+  Proof.
+    intro t.
+    repeat rewrite <- (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    f_ap.
+    rewrite (path_universe_uncurried (sigma_prod_path_symm _ _)).
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (ik t).
+    reflexivity.
+  Defined.
 
 End SQL.
