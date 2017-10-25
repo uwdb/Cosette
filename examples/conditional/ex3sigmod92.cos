@@ -1,0 +1,19 @@
+schema itp(itemn:int, ponum:int);  -- itemn is a key of itp
+schema itl(itemn:int, wkcen:int, locan:int);
+
+table itp(itp);
+table itl(itl);
+
+query q1
+`SELECT * FROM itp itp
+ WHERE EXISTS
+        (SELECT * 
+         FROM itl itl
+         WHERE itl.itemn = itp.itemn AND itl.wkcen = 468 AND itl.locan = 0)`;
+
+query q2
+`SELECT DISTINCT itp.* 
+ FROM itp itp, itl itl
+ WHERE itp.itemn = itl.itemn AND itl.wkcen = 468 AND itl.locan = 0`;
+
+verify q1 q2;

@@ -1,0 +1,23 @@
+schema itp(itemn:int, ponum:int);
+schema itm(itemn:int, type:int); -- itemn is a key
+schema pur(ponum:int, odate:int, vendn:int);
+
+table itp(itp);
+table itm(itm);
+table pur(pur);
+
+query q1
+`SELECT itm.itemn, itpv.vendn 
+ FROM itm itm, 
+      (SELECT DISTINCT itp.itemn, pur.vendn
+       FROM itp itp, pur pur
+       WHERE itp.ponum = pur.ponum AND pur.odate > 85) itpv
+ WHERE itm.itemn = itpv.itemn AND itm.itemn > 1 and itm.itemn < 20`;
+
+query q2
+`SELECT DISTINCT itm.itemn, pur.vendn
+ FROM itm itm, itp itp, pur pur
+ WHERE itp.ponum = pur.ponum AND itm.itemn = itp.itemn AND pur.odate > 85 AND
+        itm.itemn > 1 AND itm.itemn < 20`;
+
+verify q1 q2;

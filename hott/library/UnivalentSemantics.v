@@ -328,7 +328,7 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   Definition isKey {s ty} (k: Column ty s) (R: relation s) :=
     forall (t: Tuple s),  ⟦R⟧ t = {t': Tuple s & (⟦k⟧ t' = ⟦ k ⟧ t) * ⟦ R ⟧ t' * ⟦ R ⟧ t}.
   
-  Parameter keyAxiom:
+  Parameter keyAxiom1:
     forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) (t t':Tuple s),
       (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t 
       = (denoteProj k t' = denoteProj k t) * ⟦R⟧ t' * ⟦R⟧ t * ( t = t') .
@@ -338,7 +338,7 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
       (denoteProj k t' = denoteProj k t) * ⟦R⟧ t'* ⟦R⟧ t * p t'
       = (denoteProj k t' = denoteProj k t) * ⟦R⟧ t'* ⟦R⟧ t * p t.
     intros.
-    pose (keyAxiom kp t t') as pf.
+    pose (keyAxiom1 kp t t') as pf.
     rewrite pf.
     rewrite <- (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     symmetry.
@@ -367,5 +367,10 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
   (*a doid axiom assumed. *)
   Parameter equiv_trunc_sigma_prod:
     forall {A B} `{IsHProp {a:A & B a}} C, {a:A & Trunc (-1) (C a) * B a} <~> Trunc (-1) {a:A & Trunc (-1) (C a) * B a}.
+
+  (*if a relation has a key, then itself must be unique *)
+  Parameter keyAxiom3:
+    forall {s ty} {k: Column ty s} {R: relation s} (kp: isKey k R) t,
+       IsHProp (⟦R⟧ t).
 
 End SQL.
