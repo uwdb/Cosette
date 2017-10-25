@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT EMP.SAL FROM EMP AS EMP WHERE EMP.EMPNO IN (SELECT DEPT.DEPTNO FROM DEPT AS DEPT WHERE EMP.JOB = DEPT.NAME) AND EMP.EMPNO IN (SELECT EMP0.EMPNO FROM EMP AS EMP0 WHERE EMP.ENAME = EMP0.ENAME)`;
+
+query q2 `SELECT EMP1.SAL FROM EMP AS EMP1 INNER JOIN DEPT AS DEPT0 ON EMP1.JOB = DEPT0.NAME AND EMP1.EMPNO = DEPT0.DEPTNO INNER JOIN (SELECT EMP2.EMPNO, EMP2.ENAME FROM EMP AS EMP2) AS t5 ON EMP1.ENAME = t5.ENAME AND EMP1.EMPNO = t5.EMPNO`;
+
+verify q1 q2;

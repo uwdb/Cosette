@@ -848,3 +848,43 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     rewrite (path_universe_uncurried hprop_prod_trunc).
     reflexivity.
   Defined.
+
+    Definition equiv_sig_trunc_break_pair_f' {A B C D E F} `{IsHSet E} `{IsHSet F}:
+    forall (f1:A -> C -> E) (f2: A -> C -> F) f3 f4,
+      {a: A &  B a * Trunc (-1) {c:C & D a c * ((f1 a c, f2 a c) = (f3 a c, f4 a c))}} = {a: A & B a * Trunc (-1) {c:C & D a c * (f1 a c = f3 a c) * (f2 a c = f4 a c)}}.
+  Proof.
+    intros.
+    f_ap.
+    by_extensionality a.
+    f_ap.
+    f_ap.
+    f_ap.
+    by_extensionality c.
+    rewrite (path_universe_uncurried (equiv_pair_assemble _)).
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    reflexivity.
+  Defined.
+  
+  Definition equiv_prod_2sigma_trunc_r {A B C D E}:
+    {a: A & E a * Trunc (-1)({b:B & C a b} * D a) } <~> {a: A & E a * Trunc (-1) {b:B & C a b * D a}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    f_ap.
+    f_ap.
+    rewrite (path_universe_uncurried (equiv_prod_sigma_r _ _ _)).
+    reflexivity.
+  Defined.
+
+  Definition equiv_sig_trunc_prod_hset {A B} {C D: A -> Type} `{IsHSet B}: 
+    forall (f1 f2: A -> B), {a:A & Trunc (-1) (C a) * (f1 a = f2 a) * D a} <~> {a:A & Trunc (-1) ((C a) * (f1 a = f2 a)) * D a}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried hprop_prod_trunc_r).
+    reflexivity.
+  Defined.
+
