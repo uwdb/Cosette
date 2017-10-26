@@ -417,4 +417,38 @@ Module SQL (T : Types) (S : Schemas T) (R : Relations T S) (A : Aggregators T S)
     reflexivity.
   Defined.
 
+    Definition key_pred_trans_2sigma {s ty A p} {k: Column ty s} {R: relation s} (kp: isKey k R):
+    forall (f: A -> Tuple s),
+      {a: A & {t': Tuple s & (denoteProj k t' = denoteProj k (f a)) * ⟦R⟧ t' * ⟦R⟧ (f a)  * p a t'}}
+      = {a: A & {t': Tuple s & (denoteProj k t' = denoteProj k (f a)) * ⟦R⟧ t' * ⟦R⟧ (f a) * p a (f a)}}.
+   intros.
+   f_ap.
+   by_extensionality t'.
+   exact (keyLemma2 kp (f t') (p t')).
+  Defined.
+
+  Lemma equiv_2sigma_prod_path_symm {A1 A2 B D} `{IsHSet B}:
+    forall (f1 f2: A1 -> A2 -> B), {a1: A1 & {a2: A2 & (f1 a1 a2 = f2 a1 a2) * D a1 a2}} <~> {a1: A1 & {a2: A2 & (f2 a1 a2 = f1 a1 a2) * D a1 a2}}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    exact (path_universe_uncurried (sigma_prod_path_symm _ _)).
+  Defined.
+
+  Lemma iskey_reduce_2sigma_func {s ty A B} {k: Column ty s} {R: relation s} (ik: isKey k R): 
+    forall (f: A -> Tuple s), {a: A & B a * ⟦ R ⟧ (f a)} = {a: A & {t': Tuple s & B a * (⟦k⟧ t' = ⟦ k ⟧ (f a)) * ⟦ R ⟧ t' * ⟦ R ⟧ (f a) }}.
+  Proof.
+    intro t.
+    f_ap.
+    by_extensionality a.
+    repeat rewrite <- (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    f_ap.
+    rewrite (path_universe_uncurried equiv_sigma_prod_assoc).
+    rewrite <- (ik (t a)).
+    reflexivity.
+  Defined.
+  
 End SQL.

@@ -966,3 +966,73 @@ Lemma equiv_sigma_prod_symm_f {A B C D}:
     rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
     reflexivity.
   Defined.
+
+  Lemma equiv_3sigma_prod_assoc {A1 A2 A3 B C D}:
+  {a1: A1 & {a2: A2 & {a3: A3 & B a1 a2 a3 * (C a1 a2 a3 * D a1 a2 a3)}}} <~> {a1: A1 & {a2: A2 & {a3: A3 & B a1 a2 a3 * C a1 a2 a3 * D a1 a2 a3}}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a1.
+    rewrite (path_universe_uncurried equiv_2sigma_prod_assoc).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_3sigma_prod_symm {A1 A2 A3 B C}:
+  {a1: A1 & {a2: A2 & {a3: A3 & B a1 a2 a3 * C a1 a2 a3 }}} <~> {a1: A1 & {a2: A2 & {a3: A3 & C a1 a2 a3 * B a1 a2 a3}}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a1.
+    rewrite (path_universe_uncurried equiv_2sigma_prod_symm).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_prod_3sigma {A1 A2 A3 B C}:
+    {a1: A1 & {a2: A2 & {a3: A3 & B a1 a2 * C a1 a2 a3}}} <~> {a1: A1 & {a2: A2 &  B a1 a2 * {a3: A3 & C a1 a2 a3}}}.
+  Proof.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a1.
+    f_ap.
+    by_extensionality a2.
+    rewrite (path_universe_uncurried (equiv_prod_sigma _ _ _)).
+    reflexivity.
+  Defined.
+
+  Lemma equiv_2sigma_break_pair {A1 A2 B C D} `{IsHSet C} `{IsHSet D}:
+     forall (f1:A1 -> A2 -> C) (f2: A1 -> A2 -> D) f3 f4,
+       {a1: A1 & {a2: A2 & B a1 a2 * ((f1 a1 a2, f2 a1 a2) = (f3 a1 a2, f4 a1 a2))}} = {a1: A1 & {a2: A2 & B a1 a2 * (f1 a1 a2 = f3 a1 a2) * (f2 a1 a2 = f4 a1 a2)}}.    
+    intros.
+    f_ap.
+    by_extensionality a1.
+    rewrite (equiv_sig_break_pair_f' _ _ _ _).
+    reflexivity.
+  Defined.
+
+   Lemma equiv_sigma_symm_t {A1 A2 A3 B}:
+     {a1: A1 & {a2: A2 & {a3: A3 & B a1 a2 a3}}} <~> {a1: A1 & {a3: A3 & {a2: A2 & B a1 a2 a3}}}.
+   Proof.
+     apply equiv_path.
+     f_ap.
+     by_extensionality a1.
+     rewrite (path_universe_uncurried (equiv_sigma_symm _)).
+     reflexivity.
+   Defined.
+
+   Lemma equiv_2sigma_path_trans_l {A1 A2 B E} `{IsHSet B}:
+  forall (f1 f2 f3: A1 -> A2 -> B),
+    {a1: A1 & {a2:A2 & (f1 a1 a2 = f2 a1 a2) * (f1 a1 a2 = f3 a1 a2) * E a1 a2 }} <~> {a1: A1 & {a2: A2 & (f1 a1 a2 = f2 a1 a2) * (f1 a1 a2 = f3 a1 a2) * (f2 a1 a2 = f3 a1 a2) * E a1 a2}}.
+  Proof.
+    intros.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a1.
+    f_ap.
+    by_extensionality a2.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    symmetry.
+    rewrite (path_universe_uncurried (equiv_prod_symm _ _)).
+    f_ap.
+    symmetry.
+    exact (path_universe_uncurried (path_trans _ _ _)).
+  Defined.

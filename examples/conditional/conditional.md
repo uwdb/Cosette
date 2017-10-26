@@ -41,8 +41,41 @@ Conditional SQL Rewrite
 
     Q1 is only equivalent to Q1 if "Security" uses only its own employees on the projects it runs. 
 
+2. Second example From Deutsch et al. (Penn TR 2001) see `fkPennTR.cos`. 
+    ```
+    schema depts(DName:int, DProj:int);
+    schema teams(TProj:int, TMember:int); -- TMember is a fk to payroll.Empl
+    schema payroll(PDept:int, Empl:int); -- Empl is pk
+    table Depts(depts);
+    table Teams(teams);
+    table Payroll(payroll)；
+    ```
 
-2. Using foreign key to do join elimination. [blog article about oracle](https://danischnider.wordpress.com/2015/12/01/foreign-key-constraints-in-an-oracle-data-warehouse/)
+    create view V2 (
+        SELECT t.TMember as E, p.PDept as D, t.TProj as P
+        FROM teams t, payroll p
+        WHERE t.TMember = p.Empl
+    )
+    ```
+
+    Q1:
+    ```
+    SELECT t.TMember
+    FROM Depts d, Teams t
+    WHERE d.Dproj = t.TProj and d.DName = 'Security'
+    ```
+
+    Q2
+    ```
+    SELECT v1.E
+    FROM Depts d, V2 v2
+    WHERE d.DName = 'Security' and d.DProj = v.P and d.DName = v2.D
+    ```
+
+    Q1 is only equivalent to Q1 if "Security" uses only its own employees on the projects it runs. 
+
+
+3. Using foreign key to do join elimination. [blog article about oracle](https://danischnider.wordpress.com/2015/12/01/foreign-key-constraints-in-an-oracle-data-warehouse/)
 
     Assume a fact table SALES and 3 dimension tables PRODUCTS, CUSTOMERS and TIMES. There are 3 foreign keys (prod_id, cust_id, time_id) in SALES referring to primary keys of each demension table. 
 
@@ -63,7 +96,7 @@ Conditional SQL Rewrite
     WHERE s.prod_id = p.prod_id AND s.time_id = c.time_id AND t.calendar_year = 2014 
     ```
 
-3. Rewrite using Index (An architecture for query optimization, Rosenthal etc SIGMOD 82)
+4. Rewrite using Index (An architecture for query optimization, Rosenthal etc SIGMOD 82)
 
     Assume payroll(ssno:int, deptno:int, ??), applicant(ssno:int, jobtitile:int, officeno:int, ??).
 
@@ -87,7 +120,7 @@ Conditional SQL Rewrite
             idx_payroll.deptno = 29 
     ```
 
-4. Remove redundant join attribute. (Example 2.2, Query processing utilizing dependencies and horizontal decomposition, Kambayashi etc SIGMOD 83)
+5. Remove redundant join attribute. (Example 2.2, Query processing utilizing dependencies and horizontal decomposition, Kambayashi etc SIGMOD 83)
 
     The paper assumes a FD: A -> B. Here we assume that A is the key.
 
@@ -105,7 +138,7 @@ Conditional SQL Rewrite
         WHERE x.A = y.A AND y.A = R3.A AND R1.A = R3.A
     ```
 
-5. Distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
+6. Distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
     
    Preconditon: itemn is the primary key of itm.
     Q1:
@@ -129,7 +162,7 @@ Conditional SQL Rewrite
     ```
 
 
-6. Second distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
+7. Second distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).
 
     Assume itemno is the primary key of itm.
     Q1
@@ -148,7 +181,7 @@ Conditional SQL Rewrite
     WHERE itp.NegotiatedPrice > 1000 AND itp.itemno = itm.itemno
     ```
  
-7. Third distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).   
+8. Third distinct pull up (Extensible/Rule Based Query Rewrite Optimization in Starburst, SIGMOD 92).   
 
     itemn is a key of itp. 
     Q1
