@@ -405,6 +405,15 @@ Proof.
     reflexivity.
 Defined.
 
+  Definition equiv_sigma_prod_assoc_h {A B C D E}:
+    {a: A & B a * ((C a) * (D a)) * E a} <~> {a:A & B a * C a * D a * E a}.
+    apply equiv_path.
+    f_ap.
+    by_extensionality a.
+    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
+    reflexivity.
+  Defined.
+
   Lemma equiv_sigma_prod_symm_m {A B C D E}:
     {a: A & B a * ((C a) * (D a)) * E a} <~> {a:A & B a * (D a * C a) * E a}.
   Proof.
@@ -682,15 +691,6 @@ Definition path_trans_pred {A} {P: A -> hProp} `{IsHSet A}:
     apply path_universe_uncurried.
     apply equiv_iff_hprop_uncurried.
     constructor; break_and_rewrite.
-  Defined.
-
-Definition equiv_sigma_prod_assoc_h {A B C D E}:
-    {a: A & B a * ((C a) * (D a)) * E a} <~> {a:A & B a * C a * D a * E a}.
-    apply equiv_path.
-    f_ap.
-    by_extensionality a.
-    rewrite (path_universe_uncurried (equiv_prod_assoc _ _ _)).
-    reflexivity.
   Defined.
  
 Definition equiv_prod_eq_subst {A B}:
