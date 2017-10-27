@@ -13,3 +13,10 @@ docker run -v $(pwd)/:$DIR -w $DIR --name=$NAME shumo/cosette-frontend bash -c "
 
 echo "[2] removing the container ..."
 docker rm $NAME
+
+echo "[3] remove generated files ..."
+rm -r .compiled/
+rm -r dsl/dist/
+rm -r hott/.build_solve/
+rm -r rosette/generated/
+rm solver.pyc
