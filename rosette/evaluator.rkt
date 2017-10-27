@@ -125,6 +125,7 @@
                         (filter (lambda (r) (equal? gb-key-vals
                                                     (map (lambda (i) (list-ref (car r) i)) group-by-indices)))
                                 table))]
+                 ; claculate multiplicty of the group
                  [multiplicity (foldl (lambda (v r) (if (> v 0) 1 r)) 0 (map (lambda (r) (cdr r)) same-val-rows))]
                  [col-store-val-seg (transpose (map (lambda (r) (car r)) same-val-rows))])
             (cons col-store-val-seg multiplicity))
