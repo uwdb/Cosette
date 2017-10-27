@@ -51,6 +51,7 @@ Conditional SQL Rewrite
     table Payroll(payroll)；
     ```
 
+    ```
     create view V2 (
         SELECT t.TMember as E, p.PDept as D, t.TProj as P
         FROM teams t, payroll p
@@ -155,7 +156,7 @@ Conditional SQL Rewrite
 
     Q2
     ```
-    SELECT DISTINCT itm.itmn, pur.vendn
+    SELECT DISTINCT itm.itemn, pur.vendn
     FROM itm, itp, pur
     WHERE itp.ponum = pur.ponum AND itm.itemn = itp.itemn AND pur.odate > 85 AND
         itm.itemn > 1 AND itm.itemn < 20;
