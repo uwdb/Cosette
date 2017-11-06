@@ -20,7 +20,8 @@
 
 (define sym-parts (Table "parts" (list "pnum" "qoh") (gen-sym-schema 2 2)))
 
-(define sym-supply (Table "supply" (list "pnum" "shipdate") (remove-zero (gen-sym-schema 2 1))))
+(define sym-supply (Table "supply" (list "pnum" "shipdate") (gen-sym-schema 2 1)))
+(assert-table-non-empty sym-supply)
 
 ; ------------ count bug ----------------------
 (define parts sym-parts)
