@@ -17,7 +17,7 @@
 ; sum the multiplicity of each tuple in a table
 ; eg (list ((1, 1, 2), 2) ((1, 1, 2), 2)) will become (list ((1, 1, 2), 4) ((1, 1, 2), 4))
 (define (table-sum table)
-  ;(map (lambda (t) (cons (car t) (sum-if-equal t table))) table))
+  ;(map (lambda (t) (cons (car t) (get-multiplicity t table))) table))
   ; add for/all makes the thing much faster
   (for/all ([table table])
            (map (lambda (t) (cons (car t) (get-multiplicity t table))) table)))
