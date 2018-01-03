@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT * FROM (SELECT DEPT.NAME, DEPT.DEPTNO FROM DEPT AS DEPT UNION ALL SELECT t4.NAME, t4.DEPTNO FROM (SELECT DEPT0.NAME, DEPT0.DEPTNO, COUNT(*) FROM DEPT AS DEPT0 GROUP BY DEPT0.NAME, DEPT0.DEPTNO UNION ALL SELECT DEPT1.NAME, DEPT1.DEPTNO, COUNT(*) FROM DEPT AS DEPT1 GROUP BY DEPT1.NAME, DEPT1.DEPTNO) AS t4) AS t6 UNION ALL SELECT DEPT2.NAME, DEPT2.DEPTNO FROM DEPT AS DEPT2`;
+
+query q2 `SELECT DEPT3.NAME, DEPT3.DEPTNO FROM DEPT AS DEPT3 UNION ALL SELECT DEPT4.NAME, DEPT4.DEPTNO FROM DEPT AS DEPT4 GROUP BY DEPT4.NAME, DEPT4.DEPTNO UNION ALL SELECT DEPT5.NAME, DEPT5.DEPTNO FROM DEPT AS DEPT5 GROUP BY DEPT5.NAME, DEPT5.DEPTNO UNION ALL SELECT DEPT6.NAME, DEPT6.DEPTNO FROM DEPT AS DEPT6`;
+
+verify q1 q2;

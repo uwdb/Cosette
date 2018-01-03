@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT CAST(t2.NAME AS VARCHAR(128)), CAST(t2.EMPNO AS INTEGER) FROM (SELECT t.DEPTNO, t.NAME, t0.EMPNO, t0.ENAME, t0.JOB, t0.MGR, t0.HIREDATE, t0.SAL, t0.COMM, t0.DEPTNO AS DEPTNO1, t0.SLACKER FROM (SELECT DEPT.DEPTNO, DEPT.NAME, CAST(DEPT.DEPTNO AS INTEGER) AS DEPTNO0 FROM DEPT AS DEPT) AS t INNER JOIN (SELECT EMP.EMPNO, EMP.ENAME, EMP.JOB, EMP.MGR, EMP.HIREDATE, EMP.SAL, EMP.COMM, EMP.DEPTNO, EMP.SLACKER, CAST(EMP.DEPTNO AS INTEGER) AS DEPTNO0 FROM EMP AS EMP) AS t0 ON t.DEPTNO0 = t0.DEPTNO0) AS t1 WHERE CAST(t1.JOB AS VARCHAR(1)) = 'Manager'`;
+
+query q2 `SELECT CAST(t7.NAME AS VARCHAR(128)), t7.EMPNO FROM (SELECT t4.DEPTNO, t4.NAME, t5.EMPNO, t5.ENAME, t5.JOB, t5.MGR, t5.HIREDATE, t5.SAL, t5.COMM, t5.DEPTNO AS DEPTNO1, t5.SLACKER FROM (SELECT DEPT0.DEPTNO, DEPT0.NAME, DEPT0.DEPTNO AS DEPTNO0 FROM DEPT AS DEPT0) AS t4 INNER JOIN (SELECT EMP0.EMPNO, EMP0.ENAME, EMP0.JOB, EMP0.MGR, EMP0.HIREDATE, EMP0.SAL, EMP0.COMM, EMP0.DEPTNO, EMP0.SLACKER, EMP0.DEPTNO AS DEPTNO0 FROM EMP AS EMP0) AS t5 ON t4.DEPTNO0 = t5.DEPTNO0) AS t6 WHERE CAST(t6.JOB AS VARCHAR(1)) = 'Manager'`;
+
+verify q1 q2;

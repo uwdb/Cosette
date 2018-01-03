@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT t2.ENAME FROM (SELECT EMP.ENAME, EMP.DEPTNO, EMP.SAL + 1 AS SALPLUS FROM EMP AS EMP) AS t WHERE t.DEPTNO IN (SELECT EMP0.DEPTNO FROM EMP AS EMP0 WHERE EMP0.SAL + 1 = EMP.JOB)`;
+
+query q2 `SELECT t4.ENAME FROM (SELECT EMP1.ENAME, EMP1.DEPTNO, EMP1.SAL + 1 AS SALPLUS FROM EMP AS EMP1) AS t4 INNER JOIN (SELECT t6.DEPTNO, t6.$f9 FROM (SELECT EMP2.EMPNO, EMP2.ENAME, EMP2.JOB, EMP2.MGR, EMP2.HIREDATE, EMP2.SAL, EMP2.COMM, EMP2.DEPTNO, EMP2.SLACKER, EMP2.SAL + 1 AS $f9 FROM EMP AS EMP2) AS t5 WHERE t5.SAL + 1 = t5.$f9 GROUP BY t6.DEPTNO, t6.$f9) AS t8 ON t4.SALPLUS = t8.$f9 AND t4.DEPTNO = t8.DEPTNO`;
+
+verify q1 q2;

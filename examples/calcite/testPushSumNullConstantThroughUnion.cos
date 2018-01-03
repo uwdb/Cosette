@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT t1.ENAME, SUM(t1.U) FROM (SELECT EMP.EMPNO, EMP.ENAME, EMP.JOB, EMP.MGR, EMP.HIREDATE, EMP.SAL, EMP.COMM, EMP.DEPTNO, EMP.SLACKER, NULL AS U FROM EMP AS EMP UNION ALL SELECT EMP0.EMPNO, EMP0.ENAME, EMP0.JOB, EMP0.MGR, EMP0.HIREDATE, EMP0.SAL, EMP0.COMM, EMP0.DEPTNO, EMP0.SLACKER, NULL AS U FROM EMP AS EMP0) AS t1 GROUP BY t1.ENAME`;
+
+query q2 `SELECT t8.ENAME, SUM(SUM(NULL)) FROM (SELECT EMP1.ENAME, SUM(NULL) FROM EMP AS EMP1 GROUP BY EMP1.ENAME UNION ALL SELECT EMP2.ENAME, SUM(NULL) FROM EMP AS EMP2 GROUP BY EMP2.ENAME) AS t8 GROUP BY t8.ENAME`;
+
+verify q1 q2;

@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT t0.JOB, t1.NAME FROM (SELECT EMP.EMPNO, EMP.ENAME, EMP.JOB, EMP.MGR, EMP.HIREDATE, EMP.SAL, EMP.COMM, EMP.DEPTNO, EMP.SLACKER, EMP.DEPTNO + EMP.EMPNO AS $f9 FROM EMP AS EMP WHERE EMP.EMPNO = 10) AS t0 INNER JOIN (SELECT DEPT.DEPTNO, DEPT.NAME, DEPT.DEPTNO + 5 AS $f2 FROM DEPT AS DEPT) AS t1 ON t0.JOB = t1.NAME AND t0.$f9 = t1.$f2 GROUP BY t0.JOB, t1.NAME`;
+
+query q2 `SELECT t5.JOB, t7.NAME FROM (SELECT EMP0.JOB, EMP0.DEPTNO + EMP0.EMPNO AS $f9 FROM EMP AS EMP0 WHERE EMP0.EMPNO = 10 GROUP BY EMP0.JOB, EMP0.DEPTNO + EMP0.EMPNO) AS t5 INNER JOIN (SELECT DEPT0.NAME, DEPT0.DEPTNO + 5 AS $f2 FROM DEPT AS DEPT0 GROUP BY DEPT0.NAME, DEPT0.DEPTNO + 5) AS t7 ON t5.JOB = t7.NAME AND t5.$f9 = t7.$f2 GROUP BY t5.JOB, t7.NAME`;
+
+verify q1 q2;

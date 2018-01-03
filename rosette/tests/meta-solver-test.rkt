@@ -31,7 +31,7 @@
 
 ;(println (to-str (init-constraint 5 1)))
 ;(assert (eq? (extract-sel-indices q1) '(1 0)))
-;(println (to-str-set (propogate q1 (list (init-constraint (length (extract-schema q1)) 1)) 1 999)))
+(println (to-str-set (propogate q1 (list (init-constraint (length (extract-schema q1)) 1)) 1 999)))
 
 (define q2
   (SELECT 
@@ -50,7 +50,7 @@
     WHERE (AND (BINOP "Picture.uid" = 3)
                (AND (BINOP "Picture.size" > 99) (BINOP "Picture.size" < 101)))))
 
-;(println (to-str-set (propogate q3 (list (init-constraint (length (extract-schema q3)) 1)) 1 999)))
+(println (to-str-set (propogate q3 (list (init-constraint (length (extract-schema q3)) 1)) 1 999)))
 
 
 ; (time (verify (same q1 q2)))

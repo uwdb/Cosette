@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT DEPT.DEPTNO, CAST(DEPT.DEPTNO AS INTEGER) FROM DEPT AS DEPT ORDER BY CAST(DEPT.DEPTNO AS INTEGER) OFFSET 1 ROWS`;
+
+query q2 `SELECT t3.DEPTNO, CAST(t3.DEPTNO AS INTEGER) FROM (SELECT * FROM DEPT AS DEPT0 ORDER BY DEPT0.DEPTNO OFFSET 1 ROWS) AS t3`;
+
+verify q1 q2;

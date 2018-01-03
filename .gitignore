@@ -3,3 +3,4 @@
 #*#
 *.glob
 *.DS_Store
+*.pyc

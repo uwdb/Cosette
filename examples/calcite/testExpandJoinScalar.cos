@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT EMP.EMPNO FROM EMP AS EMP LEFT JOIN DEPT AS DEPT ON (((SELECT EMP0.DEPTNO FROM EMP AS EMP0 WHERE EMP0.EMPNO < 20))) < (((SELECT EMP1.DEPTNO FROM EMP AS EMP1 WHERE EMP1.EMPNO > 100)))`;
+
+query q2 `SELECT EMP2.EMPNO FROM EMP AS EMP2 LEFT JOIN (DEPT AS DEPT0 LEFT JOIN (SELECT SINGLE_VALUE(EMP3.DEPTNO) AS $f0 FROM EMP AS EMP3 WHERE EMP3.EMPNO < 20) AS t6 ON TRUE LEFT JOIN (SELECT SINGLE_VALUE(EMP4.DEPTNO) AS $f0 FROM EMP AS EMP4 WHERE EMP4.EMPNO > 100) AS t9 ON TRUE) ON t6.$f0 < t9.$f0`;
+
+verify q1 q2;

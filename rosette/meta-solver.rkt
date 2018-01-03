@@ -62,8 +62,8 @@
 (define (init-constraint tuple-size qid)
   (meta-forall-eq (c-conj (build-list tuple-size (lambda (x) (c-primitive (v-ref qid x) = (v-symval x)))))))
 
-; convert sql val expr into meta v expr
 
+; convert sql val expr into meta v expr
 (define (v-from-sql-val v vmap qid) 
   ; generate a meta constraint v expr from a vmap
   ; vmap maps each column-ref primitive into a v-ref that uses the row id
@@ -129,12 +129,14 @@
     [(meta-sum-eq? c) 
      (meta-sum-eq (c-conj (list (meta-sum-eq-constraint c) pred)))]))
 
+
 ; given a set of constraints, propogate the constraint to the finest level 
 (define (propogate query constraints qid step)
   (cond 
     [(eq? step 0) constraints]
     [(query-named? query)
-     (let ([ref-map (map (lambda (i) (v-ref (Table-name (query-named-table-ref query)) i)) 
+     (let ([ref-map (map (lambda (i) (v-ref (string-append (Table-name (query-named-table-ref query)) 
+                                                           (number->string qid)) i)) 
                          (build-list (length (Table-schema (query-named-table-ref query))) values))])
        (map (lambda (c) (subst-v-ref c ref-map qid)) constraints))]
     [(query-select? query)
@@ -165,10 +167,18 @@
              (map (lambda (i) (cond [(< i (length q1-schema)) (v-ref q1-new-qid i)] 
                                     [else (v-ref q2-new-qid (- i (length q1-schema)))]))
                   (build-list (+ (length q1-schema) (length q2-schema)) values))]
-            [constraints1 (map (lambda (c) (subst-v-ref c ref-map q1-new-qid)) constraints)]
-            [constraints2 (map (lambda (c) (subst-v-ref c ref-map q1-new-qid)) constraints1)]
-            [constraints3 (propogate q1 constraints2 q1-new-qid (- step 1))])
-       (propogate q2 constraints3 q2-new-qid (- step 1)))]
+            [constraints1 (map (lambda (c) (subst-v-ref c ref-map qid)) constraints)]
+            [constraints2 (propogate q1 constraints1 q1-new-qid (- step 1))])
+       (propogate q2 constraints2 q2-new-qid (- step 1)))]
+    [(or (query-rename-full? query) (query-rename? query))
+     (let* ([q (cond [(query-rename-full? query) (query-rename-full-query query)]
+                     [(query-rename? query) (query-rename-query query)])]
+            [new-qid (* qid 2)]
+            [ref-map (map (lambda (i) (v-ref new-qid i))
+                          (build-list (length (extract-schema query)) values))]
+            [updated-constraints (map (lambda (c) (subst-v-ref c ref-map qid)) constraints)])
+       (propogate q updated-constraints new-qid (- step 1)))]
+    ;[(query-union-all? query)]
     [else constraints]))
 
 ;;; test

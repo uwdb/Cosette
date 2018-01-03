@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT * FROM EMP AS EMP WHERE EMP.EMPNO NOT IN (SELECT t0.EMPNO FROM (SELECT EMP0.ENAME, EMP0.EMPNO, EMP0.SAL AS R FROM EMP AS EMP0) AS t WHERE t.R > 2 AND EMP.ENAME = t.ENAME)`;
+
+query q2 `SELECT EMP1.EMPNO, EMP1.ENAME, EMP1.JOB, EMP1.MGR, EMP1.HIREDATE, EMP1.SAL, EMP1.COMM, EMP1.DEPTNO, EMP1.SLACKER FROM EMP AS EMP1 LEFT JOIN (SELECT t4.ENAME, COUNT(*) AS c, COUNT(t4.EMPNO) AS ck FROM (SELECT EMP2.ENAME, EMP2.EMPNO, EMP2.SAL AS R FROM EMP AS EMP2) AS t3 WHERE t3.R > 2 GROUP BY t4.ENAME) AS t7 ON EMP1.ENAME = t7.ENAME LEFT JOIN (SELECT t9.EMPNO, TRUE AS i, t9.ENAME FROM (SELECT EMP3.ENAME, EMP3.EMPNO, EMP3.SAL AS R FROM EMP AS EMP3) AS t8 WHERE t8.R > 2) AS t11 ON EMP1.EMPNO = t11.EMPNO AND EMP1.ENAME = t11.ENAME WHERE NOT CASE WHEN t7.c = 0 THEN FALSE WHEN t11.i IS NOT NULL THEN TRUE WHEN t7.ck < t7.c THEN TRUE ELSE FALSE END`;
+
+verify q1 q2;

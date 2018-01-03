@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT EMP.EMPNO, CASE WHEN TRUE THEN CAST(EMP.DEPTNO AS INTEGER) ELSE NULL END IN (SELECT t1.DEPTNO FROM (SELECT EMP0.EMPNO, CASE WHEN TRUE THEN CAST(EMP0.DEPTNO AS INTEGER) ELSE NULL END AS DEPTNO FROM EMP AS EMP0) AS t0 WHERE t0.EMPNO < 20) AS D FROM EMP AS EMP`;
+
+query q2 `SELECT t4.EMPNO, CASE WHEN t8.c = 0 THEN FALSE WHEN t13.i IS NOT NULL THEN TRUE WHEN t4.DEPTNO IS NULL THEN NULL WHEN t8.ck < t8.c THEN NULL ELSE FALSE END AS D FROM (SELECT EMP1.EMPNO, CASE WHEN TRUE THEN CAST(EMP1.DEPTNO AS INTEGER) ELSE NULL END AS DEPTNO FROM EMP AS EMP1) AS t4, (SELECT COUNT(*) AS c, COUNT(t6.DEPTNO) AS ck FROM (SELECT EMP2.EMPNO, CASE WHEN TRUE THEN CAST(EMP2.DEPTNO AS INTEGER) ELSE NULL END AS DEPTNO FROM EMP AS EMP2) AS t5 WHERE t5.EMPNO < 20) AS t8 LEFT JOIN (SELECT t10.DEPTNO, TRUE AS i FROM (SELECT EMP3.EMPNO, CASE WHEN TRUE THEN CAST(EMP3.DEPTNO AS INTEGER) ELSE NULL END AS DEPTNO FROM EMP AS EMP3) AS t9 WHERE t9.EMPNO < 20 GROUP BY t10.DEPTNO, TRUE) AS t13 ON t4.DEPTNO = t13.DEPTNO`;
+
+verify q1 q2;

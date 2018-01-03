@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT * FROM T AS T WHERE T.F0_C0 IN (SELECT T0.F1_C0 AS C0 FROM T AS T0)`;
+
+query q2 `SELECT T1.K0, T1.C1, T1.F1_A0, T1.F2_A0, T1.F0_C0, T1.F1_C0, T1.F0_C1, T1.F1_C2, T1.F2_C3 FROM T AS T1 INNER JOIN (SELECT T2.F1_C0 AS C0 FROM T AS T2 GROUP BY T2.F1_C0) AS t2 ON T1.F0_C0 = t2.C0`;
+
+verify q1 q2;

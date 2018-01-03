@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT * FROM DEPT AS DEPT LEFT JOIN EMP AS EMP ON DEPT.DEPTNO = EMP.DEPTNO WHERE EMP.DEPTNO IS NOT NULL AND EMP.SAL > 100`;
+
+query q2 `SELECT DEPT0.DEPTNO, DEPT0.NAME, CAST(t0.EMPNO AS INTEGER) AS EMPNO, CAST(t0.ENAME AS VARCHAR(20)) AS ENAME, CAST(t0.JOB AS VARCHAR(10)) AS JOB, t0.MGR, CAST(t0.HIREDATE AS TIMESTAMP(0)) AS HIREDATE, CAST(t0.SAL AS INTEGER) AS SAL, CAST(t0.COMM AS INTEGER) AS COMM, CAST(t0.DEPTNO AS INTEGER) AS DEPTNO0, CAST(t0.SLACKER AS BOOLEAN) AS SLACKER FROM DEPT AS DEPT0 INNER JOIN (SELECT * FROM EMP AS EMP0 WHERE EMP0.SAL > 100) AS t0 ON DEPT0.DEPTNO = t0.DEPTNO`;
+
+verify q1 q2;

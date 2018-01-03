@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT * FROM EMP AS EMP LEFT JOIN DEPT AS DEPT ON EMP.DEPTNO = DEPT.DEPTNO ORDER BY EMP.SAL FETCH NEXT 10 ROWS ONLY`;
+
+query q2 `SELECT * FROM (SELECT * FROM EMP AS EMP0 ORDER BY EMP0.SAL FETCH NEXT 10 ROWS ONLY) AS t2 LEFT JOIN DEPT AS DEPT0 ON t2.DEPTNO = DEPT0.DEPTNO ORDER BY t2.SAL FETCH NEXT 10 ROWS ONLY`;
+
+verify q1 q2;

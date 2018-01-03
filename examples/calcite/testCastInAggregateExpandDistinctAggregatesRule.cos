@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT t0.NAME, SUM(DISTINCT t0.EXPR$1), SUM(DISTINCT t0.EXPR$2) FROM (SELECT DEPT.NAME, COUNT(*) AS CN, SUM(DEPT.DEPTNO) AS SM FROM DEPT AS DEPT GROUP BY DEPT.NAME) AS t0 GROUP BY t0.NAME`;
+
+query q2 `SELECT t3.NAME, CAST(SUM(t3.CN) AS BIGINT), CAST(SUM(t3.SM) AS INTEGER) FROM (SELECT DEPT0.NAME, COUNT(*) AS CN, SUM(DEPT0.DEPTNO) AS SM FROM DEPT AS DEPT0 GROUP BY DEPT0.NAME) AS t3 GROUP BY t3.NAME`;
+
+verify q1 q2;

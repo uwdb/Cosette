@@ -1,0 +1,17 @@
+
+schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
+schema dept(deptno:int, name:int);
+schema bonus(ename:int, job:int, sal:int, comm:int);
+schema account(acctno:int, type:int, balance:int);
+schema t(k0:int, c1:int, f1_a0:int, f2_a0:int, f0_c0:int, f1_c0:int, f0_c1:int, f1_c2:int, f2_c3:int);
+table emp(emp);
+table dept(dept);
+table bonus(bonus);
+table account(account);
+table t(t);
+
+query q1 `SELECT EMP.SAL, SUM(EMP.COMM), MIN(DISTINCT EMP.COMM), SUM(DISTINCT EMP.SAL) FROM EMP AS EMP GROUP BY EMP.SAL`;
+
+query q2 `SELECT t2.SAL, SUM(EMP0.COMM), MIN(MIN(DISTINCT EMP.COMM)), SUM(t8.SAL) FROM (SELECT EMP0.SAL, SUM(EMP0.COMM) FROM EMP AS EMP0 GROUP BY EMP0.SAL) AS t2 INNER JOIN (SELECT t4.SAL, MIN(MIN(DISTINCT EMP.COMM)) FROM (SELECT EMP1.SAL, EMP1.COMM FROM EMP AS EMP1 GROUP BY EMP1.SAL, EMP1.COMM) AS t4 GROUP BY t4.SAL) AS t5 ON t2.SAL IS NOT DISTINCT FROM t5.SAL INNER JOIN (SELECT t8.SAL, SUM(t8.SAL) FROM (SELECT EMP2.SAL FROM EMP AS EMP2 GROUP BY EMP2.SAL) AS t8 GROUP BY t8.SAL) AS t9 ON t2.SAL IS NOT DISTINCT FROM t9.SAL`;
+
+verify q1 q2;
