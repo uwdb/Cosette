@@ -12,8 +12,8 @@
 ;; output is the aggregation result of the list
 (define (aggr-count l) (foldl + 0 (map cdr l)))
 (define (aggr-sum l) (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
-(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) -inf.0 (map (lambda (x) (car x)) l)))
-(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))
+(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) (car (car l)) (map (lambda (x) (car x)) l)))
+(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) (car (car l)) (map (lambda (x) (car x)) l)))
 (define (aggr-count-distinct l) 
   (cond [(eq? l '()) 0]
         [else (+ 1 (aggr-count-distinct (filter (lambda (x) (not (eq? (car l) x))) (cdr l))))]))
