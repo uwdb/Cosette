@@ -1,0 +1,89 @@
+schema sch_flights(fid:int,
+    year:int,
+    month_id:int,
+    day_of_month:int,
+    day_of_week_id:int,
+    carrier_id:string,
+    flight_num:int,
+    origin_city:string,
+    origin_state:string,
+    dest_city:string,
+    dest_state:string,
+    departure_delay:int,
+    taxi_out:int,
+    arrival_delay:int,
+    canceled:int,
+    actual_time:int,
+    distance:int,
+    capacity:int,
+    price:int
+);
+schema sch_carriers
+(
+    cid:int,
+    name:string
+);
+SCHEMA sch_months
+(
+    mid:int,
+    month:string
+);
+SCHEMA sch_days
+(
+    did:int,
+    day_of_week:string
+);
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`SELECT c.name,
+       f1.flight_num,
+       f1.origin_city,
+       f1.dest_city,
+       f1.actual_time,
+       f2.flight_num,
+       f2.origin_city,
+       f2.dest_city,
+       f2.actual_time,
+       f1.actual_time + f2.actual_time AS total_time
+FROM Flights f1, Flights f2, Months m, Carriers c
+WHERE f1.dest_city = f2.origin_city
+AND f1.origin_city = 'Seattle_WA'
+AND f2.dest_city = 'Boston_MA'
+AND f1.month_id = f2.month_id
+AND f1.month_id = m.mid
+AND m.month = 'July'
+AND f1.day_of_month = f2.day_of_month
+AND f1.day_of_month = 15
+AND f1.year = f2.year
+AND f1.year = 2015
+AND f1.carrier_id = f2.carrier_id
+AND f1.carrier_id = c.cid
+AND f1.actual_time + f2.actual_time < 420`;
+
+query q2
+`SELECT c.name,f1.flight_num, f1.origin_city, f1.dest_city, f1.actual_time,
+        f2.flight_num, f2.origin_city, f2.dest_city, f2.actual_time,
+        (f1.actual_time + f2.actual_time) as total
+FROM Flights f1, Flights f2, Carriers c, Months m
+Where f1.year = f2.year 
+AND f1.month_id = f2.month_id 
+AND f1.day_of_week_id = f2.day_of_week_id
+AND f1.carrier_id = f2.carrier_id
+AND (f1.actual_time + f2.actual_time) < 420
+AND f1.year = f2.year 
+AND f1.day_of_month = f2.day_of_month
+AND f1.month_id = f2.month_id
+AND f1.year = 2015  
+AND f1.day_of_month = 15
+AND f1.month_id = m.mid 
+AND m.month = 'July'
+AND f1.origin_city = 'Seattle_WA' 
+AND f2.dest_city = 'Boston_MA'
+AND f1.dest_city = f2.origin_city
+GROUP BY f1.flight_num, f2.flight_num`;
+
+verify q1 q2;

@@ -1,0 +1,67 @@
+schema sch_flights(fid:int,
+    year:int,
+    month_id:int,
+    day_of_month:int,
+    day_of_week_id:int,
+    carrier_id:string,
+    flight_num:int,
+    origin_city:string,
+    origin_state:string,
+    dest_city:string,
+    dest_state:string,
+    departure_delay:int,
+    taxi_out:int,
+    arrival_delay:int,
+    canceled:int,
+    actual_time:int,
+    distance:int,
+    capacity:int,
+    price:int
+);
+
+schema sch_carriers
+(
+    cid:int,
+    name:string
+);
+
+SCHEMA sch_months
+(
+    mid:int,
+    month:string
+);
+
+SCHEMA sch_days
+(
+    did:int,
+    day_of_week:string
+);
+
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`select distinct 
+    F.origin_city as origin_city, 
+    F.dest_city as dest_city, 
+    F.actual_time as time
+from Flights F,
+     (select a.origin_city as origin_city, 
+             max(a.actual_time) as max_time
+      from Flights a
+      group by a.origin_city) X
+where F.origin_city = X.origin_city
+and F.actual_time = X.max_time`;
+
+query q2
+`SELECT DISTINCT F1.origin_city AS origin_city, 
+                 F1.dest_city AS dest_city, 
+                 F1.actual_time AS time
+FROM FLIGHTS AS F1, FLIGHTS AS F2
+WHERE F1.origin_city = F2.origin_city
+GROUP BY F1.origin_city, F1.dest_city, F1.actual_time
+HAVING F1.actual_time = MAX(F2.actual_time)`;
+
+verify q1 q2;

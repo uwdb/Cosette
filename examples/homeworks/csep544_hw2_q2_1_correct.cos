@@ -1,0 +1,93 @@
+schema sch_flights(fid:int,
+    year:int,
+    month_id:int,
+    day_of_month:int,
+    day_of_week_id:int,
+    carrier_id:string,
+    flight_num:int,
+    origin_city:string,
+    origin_state:string,
+    dest_city:string,
+    dest_state:string,
+    departure_delay:int,
+    taxi_out:int,
+    arrival_delay:int,
+    canceled:int,
+    actual_time:int,
+    distance:int,
+    capacity:int,
+    price:int
+);
+schema sch_carriers
+(
+    cid:int,
+    name:string
+);
+SCHEMA sch_months
+(
+    mid:int,
+    month:string
+);
+SCHEMA sch_days
+(
+    did:int,
+    day_of_week:string
+);
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`SELECT C.name as name, 
+        F1.fid as f1_flight_num, 
+        F1.origin_city as f1_origin_city, 
+        F1.dest_city as f1_dest_city,
+        F1.actual_time as f1_actual_time, 
+        F2.fid as f2_flight_num, 
+        F2.origin_city as f2_origin_city,
+        F2.dest_city as f2_dest_city, 
+        F2.actual_time as f2_actual_time,
+        (F1.actual_time + F2.actual_time) as actual_time
+    FROM Flights as F1, Flights as F2, Months as M, Carriers as C
+    WHERE  F1.month_id = M.mid and F1.carrier_id = C.cid
+    and F1.month_id = F2.month_id
+    and F1.day_of_month = F2.day_of_month
+    and F1.year = F2.year
+    and F1.carrier_id = F2.carrier_id
+    and M.month = 'July'
+    and F1.day_of_month = 15
+    and F1.year = 2015
+    and F1.dest_city = F2.origin_city
+    and F1.origin_city = 'Seattle_WA'
+    and F2.dest_city = 'Boston_MA'
+    and F1.actual_time + F2.actual_time < 420`;
+
+query q2
+`SELECT 
+  C.name AS name,
+  F1.flight_num AS f1_flight_num, 
+  F1.origin_city AS f1_origin_city, 
+  F1.dest_city AS f1_dest_city, 
+  F1.actual_time AS f1_actual_time, 
+  F2.flight_num AS f2_flight_num, 
+  F2.origin_city AS f2_origin_city, 
+  F2.dest_city AS f2_dest_city, 
+  F2.actual_time AS f2_actual_time, 
+  (F1.actual_time + F2.actual_time) AS actual_time
+FROM flights AS F1 
+  JOIN flights AS F2
+  JOIN months AS M
+  JOIN carriers AS C
+  ON F1.carrier_id = C.cid AND F2.carrier_id = C.cid 
+  AND F1.month_id = M.mid AND F2.month_id = M.mid
+  AND F1.carrier_id = F2.carrier_id
+  AND F1.dest_city = F2.origin_city
+WHERE M.month = 'July'
+  AND F1.day_of_month = 15 AND F2.day_of_month = 15
+  AND F1.year = 2015 AND F2.year = 2015
+  AND F1.origin_city = 'Seattle_WA'
+  AND F2.dest_city = 'Boston_MA'
+  AND (F1.actual_time + F2.actual_time) < 420`;
+
+verify q1 q2;

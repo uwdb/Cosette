@@ -52,8 +52,21 @@ def prepare_calcite_benchmarks(input_dir, output_dir):
                 out_file.write(rosette_file)
 
 
-def prepare_cesp544hw_benchmarks(input_dir, output_dir):
-    pass
+def prepare_hw_benchmarks(input_dir, output_dir):
+    
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".cos"):
+            case_name = filename[:-4]
+            with open(os.path.join(input_dir, filename), "r") as f:
+                content = "\n".join(f.readlines())
+                status, rosette_file = solver.gen_rosette(content, ".")
+
+                if status == True:
+                    with open(os.path.join(output_dir, case_name + ".rkt"), "w") as out_file:
+                        out_file.write(rosette_file)
+                else:
+                    print(case_name)
+
 
 
 def run_benchmarks(input_dir, cosette_dir="."):
@@ -81,5 +94,6 @@ def run_benchmark(rosette_file, cosette_dir):
 
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir=os.path.join("benchmarks", "calcite"))
-    #run_benchmarks("benchmarks/calcite")
-    print(quick_parse("temp.cos"))
+    prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
+    run_benchmarks("benchmarks/homeworks")
+    #print(quick_parse("temp.cos"))

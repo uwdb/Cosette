@@ -1,0 +1,59 @@
+schema sch_flights(fid:int,
+    year:int,
+    month_id:int,
+    day_of_month:int,
+    day_of_week_id:int,
+    carrier_id:string,
+    flight_num:int,
+    origin_city:string,
+    origin_state:string,
+    dest_city:string,
+    dest_state:string,
+    departure_delay:int,
+    taxi_out:int,
+    arrival_delay:int,
+    canceled:int,
+    actual_time:int,
+    distance:int,
+    capacity:int,
+    price:int
+);
+schema sch_carriers
+(
+    cid:int,
+    name:string
+);
+SCHEMA sch_months
+(
+    mid:int,
+    month:string
+);
+SCHEMA sch_days
+(
+    did:int,
+    day_of_week:string
+);
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`select c.name as name, sum(f.canceled) / count(*) as percent
+from FLIGHTS as f join CARRIERS as c 
+where c.cid = f.carrier_id 
+and f.origin_city = 'Seattle_WA'
+group by c.cid, c.name
+having sum(f.canceled) / count(*) > 5 / 1000`;
+
+query q2
+`SELECT C.name AS name,
+        SUM(F.canceled) / COUNT(F.canceled) AS percent 
+FROM Flights AS F JOIN Carriers AS C 
+ON F.carrier_id = C.cid
+WHERE F.origin_city = 'Seattle_WA' 
+AND F.origin_state = 'Washington'
+GROUP BY C.name
+HAVING SUM(F.canceled) / COUNT(F.canceled) > 5 / 1000`;
+
+verify q1 q2;

@@ -1,0 +1,54 @@
+schema sch_flights(fid:int,
+    year:int,
+    month_id:int,
+    day_of_month:int,
+    day_of_week_id:int,
+    carrier_id:string,
+    flight_num:int,
+    origin_city:string,
+    origin_state:string,
+    dest_city:string,
+    dest_state:string,
+    departure_delay:int,
+    taxi_out:int,
+    arrival_delay:int,
+    canceled:int,
+    actual_time:int,
+    distance:int,
+    capacity:int,
+    price:int
+);
+schema sch_carriers
+(
+    cid:int,
+    name:string
+);
+SCHEMA sch_months
+(
+    mid:int,
+    month:string
+);
+SCHEMA sch_days
+(
+    did:int,
+    day_of_week:string
+);
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`select c.name as carrier, sum(f.price) / count(f.price) as average_price
+from FLIGHTS as f join CARRIERS as c on f.carrier_id = c.cid
+where (f.origin_city = 'Seattle_WA' and f.dest_city = 'New_York_NY')
+or (f.origin_city = 'New_York_NY' and f.dest_city = 'Seattle_WA')
+group by c.cid, c.name`;
+
+query q2
+`select C.name as carrier, sum(f.price) / count(f.price) as average_price
+from FLIGHTS as F, Carriers as C
+where F.carrier_id = C.cid and F.origin_city = 'Seattle_WA' and F.dest_city = 'New_York_NY'
+group by C.cid, C.name`;
+
+verify q1 q2;

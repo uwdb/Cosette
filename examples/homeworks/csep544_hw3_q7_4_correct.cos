@@ -1,0 +1,57 @@
+schema sch_flights(fid:int,
+    year:int,
+	month_id:int,
+	day_of_month:int,
+	day_of_week_id:int,
+	carrier_id:string,
+	flight_num:int,
+	origin_city:string,
+	origin_state:string,
+	dest_city:string,
+	dest_state:string,
+	departure_delay:int,
+	taxi_out:int,
+	arrival_delay:int,
+	canceled:int,
+	actual_time:int,
+	distance:int,
+	capacity:int,
+	price:int
+);
+
+schema sch_carriers
+(
+	cid:int,
+	name:string
+);
+
+SCHEMA sch_months
+(
+	mid:int,
+	month:string
+);
+
+SCHEMA sch_days
+(
+	did:int,
+	day_of_week:string
+);
+
+table Flights(sch_flights);
+table Carriers(sch_carriers);
+table Weekdays(sch_days);
+table Months(sch_months);
+
+query q1
+`select distinct C.name as carrier
+from Flights F, Carriers C
+where F.origin_city = 'Seattle_WA' 
+and F.dest_city = 'San_Francisco_CA' 
+and F.carrier_id = C.cid`;
+
+query q2
+`select distinct c.name as carrier
+from CARRIERS as c
+where exists (select * from Flights as f where f.origin_city = 'Seattle_WA' and f.dest_city = 'San_Francisco_CA' and f.carrier_id = c.cid)`;
+
+verify q1 q2;
