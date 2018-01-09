@@ -30,10 +30,36 @@
       (hasheq 'status status
               'counter-example (map (lambda (t) (table->jsexpr t)) tables)))))
 
+; remove symbolic values from a ret-table to make it executable
+(define (clean-ret-table table)
+  (let* ([name (Table-name table)]
+         [schema (Table-schema table)]
+         [content (Table-content table)]
+         [new-content 
+          (map (lambda (r) 
+                 (cons 
+                   (map (lambda (v) (zero-if-symbolic v)) (car r))
+                   (zero-if-symbolic (cdr r)))) content)])
+    (Table name schema new-content)))
+
+(define (zero-if-symbolic v)
+  (cond [(term? v) 0]
+        [else v])) 
+
 (define (cosette-solve q1 q2 input-tables)
   (let ([solution (verify (same q1 q2))])
     (cond 
-      [(sat? solution) (cons "NEQ" (evaluate input-tables solution))]
+      [(sat? solution) 
+       (let* ([tables (evaluate input-tables solution)]
+              [q1t (evaluate q1 solution)]
+              [q2t (evaluate q2 solution)]
+              [clean-tables (map clean-ret-table tables)])
+         (println "")
+         (println "### Table evaluation results:")
+         (println (clean-ret-table (denote-and-run q1t)))
+         (println (clean-ret-table (denote-and-run q2t)))
+         (println "")
+         (cons "NEQ" clean-tables))]
       [else (cons "EQ"  (list))]))) 
 
 (define (table->jsexpr t) 

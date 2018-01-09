@@ -52,12 +52,12 @@ query q2
 `select distinct f.flight_num
 from flights f, weekdays w, carriers c
 where
-f.Ocity = 'Seattle_WA' and
-f.Dcity ='Boston_MA' and
-f.carrier = c.cid and
+f.origin_city = 'Seattle_WA' and
+f.dest_city ='Boston_MA' and
+f.carrier_id = c.cid and
 c.name = 'Alaska_Airlines_Inc.' and
-f.dow = w.did and
-w.dow ='Monday' and
+f.day_of_week_id = w.did and
+w.day_of_week ='Monday' and
 f.canceled = 0`;
 
 verify q1 q2;

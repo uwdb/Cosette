@@ -19,7 +19,7 @@
 
 (define (q1 tables) 
   (SELECT-DISTINCT (VALS "f.origin_city" "f.dest_city" "f.actual_time") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (AS (SELECT (VALS origin_city (VAL-UNOP aggr-max (val-column-ref "a.actual_time"))) 
+  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (AS (SELECT (VALS "a.origin_city" (VAL-UNOP aggr-max (val-column-ref "a.actual_time"))) 
  FROM (NAMED (RENAME (list-ref tables 3) "a")) 
  WHERE (TRUE) GROUP-BY (list "a.origin_city") 
  HAVING (TRUE)) ["x" (list "origin_city" "max_time")])) 

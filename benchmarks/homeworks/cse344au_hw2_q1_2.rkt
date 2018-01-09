@@ -29,7 +29,7 @@
 (define (q2 tables) 
   (SELECT-DISTINCT (VALS "f.flight_num") 
   FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (JOIN (NAMED (RENAME (list-ref tables 1) "w")) (NAMED (RENAME (list-ref tables 2) "c")))) 
-  WHERE (AND (AND (AND (AND (AND (AND (BINOP "f.ocity" = str_seattle_wa_) (BINOP "f.dcity" = str_boston_ma_)) (BINOP "f.carrier" = "c.cid")) (BINOP "c.name" = str_alaska_airlines_inc._)) (BINOP "f.dow" = "w.did")) (BINOP "w.dow" = str_monday_)) (BINOP "f.canceled" = 0))))
+  WHERE (AND (AND (AND (AND (AND (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_boston_ma_)) (BINOP "f.carrier_id" = "c.cid")) (BINOP "c.name" = str_alaska_airlines_inc._)) (BINOP "f.day_of_week_id" = "w.did")) (BINOP "w.day_of_week" = str_monday_)) (BINOP "f.canceled" = 0))))
 
 
 (define ros-instance (list q1 q2 (list months-info weekdays-info carriers-info flights-info))) 
