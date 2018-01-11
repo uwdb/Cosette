@@ -68,7 +68,6 @@ def prepare_hw_benchmarks(input_dir, output_dir):
                     print(case_name)
 
 
-
 def run_benchmarks(input_dir, cosette_dir="."):
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and (not fname.startswith("__")):

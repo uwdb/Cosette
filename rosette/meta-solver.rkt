@@ -163,7 +163,7 @@
             [q2-name-hash (list->hash q2-schema)]
             [q1-new-qid (* qid 2)]
             [q2-new-qid (+ (* qid 2) 1)]
-            [ref-map 
+            [ref-map
              (map (lambda (i) (cond [(< i (length q1-schema)) (v-ref q1-new-qid i)] 
                                     [else (v-ref q2-new-qid (- i (length q1-schema)))]))
                   (build-list (+ (length q1-schema) (length q2-schema)) values))]

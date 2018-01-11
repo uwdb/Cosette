@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../meta-solver.rkt" "../sql.rkt" 
+(require "../symmetry.rkt" "../sql.rkt" 
          "../syntax.rkt" "../denotation.rkt" 
          "../table.rkt" "../evaluator.rkt" "../util.rkt")
 
@@ -51,10 +51,27 @@
         ["t" (list "id1" "name" "cname" "id2")])
     WHERE (BINOP "t.id1" < "t.id2")))
 
+(define q32
+   (SELECT-DISTINCT (VALS "t.id1" "t.name" "t.cname" "t.id2")
+    FROM  (AS (JOIN (NAMED instructor) (NAMED teaches))
+        ["t" (list "id1" "name" "cname" "id2")])
+    WHERE (BINOP "t.id1" < "t.id2")))
+
 (define q4
    (SELECT (VALS "t.id1" "t.name" "t.cname" "t.id2")
     FROM  (AS (JOIN (NAMED instructor) (NAMED teaches))
         ["t" (list "id1" "name" "cname" "id2")])
     WHERE (BINOP "t.id1" >= "t.id2")))
 
-(println (to-str-set (propogate q1 (list (init-constraint (length (extract-schema q1)) 1)) 1 999)))
+(define c2 (small-step-sum-eq (init-constraint q1) 0))
+(define c3 (big-step (init-constraint q3) 10))
+(define xxx (init-constraint q32))
+(define c32 (big-step xxx 10))
+
+
+(displayln (to-str c3))
+(displayln (to-str c32))
+;"SumEQ((r[0] = r[3]) ∧ ((r[3] = $2) ∧ (r[2] = $1) ∧ (r[0] = $0)))"
+;"∀{ (rc8[0] = rd9[1]) ∧ ((rd9[1] = @2) ∧ (rd9[0] = @1) ∧ (rc8[0] = @0)) }  "
+
+

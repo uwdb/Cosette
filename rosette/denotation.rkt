@@ -159,6 +159,8 @@
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]
+    [(query-select-distinct? query)
+     (map (lambda (x) "dummy") (query-select-distinct-select-args query))]
     [(query-aggr-general? query)
      (map (lambda (x) "dummy") (query-aggr-general-select-args query))]))
 
