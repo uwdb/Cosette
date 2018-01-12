@@ -45,10 +45,13 @@
     WHERE (AND (BINOP "Picture.uid" = 3)
                (AND (BINOP "Picture.size" > 99) (BINOP "Picture.size" < 101)))))
 
-(displayln (to-str (small-step-sum-eq (init-constraint q1) 0)))
-(displayln (to-str (small-step-sum-eq (init-constraint q2) 0)))
-(displayln (to-str (small-step-sum-eq (init-constraint q3) 0)))
+;(displayln (to-str (small-step-sum-eq (init-constraint q1) 0)))
+;(displayln (to-str (small-step-sum-eq (init-constraint q2) 0)))
+;(displayln (to-str (small-step-sum-eq (init-constraint q3) 0)))
 ;(println (to-str-set (propogate q3 (list (init-constraint (length (extract-schema q3)) 1)) 1 999)))
+(displayln (to-str (go-break-symmetry-bounded q1 q2)))
+(displayln (to-str (go-break-symmetry-bounded q2 q3)))
+
 
 
 ; (time (verify (same q1 q2)))

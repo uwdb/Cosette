@@ -16,8 +16,7 @@
 
 (define c-teaches
   (Table "t" (list "cname" "id")
-         (list
-          (cons (list 2 3) 1))))
+         (list (cons (list 2 3) 1))))
 
 ; ------------ symbolic tables ----------------
 ; we need at least two rows
@@ -68,5 +67,6 @@
 (define xxx (init-constraint q32))
 (define c32 (big-step xxx 10))
 
-(displayln (constr-flatten (to-str c3)))
-(displayln (constr-flatten (to-str c32)))
+
+(displayln (to-str (go-break-symmetry-bounded q1 q2)))
+

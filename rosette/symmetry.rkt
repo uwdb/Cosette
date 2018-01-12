@@ -5,8 +5,6 @@
 (provide (all-defined-out))
 
 ;; meta constraint language
-
-(struct constr-list (constrs) #:transparent)
 (struct forall-eq (query constr) #:transparent)
 (struct sum-eq (queries constr) #:transparent)
 
@@ -22,30 +20,47 @@
 (struct v-bexpr (op v1 v2) #:transparent)
 (struct v-uexpr (op v) #:transparent)
 (struct v-ref (id) #:transparent) ; referencing a cell in the row
-(struct v-symval (id) #:transparent)
+(struct v-symval (id) #:transparent) ; a symbolic value with its id
+
+;;;;;;;;;;;; functions for generating symmetry breaking conditions ;;;;;;;;;;;;
+
+(define (go-break-symmetry-bounded q1 q2)
+  (let ([c1 (big-step (init-forall-eq-constraint q1) 20)]
+        [c2 (big-step (init-forall-eq-constraint q2) 20)])
+   (constr-flatten (merge-forall-eq (flatten (list c1 c2))))))
 
 (define (init-constraint query)
+  ; initialize a the constraint for symmetry breaking
   (sum-eq (list query) 
           (c-conj (build-list (length (extract-schema query)) 
                               (lambda (x) (c-primitive (v-ref x) = (v-symval x)))))))
 
+(define (init-forall-eq-constraint query)
+  ; initialize a the constraint for symmetry breaking
+  (forall-eq query
+             (c-conj (build-list (length (extract-schema query)) 
+                                 (lambda (x) (c-primitive (v-ref x) = (v-symval x)))))))
+
 (define (big-step mconstr fuel)
+  ; big-step semantics for constraint propogation,
+  ; fuel is supposed to be greater or equal than depth of the ast
   (cond
     [(eq? fuel 0) mconstr]
-    [else 
-      (cond 
-        [(forall-eq? mconstr) (big-step (small-step-forall-eq mconstr) (- fuel 1))]
-        [(sum-eq? mconstr) (big-step (small-step-sum-eq mconstr 0) (- fuel 1))]
-        [(list? mconstr) (map (lambda (mc) (big-step mc fuel)) mconstr)])]))
+    [(forall-eq? mconstr) (big-step (small-step-forall-eq mconstr) (- fuel 1))]
+    [(sum-eq? mconstr) (big-step (small-step-sum-eq mconstr 0) (- fuel 1))]
+    [(list? mconstr) (map (lambda (mc) (big-step mc fuel)) mconstr)]))
 
 (define (sum-eq->forall-eq mconstr)
+  ; generates forall-eq to sum-eq, 
+  ; which strenghtens the constraint (as the space is further restricted)
   (let ([queries (sum-eq-queries mconstr)]
         [core (sum-eq-constr mconstr)])
     (if (eq? (length queries) 1)
-        (forall-eq (car queries) core)
-        (forall-eq (foldl (lambda (v r) (JOIN r v)) (car queries) (cdr queries)) core))))
+      (forall-eq (car queries) core)
+      (forall-eq (foldl (lambda (v r) (JOIN r v)) (car queries) (cdr queries)) core))))
 
 (define (small-step-sum-eq mconstr index)
+  ; small step semantics for propogating sum-eq constraints 
   (cond 
     [(>= index (length (sum-eq-queries mconstr))) mconstr] ; no need to update query
     [else
@@ -54,8 +69,10 @@
              [queries-before (take queries index)]
              [queries-after (drop queries (+ index 1))]
              [q-schema-size (length (extract-schema query))]
-             [schema-size-before (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-before))]
-             [schema-size-after (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-after))])
+             [schema-size-before 
+              (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-before))]
+             [schema-size-after 
+              (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-after))])
         (cond
           [(query-named? (list-ref queries index)) ; no step needed, move to the next index
            (small-step-sum-eq mconstr (+ index 1))]
@@ -66,13 +83,15 @@
                   [inner-q-schema (extract-schema inner-q)]
                   [inner-q-schema-size (length (extract-schema inner-q))]
                   [inner-q-name-hash 
-                    (make-hash (map (lambda (i) (cons (list-ref inner-q-schema i) (+ i schema-size-before))) 
+                    (make-hash (map (lambda (i) (cons (list-ref inner-q-schema i) 
+                                                      (+ i schema-size-before))) 
                                     (build-list (length inner-q-schema) values)))]
                   [ref-map
                     (append 
                       (build-list schema-size-before values)
                       (map (lambda (v) (v-from-sql-val v inner-q-name-hash)) sel-args)
-                      (build-list schema-size-after (lambda (x) (+ x schema-size-before inner-q-schema-size))))])
+                      (build-list schema-size-after 
+                                  (lambda (x) (+ x schema-size-before inner-q-schema-size))))])
              (sum-eq
                (append queries-before (list inner-q) queries-after)
                (c-conj (list (subst-v-ref (sum-eq-constr mconstr) ref-map) 
@@ -84,13 +103,15 @@
                   [inner-q-schema (extract-schema inner-q)]
                   [inner-q-schema-size (length (extract-schema inner-q))]
                   [inner-q-name-hash 
-                    (make-hash (map (lambda (i) (cons (list-ref inner-q-schema i) (+ i schema-size-before))) 
+                    (make-hash (map (lambda (i) (cons (list-ref inner-q-schema i) 
+                                                      (+ i schema-size-before))) 
                                     (build-list (length inner-q-schema) values)))]
                   [ref-map
                     (append 
                       (build-list schema-size-before values)
                       (map (lambda (v) (v-from-sql-val v inner-q-name-hash)) sel-args)
-                      (build-list schema-size-after (lambda (x) (+ x schema-size-before inner-q-schema-size))))])
+                      (build-list schema-size-after 
+                                  (lambda (x) (+ x schema-size-before inner-q-schema-size))))])
              (sum-eq
                (append queries-before (list inner-q) queries-after)
                (c-conj (list (subst-v-ref (sum-eq-constr mconstr) ref-map) 
@@ -116,10 +137,11 @@
           [else (small-step-forall-eq (sum-eq->forall-eq mconstr))]))]))
 
 (define (small-step-forall-eq mconstr)
+  ; small step semantics for propogating forall-eq constraints
   (let* ([query (forall-eq-query mconstr)]
          [schema-size (length (extract-schema query))])
     (cond 
-      [(query-named? query) mconstr] ; no step needed, move to the next index
+      [(query-named? query) mconstr] ; do nothing
       [(query-select? query)
        (let* ([inner-q (query-select-from-query query)]
               [sel-args (query-select-select-args query)]
@@ -133,18 +155,19 @@
            (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
                          (c-from-sql-filter sel-pred inner-q-name-hash)))))]
       [(query-aggr-general? query)
-        (let* ([sel-args (query-aggr-general-select-args query)]
-               [where-pred (query-aggr-general-where-filter query)]
-               [having-pred (query-aggr-general-having-filter query)]
-               [gb-fields (query-aggr-general-gb-fields query)]
-               [inner-q (query-aggr-general-query query)]
-               [inner-q-schema (extract-schema inner-q)]
-               [inner-q-name-hash (list->hash inner-q-schema)]
-               [ref-map (map (lambda (v) (v-from-sql-val v inner-q-name-hash)) sel-args)]
-               [core-constr (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
-                                          (c-from-sql-filter having-pred inner-q-name-hash)
-                                          (c-from-sql-filter where-pred inner-q-name-hash)))])
-          (forall-eq inner-q (remove-constr-if-val core-constr contain-aggr-uexpr)))]
+       (let* ([sel-args (query-aggr-general-select-args query)]
+              [where-pred (query-aggr-general-where-filter query)]
+              [having-pred (query-aggr-general-having-filter query)]
+              [gb-fields (query-aggr-general-gb-fields query)]
+              [inner-q (query-aggr-general-query query)]
+              [inner-q-schema (extract-schema inner-q)]
+              [inner-q-name-hash (list->hash inner-q-schema)]
+              [ref-map (map (lambda (v) (v-from-sql-val v inner-q-name-hash)) sel-args)]
+              [core-constr (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
+                                         (c-from-sql-filter having-pred inner-q-name-hash)
+                                         (c-from-sql-filter where-pred inner-q-name-hash)))])
+         ; loosing constraints by removing those involving aggregation functions
+         (forall-eq inner-q (remove-constr-if-val core-constr contain-aggr-uexpr)))]
       [(query-select-distinct? query)
        (let* ([inner-q (query-select-distinct-from-query query)]
               [sel-args (query-select-distinct-select-args query)]
@@ -168,11 +191,13 @@
               [q2-ref-update-map (map (lambda (x) (v-ref x))
                                       (append (build-list q1-schema-size values) 
                                               (build-list q2-schema-size values)))])
-         (list (forall-eq q1 (remove-constr-if-val (forall-eq-constr mconstr) 
-                                                   (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
+         (list (forall-eq q1 (remove-constr-if-val 
+                               (forall-eq-constr mconstr) 
+                               (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
                (forall-eq q2 (subst-v-ref
-                               (remove-constr-if-val (forall-eq-constr mconstr) 
-                                                     (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
+                               (remove-constr-if-val 
+                                 (forall-eq-constr mconstr)
+                                 (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
                                q2-ref-update-map))))]
       [(or (query-rename-full? query) (query-rename? query))
        (let* ([q (cond [(query-rename-full? query) (query-rename-full-query query)]
@@ -185,15 +210,14 @@
            (forall-eq q1 (forall-eq-constr mconstr))
            (forall-eq q2 (forall-eq-constr mconstr))))])))
 
-
-;; substitutes primitive constraints with (c-true) if any of its value
-;; satisfies the condition specify f 
 (define (remove-constr-if-val constr f)
+  ; substitutes primitive constraints with (c-true) if any of its value
+  ; satisfies the condition specify function f, typed (f::val->bool) 
   (cond
     [(c-primitive? constr)
      (if (or (f (c-primitive-left constr)) (f (c-primitive-right constr)))
-         (c-true) ; the primitive pred contains some value satisfying function f
-         constr)]
+       (c-true) ; the primitive pred contains some value satisfying function f
+       constr)]
     [(c-true? constr) constr]
     [(c-false? constr) constr]
     [(c-conj? constr) 
@@ -213,8 +237,9 @@
        (c-true)
        constr)]))
 
-;; check if the value contain a reference that is outside the range provided by the list ref-indexes
 (define (contain-out-of-range-v-ref v ref-indexes)
+  ;; check if the value contain a reference that is outside 
+  ;; the range provided by the list ref-indexes
   (cond 
     [(v-uexpr? v) (contain-out-of-range-v-ref (v-uexpr-v v) ref-indexes)]
     [(v-bexpr? v) (or (contain-out-of-range-v-ref (v-bexpr-v1 v) ref-indexes)
@@ -223,14 +248,15 @@
     [else #f]))
 
 (define (contain-aggr-uexpr v)
+  ;; check whether a value contains aggregation function
   (cond 
     [(v-uexpr? v) (is-aggr-func? (v-uexpr-op v))]
     [(v-bexpr? v) (or (contain-aggr-uexpr (v-bexpr-v1 v))
                       (contain-aggr-uexpr (v-bexpr-v2 v)))]
     [else #f]))
 
-; convert sql val expr into meta v expr
 (define (v-from-sql-val v vmap) 
+  ; convert sql val expr into meta v expr:
   ; generate a meta constraint v expr from a vmap
   ; vmap maps each column-ref primitive into a v-ref that uses the row id
   (cond 
@@ -257,7 +283,6 @@
     [(filter-false? f) (c-false)] ; currently not supporting n-nary filter operation
     ))
 
-
 (define (subst-v-ref v ref-map)
   ; subst values in the constriant based on ref-map 
   (cond
@@ -282,8 +307,8 @@
     [(v-symval? v) v]
     [else v]))
 
-
 (define (constr-flatten v)
+  ; flattening nested conjunctions into one single conjunction
   (cond
     [(list? v) (map (lambda (x) (constr-flatten x)) v)]
     [(forall-eq? v) (forall-eq (forall-eq-query v) (constr-flatten (forall-eq-constr v)))]
@@ -295,19 +320,41 @@
        (c-conj (flatten content)))]
     [else v]))
 
+
+(define (merge-forall-eq raw-constraints)
+  ; merging constraints 
+  (let ([constraints (constr-flatten raw-constraints)])
+    (cond [(empty? constraints) (list)]
+          [else (let* ([q (forall-eq-query (car constraints))]
+                       [t-constrs (filter (lambda (c) (eq? q (forall-eq-query c))) constraints)]
+                       [cores (map (lambda (c) 
+                                     (let ([x (forall-eq-constr c)])
+                                       (if (c-conj? x) (c-conj-preds x) (list x)))) t-constrs)]
+                       [rest-constrs (filter (lambda (c) (not (eq? q (forall-eq-query c)))) 
+                                             (cdr constraints))])
+                  (append (list (forall-eq q (c-conj (auto-set-intersect cores)))) 
+                          (merge-forall-eq rest-constrs)))])))
+
+(define (auto-set-intersect lists)
+  (cond [(empty? lists) (list)]
+        [(eq? (length lists) 1) (car lists)]
+        [else (set-intersect (car lists) (auto-set-intersect (cdr lists)))]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 (define (queries-to-str queries)
+  ; pretty printing tables involved in these constraints
   (let ([f (lambda (q) (cond [(query-named? q) (Table-name (query-named-table-ref q))]
                              [else "q"]))])
     (foldl (lambda (x y) (string-append x "," y)) "" (map f queries))))
 
-;; given a constraint, print it as a string for the purpose of reading
 (define (to-str v)
+  ; pretty printing a constraint
   (cond
-    [(list? v) (foldl (lambda (x y) (string-append x "\n" y)) "" (map (lambda (c) (to-str c)) v))]
+    [(list? v) (foldl (lambda (x y) (string-append x "\n" y)) "" 
+                      (map (lambda (c) (to-str c)) v))]
     [(forall-eq? v) (format "~a\nForallEQ[~a]" (queries-to-str (list (forall-eq-query v))) 
                             (to-str (forall-eq-constr v)))]
     [(sum-eq? v) (format "~a\nSumEQ[~a]" (queries-to-str (sum-eq-queries v)) 
@@ -317,10 +364,12 @@
              (to-str (c-primitive-right v)))]
     [(c-true? v) "#t"]
     [(c-false? v) "#f"]
-    [(c-conj? v) 
+    [(c-conj? v)
      (let ([content (map (lambda (x) (format "(~a)" (to-str x))) (c-conj-preds v))])
-       (format "~a" (foldl (lambda (x y) (format "~a \u2227 ~a" x y)) 
-                           (car content) (cdr content))))]
+       (if (>= (length content) 1)
+           (format "~a" (foldl (lambda (x y) (format "~a \u2227 ~a" x y)) 
+                               (car content) (cdr content)))
+           ""))]
     [(c-disj? v) 
      (let ([content (map (lambda (x) (to-str x)) (c-conj-preds v))])
        (format "~a" (foldl (lambda (x y) (format "~a \u2228 ~a" x y)) 

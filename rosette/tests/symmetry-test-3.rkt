@@ -40,15 +40,12 @@
 (define c1 (big-step (init-constraint qt1) 20))
 (define c2 (big-step (init-constraint qt2) 20))
 
-(displayln (to-str (constr-flatten c1)))
+;(displayln (to-str (constr-flatten c1)))
 ;(displayln (to-str (constr-flatten c2)))
 
 (displayln "---")
 
-(define d1 (big-step (sum-eq->forall-eq c1) 10))
-(displayln (to-str (constr-flatten d1)))
-
-(displayln "---")
-
 ;(displayln (to-str (init-forall-eq-constraint qt1)))
+
+(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 

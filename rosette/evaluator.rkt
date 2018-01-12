@@ -248,7 +248,8 @@
       (string-append (get-table-name table1)
                      (get-table-name table2))
       (schema-join table1 table2) 
-      (left-outer-join-raw content1 content2 index1 index2 (length (get-schema table1)) (length (get-schema table2))))))
+      (left-outer-join-raw content1 content2 index1 index2 
+                           (length (get-schema table1)) (length (get-schema table2))))))
 
 ; another version of left-outer-join
 (define (left-outer-join-2 table1 table2 table12)
