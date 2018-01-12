@@ -23,12 +23,12 @@
 
 (define (q1 tables) 
   (SELECT-DISTINCT (VALS "f.flight_num") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (JOIN (NAMED (RENAME (list-ref tables 2) "c")) (NAMED (RENAME (list-ref tables 1) "d")))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (JOIN (AS (NAMED (list-ref tables 2)) ["c"]) (AS (NAMED (list-ref tables 1)) ["d"]))) 
   WHERE (AND (AND (AND (AND (AND (BINOP "f.carrier_id" = "c.cid") (BINOP "f.day_of_week_id" = "d.did")) (BINOP "c.name" = str_alaska_airlines_inc._)) (BINOP "d.day_of_week" = str_monday_)) (BINOP "f.origin_city" = str_seattle_wa_)) (BINOP "f.dest_city" = str_boston_ma_))))
 
 (define (q2 tables) 
   (SELECT-DISTINCT (VALS "f.flight_num") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
   WHERE (AND (AND (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_boston_ma_)) (BINOP "c.cid" = "f.carrier_id")) (BINOP "c.name" = str_alaska_airlines_inc._))))
 
 

@@ -21,13 +21,13 @@
 
 (define (q1 tables) 
   (SELECT (VALS "c.name" (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.canceled")) div_ (VAL-UNOP aggr-count (val-column-ref "c.cid")))) 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
  WHERE (AND (BINOP "c.cid" = "f.carrier_id") (BINOP "f.origin_city" = str_seattle_wa_)) GROUP-BY (list "c.cid" "c.name") 
  HAVING (BINOP (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.canceled")) div_ (VAL-UNOP aggr-count (val-column-ref "c.cid"))) > (VAL-BINOP 5 div_ 1000))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.name" (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.canceled")) div_ (VAL-UNOP aggr-count (val-column-ref "f.canceled")))) 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
  WHERE (AND (BINOP "f.carrier_id" = "c.cid") (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.origin_state" = str_washington_))) GROUP-BY (list "c.name") 
  HAVING (BINOP (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.canceled")) div_ (VAL-UNOP aggr-count (val-column-ref "f.canceled"))) > (VAL-BINOP 5 div_ 1000))))
 

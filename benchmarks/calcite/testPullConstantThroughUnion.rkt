@@ -13,17 +13,17 @@
 
 (define (q1 tables) 
   (UNION-ALL (SELECT (VALS 2 "emp.deptno" "emp.job") 
-  FROM (NAMED (RENAME (list-ref tables 0) "emp")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["emp"]) 
   WHERE (TRUE)) (SELECT (VALS 2 "emp0.deptno" "emp0.job") 
-  FROM (NAMED (RENAME (list-ref tables 0) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["emp0"]) 
   WHERE (TRUE))))
 
 (define (q2 tables) 
   (SELECT (VALS 2 "t6.deptno" "t6.job") 
   FROM (AS (UNION-ALL (SELECT (VALS "emp1.deptno" "emp1.job") 
-  FROM (NAMED (RENAME (list-ref tables 0) "emp1")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["emp1"]) 
   WHERE (TRUE)) (SELECT (VALS "emp2.deptno" "emp2.job") 
-  FROM (NAMED (RENAME (list-ref tables 0) "emp2")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["emp2"]) 
   WHERE (TRUE))) ["t6" (list "deptno" "job")]) 
   WHERE (TRUE)))
 

@@ -22,14 +22,14 @@
 
 (define (q1 tables) 
   (SELECT (VALS "dept.name" "dept.deptno" (VAL-UNOP aggr-count (val-column-ref "dept.deptno"))) 
- FROM (NAMED (RENAME (list-ref tables 3) "dept")) 
+ FROM (AS (NAMED (list-ref tables 3)) ["dept"]) 
  WHERE (TRUE) GROUP-BY (list "dept.name" "dept.deptno") 
  HAVING (BINOP "dept.name" = str_charlie_)))
 
 (define (q2 tables) 
   (SELECT (VALS "t3.dname" "t3.ddeptno" (VAL-UNOP aggr-count (val-column-ref "t2.dname"))) 
  FROM (AS (SELECT (VALS "dept0.name" "dept0.deptno") 
-  FROM (NAMED (RENAME (list-ref tables 3) "dept0")) 
+  FROM (AS (NAMED (list-ref tables 3)) ["dept0"]) 
   WHERE (TRUE)) ["t2" (list "dname" "ddeptno")]) 
  WHERE (BINOP "t2.dname" = str_charlie_) GROUP-BY (list "t3.dname" "t3.ddeptno") 
  HAVING (TRUE)))

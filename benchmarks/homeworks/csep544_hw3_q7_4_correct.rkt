@@ -21,14 +21,14 @@
 
 (define (q1 tables) 
   (SELECT-DISTINCT (VALS "c.name") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
   WHERE (AND (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_san_francisco_ca_)) (BINOP "f.carrier_id" = "c.cid"))))
 
 (define (q2 tables) 
   (SELECT-DISTINCT (VALS "c.name") 
-  FROM (NAMED (RENAME (list-ref tables 2) "c")) 
+  FROM (AS (NAMED (list-ref tables 2)) ["c"]) 
   WHERE (EXISTS (AS (SELECT (VALS "f.fid" "f.year" "f.month_id" "f.day_of_month" "f.day_of_week_id" "f.carrier_id" "f.flight_num" "f.origin_city" "f.origin_state" "f.dest_city" "f.dest_state" "f.departure_delay" "f.taxi_out" "f.arrival_delay" "f.canceled" "f.actual_time" "f.distance" "f.capacity" "f.price") 
-  FROM (NAMED (RENAME (list-ref tables 3) "f")) 
+  FROM (AS (NAMED (list-ref tables 3)) ["f"]) 
   WHERE (AND (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_san_francisco_ca_)) (BINOP "f.carrier_id" = "c.cid"))) ["anyname" (list "fid" "year" "month_id" "day_of_month" "day_of_week_id" "carrier_id" "flight_num" "origin_city" "origin_state" "dest_city" "dest_state" "departure_delay" "taxi_out" "arrival_delay" "canceled" "actual_time" "distance" "capacity" "price")]))))
 
 

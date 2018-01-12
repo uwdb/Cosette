@@ -13,14 +13,14 @@
 
 (define (q1 tables) 
   (SELECT (VALS "dept.name" (VAL-UNOP aggr-count (val-column-ref "dept.deptno"))) 
- FROM (NAMED (RENAME (list-ref tables 0) "dept")) 
+ FROM (AS (NAMED (list-ref tables 0)) ["dept"]) 
  WHERE (TRUE) GROUP-BY (list "dept.name") 
  HAVING (BINOP "dept.name" = 10)))
 
 (define (q2 tables) 
   (SELECT (VALS "t2.dname" (VAL-UNOP aggr-count (val-column-ref "t2.dname"))) 
  FROM (AS (SELECT (VALS "dept0.name") 
-  FROM (NAMED (RENAME (list-ref tables 0) "dept0")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["dept0"]) 
   WHERE (TRUE)) ["t2" (list "dname")]) 
  WHERE (BINOP "t2.dname" = 10) GROUP-BY (list "t2.dname") 
  HAVING (TRUE)))

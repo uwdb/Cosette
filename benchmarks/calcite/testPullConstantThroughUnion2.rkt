@@ -21,16 +21,16 @@
 
 (define (q1 tables) 
   (UNION-ALL (SELECT (VALS 2 "emp.deptno" "emp.job") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
   WHERE (TRUE)) (SELECT (VALS 1 "emp0.deptno" "emp0.job") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (TRUE))))
 
 (define (q2 tables) 
   (UNION-ALL (SELECT (VALS 2 "emp1.deptno" "emp1.job") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp1")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp1"]) 
   WHERE (TRUE)) (SELECT (VALS 1 "emp2.deptno" "emp2.job") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp2")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp2"]) 
   WHERE (TRUE))))
 
 

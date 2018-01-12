@@ -19,13 +19,13 @@
 
 (define (q1 tables) 
   (SELECT (VALS "x.origin_city") 
- FROM (NAMED (RENAME (list-ref tables 3) "x")) 
+ FROM (AS (NAMED (list-ref tables 3)) ["x"]) 
  WHERE (TRUE) GROUP-BY (list "x.origin_city") 
  HAVING (BINOP (VAL-UNOP aggr-max (val-column-ref "x.actual_time")) < 180)))
 
 (define (q2 tables) 
   (SELECT (VALS "f2.origin_city") 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f2")) (NAMED (RENAME (list-ref tables 3) "f1"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f2"]) (AS (NAMED (list-ref tables 3)) ["f1"])) 
  WHERE (BINOP "f1.origin_city" = "f2.origin_city") GROUP-BY (list "f2.origin_city") 
  HAVING (BINOP (VAL-UNOP aggr-max (val-column-ref "f1.actual_time")) < 180)))
 

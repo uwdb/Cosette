@@ -68,10 +68,5 @@
 (define xxx (init-constraint q32))
 (define c32 (big-step xxx 10))
 
-
-(displayln (to-str c3))
-(displayln (to-str c32))
-;"SumEQ((r[0] = r[3]) ∧ ((r[3] = $2) ∧ (r[2] = $1) ∧ (r[0] = $0)))"
-;"∀{ (rc8[0] = rd9[1]) ∧ ((rd9[1] = @2) ∧ (rd9[0] = @1) ∧ (rc8[0] = @0)) }  "
-
-
+(displayln (constr-flatten (to-str c3)))
+(displayln (constr-flatten (to-str c32)))

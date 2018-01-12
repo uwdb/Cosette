@@ -19,15 +19,14 @@
 (define-symbolic* str_july_ integer?) 
 
 (define (q1 tables) 
-  (SELECT (VALS "c.name" "f1.fid" "f1.origin_city" "f1.dest_city" "f1.actual_time" "f2.fid" "f2.origin_city" "f2.dest_city" "f2.actual_time" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f1")) (JOIN (NAMED (RENAME (list-ref tables 3) "f2")) (JOIN (NAMED (RENAME (list-ref tables 0) "m")) (NAMED (RENAME (list-ref tables 2) "c"))))) 
-  WHERE (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (BINOP "f1.month_id" = "m.mid") (BINOP "f1.carrier_id" = "c.cid")) (BINOP "f1.month_id" = "f2.month_id")) (BINOP "f1.day_of_month" = "f2.day_of_month")) (BINOP "f1.year" = "f2.year")) (BINOP "f1.carrier_id" = "f2.carrier_id")) (BINOP "m.month" = str_july_)) (BINOP "f1.day_of_month" = 15)) (BINOP "f1.year" = 2015)) (BINOP "f1.dest_city" = "f2.origin_city")) (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 420))))
+  (SELECT (VALS "c.name" "f1.flight_num" "f1.origin_city" "f1.dest_city" "f1.actual_time" "f2.flight_num" "f2.origin_city" "f2.dest_city" "f2.actual_time" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f1"]) (JOIN (AS (NAMED (list-ref tables 3)) ["f2"]) (JOIN (AS (NAMED (list-ref tables 0)) ["m"]) (AS (NAMED (list-ref tables 2)) ["c"])))) 
+  WHERE (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (BINOP "f1.dest_city" = "f2.origin_city") (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP "f1.month_id" = "f2.month_id")) (BINOP "f1.month_id" = "m.mid")) (BINOP "m.month" = str_july_)) (BINOP "f1.day_of_month" = "f2.day_of_month")) (BINOP "f1.day_of_month" = 15)) (BINOP "f1.year" = "f2.year")) (BINOP "f1.year" = 2015)) (BINOP "f1.carrier_id" = "f2.carrier_id")) (BINOP "f1.carrier_id" = "c.cid")) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 420))))
 
 (define (q2 tables) 
-  (SELECT (VALS "c.name" "f1.flight_num" "f1.origin_city" "f1.dest_city" "f1.actual_time" "f2.flight_num" "f2.origin_city" "f2.dest_city" "f2.actual_time" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f1")) (JOIN (NAMED (RENAME (list-ref tables 3) "f2")) (JOIN (NAMED (RENAME (list-ref tables 0) "m")) (NAMED (RENAME (list-ref tables 2) "c"))))) 
-  WHERE (AND (AND (AND (AND (AND (AND (BINOP "f1.carrier_id" = "c.cid") (BINOP "f2.carrier_id" = "c.cid")) (BINOP "f1.month_id" = "m.mid")) (BINOP "f2.month_id" = "m.mid")) (BINOP "f1.carrier_id" = "f2.carrier_id")) (BINOP "f1.dest_city" = "f2.origin_city")) (AND (AND (AND (AND (AND (AND (AND (BINOP "m.month" = str_july_) (BINOP "f1.day_of_month" = 15)) (BINOP "f2.day_of_month" = 15)) (BINOP "f1.year" = 2015)) (BINOP "f2.year" = 2015)) (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 420)))))
-
+  (SELECT (VALS "f1.carrier_id" "f1.flight_num" "f1.origin_city" "f1.dest_city" "f1.actual_time" "f2.flight_num" "f2.origin_city" "f2.dest_city" "f2.actual_time" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f1"]) (JOIN (AS (NAMED (list-ref tables 3)) ["f2"]) (AS (NAMED (list-ref tables 0)) ["m"]))) 
+  WHERE (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (BINOP "f1.carrier_id" = "f2.carrier_id") (BINOP "f1.dest_city" = "f2.origin_city")) (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP "f1.month_id" = "m.mid")) (BINOP "f2.month_id" = "m.mid")) (BINOP "f1.year" = 2015)) (BINOP "f2.year" = 2015)) (BINOP "m.month" = str_july_)) (BINOP "f1.day_of_month" = 15)) (BINOP "f2.day_of_month" = 15)) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 420))))
 
 (define table-info-list (list months-info weekdays-info carriers-info flights-info))
 (define table-size-list (make-list (length table-info-list) 1))
@@ -35,28 +34,21 @@
                                                          (list-ref table-size-list i)))
                     (build-list (length table-info-list) values)))
 
-
 (define qt1 (q1 tables))
 (define qt2 (q2 tables))
 
 (define c1 (big-step (init-constraint qt1) 20))
 (define c2 (big-step (init-constraint qt2) 20))
 
-;(displayln (to-str-set (constr-flatten c1)))
-;(displayln (to-str-set (constr-flatten c2)))
+(displayln (to-str (constr-flatten c1)))
+;(displayln (to-str (constr-flatten c2)))
+
+(displayln "---")
+
+(define d1 (big-step (sum-eq->forall-eq c1) 10))
+(displayln (to-str (constr-flatten d1)))
+
+(displayln "---")
 
 ;(displayln (to-str (init-forall-eq-constraint qt1)))
 
-(define c3 (big-step (init-forall-eq-constraint qt1) 20))
-(define c4 (big-step (init-forall-eq-constraint qt2) 20))
-
-;(displayln (to-str c3))
-;(displayln (to-str (car c3)))
-
-;(displayln (to-str-set c3))
-
-;(displayln (constr-flatten c3))
-
-
-(displayln (to-str (constr-flatten c3)))
-;(displayln (to-str (constr-flatten c4)))

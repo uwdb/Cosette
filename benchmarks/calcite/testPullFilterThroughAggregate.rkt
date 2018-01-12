@@ -22,14 +22,14 @@
 (define (q1 tables) 
   (SELECT (VALS "t0.ename" "t0.sal" "t0.deptno") 
  FROM (AS (SELECT (VALS "emp.ename" "emp.sal" "emp.deptno") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
   WHERE (TRUE)) ["t0" (list "ename" "sal" "deptno")]) 
  WHERE (BINOP "t0.sal" > 5000) GROUP-BY (list "t0.ename" "t0.sal" "t0.deptno") 
  HAVING (TRUE)))
 
 (define (q2 tables) 
   (SELECT (VALS "emp0.ename" "emp0.sal" "emp0.deptno") 
- FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+ FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
  WHERE (TRUE) GROUP-BY (list "emp0.ename" "emp0.sal" "emp0.deptno") 
  HAVING (BINOP "emp0.sal" > 5000)))
 

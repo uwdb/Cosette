@@ -14,13 +14,13 @@
 (define (q1 tables) 
   (SELECT (VALS "t.name") 
   FROM (AS (SELECT (VALS "dept.deptno" "dept.name") 
-  FROM (NAMED (RENAME (list-ref tables 0) "dept")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["dept"]) 
   WHERE (BINOP "dept.deptno" = 10)) ["t" (list "deptno" "name")]) 
   WHERE (BINOP "t.deptno" = 10)))
 
 (define (q2 tables) 
   (SELECT (VALS "dept0.name") 
-  FROM (NAMED (RENAME (list-ref tables 0) "dept0")) 
+  FROM (AS (NAMED (list-ref tables 0)) ["dept0"]) 
   WHERE (BINOP "dept0.deptno" = 10)))
 
 

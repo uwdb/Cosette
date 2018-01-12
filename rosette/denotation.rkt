@@ -152,7 +152,7 @@
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
            [cnames (extract-schema (query-rename-query query))])
-       (map (lambda (x) (string-append tn "." x)) cnames))]
+       (map (lambda (x) (string-append tn "." (last (string-split x ".")))) cnames))]
     [(query-rename-full? query)
      (let ([tn (query-rename-full-table-name query)]
            [cnames (query-rename-full-column-names query)])

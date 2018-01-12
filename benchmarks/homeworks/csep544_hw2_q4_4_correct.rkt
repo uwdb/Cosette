@@ -19,13 +19,13 @@
 
 (define (q1 tables) 
   (SELECT (VALS "c.name") 
- FROM (JOIN (NAMED (RENAME (list-ref tables 2) "c")) (NAMED (RENAME (list-ref tables 3) "f"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 2)) ["c"]) (AS (NAMED (list-ref tables 3)) ["f"])) 
  WHERE (BINOP "c.cid" = "f.carrier_id") GROUP-BY (list "c.cid" "c.name" "f.year" "f.month_id" "f.day_of_month") 
  HAVING (BINOP (VAL-UNOP aggr-count (val-column-ref "f.fid")) > 1000)))
 
 (define (q2 tables) 
   (SELECT (VALS "c.name") 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (JOIN (NAMED (RENAME (list-ref tables 2) "c")) (NAMED (RENAME (list-ref tables 1) "w")))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (JOIN (AS (NAMED (list-ref tables 2)) ["c"]) (AS (NAMED (list-ref tables 1)) ["w"]))) 
  WHERE (AND (BINOP "f.carrier_id" = "c.cid") (BINOP "f.day_of_week_id" = "w.did")) GROUP-BY (list "c.name" "f.year" "f.month_id" "f.day_of_month") 
  HAVING (BINOP (VAL-UNOP aggr-count (val-column-ref "w.did")) > 1000)))
 

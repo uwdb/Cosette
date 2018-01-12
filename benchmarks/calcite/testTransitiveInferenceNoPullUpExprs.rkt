@@ -22,15 +22,15 @@
 (define (q1 tables) 
   (SELECT (VALS 1) 
   FROM (JOIN (AS (SELECT (VALS "emp.empno" "emp.ename" "emp.job" "emp.mgr" "emp.hiredate" "emp.comm" "emp.sal" "emp.deptno" "emp.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
-  WHERE (OR (OR (BINOP "emp.deptno" = 7) (BINOP "emp.deptno" = 9)) (BINOP "emp.comm" > 10))) ["t" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) (NAMED (RENAME (list-ref tables 4) "emp0"))) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
+  WHERE (OR (OR (BINOP "emp.deptno" = 7) (BINOP "emp.deptno" = 9)) (BINOP "emp.comm" > 10))) ["t" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) (AS (NAMED (list-ref tables 4)) ["emp0"])) 
   WHERE (BINOP "t.deptno" = "emp0.deptno")))
 
 (define (q2 tables) 
   (SELECT (VALS 1) 
   FROM (JOIN (AS (SELECT (VALS "emp1.empno" "emp1.ename" "emp1.job" "emp1.mgr" "emp1.hiredate" "emp1.comm" "emp1.sal" "emp1.deptno" "emp1.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp1")) 
-  WHERE (OR (OR (BINOP "emp1.deptno" = 7) (BINOP "emp1.deptno" = 9)) (BINOP "emp1.comm" > 10))) ["t1" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) (NAMED (RENAME (list-ref tables 4) "emp2"))) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp1"]) 
+  WHERE (OR (OR (BINOP "emp1.deptno" = 7) (BINOP "emp1.deptno" = 9)) (BINOP "emp1.comm" > 10))) ["t1" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) (AS (NAMED (list-ref tables 4)) ["emp2"])) 
   WHERE (BINOP "t1.deptno" = "emp2.deptno")))
 
 

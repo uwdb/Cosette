@@ -21,14 +21,14 @@
 
 (define (q1 tables) 
   (SELECT (VALS "dept.name") 
- FROM (NAMED (RENAME (list-ref tables 3) "dept")) 
+ FROM (AS (NAMED (list-ref tables 3)) ["dept"]) 
  WHERE (BINOP "dept.name" > 1) GROUP-BY (list "dept.name") 
  HAVING (AND (BINOP "dept.name" > 2) (OR (BINOP (VAL-UNOP aggr-count (val-column-ref "dept.deptno")) > 30) (BINOP "dept.name" < 3)))))
 
 (define (q2 tables) 
   (SELECT (VALS "t6.c1") 
  FROM (AS (SELECT (VALS "dept0.name") 
-  FROM (NAMED (RENAME (list-ref tables 3) "dept0")) 
+  FROM (AS (NAMED (list-ref tables 3)) ["dept0"]) 
   WHERE (BINOP "dept0.name" > 1)) ["t6" (list "c1")]) 
  WHERE (BINOP "t6.c1" > 2) GROUP-BY (list "t6.c1") 
  HAVING (OR (BINOP (VAL-UNOP aggr-count (val-column-ref "t6.c1")) > 30) (BINOP "t6.c1" < 3))))

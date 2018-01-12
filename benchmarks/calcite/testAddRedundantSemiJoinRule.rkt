@@ -15,12 +15,12 @@
 
 (define (q1 tables) 
   (SELECT (VALS 1) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 1) "emp")) (NAMED (RENAME (list-ref tables 0) "dept"))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 1)) ["emp"]) (AS (NAMED (list-ref tables 0)) ["dept"])) 
   WHERE (BINOP "emp.deptno" = "dept.deptno")))
 
 (define (q2 tables) 
   (SELECT (VALS 1) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 1) "emp0")) (JOIN (NAMED (RENAME (list-ref tables 0) "dept0")) (NAMED (RENAME (list-ref tables 0) "dept1")))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 1)) ["emp0"]) (JOIN (AS (NAMED (list-ref tables 0)) ["dept0"]) (AS (NAMED (list-ref tables 0)) ["dept1"]))) 
   WHERE (AND (BINOP "emp0.deptno" = "dept0.deptno") (BINOP "emp0.deptno" = "dept1.deptno"))))
 
 

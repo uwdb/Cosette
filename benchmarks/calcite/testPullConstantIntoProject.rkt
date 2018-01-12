@@ -21,12 +21,12 @@
 
 (define (q1 tables) 
   (SELECT (VALS "emp.deptno" (VAL-BINOP "emp.deptno" + 1) (VAL-BINOP "emp.empno" + "emp.deptno")) 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
   WHERE (BINOP "emp.deptno" = 10)))
 
 (define (q2 tables) 
   (SELECT (VALS 10 11 (VAL-BINOP "emp0.empno" + 10)) 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (BINOP "emp0.deptno" = 10)))
 
 

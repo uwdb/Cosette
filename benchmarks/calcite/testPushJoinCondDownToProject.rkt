@@ -21,15 +21,15 @@
 
 (define (q1 tables) 
   (SELECT (VALS "dept.deptno" "emp.deptno") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "dept")) (NAMED (RENAME (list-ref tables 4) "emp"))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["dept"]) (AS (NAMED (list-ref tables 4)) ["emp"])) 
   WHERE (BINOP (VAL-BINOP "dept.deptno" + 10) = (VAL-BINOP "emp.deptno" * 2))))
 
 (define (q2 tables) 
   (SELECT (VALS "t1.deptno" "t2.deptno") 
   FROM (JOIN (AS (SELECT (VALS "dept0.deptno" "dept0.name" (VAL-BINOP "dept0.deptno" + 10)) 
-  FROM (NAMED (RENAME (list-ref tables 3) "dept0")) 
+  FROM (AS (NAMED (list-ref tables 3)) ["dept0"]) 
   WHERE (TRUE)) ["t1" (list "deptno" "name" "f2")]) (AS (SELECT (VALS "emp0.empno" "emp0.ename" "emp0.job" "emp0.mgr" "emp0.hiredate" "emp0.sal" "emp0.comm" "emp0.deptno" "emp0.slacker" (VAL-BINOP "emp0.deptno" * 2)) 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (TRUE)) ["t2" (list "empno" "ename" "job" "mgr" "hiredate" "sal" "comm" "deptno" "slacker" "f9")])) 
   WHERE (BINOP "t1.f2" = "t2.f9")))
 

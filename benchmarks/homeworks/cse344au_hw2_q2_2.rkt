@@ -22,12 +22,12 @@
 
 (define (q1 tables) 
   (SELECT (VALS "c.name" "f1.flight_num" "f1.origin_city" "f1.dest_city" "f1.actual_time" "f2.flight_num" "f2.origin_city" "f2.dest_city" "f2.actual_time" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f1")) (JOIN (NAMED (RENAME (list-ref tables 3) "f2")) (JOIN (NAMED (RENAME (list-ref tables 0) "m")) (NAMED (RENAME (list-ref tables 2) "c"))))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f1"]) (JOIN (AS (NAMED (list-ref tables 3)) ["f2"]) (JOIN (AS (NAMED (list-ref tables 0)) ["m"]) (AS (NAMED (list-ref tables 2)) ["c"])))) 
   WHERE (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (BINOP "f1.dest_city" = "f2.origin_city") (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP "f1.month_id" = "f2.month_id")) (BINOP "f1.month_id" = "m.mid")) (BINOP "m.month" = str_july_)) (BINOP "f1.day_of_month" = "f2.day_of_month")) (BINOP "f1.day_of_month" = 15)) (BINOP "f1.year" = "f2.year")) (BINOP "f1.year" = 2015)) (BINOP "f1.carrier_id" = "f2.carrier_id")) (BINOP "f1.carrier_id" = "c.cid")) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 420))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.name" "f1.flight_num" "f1.origin_city" "f1.dest_city" "f2.flight_num" "f2.origin_city" "f2.dest_city" (VAL-BINOP "f1.actual_time" + "f2.actual_time")) 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f1")) (JOIN (NAMED (RENAME (list-ref tables 3) "f2")) (NAMED (RENAME (list-ref tables 2) "c")))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f1"]) (JOIN (AS (NAMED (list-ref tables 3)) ["f2"]) (AS (NAMED (list-ref tables 2)) ["c"]))) 
   WHERE (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (AND (BINOP "f1.carrier_id" = "c.cid") (BINOP "f1.year" = 2015)) (BINOP "f1.month_id" = 7)) (BINOP "f1.day_of_month" = 7)) (BINOP "f2.year" = 2015)) (BINOP "f2.month_id" = 7)) (BINOP "f2.day_of_month" = 7)) (BINOP "f1.origin_city" = str_seattle_wa_)) (BINOP "f2.origin_city" = "f1.dest_city")) (BINOP "f2.dest_city" = str_boston_ma_)) (BINOP "f1.carrier_id" = "f2.carrier_id")) (BINOP (VAL-BINOP "f1.actual_time" + "f2.actual_time") < 4200))))
 
 

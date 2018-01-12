@@ -22,15 +22,15 @@
 (define (q1 tables) 
   (SELECT (VALS 1) 
   FROM (JOIN (AS (SELECT (VALS "emp.comm") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
-  WHERE (BINOP "emp.deptno" > 7)) ["t0" (list "deptno")]) (NAMED (RENAME (list-ref tables 4) "emp0"))) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
+  WHERE (BINOP "emp.deptno" > 7)) ["t0" (list "deptno")]) (AS (NAMED (list-ref tables 4)) ["emp0"])) 
   WHERE (BINOP "t0.deptno" = "emp0.deptno")))
 
 (define (q2 tables) 
   (SELECT (VALS 1) 
   FROM (JOIN (AS (SELECT (VALS "emp1.comm") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp1")) 
-  WHERE (BINOP "emp1.deptno" > 7)) ["t3" (list "deptno")]) (NAMED (RENAME (list-ref tables 4) "emp2"))) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp1"]) 
+  WHERE (BINOP "emp1.deptno" > 7)) ["t3" (list "deptno")]) (AS (NAMED (list-ref tables 4)) ["emp2"])) 
   WHERE (BINOP "t3.deptno" = "emp2.deptno")))
 
 

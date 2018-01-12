@@ -21,16 +21,16 @@
 
 (define (q1 tables) 
   (SELECT (VALS "dept.deptno" "dept.name") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "dept")) (AS (SELECT (VALS "emp.deptno") 
- FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["dept"]) (AS (SELECT (VALS "emp.deptno") 
+ FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
  WHERE (BINOP "emp.sal" > 100) GROUP-BY (list "emp.deptno") 
  HAVING (TRUE)) ["t1" (list "deptno")])) 
   WHERE (BINOP "dept.deptno" = "t1.deptno")))
 
 (define (q2 tables) 
   (SELECT (VALS "dept0.deptno" "dept0.name" "t4.deptno") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "dept0")) (AS (SELECT (VALS "emp0.deptno") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["dept0"]) (AS (SELECT (VALS "emp0.deptno") 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (BINOP "emp0.sal" > 100)) ["t4" (list "deptno")])) 
   WHERE (BINOP "dept0.deptno" = "t4.deptno")))
 

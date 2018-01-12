@@ -21,13 +21,13 @@
 
 (define (q1 tables) 
   (SELECT (VALS "c.name" (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.price")) div_ (VAL-UNOP aggr-count (val-column-ref "f.price")))) 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
  WHERE (AND (BINOP "f.carrier_id" = "c.cid") (OR (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_new_york_ny_)) (AND (BINOP "f.origin_city" = str_new_york_ny_) (BINOP "f.dest_city" = str_seattle_wa_)))) GROUP-BY (list "c.cid" "c.name") 
  HAVING (TRUE)))
 
 (define (q2 tables) 
   (SELECT (VALS "c.name" (VAL-BINOP (VAL-UNOP aggr-sum (val-column-ref "f.price")) div_ (VAL-UNOP aggr-count (val-column-ref "f.price")))) 
- FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+ FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
  WHERE (AND (BINOP "f.carrier_id" = "c.cid") (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_new_york_ny_))) GROUP-BY (list "c.name") 
  HAVING (TRUE)))
 

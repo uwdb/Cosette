@@ -22,17 +22,17 @@
 (define (q1 tables) 
   (SELECT (VALS "t.sal") 
   FROM (AS (UNION-ALL (SELECT (VALS "emp.empno" "emp.ename" "emp.job" "emp.mgr" "emp.hiredate" "emp.comm" "emp.sal" "emp.deptno" "emp.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
   WHERE (TRUE)) (SELECT (VALS "emp0.empno" "emp0.ename" "emp0.job" "emp0.mgr" "emp0.hiredate" "emp0.comm" "emp0.sal" "emp0.deptno" "emp0.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (TRUE))) ["t" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) 
   WHERE (TRUE)))
 
 (define (q2 tables) 
   (UNION-ALL (SELECT (VALS "emp1.sal") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp1")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp1"]) 
   WHERE (TRUE)) (SELECT (VALS "emp2.sal") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp2")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp2"]) 
   WHERE (TRUE))))
 
 

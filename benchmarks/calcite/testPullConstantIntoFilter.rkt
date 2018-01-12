@@ -22,14 +22,14 @@
 (define (q1 tables) 
   (SELECT (VALS "t.empno" "t.ename" "t.job" "t.mgr" "t.hiredate" "t.comm" "t.sal" "t.deptno" "t.slacker") 
   FROM (AS (SELECT (VALS "emp.empno" "emp.ename" "emp.job" "emp.mgr" "emp.hiredate" "emp.comm" "emp.sal" "emp.deptno" "emp.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp"]) 
   WHERE (BINOP "emp.deptno" = 10)) ["t" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) 
   WHERE (BINOP (VAL-BINOP "t.deptno" + 5) > "t.empno")))
 
 (define (q2 tables) 
   (SELECT (VALS "t1.empno" "t1.ename" "t1.job" "t1.mgr" "t1.hiredate" "t1.comm" "t1.sal" "t1.deptno" "t1.slacker") 
   FROM (AS (SELECT (VALS "emp0.empno" "emp0.ename" "emp0.job" "emp0.mgr" "emp0.hiredate" "emp0.comm" "emp0.sal" "emp0.deptno" "emp0.slacker") 
-  FROM (NAMED (RENAME (list-ref tables 4) "emp0")) 
+  FROM (AS (NAMED (list-ref tables 4)) ["emp0"]) 
   WHERE (BINOP "emp0.deptno" = 10)) ["t1" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")]) 
   WHERE (BINOP 15 > "t1.empno")))
 

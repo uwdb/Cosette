@@ -24,16 +24,10 @@
 (struct v-ref (id) #:transparent) ; referencing a cell in the row
 (struct v-symval (id) #:transparent)
 
-
 (define (init-constraint query)
   (sum-eq (list query) 
           (c-conj (build-list (length (extract-schema query)) 
                               (lambda (x) (c-primitive (v-ref x) = (v-symval x)))))))
-
-(define (init-forall-eq-constraint query)
-  (forall-eq query 
-             (c-conj (build-list (length (extract-schema query)) 
-                                 (lambda (x) (c-primitive (v-ref x) = (v-symval x)))))))
 
 (define (big-step mconstr fuel)
   (cond
@@ -44,6 +38,12 @@
         [(sum-eq? mconstr) (big-step (small-step-sum-eq mconstr 0) (- fuel 1))]
         [(list? mconstr) (map (lambda (mc) (big-step mc fuel)) mconstr)])]))
 
+(define (sum-eq->forall-eq mconstr)
+  (let ([queries (sum-eq-queries mconstr)]
+        [core (sum-eq-constr mconstr)])
+    (if (eq? (length queries) 1)
+        (forall-eq (car queries) core)
+        (forall-eq (foldl (lambda (v r) (JOIN r v)) (car queries) (cdr queries)) core))))
 
 (define (small-step-sum-eq mconstr index)
   (cond 
@@ -56,7 +56,7 @@
              [q-schema-size (length (extract-schema query))]
              [schema-size-before (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-before))]
              [schema-size-after (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-after))])
-        (cond 
+        (cond
           [(query-named? (list-ref queries index)) ; no step needed, move to the next index
            (small-step-sum-eq mconstr (+ index 1))]
           [(query-select-distinct? query)
@@ -113,7 +113,7 @@
                        (sum-eq-constr mconstr))
                (sum-eq (append queries-before (list q2) queries-after)
                        (sum-eq-constr mconstr))))]
-          ))]))
+          [else (small-step-forall-eq (sum-eq->forall-eq mconstr))]))]))
 
 (define (small-step-forall-eq mconstr)
   (let* ([query (forall-eq-query mconstr)]
@@ -132,6 +132,19 @@
            inner-q
            (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
                          (c-from-sql-filter sel-pred inner-q-name-hash)))))]
+      [(query-aggr-general? query)
+        (let* ([sel-args (query-aggr-general-select-args query)]
+               [where-pred (query-aggr-general-where-filter query)]
+               [having-pred (query-aggr-general-having-filter query)]
+               [gb-fields (query-aggr-general-gb-fields query)]
+               [inner-q (query-aggr-general-query query)]
+               [inner-q-schema (extract-schema inner-q)]
+               [inner-q-name-hash (list->hash inner-q-schema)]
+               [ref-map (map (lambda (v) (v-from-sql-val v inner-q-name-hash)) sel-args)]
+               [core-constr (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
+                                          (c-from-sql-filter having-pred inner-q-name-hash)
+                                          (c-from-sql-filter where-pred inner-q-name-hash)))])
+          (forall-eq inner-q (remove-constr-if-val core-constr contain-aggr-uexpr)))]
       [(query-select-distinct? query)
        (let* ([inner-q (query-select-distinct-from-query query)]
               [sel-args (query-select-distinct-select-args query)]
@@ -155,9 +168,11 @@
               [q2-ref-update-map (map (lambda (x) (v-ref x))
                                       (append (build-list q1-schema-size values) 
                                               (build-list q2-schema-size values)))])
-         (list (forall-eq q1 (filter-constr-by-ref (forall-eq-constr mconstr) q1-ref-indexes))
+         (list (forall-eq q1 (remove-constr-if-val (forall-eq-constr mconstr) 
+                                                   (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
                (forall-eq q2 (subst-v-ref
-                               (filter-constr-by-ref (forall-eq-constr mconstr) q2-ref-indexes)
+                               (remove-constr-if-val (forall-eq-constr mconstr) 
+                                                     (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
                                q2-ref-update-map))))]
       [(or (query-rename-full? query) (query-rename? query))
        (let* ([q (cond [(query-rename-full? query) (query-rename-full-query query)]
@@ -170,41 +185,48 @@
            (forall-eq q1 (forall-eq-constr mconstr))
            (forall-eq q2 (forall-eq-constr mconstr))))])))
 
-;; remove constraints containing references whose id is out of the provided ref-indexes list.
-(define (filter-constr-by-ref constr ref-indexes)
-  (cond 
+
+;; substitutes primitive constraints with (c-true) if any of its value
+;; satisfies the condition specify f 
+(define (remove-constr-if-val constr f)
+  (cond
     [(c-primitive? constr)
-     (if (or (contain-out-of-range-v-ref (c-primitive-left constr) ref-indexes)
-             (contain-out-of-range-v-ref (c-primitive-right constr) ref-indexes))
-         (c-true) ;return a default c-true value
+     (if (or (f (c-primitive-left constr)) (f (c-primitive-right constr)))
+         (c-true) ; the primitive pred contains some value satisfying function f
          constr)]
     [(c-true? constr) constr]
     [(c-false? constr) constr]
     [(c-conj? constr) 
      (let ([filtered-content 
-            (filter (lambda (c) (not (c-true? c))) 
-                    (map (lambda (x) (filter-constr-by-ref x ref-indexes)) 
-                         (c-conj-preds constr)))])
+             (filter (lambda (c) (not (c-true? c))) 
+                     (map (lambda (x) (remove-constr-if-val x f)) 
+                          (c-conj-preds constr)))])
        (if (empty? filtered-content) (c-true) (c-conj filtered-content)))]
     [(c-disj? constr) 
      (let ([filtered-content 
-            (filter (lambda (c) (not (c-true? c))) 
-                    (map (lambda (x) (filter-constr-by-ref x ref-indexes)) 
-                         (c-disj-preds constr)))])
+             (filter (lambda (c) (not (c-true? c))) 
+                     (map (lambda (x) (remove-constr-if-val x f)) 
+                          (c-disj-preds constr)))])
        (if (empty? filtered-content) (c-true) (c-conj filtered-content)))]
     [(c-neg? constr) 
-     (if (contain-out-of-range-v-ref (c-neg-pred constr) ref-indexes)
-         (c-true) ;return a default c-true value
-         constr)]))
+     (if (remove-constr-if-val (c-neg-pred constr) f)
+       (c-true)
+       constr)]))
 
+;; check if the value contain a reference that is outside the range provided by the list ref-indexes
 (define (contain-out-of-range-v-ref v ref-indexes)
   (cond 
-    [(v-const? v) #f]
     [(v-uexpr? v) (contain-out-of-range-v-ref (v-uexpr-v v) ref-indexes)]
     [(v-bexpr? v) (or (contain-out-of-range-v-ref (v-bexpr-v1 v) ref-indexes)
                       (contain-out-of-range-v-ref (v-bexpr-v1 v) ref-indexes))]
     [(v-ref? v) (not (index-of ref-indexes (v-ref-id v)))]
-    [(v-symval? v) #f]
+    [else #f]))
+
+(define (contain-aggr-uexpr v)
+  (cond 
+    [(v-uexpr? v) (is-aggr-func? (v-uexpr-op v))]
+    [(v-bexpr? v) (or (contain-aggr-uexpr (v-bexpr-v1 v))
+                      (contain-aggr-uexpr (v-bexpr-v2 v)))]
     [else #f]))
 
 ; convert sql val expr into meta v expr
@@ -232,8 +254,7 @@
                                     (c-from-sql-filter (filter-disj-f2 f) vmap)))]
     [(filter-not? f) (c-neg (c-from-sql-filter (filter-not-f1 f) vmap))]
     [(filter-true? f) (c-true)]
-    [(filter-false? f) (c-false)]
-    ; currently not supporting n-nary filter operation
+    [(filter-false? f) (c-false)] ; currently not supporting n-nary filter operation
     ))
 
 
@@ -261,9 +282,6 @@
     [(v-symval? v) v]
     [else v]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 (define (constr-flatten v)
   (cond
@@ -276,6 +294,10 @@
                          (c-conj-preds v))])
        (c-conj (flatten content)))]
     [else v]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 (define (queries-to-str queries)
   (let ([f (lambda (q) (cond [(query-named? q) (Table-name (query-named-table-ref q))]
@@ -293,8 +315,8 @@
     [(c-primitive? v)
      (format "~a ~a ~a" (to-str (c-primitive-left v)) (c-primitive-op v) 
              (to-str (c-primitive-right v)))]
-    [(c-true? v) "T"]
-    [(c-false? v) "F"]
+    [(c-true? v) "#t"]
+    [(c-false? v) "#f"]
     [(c-conj? v) 
      (let ([content (map (lambda (x) (format "(~a)" (to-str x))) (c-conj-preds v))])
        (format "~a" (foldl (lambda (x y) (format "~a \u2227 ~a" x y)) 
@@ -305,13 +327,9 @@
                            (car content) (cdr content))))]
     [(c-neg? v) (format "\u00AC ~a" (to-str (c-neg-pred v)))]
     [(v-const? v) (format "~a" (v-const-c v))]
-    [(v-uexpr? v) (format "~a ~a" (v-uexpr-op v) (v-uexpr-v v))]
+    [(v-uexpr? v) (format "~a ~a" (v-uexpr-op v) (to-str (v-uexpr-v v)))]
     [(v-bexpr? v) (format "~a ~a ~a" (to-str (v-bexpr-v1 v)) (v-bexpr-op v) 
                           (to-str (v-bexpr-v2 v)))]
     [(v-ref? v) (format "r[~a]" (v-ref-id v))]
     [(v-symval? v) (format "@~a" (v-symval-id v))]
     [else v]))
-
-(define (to-str-set v-set)
-  (foldl (lambda (v r) (string-append r (to-str v) "\n")) ""  v-set))
-

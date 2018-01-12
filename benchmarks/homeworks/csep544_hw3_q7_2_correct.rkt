@@ -21,14 +21,14 @@
 
 (define (q1 tables) 
   (SELECT-DISTINCT (VALS "c.name") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 2) "c")) (AS (SELECT-DISTINCT (VALS "f1.carrier_id") 
-  FROM (NAMED (RENAME (list-ref tables 3) "f1")) 
+  FROM (JOIN (AS (NAMED (list-ref tables 2)) ["c"]) (AS (SELECT-DISTINCT (VALS "f1.carrier_id") 
+  FROM (AS (NAMED (list-ref tables 3)) ["f1"]) 
   WHERE (AND (BINOP "f1.origin_city" = str_seattle_wa_) (BINOP "f1.dest_city" = str_san_francisco_ca_))) ["f2" (list "carrier_id")])) 
   WHERE (BINOP "c.cid" = "f2.carrier_id")))
 
 (define (q2 tables) 
   (SELECT-DISTINCT (VALS "c.name") 
-  FROM (JOIN (NAMED (RENAME (list-ref tables 3) "f")) (NAMED (RENAME (list-ref tables 2) "c"))) 
+  FROM (JOIN (AS (NAMED (list-ref tables 3)) ["f"]) (AS (NAMED (list-ref tables 2)) ["c"])) 
   WHERE (AND (AND (BINOP "f.origin_city" = str_seattle_wa_) (BINOP "f.dest_city" = str_san_francisco_ca_)) (BINOP "f.carrier_id" = "c.cid"))))
 
 
