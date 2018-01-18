@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "sql.rkt" "syntax.rkt" "denotation.rkt" "table.rkt" "evaluator.rkt" "util.rkt")
+(require "syntax.rkt" "denotation.rkt" "evaluator.rkt" "table.rkt")
 
 (provide (all-defined-out))
 
@@ -57,7 +57,7 @@
         [core (sum-eq-constr mconstr)])
     (if (eq? (length queries) 1)
       (forall-eq (car queries) core)
-      (forall-eq (foldl (lambda (v r) (JOIN r v)) (car queries) (cdr queries)) core))))
+      (forall-eq (foldl (lambda (v r) (query-join r v)) (car queries) (cdr queries)) core))))
 
 (define (small-step-sum-eq mconstr index)
   ; small step semantics for propogating sum-eq constraints 
@@ -343,6 +343,16 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+
+(define (mconstr-to-hashmap constr-list)
+  ; generate a hash map for ease of creating table
+  (let ([qname->str 
+         (lambda (q) (if (query-named? q) (Table-name (query-named-table-ref q)) "q"))])
+    (make-hash
+      (map (lambda (x) 
+           (cond [(forall-eq? x)
+                  (cons (qname->str (forall-eq-query x)) (forall-eq-constr x))])) 
+         constr-list))))
 
 (define (queries-to-str queries)
   ; pretty printing tables involved in these constraints

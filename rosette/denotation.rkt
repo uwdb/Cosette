@@ -249,7 +249,6 @@
                                   `(,(denote-value x nmap) e))
                                 (filter-nary-op-args f)))))]))
 
-
 ;;; denote filters returns tuple -> bool
 (define (denote-filter-w-broadcasting f nmap gb-fields)
   (cond
@@ -275,22 +274,3 @@
                ;push a quote "list" to make the list a list 
                ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap gb-fields #t) e))
                                      (filter-nary-op-args f)))))]))
-
-;;(define test-query1
-;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
-;;   FROM (JOIN (NAMED table1) (AS (NAMED table1) ["t2" '("c1" "c2" "c3")]))
-;;   WHERE (AND (BINOP "t1.c1" < "t2.c2") (BINOP "t1.c3" < "t2.c3"))))
-
-;; (run test-query1)
-
-; (rename-table ((lambda (e) (Table "t1" (list "c1" "c2" "c3") '())) '()) "t2")
-
-; (define denotation-q3
-;   '(lambda (e) (rename-table ((lambda (e) (Table "t1" (list "c1" "c2" "c3") '())) e) "t2")) )
-
-; ((eval (denote-sql q3 '()) ns) '())
-
-; (extract-schema q3)
-; (denote-sql q (make-hash))
-; ((eval (denote-sql q (make-hash)) ns) '())
-

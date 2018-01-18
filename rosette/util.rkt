@@ -1,15 +1,19 @@
 #lang rosette
 
-(require "table.rkt" "equal.rkt" "sql.rkt" "evaluator.rkt")
+(require "symmetry.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "sql.rkt" "evaluator.rkt")
 (require json)
 
 (provide gen-sym-schema ;; generate a symbolic table based on schema
+         gen-sym-schema-mconstr ;; generate a symbolic table based on schema and meta constraint
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
          assert-table-non-empty ;; assert that a table is not empty
          assert-table-ordered ;; assert that the table is ordered
          assert-table-col-distinct ;; assert that all values in a column is distinct from each other
          same ;; assert two queries are the same 
-         neq) ;; assert two queries are not the same
+         neq ;; assert two queries are not the same
+         ) 
+
+;;;;; Symbolic utilities
 
 ; generate a symbolic value
 (define (gen-sv)
@@ -17,7 +21,7 @@
   sv)
 
 ; generate a tuple, n is the number of column
-(define (gen-sv-row n)
+(define (gen-sv-list n)
   (build-list n (lambda (x) (gen-sv))))
 
 ; generate a positive symbolic value, used to represent cardinalities of tuples
@@ -32,10 +36,19 @@
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-sym-schema num-col num-row)
+  ; generating symbolic table row by row
   (let ([gen-row (lambda (x)
-                   (cons (gen-sv-row num-col)
+                   (cons (gen-sv-list num-col)
                          (gen-pos-sv)))])
     (build-list num-row gen-row)))
+
+(define (gen-sym-schema-mconstr num-col num-row mconstr)
+  (if (or (eq? num-row 0) (null? mconstr)) 
+    (list)
+    (let ([gen-row (lambda (x)
+                     (cons (gen-sv-list num-col)
+                           (gen-pos-sv)))])
+      (build-list num-row gen-row))))
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-pos-sym-schema num-col num-row)
@@ -65,4 +78,3 @@
 
 (define (neq q1 q2)
   (assert (not (bag-equal (get-content (run q1)) (get-content (run q2))))))
-

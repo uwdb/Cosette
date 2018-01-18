@@ -92,7 +92,8 @@ def run_benchmark(rosette_file, cosette_dir):
 
 
 if __name__ == '__main__':
-    prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
-    prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
+    #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
+    #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     #run_benchmarks("benchmarks/homeworks")
+    run_benchmarks("benchmarks/calcite")
     #print(quick_parse("temp.cos"))
