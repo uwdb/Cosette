@@ -162,7 +162,9 @@
     [(query-select-distinct? query)
      (map (lambda (x) "dummy") (query-select-distinct-select-args query))]
     [(query-aggr-general? query)
-     (map (lambda (x) "dummy") (query-aggr-general-select-args query))]))
+     (map (lambda (x) "dummy") (query-aggr-general-select-args query))]
+    [(query-union-all? query) 
+     (extract-schema (query-union-all-query1 query))]))
 
 
 ;;; denote value returns tuple -> value

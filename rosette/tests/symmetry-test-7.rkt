@@ -47,22 +47,11 @@
 (define c1 (big-step (init-constraint qt1) 20))
 (define c2 (big-step (init-constraint qt2) 20))
 
-;(displayln (to-str (constr-flatten c1)))
-;(displayln (to-str (constr-flatten c2)))
-
-;(pretty-display tables)
-
 (define m-tables
   (init-sym-tables-mconstr 
     table-info-list 
     table-size-list
     (go-break-symmetry-bounded qt1 qt2)))
-
-;(pretty-display
-;  (init-sym-tables-mconstr 
-;    table-info-list 
-;    table-size-list
-;    (go-break-symmetry-bounded qt1 qt2)))
 
 ;(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 
@@ -76,5 +65,3 @@
 ;(time (test-now ros-instance tables))
 ;(asserts)
 (time (test-now ros-instance m-tables))
-
-
