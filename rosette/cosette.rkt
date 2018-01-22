@@ -10,6 +10,7 @@
          cosette-solve
          table-info
          solve-queries
+         solve-queries-symbreak
          init-sym-tables
          init-sym-tables-mconstr)
 
@@ -96,6 +97,7 @@
   (let ([used-tf (used-table-info fq-list table-info-list)])
     (map (lambda (tf) (if (set-member? used-tf (table-info-name tf)) 1 0)) table-info-list)))
 
+
 ; given a list of table sizes, increase the size of them one at a time (zig-zag style)
 (define (inc-table-size-list size-list)
   (letrec ([min-pos-val (first (sort (filter (lambda (v) (> v 0)) size-list) <))]
@@ -126,8 +128,9 @@
           [mconstr-map (mconstr-to-hashmap mconstr)])
       (Table (table-info-name tf) 
              schema 
-             (gen-sym-schema-mconstr (length schema) size
-                                     (hash-ref mconstr-map (table-info-name tf) null))))) 
+             (gen-sym-schema-mconstr 
+               (length schema) size
+               (hash-ref mconstr-map (table-info-name tf) null))))) 
   (map (lambda (i) (gen-sym-table-mconstr
                      (list-ref table-info-list i)
                      (list-ref table-size-list i)
@@ -141,6 +144,28 @@
          [try-solve
            (lambda (fq1 fq2 table-info-list table-size-list)
              (let* ([tables (init-sym-tables table-info-list table-size-list)]
+                    [q1 (fq1 tables)]
+                    [q2 (fq2 tables)])
+               (cosette-solve q1 q2 tables)))])
+    (define (rec-wrapper table-size-list)
+      (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
+        (cond [(eq? (car sol) "NEQ") (messenger sol)]
+              [else (messenger  table-size-list)
+                    (rec-wrapper (inc-table-size-list table-size-list))])))
+    (rec-wrapper initial-size)))
+
+
+; given two query functions and the schema definition,
+; the function will increase the table size one by one trying to solve the question
+; it differs from the one above as it utilize the symmetry breaking method
+(define (solve-queries-symbreak fq1 fq2 table-info-list messenger)
+  (let* ([initial-size (init-table-size-list (list fq1 fq2) table-info-list)]
+         [try-solve
+           (lambda (fq1 fq2 table-info-list table-size-list)
+             (let* ([empty-tables (init-sym-tables table-info-list 
+                                   (build-list (length table-info-list) (lambda (x) 0)))]
+                    [mconstr (go-break-symmetry-bounded (fq1 empty-tables) (fq2 empty-tables))]
+                    [tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
                     [q1 (fq1 tables)]
                     [q2 (fq2 tables)])
                (cosette-solve q1 q2 tables)))])

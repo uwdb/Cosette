@@ -42,13 +42,61 @@
                          (gen-pos-sv)))])
     (build-list num-row gen-row)))
 
+(define (subst-mconstr v sv-base sv-current)
+  (cond
+    [(c-primitive? v)
+     `(,(c-primitive-op v)
+       ,(subst-mconstr (c-primitive-left v) sv-base sv-current) 
+       ,(subst-mconstr (c-primitive-right v) sv-base sv-current))]
+    [(c-true? v) #t]
+    [(c-false? v) #f]
+    [(c-conj? v)
+     (let ([content (map (lambda (x) (subst-mconstr  x sv-base sv-current)) 
+                         (c-conj-preds v))])
+       (cond [(eq? (length content) 0) #t]
+             [(eq? (length content) 1) (car content)]
+             [else (foldl (lambda (x y) `(and ,x ,y)) (car content) (cdr content))]))]
+    [(c-disj? v) 
+     (let ([content (map (lambda (x) (subst-mconstr  x sv-base sv-current)) 
+                         (c-conj-preds v))])
+       (cond [(eq? (length content) 0) #t]
+             [(eq? (length content) 1) (car content)]
+             [else (foldl (lambda (x y) `(or ,x ,y)) (car content) (cdr content))]))]
+    [(v-const? v) (v-const-c v)]
+    [(v-uexpr? v) `(,(v-uexpr-op v) ,(subst-mconstr (v-uexpr-v v) sv-base sv-current))]
+    [(v-bexpr? v) 
+     `(,(v-bexpr-op v)
+       ,(subst-mconstr (v-bexpr-v1 v) sv-base sv-current) 
+       ,(subst-mconstr (v-bexpr-v2 v) sv-base sv-current))]
+    [(v-ref? v) (list-ref sv-current (v-ref-id v))]
+    [(v-symval? v) (list-ref sv-base (v-symval-id v))]
+    [else v]))
+
+; the namespace used to evaluate constraint
+(define-namespace-anchor anc)
+(define ns (namespace-anchor->namespace anc))
+
+; generate constraints and assertions from meta constraints 
 (define (gen-sym-schema-mconstr num-col num-row mconstr)
   (if (or (eq? num-row 0) (null? mconstr)) 
-    (list)
-    (let ([gen-row (lambda (x)
-                     (cons (gen-sv-list num-col)
-                           (gen-pos-sv)))])
-      (build-list num-row gen-row))))
+      (list)
+      (let* ([sym-table 
+              (build-list 
+                num-row 
+                (lambda (x)
+                  (cons (gen-sv-list num-col) (gen-pos-sv))))]
+              [base (car (car sym-table))]
+              [cs (foldl (lambda (x y) `(and ,x ,y)) #t 
+                         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table))])
+        ;(writeln  (foldl (lambda (x y) `(and ,x ,y)) #t 
+        ;         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table)))
+        ;(assert (and (and (= sv$85 sv$81) (> sv$85 2)) (and (and (= sv$83 sv$81) (> sv$83 2)) (and (and (= sv$81 sv$81) (> sv$81 2)) #t))))
+        ;(assert 
+        ;  (foldl (lambda (x y) `(and ,x ,y)) #t 
+        ;         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table)))
+        ;(asserts)
+        (assert (eval cs ns))
+        sym-table)))
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-pos-sym-schema num-col num-row)

@@ -1,5 +1,6 @@
 # prepare rosette benchmarks for the purpose of testing rosette solver
- 
+from __future__ import print_function
+
 import time
 import os
 import json
@@ -72,9 +73,8 @@ def run_benchmarks(input_dir, cosette_dir="."):
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and (not fname.startswith("__")):
             result = run_benchmark(os.path.join(input_dir, fname), cosette_dir)
-            print "===="
-            print fname
-            print result
+            print("[Input] Solving {}".format(fname))
+            print("[Output] {}".format(result))
             
 
 def run_benchmark(rosette_file, cosette_dir):
