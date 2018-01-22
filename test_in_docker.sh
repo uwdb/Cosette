@@ -6,7 +6,7 @@ CMD="cd dsl; cabal install HUnit; cabal install Parsec; cabal build; cd ..; pyth
 NAME="cosette-test"
 
 # uncomment the following command if not exist
-# docker pull shumo/cosette-frontend
+ docker pull shumo/cosette-frontend
 
 echo "[0] starting container with name $NAME ..."
 docker run -v $(pwd)/:$DIR -w $DIR --name=$NAME shumo/cosette-frontend bash -c "$CMD"

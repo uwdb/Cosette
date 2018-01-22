@@ -16,7 +16,7 @@
 (define rosfile (vector-ref args 0))
 
 ;; max allowed solver time
-(define max-time 10)
+(define max-time 30)
 
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads
