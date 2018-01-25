@@ -24,14 +24,14 @@
         (display (to-str mconstr))
         (car mconstr))))
   (define (test-now instance table-size-list)
-      (displayln "[[Start]]")
+      (displayln "==============================")
       (displayln (format "[table size] ~a" table-size-list))
       (let* ([tables (init-sym-tables table-info-list table-size-list)]
              [qt1 (fq1 tables)]
              [qt2 (fq2 tables)])
         (cosette-solve qt1 qt2 tables)))
   (define (test-now-mconstr instance table-size-list)
-      (displayln "[[Start]]")
+      (displayln "==============================")
       (displayln (format "[table size] ~a" table-size-list))
       (asserts)
       (let* ([tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
@@ -44,11 +44,11 @@
       (cond [(eq? (car (car sol)) "NEQ") 
              (displayln (format "[real time] ~a ms" t-real))
              (pretty-display (cdr (car sol)))
-             (displayln "[[End]]\n")]
+             (displayln "")]
             [else 
              (displayln (format "[real time] ~a ms" t-real))
              (displayln (car sol))
-             (displayln "[[End]]\n")
+             (displayln "")
              (flush-output)
              (test-loop (inc-table-size-list table-size-list) test-func)])))
   (if symbreak
