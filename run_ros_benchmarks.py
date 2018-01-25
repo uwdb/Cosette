@@ -1,13 +1,14 @@
 # prepare rosette benchmarks for the purpose of testing rosette solver
-from __future__ import print_function
-
 import time
 import os
 import json
 import csv
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT, check_output
+import signal
+
 
 import solver
+import sys
 
 def quick_parse(input_file):
     with open(input_file, "r") as f:
@@ -50,7 +51,14 @@ def prepare_calcite_benchmarks(input_dir, output_dir):
         if status == True:
             rname = rname if labels[rname] else ("__" + rname)
             with open(os.path.join(output_dir, rname + ".rkt"), "w") as out_file:
-                out_file.write(rosette_file)
+                lines = rosette_file.split("\n")
+
+                for i in range(len(lines)):
+                    if lines[i].startswith("(require "):
+                        lines[i] = '(require "../cosette.rkt" "../util.rkt" "../denotation.rkt" "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt" "../test-util.rkt")'
+                
+                lines.append("(experiment ros-instance)")
+                out_file.write("\n".join(lines))
 
 
 def prepare_hw_benchmarks(input_dir, output_dir):
@@ -70,6 +78,18 @@ def prepare_hw_benchmarks(input_dir, output_dir):
 
 
 def run_benchmarks(input_dir, cosette_dir="."):
+    def run_benchmark(rosette_file, cosette_dir):
+        cmd_ros = 'cd {}; ./rosette_solve.sh '.format(cosette_dir) + rosette_file
+        proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
+        while True:
+            retcode = proc.poll()
+            if retcode is not None:
+                result = proc.stdout.read() + proc.stderr.read()
+                break
+            else:
+                time.sleep(.1)
+                continue
+        return result
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and (not fname.startswith("__")):
             result = run_benchmark(os.path.join(input_dir, fname), cosette_dir)
@@ -77,23 +97,34 @@ def run_benchmarks(input_dir, cosette_dir="."):
             print("[Output] {}".format(result))
             
 
-def run_benchmark(rosette_file, cosette_dir):
-    cmd_ros = 'cd {}; ./rosette_solve.sh '.format(cosette_dir) + rosette_file
-    proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
-    while True:
-        retcode = proc.poll()
-        if retcode is not None:
-            result = proc.stdout.read() + proc.stderr.read()
-            break
-        else:
-            time.sleep(.1)
-            continue
-    return result
+def run_benchmarks(input_dir, cosette_dir, log_dir):
+
+    def run_benchmark(rosette_file):
+
+        log_file = os.path.join(log_dir, "log_"+os.path.basename(rosette_file).split()[0][4:])
+
+        cmd_ros = 'cd {}; ./rosette_solve.sh {} > {}'.format(cosette_dir, rosette_file, log_file)
+        proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
+        
+        while True:
+            retcode = proc.poll()
+            if retcode is not None:
+                result = proc.stdout.read() + proc.stderr.read()
+                break
+            else:
+                time.sleep(.1)
+                continue
+        return result
+
+    for fname in os.listdir(input_dir):
+        if fname.endswith('.rkt') and (not fname.startswith("__")):
+            result = run_benchmark(os.path.join(input_dir, fname))
+            print("[Input] Solving {}".format(fname))
+            print("[Output] {}".format(result))
 
 
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    #run_benchmarks("benchmarks/homeworks")
-    run_benchmarks("benchmarks/calcite")
+    run_benchmarks("benchmarks/calcite", ".", "./output")
     #print(quick_parse("temp.cos"))

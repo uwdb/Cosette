@@ -20,4 +20,4 @@ cd rosette
 
 #echo "[OK] solving "$BUILD/$UUID.rkt
 
-racket server.rkt $BUILD/$UUID.rkt
+racket test-server.rkt $BUILD/$UUID.rkt

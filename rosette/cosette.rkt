@@ -12,7 +12,9 @@
          solve-queries
          solve-queries-symbreak
          init-sym-tables
-         init-sym-tables-mconstr)
+         init-sym-tables-mconstr
+         init-table-size-list
+         inc-table-size-list)
 
 ; format cosette solution into a json string
 ; {
@@ -57,11 +59,9 @@
               [q1t (evaluate q1 solution)]
               [q2t (evaluate q2 solution)]
               [clean-tables (map clean-ret-table tables)])
-         (println "")
-         (println "### Table evaluation results:")
-         (println (clean-ret-table (denote-and-run q1t)))
-         (println (clean-ret-table (denote-and-run q2t)))
-         (println "")
+         (displayln "[Table evaluation results]")
+         (displayln (format "  ~a" (clean-ret-table (denote-and-run q1t))))
+         (displayln (format "  ~a" (clean-ret-table (denote-and-run q2t))))
          (cons "NEQ" clean-tables))]
       [else (cons "EQ"  (list))]))) 
 
@@ -170,7 +170,7 @@
                     [q2 (fq2 tables)])
                (cosette-solve q1 q2 tables)))])
     (define (rec-wrapper table-size-list)
-      (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
+      (let ([sol (time (try-solve fq1 fq2 table-info-list table-size-list))])
         (cond [(eq? (car sol) "NEQ") (messenger sol)]
               [else (messenger  table-size-list)
                     (rec-wrapper (inc-table-size-list table-size-list))])))

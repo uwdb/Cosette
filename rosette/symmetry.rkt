@@ -350,9 +350,9 @@
          (lambda (q) (if (query-named? q) (Table-name (query-named-table-ref q)) "q"))])
     (make-hash
       (map (lambda (x) 
-           (cond [(forall-eq? x)
-                  (cons (qname->str (forall-eq-query x)) (forall-eq-constr x))])) 
-         constr-list))))
+             (cond [(forall-eq? x)
+                    (cons (qname->str (forall-eq-query x)) (forall-eq-constr x))])) 
+           constr-list))))
 
 (define (queries-to-str queries)
   ; pretty printing tables involved in these constraints

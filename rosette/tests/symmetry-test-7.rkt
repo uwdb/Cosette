@@ -53,7 +53,7 @@
     table-size-list
     (go-break-symmetry-bounded qt1 qt2)))
 
-;(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
+(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 
 (define (test-now instance tables)
     (let* ([q1 ((list-ref instance 0) tables)]
