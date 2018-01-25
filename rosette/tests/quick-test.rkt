@@ -13,13 +13,12 @@
 (define bonus-info (table-info "bonus" (list "ename" "job" "sal" "comm")))
  
 (define dept-info (table-info "dept" (list "deptno" "name")))
- 
+
 (define emp-info (table-info "emp" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")))
  
 (define-symbolic* str_charlie_ integer?) 
 
-
-(define (q1 tables) 
+(define (q1 tables)
   (SELECT (VALS "dept.deptno") 
  FROM (AS (NAMED (list-ref tables 3)) ["dept"]) 
  WHERE (TRUE) GROUP-BY (list "dept.deptno") 
@@ -35,5 +34,5 @@
 
 (define ros-instance (list q1 q2 (list t-info account-info bonus-info dept-info emp-info))) 
 
-(experiment ros-instance)
+(run-experiment ros-instance)
 

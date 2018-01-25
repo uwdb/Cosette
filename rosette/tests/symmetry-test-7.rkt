@@ -7,7 +7,7 @@
 (define-symbolic div_ (~> integer? integer? integer?))
  
 (define t-info (table-info "t" (list "k0" "c1" "f1_a0" "f2_a0" "f0_c0" "f1_c0" "f0_c1" "f1_c2" "f2_c3")))
- 
+
 (define account-info (table-info "account" (list "acctno" "type" "balance")))
  
 (define bonus-info (table-info "bonus" (list "ename" "job" "sal" "comm")))
@@ -17,7 +17,6 @@
 (define emp-info (table-info "emp" (list "empno" "ename" "job" "mgr" "hiredate" "comm" "sal" "deptno" "slacker")))
  
 (define-symbolic* str_charlie_ integer?) 
-
 
 (define (q1 tables) 
   (SELECT (VALS "dept.deptno") 

@@ -99,9 +99,14 @@ def run_benchmarks(input_dir, cosette_dir="."):
 
 def run_benchmarks(input_dir, cosette_dir, log_dir):
 
+    finished_cases = [os.path.splitext(os.path.basename(item))[0] for item in os.listdir(log_dir) 
+                        if os.path.isfile(os.path.join(log_dir, item))]
+
     def run_benchmark(rosette_file):
 
-        log_file = os.path.join(log_dir, "log_"+os.path.basename(rosette_file).split()[0][4:])
+        case_name = os.path.splitext(os.path.basename(item))[0]
+
+        log_file = os.path.join(log_dir, case_name + ".log")
 
         cmd_ros = 'cd {}; ./rosette_solve.sh {} > {}'.format(cosette_dir, rosette_file, log_file)
         proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
@@ -118,13 +123,16 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
 
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and (not fname.startswith("__")):
-            result = run_benchmark(os.path.join(input_dir, fname))
-            print("[Input] Solving {}".format(fname))
-            print("[Output] {}".format(result))
 
+            if os.path.splitext(fname)[0] in finished_cases:
+                print("[Ignore]{}".format(fname))
+            else:
+                print("[Input] Solving {}".format(fname))
+                result = run_benchmark(os.path.join(input_dir, fname))
+                #print("[Output] {}".format(result))
 
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    run_benchmarks("benchmarks/calcite", ".", "./output")
+    run_benchmarks("benchmarks/calcite", ".", "./output/mconstr")
     #print(quick_parse("temp.cos"))

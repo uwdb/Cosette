@@ -58,7 +58,7 @@
              [else (foldl (lambda (x y) `(and ,x ,y)) (car content) (cdr content))]))]
     [(c-disj? v) 
      (let ([content (map (lambda (x) (subst-mconstr  x sv-base sv-current)) 
-                         (c-conj-preds v))])
+                         (c-disj-preds v))])
        (cond [(eq? (length content) 0) #t]
              [(eq? (length content) 1) (car content)]
              [else (foldl (lambda (x y) `(or ,x ,y)) (car content) (cdr content))]))]

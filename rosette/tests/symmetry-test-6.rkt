@@ -49,13 +49,22 @@
 (define c1 (big-step (init-constraint qt1) 20))
 (define c2 (big-step (init-constraint qt2) 20))
 
+
+(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
+
 (define m-tables
   (init-sym-tables-mconstr 
     table-info-list 
     table-size-list
     (go-break-symmetry-bounded qt1 qt2)))
 
-(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
+(define m-tables-2
+  (init-sym-tables-mconstr 
+    table-info-list 
+    table-size-list
+    (go-break-symmetry-bounded-simplify qt1 qt2)))
+
+;(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 
 (define (test-now instance tables)
     (let* ([q1 ((list-ref instance 0) tables)]
@@ -67,3 +76,5 @@
 (time (test-now ros-instance tables))
 ;(asserts)
 (time (test-now ros-instance m-tables))
+;(asserts)
+(time (test-now ros-instance m-tables-2))

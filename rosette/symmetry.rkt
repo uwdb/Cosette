@@ -25,9 +25,17 @@
 ;;;;;;;;;;;; functions for generating symmetry breaking conditions ;;;;;;;;;;;;
 
 (define (go-break-symmetry-bounded q1 q2)
-  (let ([c1 (big-step (init-forall-eq-constraint q1) 20)]
-        [c2 (big-step (init-forall-eq-constraint q2) 20)])
-   (constr-flatten (merge-forall-eq (flatten (list c1 c2))))))
+  (let* ([c1 (big-step (init-forall-eq-constraint q1) 20)]
+         [c2 (big-step (init-forall-eq-constraint q2) 20)]
+         [flat-constr (flatten (list c1 c2))])
+   (merge-forall-eq flat-constr)))
+
+(define (go-break-symmetry-bounded-intersect q1 q2)
+  ; perform an intersection to reduce 
+  (let* ([c1 (big-step (init-forall-eq-constraint q1) 20)]
+         [c2 (big-step (init-forall-eq-constraint q2) 20)]
+         [flat-constr (flatten (list c1 c2))])
+   (merge-forall-eq-intersect flat-constr)))
 
 (define (init-constraint query)
   ; initialize a the constraint for symmetry breaking
@@ -231,7 +239,7 @@
              (filter (lambda (c) (not (c-true? c))) 
                      (map (lambda (x) (remove-constr-if-val x f)) 
                           (c-disj-preds constr)))])
-       (if (empty? filtered-content) (c-true) (c-conj filtered-content)))]
+       (if (empty? filtered-content) (c-true) (c-disj filtered-content)))]
     [(c-neg? constr) 
      (if (remove-constr-if-val (c-neg-pred constr) f)
        (c-true)
@@ -259,7 +267,7 @@
   ; convert sql val expr into meta v expr:
   ; generate a meta constraint v expr from a vmap
   ; vmap maps each column-ref primitive into a v-ref that uses the row id
-  (cond 
+  (cond
     [(val-const? v) (v-const (val-const-val v))]
     [(val-column-ref? v) (v-ref (hash-ref vmap (val-column-ref-column-name v)))]
     [(val-uexpr? v) (v-uexpr (val-uexpr-op v) (v-from-sql-val (val-uexpr-val v) vmap))]
@@ -327,18 +335,32 @@
     (cond [(empty? constraints) (list)]
           [else (let* ([q (forall-eq-query (car constraints))]
                        [t-constrs (filter (lambda (c) (eq? q (forall-eq-query c))) constraints)]
+                       [cores (map (lambda (c) (forall-eq-constr c)) t-constrs)]
+                       [rest-constrs (filter (lambda (c) (not (eq? q (forall-eq-query c)))) 
+                                             (cdr constraints))])
+                  (append (list (forall-eq q (c-disj cores)))
+                          (merge-forall-eq rest-constrs)))])))
+
+(define (merge-forall-eq-intersect raw-constraints)
+  ; merging constraints 
+  (define (auto-set-intersect lists)
+    ; the helper function to do intersects among lists
+    (cond [(empty? lists) (list)]
+          [(eq? (length lists) 1) (car lists)]
+          [else (set-intersect (car lists) (auto-set-intersect (cdr lists)))]))
+  (let ([constraints (constr-flatten raw-constraints)])
+    (cond [(empty? constraints) (list)]
+          [else (let* ([q (forall-eq-query (car constraints))]
+                       [t-constrs (filter (lambda (c) (eq? q (forall-eq-query c))) constraints)]
                        [cores (map (lambda (c) 
                                      (let ([x (forall-eq-constr c)])
                                        (if (c-conj? x) (c-conj-preds x) (list x)))) t-constrs)]
                        [rest-constrs (filter (lambda (c) (not (eq? q (forall-eq-query c)))) 
                                              (cdr constraints))])
-                  (append (list (forall-eq q (c-conj (auto-set-intersect cores)))) 
-                          (merge-forall-eq rest-constrs)))])))
+                  (append (list (forall-eq q (c-conj (auto-set-intersect cores))))
+                          (merge-forall-eq-intersect rest-constrs)))])))
 
-(define (auto-set-intersect lists)
-  (cond [(empty? lists) (list)]
-        [(eq? (length lists) 1) (car lists)]
-        [else (set-intersect (car lists) (auto-set-intersect (cdr lists)))]))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -381,7 +403,7 @@
                                (car content) (cdr content)))
            ""))]
     [(c-disj? v) 
-     (let ([content (map (lambda (x) (to-str x)) (c-conj-preds v))])
+     (let ([content (map (lambda (x) (to-str x)) (c-disj-preds v))])
        (format "~a" (foldl (lambda (x y) (format "~a \u2228 ~a" x y)) 
                            (car content) (cdr content))))]
     [(c-neg? v) (format "\u00AC ~a" (to-str (c-neg-pred v)))]

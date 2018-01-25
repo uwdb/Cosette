@@ -18,7 +18,7 @@
 (define rosfile (vector-ref args 0))
 
 ;; max allowed solver time
-(define max-time 30)
+(define max-time 300)
 
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads
@@ -38,7 +38,7 @@
   (thread (lambda ()
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
-              [(list q1 q2 tables) (experiment (list q1 q2 tables))]
+              [(list q1 q2 tables) (run-experiment (list q1 q2 tables))]
               [_ (error "error on loading rosette source code.")])
             )))
 
