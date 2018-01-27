@@ -1,0 +1,12 @@
+[[symbreak]] #t
+[inference time] 5
+[constraint]
+emp,
+ForallEQ[(r[7] > 10 ∨ r[7] = 9 ∨ r[7] = 7) ∧ (1 = @0) ∨ (r[7] > 10 ∨ r[7] = 9 ∨ r[7] = 7) ∧ (1 = @0) ∨ (1 = @0) ∨ (r[7] > 10 ∨ r[7] = 9 ∨ r[7] = 7) ∧ (1 = @0)]
+
+--------------------
+[table size] (0 0 0 0 1) [real time] 37 ms
+[table size] (0 0 0 0 2) [real time] 205 ms
+[table size] (0 0 0 0 3) [real time] 390 ms
+[table size] (0 0 0 0 4) [real time] 6778 ms
+{"size":[1],"status":"UNSAT"}

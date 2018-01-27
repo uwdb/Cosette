@@ -104,7 +104,7 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
 
     def run_benchmark(rosette_file):
 
-        case_name = os.path.splitext(os.path.basename(item))[0]
+        case_name = os.path.splitext(os.path.basename(rosette_file))[0]
 
         log_file = os.path.join(log_dir, case_name + ".log")
 
@@ -134,5 +134,5 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    run_benchmarks("benchmarks/calcite", ".", "./output/mconstr")
+    run_benchmarks("benchmarks/calcite", ".", "./output/r-nosymbreak")
     #print(quick_parse("temp.cos"))

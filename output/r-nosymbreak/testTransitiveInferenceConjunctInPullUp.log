@@ -1,0 +1,12 @@
+[[symbreak]] #f
+[inference time] 5
+[constraint]
+emp,
+ForallEQ[(1 = @0)]
+
+--------------------
+[table size] (0 0 0 0 1) [real time] 38 ms
+[table size] (0 0 0 0 2) [real time] 205 ms
+[table size] (0 0 0 0 3) [real time] 739 ms
+[table size] (0 0 0 0 4) [real time] 7038 ms
+{"size":[1],"status":"UNSAT"}

@@ -1,0 +1,20 @@
+[[symbreak]] #t
+[inference time] 6
+[constraint]
+dept,
+ForallEQ[]
+emp,
+ForallEQ[]
+
+--------------------
+[Table evaluation results]
+  #(struct:Table dummy (dummy) (((0) . 275)))
+  #(struct:Table dummy (dummy) (((0) . 15125)))
+[table size] (1 1) [real time] 118 ms
+(#(struct:Table dept (deptno name) (((0 0) . 11)))
+ #(struct:Table
+   emp
+   (empno ename job mgr hiredate comm sal deptno slacker)
+   (((0 0 0 0 0 0 0 0 0) . 5))))
+
+{"size":[1],"status":"UNSAT"}

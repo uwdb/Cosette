@@ -1,0 +1,50 @@
+[[symbreak]] #t
+[inference time] 5
+[constraint]
+emp,
+ForallEQ[(r[7] = @1)]
+dept,
+ForallEQ[(r[0] = @0)]
+
+--------------------
+[table size] (0 0 0 1 1) [real time] 30 ms
+[table size] (0 0 0 2 1) [real time] 22 ms
+[table size] (0 0 0 2 2) [real time] 19 ms
+[table size] (0 0 0 3 2) [real time] 23 ms
+[table size] (0 0 0 3 3) [real time] 30 ms
+[table size] (0 0 0 4 3) [real time] 45 ms
+[table size] (0 0 0 4 4) [real time] 50 ms
+[table size] (0 0 0 5 4) [real time] 64 ms
+[table size] (0 0 0 5 5) [real time] 89 ms
+[table size] (0 0 0 6 5) [real time] 126 ms
+[table size] (0 0 0 6 6) [real time] 168 ms
+[table size] (0 0 0 7 6) [real time] 220 ms
+[table size] (0 0 0 7 7) [real time] 388 ms
+[table size] (0 0 0 8 7) [real time] 378 ms
+[table size] (0 0 0 8 8) [real time] 513 ms
+[table size] (0 0 0 9 8) [real time] 649 ms
+[table size] (0 0 0 9 9) [real time] 799 ms
+[table size] (0 0 0 10 9) [real time] 1091 ms
+[table size] (0 0 0 10 10) [real time] 1203 ms
+[table size] (0 0 0 11 10) [real time] 1764 ms
+[table size] (0 0 0 11 11) [real time] 2001 ms
+[table size] (0 0 0 12 11) [real time] 2145 ms
+[table size] (0 0 0 12 12) [real time] 2705 ms
+[table size] (0 0 0 13 12) [real time] 4145 ms
+[table size] (0 0 0 13 13) [real time] 3711 ms
+[table size] (0 0 0 14 13) [real time] 4402 ms
+[table size] (0 0 0 14 14) [real time] 5360 ms
+[table size] (0 0 0 15 14) [real time] 7978 ms
+[table size] (0 0 0 15 15) [real time] 7309 ms
+[table size] (0 0 0 16 15) [real time] 8474 ms
+[table size] (0 0 0 16 16) [real time] 10094 ms
+[table size] (0 0 0 17 16) [real time] 15680 ms
+[table size] (0 0 0 17 17) [real time] 13729 ms
+[table size] (0 0 0 18 17) [real time] 16127 ms
+[table size] (0 0 0 18 18) [real time] 18490 ms
+[table size] (0 0 0 19 18) [real time] 21317 ms
+[table size] (0 0 0 19 19) [real time] 33424 ms
+[table size] (0 0 0 20 19) [real time] 30633 ms
+[table size] (0 0 0 20 20) [real time] 35418 ms
+[table size] (0 0 0 21 20) [real time] 40268 ms
+{"size":[1],"status":"UNSAT"}
