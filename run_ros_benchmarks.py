@@ -97,18 +97,16 @@ def run_benchmarks(input_dir, cosette_dir="."):
             print("[Output] {}".format(result))
             
 
-def run_benchmarks(input_dir, cosette_dir, log_dir):
-
-    finished_cases = [os.path.splitext(os.path.basename(item))[0] for item in os.listdir(log_dir) 
-                        if os.path.isfile(os.path.join(log_dir, item))]
-
-    def run_benchmark(rosette_file):
+def run_one_benchmark(rosette_file, cosette_dir, log_dir=None):
 
         case_name = os.path.splitext(os.path.basename(rosette_file))[0]
+        
+        cmd_ros = 'cd {}; ./rosette_solve.sh {}'.format(cosette_dir, rosette_file)
 
-        log_file = os.path.join(log_dir, case_name + ".log")
+        if log_dir:
+            log_file = os.path.join(log_dir, case_name + ".log")
+            cmd_ros += " > {}".format(log_file)
 
-        cmd_ros = 'cd {}; ./rosette_solve.sh {} > {}'.format(cosette_dir, rosette_file, log_file)
         proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
         
         while True:
@@ -121,6 +119,11 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                 continue
         return result
 
+def run_benchmarks(input_dir, cosette_dir, log_dir):
+
+    finished_cases = [os.path.splitext(os.path.basename(item))[0] for item in os.listdir(log_dir) 
+                        if os.path.isfile(os.path.join(log_dir, item))]
+
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt'):# and (not fname.startswith("__")):
 
@@ -128,11 +131,29 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                 print("[Ignore]{}".format(fname))
             else:
                 print("[Input] Solving {}".format(fname))
-                result = run_benchmark(os.path.join(input_dir, fname))
+                result = run_one_benchmark(os.path.join(input_dir, fname), cosette_dir, log_dir)
                 #print("[Output] {}".format(result))
 
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    run_benchmarks("benchmarks/calcite", ".", "./output/all_mconstr")
+    #run_benchmarks("benchmarks/calcite", ".", "./output/all_mconstr")
     #print(quick_parse("temp.cos"))
+
+    fname = sys.argv[1]
+
+    ros_file = quick_parse(fname)
+    lines = ros_file.split("\n")
+
+    for i in range(len(lines)):
+        if lines[i].startswith("(require "):
+            lines[i] = '(require "../cosette.rkt" "../util.rkt" "../denotation.rkt" "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt" "../test-util.rkt")'
+    
+    lines.append("(run-experiment ros-instance)")
+    lines.append(";{}".format(fname))
+    
+    ros_file = "\n".join(lines)
+
+    with open("rosette/generated/temp.rkt", "w") as f:
+        f.write(ros_file)
+    #run_one_benchmark("testtemp.rkt", ".", "output/temp")
