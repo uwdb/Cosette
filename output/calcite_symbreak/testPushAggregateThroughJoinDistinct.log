@@ -1,0 +1,18 @@
+[[symbreak]] #t
+[query size] 5 6
+[query aggr] #t #t
+[inference time] 4
+[constraint]
+dept,
+ForallEQ[(r[1] = @0) ∨ (r[1] = @0)]
+emp,
+ForallEQ[#t ∨ #t]
+
+--------------------
+[table size] (0 0 0 1 1) [real time] 38 ms
+[table size] (0 0 0 2 1) [real time] 36 ms
+[table size] (0 0 0 2 2) [real time] 293 ms
+[table size] (0 0 0 3 2) [real time] 4572 ms
+[table size] (0 0 0 3 3) [real time] 40851 ms
+[table size] (0 0 0 4 3) [real time] 128818 ms
+{"size":[1],"status":"UNSAT"}
