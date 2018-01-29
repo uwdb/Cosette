@@ -188,6 +188,30 @@
            inner-q
            (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
                          (c-from-sql-filter sel-pred inner-q-name-hash)))))]
+      [(or (query-left-outer-join-2? query)
+           (query-left-outer-join? query))
+       (let* ([q1 (if (query-left-outer-join-2? query)
+                      (query-left-outer-join-2-query1 query)
+                      (query-left-outer-join-query1 query))]
+              [q2 (if (query-left-outer-join-2? query)
+                      (query-left-outer-join-2-query2 query)
+                      (query-left-outer-join-query2 query))]
+              [q1-schema-size (length (extract-schema q1))]
+              [q1-ref-indexes (build-list q1-schema-size values)]
+              [q2-schema-size (length (extract-schema q2))]
+              [q2-ref-indexes (build-list q2-schema-size (lambda (x) (+ x q1-schema-size)))]
+              ; don't forget to update ref indexes for q2
+              [q2-ref-update-map (map (lambda (x) (v-ref x))
+                                      (append (build-list q1-schema-size values) 
+                                              (build-list q2-schema-size values)))])
+         (list (forall-eq q1 (remove-constr-if-val 
+                               (forall-eq-constr mconstr) 
+                               (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
+               (forall-eq q2 (subst-v-ref
+                               (remove-constr-if-val 
+                                 (forall-eq-constr mconstr)
+                                 (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
+                               q2-ref-update-map))))]
       [(query-join? query)
        (let* ([q1 (query-join-query1 query)]
               [q2 (query-join-query2 query)]
@@ -216,7 +240,8 @@
               [q2 (query-union-all-query2 query)])
          (list
            (forall-eq q1 (forall-eq-constr mconstr))
-           (forall-eq q2 (forall-eq-constr mconstr))))])))
+           (forall-eq q2 (forall-eq-constr mconstr))))]
+      )))
 
 (define (remove-constr-if-val constr f)
   ; substitutes primitive constraints with (c-true) if any of its value

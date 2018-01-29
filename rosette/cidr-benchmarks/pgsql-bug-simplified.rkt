@@ -36,7 +36,7 @@
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
 #lang rosette                                                                                                                                                 
-(require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
+(require "../util.rkt" "../symmetry.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 
@@ -165,8 +165,10 @@
 ;(run q1-part-4)
 ;(run q2)
 
-(verify (same q0-part-2 q2-part-4))
-(verify (same q0 q1))
+(go-break-symmetry-bounded q0 q2)
+
+;(verify (same q0-part-2 q2-part-4))
+;(verify (same q0 q1))
 (verify (same q0 q2))
 
 ;EXPLAIN ANALYZE:

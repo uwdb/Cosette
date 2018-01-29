@@ -1,5 +1,6 @@
 import os
 import sys
+from pprint import pprint
 
 def calculate_table_size(input_dir):
 
@@ -19,16 +20,17 @@ def calculate_table_size(input_dir):
 
     return case_table_size
 
-def parse_outputs(log_dirs, table_size_dict):
+def parse_outputs(log_dirs, table_size_dict={}):
 
     method_results = {}
 
-    all_cases = [x for x in table_size_dict]
+    all_cases = []
 
     for log_dir in log_dirs:
         record = {}
         for fname in os.listdir(log_dir):
-            case_name = fname.split(".")[0][4:]
+            case_name = fname.split(".")[0]
+            all_cases.append(case_name)
             #print(case_name)
             #print(table_size_dict[case_name])
             case_result = []
@@ -46,26 +48,25 @@ def parse_outputs(log_dirs, table_size_dict):
         method_results[log_dir] = record
 
 
+    all_cases = list(set(all_cases))
     speed_up = []
 
     for case in all_cases:
         records = []
         record_lens = []
         for method in method_results:
-            #print(method)
             record_lens.append(len(method_results[method][case]))
+
+        if min(record_lens) == 0:
+            continue
 
         for method in method_results:
             records.append(method_results[method][case][min(record_lens)-1])
 
-        #print(case)
-        #print(records)
-
         v = float(records[1][1]) / records[0][1]
-        if v < 1:
+        if v > 1:
             print(case)
-            #print(v)
-            print("")
+            print(v)
 
         speed_up.append(v)
 
@@ -74,7 +75,7 @@ def parse_outputs(log_dirs, table_size_dict):
 
 
 if __name__ == '__main__':
-    table_size_dict = calculate_table_size("../benchmarks/calcite")
-    parse_outputs(["./r-mconstr", "./r-nosymbreak"], table_size_dict)
+    #table_size_dict = calculate_table_size(sys.argv[1])
+    parse_outputs([sys.argv[1], sys.argv[2]])
 
 

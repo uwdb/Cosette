@@ -149,6 +149,12 @@
     [(query-join? query) 
      (append (extract-schema (query-join-query1 query)) 
              (extract-schema (query-join-query2 query)))]
+    [(query-left-outer-join? query) 
+     (append (extract-schema (query-left-outer-join-query1 query)) 
+             (extract-schema (query-left-outer-join-query2 query)))]
+    [(query-left-outer-join-2? query) 
+     (append (extract-schema (query-left-outer-join-2-query1 query)) 
+             (extract-schema (query-left-outer-join-2-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
            [cnames (extract-schema (query-rename-query query))])
