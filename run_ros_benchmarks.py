@@ -143,5 +143,5 @@ def parse_and_test(file_name):
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
+    run_benchmarks("benchmarks/calcite", ".", "./output/calcite_nosymbreak")
     #print(quick_parse("temp.cos"))
