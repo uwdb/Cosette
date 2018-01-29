@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "symmetry.rkt" "cosette.rkt")
+(require "symmetry.rkt" "cosette.rkt" "syntax.rkt")
 
 (provide run-experiment) 
 
@@ -22,6 +22,8 @@
            [qt2 (fq2 empty-tables)])
       (let*-values ([(mconstr t-cpu t-real t-gc) 
                      (time-apply symbreak-func (list qt1 qt2))])
+        (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
+        (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (displayln (format "[inference time] ~a" t-real))
         (displayln "[constraint]")
         (display (to-str mconstr))
@@ -31,6 +33,8 @@
       (let* ([tables (init-sym-tables table-info-list table-size-list)]
              [qt1 (fq1 tables)]
              [qt2 (fq2 tables)])
+        (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
+        (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (cosette-solve qt1 qt2 tables)))
   (define (test-now-mconstr instance table-size-list)
       (let* ([tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
@@ -52,4 +56,48 @@
       (test-loop initial-table-size-list test-now-mconstr)
       (test-loop initial-table-size-list test-now)))
 
+
+;; query: the sql query to extract schema for
+(define (query-size query)
+  (cond 
+    [(query-named? query) 1]
+    [(query-join? query) 
+     (+ (query-size (query-join-query1 query)) 
+        (query-size (query-join-query2 query))
+        1)]
+    [(query-rename? query)
+     (query-size (query-rename-query query))]
+    [(query-rename-full? query)
+     (query-size (query-rename-full-query query))]
+    [(query-select? query)
+     (+ 1 (query-size (query-select-from-query query)))]
+    [(query-select-distinct? query)
+     (+ 1 (query-size (query-select-distinct-from-query query)))]
+    [(query-aggr-general? query)
+     (+ 1 (query-size (query-aggr-general-query query)))]
+    [(query-union-all? query) 
+     (+ (query-size (query-union-all-query1 query))
+        (query-size (query-union-all-query2 query))
+        1)]))
+
+
+;; query: the sql query to extract schema for
+(define (query-contain-aggr query)
+  (cond 
+    [(query-named? query) #f]
+    [(query-join? query) 
+     (or (query-contain-aggr (query-join-query1 query)) 
+         (query-contain-aggr (query-join-query2 query)))]
+    [(query-rename? query)
+     (query-contain-aggr (query-rename-query query))]
+    [(query-rename-full? query)
+     (query-contain-aggr (query-rename-full-query query))]
+    [(query-select? query)
+     (query-contain-aggr (query-select-from-query query))]
+    [(query-select-distinct? query)
+     (query-contain-aggr (query-select-distinct-from-query query))]
+    [(query-aggr-general? query) #t]
+    [(query-union-all? query) 
+     (or (query-contain-aggr (query-union-all-query1 query))
+         (query-contain-aggr (query-union-all-query2 query)))]))
 

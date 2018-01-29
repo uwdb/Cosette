@@ -76,7 +76,7 @@ def prepare_hw_benchmarks(input_dir, output_dir):
                 else:
                     print(case_name)
 
-
+'''
 def run_benchmarks(input_dir, cosette_dir="."):
     def run_benchmark(rosette_file, cosette_dir):
         cmd_ros = 'cd {}; ./rosette_solve.sh '.format(cosette_dir) + rosette_file
@@ -95,7 +95,7 @@ def run_benchmarks(input_dir, cosette_dir="."):
             result = run_benchmark(os.path.join(input_dir, fname), cosette_dir)
             print("[Input] Solving {}".format(fname))
             print("[Output] {}".format(result))
-            
+'''            
 
 def run_one_benchmark(rosette_file, cosette_dir, log_dir=None):
 
@@ -125,8 +125,7 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                         if os.path.isfile(os.path.join(log_dir, item))]
 
     for fname in os.listdir(input_dir):
-        if fname.endswith('.rkt'):# and (not fname.startswith("__")):
-
+        if fname.endswith('.rkt'):
             if os.path.splitext(fname)[0] in finished_cases:
                 print("[Ignore]{}".format(fname))
             else:
@@ -159,7 +158,7 @@ def parse_and_test(file_name):
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    #run_benchmarks("benchmarks/calcite", ".", "./output/all_mconstr")
+    run_benchmarks("benchmarks/calcite", ".", "./output/test")
     #print(quick_parse("temp.cos"))
 
     

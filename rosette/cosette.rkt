@@ -203,3 +203,5 @@
               [else (error "[Error] not  query construct")]))])
     (list->set (foldl append (list)
                       (map (lambda (fq) (used-table-info-one (fq table-info-list))) fq-list)))))
+
+

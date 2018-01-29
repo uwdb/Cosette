@@ -166,7 +166,6 @@
     [(query-union-all? query) 
      (extract-schema (query-union-all-query1 query))]))
 
-
 ;;; denote value returns tuple -> value
 (define (denote-value value nmap)
   (cond
