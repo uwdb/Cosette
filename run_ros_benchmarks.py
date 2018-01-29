@@ -6,6 +6,7 @@ import csv
 from subprocess import Popen, PIPE, STDOUT, check_output
 import signal
 
+from pprint import pprint
 
 import solver
 import sys
@@ -14,7 +15,7 @@ def quick_parse(input_file):
     with open(input_file, "r") as f:
         content = "\n".join(f.readlines())
         status, rosette_file = solver.gen_rosette(content, ".")
-        return rosette_file
+        return status, rosette_file
 
 
 def prepare_calcite_benchmarks(input_dir, output_dir):    
@@ -28,37 +29,21 @@ def prepare_calcite_benchmarks(input_dir, output_dir):
                 generated_rules[case_name] = cos
 
     labels = {}
-    with open(os.path.join(input_dir, "calcite_labels.csv")) as f:
+    with open(os.path.join(input_dir, "rosette_supported.csv")) as f:
         reader = csv.reader(f, delimiter=',')
         for row in reader:
             name = row[0]
-            labels[name] = False if row[1].lower() == "error" else True
+            labels[name] = True if row[1] == "T" else False
 
-    # run all the rule from the json file
-    with open(os.path.join(input_dir, 'calcite_tests.json')) as input_file:
-        calcite_rules = json.load(input_file)
+    for fname in os.listdir(input_dir):
+        case_name = fname.split(".")[0]
 
-    for rule in calcite_rules:
-        rname = rule["name"]
+        if fname.endswith(".cos") and labels[case_name]:
+            status, ros_file = quick_parse(os.path.join(input_dir, fname))
 
-        if rname in generated_rules:
-            cos = generated_rules[rname]
-        else:
-            cos = gen_cos_files.gen_cos_source(rule["q1"], rule["q2"])
-
-        status, rosette_file = solver.gen_rosette(cos, ".")
-
-        if status == True:
-            rname = rname if labels[rname] else ("__" + rname)
-            with open(os.path.join(output_dir, rname + ".rkt"), "w") as out_file:
-                lines = rosette_file.split("\n")
-
-                for i in range(len(lines)):
-                    if lines[i].startswith("(require "):
-                        lines[i] = '(require "../cosette.rkt" "../util.rkt" "../denotation.rkt" "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt" "../test-util.rkt")'
-                
-                lines.append("(experiment ros-instance)")
-                out_file.write("\n".join(lines))
+            if status == True:
+                with open(os.path.join(output_dir, case_name + ".rkt"), "w") as out_file:
+                    out_file.write(ros_file)
 
 
 def prepare_hw_benchmarks(input_dir, output_dir):
@@ -156,7 +141,7 @@ def parse_and_test(file_name):
     #run_one_benchmark("testtemp.rkt", ".", "output/temp")
 
 if __name__ == '__main__':
-    #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
+    prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     run_benchmarks("benchmarks/calcite", ".", "./output/test")
     #print(quick_parse("temp.cos"))
