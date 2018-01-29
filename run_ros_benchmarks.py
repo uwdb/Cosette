@@ -134,11 +134,8 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                 result = run_one_benchmark(os.path.join(input_dir, fname), cosette_dir, log_dir)
                 #print("[Output] {}".format(result))
 
-if __name__ == '__main__':
-    #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
-    #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
-    #run_benchmarks("benchmarks/calcite", ".", "./output/all_mconstr")
-    #print(quick_parse("temp.cos"))
+
+def parse_and_test(file_name):
 
     fname = sys.argv[1]
 
@@ -156,4 +153,14 @@ if __name__ == '__main__':
 
     with open("rosette/generated/temp.rkt", "w") as f:
         f.write(ros_file)
+
     #run_one_benchmark("testtemp.rkt", ".", "output/temp")
+
+if __name__ == '__main__':
+    #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
+    #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
+    #run_benchmarks("benchmarks/calcite", ".", "./output/all_mconstr")
+    #print(quick_parse("temp.cos"))
+
+    
+   
