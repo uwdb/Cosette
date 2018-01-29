@@ -73,9 +73,43 @@ def parse_outputs(log_dirs, table_size_dict={}):
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 1]))
 
+def read_stats(folder, table_size_dict):
+
+    query_size_collector = {}
+    schema_size_collector = {}
+    aggr_cases = 0
+    for fname in os.listdir(folder):
+        case_name = fname.split(".")[0][4:]
+        full_schema_size = table_size_dict[case_name]
+        with open(os.path.join(folder,fname), "r") as f:
+            lines = f.readlines()
+            for l in lines:
+                if l.startswith("[query size]"):
+                    l = [int(x) for x in (l[len("[query size]"):]).split()]
+                    if max(l) not in query_size_collector:
+                        query_size_collector[max(l)] = 0
+                    query_size_collector[max(l)] += 1
+                elif l.startswith("[query aggr]"):
+                    if "#t" in l:
+                        aggr_cases += 1
+                elif l.startswith("[table size]"):
+                    sz = [int(x) for x in l[l.index("(")+1:l.index(")")].split()]                    
+                    sz = sum([sz[i] * full_schema_size[i] for i in range(len(sz))])
+                    if sz not in schema_size_collector:
+                        schema_size_collector[sz] = 0
+                    schema_size_collector[sz] += 1
+                    break
+                    #collector.append(max(l))
+    pprint(query_size_collector)
+    pprint(schema_size_collector)
+    pprint(aggr_cases)
+    
 
 if __name__ == '__main__':
-    #table_size_dict = calculate_table_size(sys.argv[1])
-    parse_outputs([sys.argv[1], sys.argv[2]])
+    table_size_dict = calculate_table_size("../benchmarks/calcite")
+    #print(table_size_dict)
+    #parse_outputs([sys.argv[1], sys.argv[2]])
+    read_stats("calcite_symbreak", table_size_dict)
+
 
 
