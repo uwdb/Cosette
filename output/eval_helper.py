@@ -1,5 +1,6 @@
 import os
 import sys
+from pprint import pprint
 
 def calculate_table_size(input_dir):
 
@@ -19,16 +20,17 @@ def calculate_table_size(input_dir):
 
     return case_table_size
 
-def parse_outputs(log_dirs, table_size_dict):
+def parse_outputs(log_dirs, table_size_dict={}):
 
     method_results = {}
 
-    all_cases = [x for x in table_size_dict]
+    all_cases = []
 
     for log_dir in log_dirs:
         record = {}
         for fname in os.listdir(log_dir):
-            case_name = fname.split(".")[0][4:]
+            case_name = fname.split(".")[0]
+            all_cases.append(case_name)
             #print(case_name)
             #print(table_size_dict[case_name])
             case_result = []
@@ -46,35 +48,68 @@ def parse_outputs(log_dirs, table_size_dict):
         method_results[log_dir] = record
 
 
+    all_cases = list(set(all_cases))
     speed_up = []
 
     for case in all_cases:
         records = []
         record_lens = []
         for method in method_results:
-            #print(method)
             record_lens.append(len(method_results[method][case]))
+
+        if min(record_lens) == 0:
+            continue
 
         for method in method_results:
             records.append(method_results[method][case][min(record_lens)-1])
 
-        #print(case)
-        #print(records)
-
         v = float(records[1][1]) / records[0][1]
-        if v < 1:
+        if v > 1:
             print(case)
-            #print(v)
-            print("")
+            print(v)
 
         speed_up.append(v)
 
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 1]))
 
+def read_stats(folder, table_size_dict):
+
+    query_size_collector = {}
+    schema_size_collector = {}
+    aggr_cases = 0
+    for fname in os.listdir(folder):
+        case_name = fname.split(".")[0][4:]
+        full_schema_size = table_size_dict[case_name]
+        with open(os.path.join(folder,fname), "r") as f:
+            lines = f.readlines()
+            for l in lines:
+                if l.startswith("[query size]"):
+                    l = [int(x) for x in (l[len("[query size]"):]).split()]
+                    if max(l) not in query_size_collector:
+                        query_size_collector[max(l)] = 0
+                    query_size_collector[max(l)] += 1
+                elif l.startswith("[query aggr]"):
+                    if "#t" in l:
+                        aggr_cases += 1
+                elif l.startswith("[table size]"):
+                    sz = [int(x) for x in l[l.index("(")+1:l.index(")")].split()]                    
+                    sz = sum([sz[i] * full_schema_size[i] for i in range(len(sz))])
+                    if sz not in schema_size_collector:
+                        schema_size_collector[sz] = 0
+                    schema_size_collector[sz] += 1
+                    break
+                    #collector.append(max(l))
+    pprint(query_size_collector)
+    pprint(schema_size_collector)
+    pprint(aggr_cases)
+    
 
 if __name__ == '__main__':
     table_size_dict = calculate_table_size("../benchmarks/calcite")
-    parse_outputs(["./r-mconstr", "./r-nosymbreak"], table_size_dict)
+    #print(table_size_dict)
+    #parse_outputs([sys.argv[1], sys.argv[2]])
+    read_stats("calcite_symbreak", table_size_dict)
+
 
 

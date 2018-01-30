@@ -22,8 +22,6 @@
            [qt2 (fq2 empty-tables)])
       (let*-values ([(mconstr t-cpu t-real t-gc) 
                      (time-apply symbreak-func (list qt1 qt2))])
-        (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
-        (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (displayln (format "[inference time] ~a" t-real))
         (displayln "[constraint]")
         (display (to-str mconstr))
@@ -40,11 +38,14 @@
       (let* ([tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
              [qt1 (fq1 tables)]
              [qt2 (fq2 tables)])
+        (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
+        (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (cosette-solve qt1 qt2 tables)))
   (define (test-loop table-size-list test-func)
     (let*-values ([(sol t-cpu t-real t-gc) 
                    (time-apply test-func (list ros-instance table-size-list))])
       (cond [(eq? (car (car sol)) "NEQ") 
+             (displayln "[NEQ]")
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (pretty-display (cdr (car sol)))
              (displayln "")]
