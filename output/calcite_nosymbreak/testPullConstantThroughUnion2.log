@@ -1,0 +1,465 @@
+[[symbreak]] #f
+[query size] 5 5
+[query aggr] #f #f
+[inference time] 4
+[constraint]
+emp,
+ForallEQ[(#t) ∧ (r[2] = @2) ∧ (r[7] = @1) ∧ (1 = @0) ∨ (#t) ∧ (r[2] = @2) ∧ (r[7] = @1) ∧ (2 = @0) ∨ (#t) ∧ (r[2] = @2) ∧ (r[7] = @1) ∧ (1 = @0) ∨ (#t) ∧ (r[2] = @2) ∧ (r[7] = @1) ∧ (2 = @0)]
+
+--------------------
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 1) [real time] 25 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 2) [real time] 43 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 3) [real time] 16 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 4) [real time] 19 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 5) [real time] 24 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 6) [real time] 28 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 7) [real time] 33 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 8) [real time] 40 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 9) [real time] 49 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 10) [real time] 52 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 11) [real time] 58 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 12) [real time] 71 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 13) [real time] 74 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 14) [real time] 89 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 15) [real time] 99 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 16) [real time] 118 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 17) [real time] 118 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 18) [real time] 134 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 19) [real time] 150 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 20) [real time] 175 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 21) [real time] 187 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 22) [real time] 199 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 23) [real time] 216 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 24) [real time] 235 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 25) [real time] 262 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 26) [real time] 295 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 27) [real time] 288 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 28) [real time] 309 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 29) [real time] 410 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 30) [real time] 369 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 31) [real time] 392 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 32) [real time] 423 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 33) [real time] 483 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 34) [real time] 450 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 35) [real time] 482 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 36) [real time] 510 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 37) [real time] 549 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 38) [real time] 588 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 39) [real time] 610 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 40) [real time] 667 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 41) [real time] 707 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 42) [real time] 784 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 43) [real time] 726 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 44) [real time] 768 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 45) [real time] 816 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 46) [real time] 867 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 47) [real time] 892 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 48) [real time] 931 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 49) [real time] 990 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 50) [real time] 1057 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 51) [real time] 1365 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 52) [real time] 1179 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 53) [real time] 1310 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 54) [real time] 1171 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 55) [real time] 1231 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 56) [real time] 1281 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 57) [real time] 1322 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 58) [real time] 1387 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 59) [real time] 1412 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 60) [real time] 1512 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 61) [real time] 1556 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 62) [real time] 1628 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 63) [real time] 1687 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 64) [real time] 1762 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 65) [real time] 1843 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 66) [real time] 1968 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 67) [real time] 2750 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 68) [real time] 1901 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 69) [real time] 1984 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 70) [real time] 2052 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 71) [real time] 2103 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 72) [real time] 2218 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 73) [real time] 2229 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 74) [real time] 2320 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 75) [real time] 2422 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 76) [real time] 2470 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 77) [real time] 2560 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 78) [real time] 2656 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 79) [real time] 2720 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 80) [real time] 2858 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 81) [real time] 2930 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 82) [real time] 3027 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 83) [real time] 3163 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 84) [real time] 4865 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 85) [real time] 3152 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 86) [real time] 3188 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 87) [real time] 3322 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 88) [real time] 3403 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 89) [real time] 3505 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 90) [real time] 3519 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 91) [real time] 3723 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 92) [real time] 3807 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 93) [real time] 3842 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 94) [real time] 3966 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 95) [real time] 4029 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 96) [real time] 4105 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 97) [real time] 4245 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 98) [real time] 4382 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 99) [real time] 4533 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 100) [real time] 4629 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 101) [real time] 4796 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 102) [real time] 4856 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 103) [real time] 5017 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 104) [real time] 5155 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 105) [real time] 5322 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 106) [real time] 8866 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 107) [real time] 5299 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 108) [real time] 5503 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 109) [real time] 5703 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 110) [real time] 5630 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 111) [real time] 5818 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 112) [real time] 5956 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 113) [real time] 6176 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 114) [real time] 6106 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 115) [real time] 6414 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 116) [real time] 6441 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 117) [real time] 6671 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 118) [real time] 6670 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 119) [real time] 6791 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 120) [real time] 7022 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 121) [real time] 7184 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 122) [real time] 7393 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 123) [real time] 7537 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 124) [real time] 7586 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 125) [real time] 7727 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 126) [real time] 7984 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 127) [real time] 8131 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 128) [real time] 8280 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 129) [real time] 8382 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 130) [real time] 8574 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 131) [real time] 8927 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 132) [real time] 9145 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 133) [real time] 16519 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 134) [real time] 9569 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 135) [real time] 9692 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 136) [real time] 9850 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 137) [real time] 10007 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 138) [real time] 10533 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 139) [real time] 10541 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 140) [real time] 10902 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 141) [real time] 10876 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 142) [real time] 11275 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 143) [real time] 11459 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 144) [real time] 11677 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 145) [real time] 11833 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 146) [real time] 12045 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 147) [real time] 12196 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 148) [real time] 12416 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 149) [real time] 12805 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 150) [real time] 13288 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (0 0 0 0 151) [real time] 13005 ms
+[query size] 5 5
+[query aggr] #f #f
+{"size":[1],"status":"UNSAT"}

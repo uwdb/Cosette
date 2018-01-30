@@ -1,0 +1,35 @@
+[[symbreak]] #f
+[query size] 5 5
+[query aggr] #f #f
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[(r[0] = 10) ∧ (r[0] = @0) ∨ (r[0] = 10) ∧ (r[0] = 10) ∧ (r[0] = @0)]
+emp,
+ForallEQ[(r[1] = @1) ∨ (r[1] = @1)]
+
+--------------------
+[query size] 5 5
+[query aggr] #f #f
+[table size] (1 1) [real time] 33 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (2 1) [real time] 34 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (2 2) [real time] 258 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (3 2) [real time] 382 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (3 3) [real time] 582 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (4 3) [real time] 1630 ms
+[query size] 5 5
+[query aggr] #f #f
+[table size] (4 4) [real time] 3298 ms
+[query size] 5 5
+[query aggr] #f #f
+{"size":[1],"status":"UNSAT"}

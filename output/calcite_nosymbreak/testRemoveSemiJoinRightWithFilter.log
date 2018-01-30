@@ -1,0 +1,26 @@
+[[symbreak]] #f
+[query size] 6 7
+[query aggr] #f #f
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[(r[1] = str_foo_$0) ∧ (#t) ∨ (r[1] = str_foo_$0)]
+emp,
+ForallEQ[#t ∨ (r[1] = @0) ∨ #t ∨ (r[1] = @0)]
+
+--------------------
+[query size] 6 7
+[query aggr] #f #f
+[table size] (1 1) [real time] 31 ms
+[query size] 6 7
+[query aggr] #f #f
+[table size] (2 1) [real time] 20 ms
+[query size] 6 7
+[query aggr] #f #f
+[table size] (2 2) [real time] 226 ms
+[query size] 6 7
+[query aggr] #f #f
+[table size] (3 2) [real time] 336 ms
+[query size] 6 7
+[query aggr] #f #f
+{"size":[1],"status":"UNSAT"}
