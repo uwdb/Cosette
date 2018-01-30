@@ -4,7 +4,7 @@
 
 (provide run-experiment) 
 
-(define symbreak #t)
+(define symbreak #f)
 (define simplify-constr #t)
 
 (define (run-experiment ros-instance)

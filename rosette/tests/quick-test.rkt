@@ -5,22 +5,27 @@
 (current-bitwidth #f)
  
 (define-symbolic div_ (~> integer? integer? integer?))
-
-(define dept-info (table-info "dept" (list "deptno" "name")))
  
-(define (q1 tables) 
-  (SELECT (VALS "t.name") 
-  FROM (AS (SELECT (VALS "dept.deptno" "dept.name") 
-  FROM (AS (NAMED (list-ref tables 0)) ["dept"]) 
-  WHERE (BINOP "dept.deptno" = 10)) ["t" (list "deptno" "name")]) 
-  WHERE (BINOP "t.deptno" = 10)))
+(define t-info (table-info "t" (list "id" "sal")))
+ 
 
-(define (q2 tables) 
-  (SELECT (VALS "dept0.name") 
-  FROM (AS (NAMED (list-ref tables 0)) ["dept0"]) 
-  WHERE (BINOP "dept0.deptno" = 10)))
+(define (q1 k tables) 
+  (SELECT (VALS "x.id" (VAL-UNOP aggr-sum (val-column-ref "x.sal"))) 
+ FROM (AS (NAMED (list-ref tables 0)) ["x"]) 
+ WHERE (TRUE) GROUP-BY (list "x.id") 
+ HAVING (BINOP (VAL-UNOP aggr-count-distinct (val-column-ref "x.sal")) > k)))
 
+(define (q2 k tables) 
+  (SELECT (VALS "x.id" (VAL-UNOP aggr-sum (val-column-ref "x.sal"))) 
+ FROM (AS (NAMED (list-ref tables 0)) ["x"]) 
+ WHERE (TRUE) GROUP-BY (list "x.id") 
+ HAVING (BINOP (VAL-UNOP aggr-count-distinct (val-column-ref "x.sal")) > (+ 1 k))))
 
-(define ros-instance (list q1 q2 (list dept-info))) 
-(run-experiment ros-instance)
+(define ros-instance (list q1 q2 (list t-info)))
+
+(for ([k (list 1 2 3 4 5 6 7 8 9 10)])
+  (let ([ros-instance (list (lambda (x) (q1 k x)) (lambda (x) (q2 k x)) (list t-info))])
+    (run-experiment ros-instance)))
+ 
+;(run-experiment ros-instance)
 

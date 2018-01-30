@@ -37,21 +37,29 @@ def parse_outputs(log_dirs, table_size_dict={}):
             with open(os.path.join(log_dir, fname), encoding='utf-8') as f: 
                 lines = [l.strip() for l in f.readlines() if "[table size]" in l]
                 for l in lines:
+                    
                     table_size = l[l.index("[table size]")+len("[table size]")+2: l.index("[real time]")-2]
                     real_time = int(l[l.index("[real time]")+len("[read time]"): l.index("ms")])
 
                     table_size = [int(i) for i in table_size.split()]
+
+                    if max(table_size) > 1:
+                        print (case_name)
+                        #print(table_size)
+
                     case_result.append((table_size, real_time))
 
             record[case_name] = case_result
-
         method_results[log_dir] = record
+
+    #pprint(method_results)
 
 
     all_cases = list(set(all_cases))
     speed_up = []
 
     result = []
+
 
     for case in all_cases:
         records = []
@@ -61,6 +69,7 @@ def parse_outputs(log_dirs, table_size_dict={}):
             record_lens.append(len(method_results[method][case]))
 
         if min(record_lens) == 0:
+            print(case)
             continue
 
         for method in method_results:
@@ -78,25 +87,26 @@ def parse_outputs(log_dirs, table_size_dict={}):
         for i in range(len(table_size_dict[case])):
             num_sv += records[0][0][i] * table_size_dict[case][i]
 
-        result.append([case[4:], num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
+        result.append([case, num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
 
     def takeSecond(elem):
         return elem[4]
+    return sorted(result, reverse=True, key=takeSecond)
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 2]))
-    for x in sorted(result, reverse=True, key=takeSecond):
-        print("{} & {} & {} & {} & {} \\\\".format(x[0], x[1], x[2], x[3], x[4]))
+    #for x in sorted(result, reverse=True, key=takeSecond):
+    #    print("{} & {} & {} & {} & {} \\\\".format(x[0], x[1], x[2], x[3], x[4]))
 
 
 
 
 def read_stats(folder, table_size_dict):
-
     query_size_collector = {}
     schema_size_collector = {}
     aggr_cases = 0
+    stats = {}
     for fname in os.listdir(folder):
-        print(fname)
+        #print(fname)
         case_name = fname.split(".")[0]
         full_schema_size = table_size_dict[case_name]
         with open(os.path.join(folder,fname), "r") as f:
@@ -111,6 +121,8 @@ def read_stats(folder, table_size_dict):
                 elif l.startswith("[table size]"):
                     sz = [int(x) for x in l[l.index("(")+1:l.index(")")].split()]                    
                     tsize = sum([sz[i] * full_schema_size[i] for i in range(len(sz))])
+            
+            stats[case_name]= (qsize, aggr)
             if aggr:
                 aggr_cases += 1
             if qsize not in query_size_collector:
@@ -120,18 +132,35 @@ def read_stats(folder, table_size_dict):
                 schema_size_collector[tsize] = 0
             schema_size_collector[tsize] += 1
 
-    pprint(query_size_collector)
-    print(schema_size_collector)
-    print(aggr_cases)
+    #pprint(query_size_collector)
+    #print(schema_size_collector)
+    #print(aggr_cases)
+
+    return stats
     
+def process_case_name(s):
+    return s[4:].replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj")
 
 if __name__ == '__main__':
+        
+    '''
     table_size_dict = calculate_table_size("../benchmarks/calcite")
-    #print(table_size_dict)
-    #print(table_size_dict)
-    parse_outputs(["calcite_symbreak", "calcite_nosymbreak"], table_size_dict)
-    #pprint(table_size_dict)
-    #read_stats("calcite_nosymbreak", table_size_dict)
+    stats = read_stats("calcite_nosymbreak", table_size_dict)
+    result = parse_outputs(["calcite_symbreak", "calcite_nosymbreak"], table_size_dict)
+    for x in result:
+        if not stats[x[0]][1]:
+            print("{} & {} & {} & {} & {} & {} \\\\".format(process_case_name(x[0]), stats[x[0]][0], x[1], x[2], x[3], x[4]))
+    '''
+    
+    table_size_dict = calculate_table_size("../benchmarks/homeworks")
+    stats = read_stats("homeworks_symbreak", table_size_dict)
+    result = parse_outputs(["homeworks_symbreak_simple", "homeworks_nosymbreak_new"], table_size_dict)
+    
+    print(len(result))
 
+    for x in result:
+        #if stats[x[0]][1]:
+            print("{} & {} & {} & {} & {} & {} \\\\".format((x[0]), stats[x[0]][0], x[1], x[2], x[3], x[4]))
+    
 
 
