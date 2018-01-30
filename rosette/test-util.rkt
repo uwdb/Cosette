@@ -4,8 +4,8 @@
 
 (provide run-experiment) 
 
-(define symbreak #f)
-(define simplify-constr #f)
+(define symbreak #t)
+(define simplify-constr #t)
 
 (define (run-experiment ros-instance)
   (displayln (format "[[symbreak]] ~a" symbreak))

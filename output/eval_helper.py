@@ -8,7 +8,7 @@ def calculate_table_size(input_dir):
 
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and (not fname.startswith("__")):
-            case_name = fname.split(".")[0][4:]
+            case_name = fname.split(".")[0]
             with open(os.path.join(input_dir, fname)) as f:
                 lines = [l for l in f.readlines() if "table-info" in l]
                  
@@ -51,9 +51,12 @@ def parse_outputs(log_dirs, table_size_dict={}):
     all_cases = list(set(all_cases))
     speed_up = []
 
+    result = []
+
     for case in all_cases:
         records = []
         record_lens = []
+
         for method in method_results:
             record_lens.append(len(method_results[method][case]))
 
@@ -64,14 +67,28 @@ def parse_outputs(log_dirs, table_size_dict={}):
             records.append(method_results[method][case][min(record_lens)-1])
 
         v = float(records[1][1]) / records[0][1]
-        if v > 1:
-            print(case)
-            print(v)
+        #if v > 1:
+        #    print(case)
+        #    print(v)
 
         speed_up.append(v)
 
+        #print(records)
+        num_sv = 0
+        for i in range(len(table_size_dict[case])):
+            num_sv += records[0][0][i] * table_size_dict[case][i]
+
+        result.append([case[4:], num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
+
+    def takeSecond(elem):
+        return elem[4]
     #print(len(speed_up))
-    #print(len([x for x in speed_up if x > 1]))
+    #print(len([x for x in speed_up if x > 2]))
+    for x in sorted(result, reverse=True, key=takeSecond):
+        print("{} & {} & {} & {} & {} \\\\".format(x[0], x[1], x[2], x[3], x[4]))
+
+
+
 
 def read_stats(folder, table_size_dict):
 
@@ -79,37 +96,42 @@ def read_stats(folder, table_size_dict):
     schema_size_collector = {}
     aggr_cases = 0
     for fname in os.listdir(folder):
-        case_name = fname.split(".")[0][4:]
+        print(fname)
+        case_name = fname.split(".")[0]
         full_schema_size = table_size_dict[case_name]
         with open(os.path.join(folder,fname), "r") as f:
             lines = f.readlines()
+            aggr = False
             for l in lines:
                 if l.startswith("[query size]"):
-                    l = [int(x) for x in (l[len("[query size]"):]).split()]
-                    if max(l) not in query_size_collector:
-                        query_size_collector[max(l)] = 0
-                    query_size_collector[max(l)] += 1
+                    qsize = max([int(x) for x in (l[len("[query size]"):]).split()])
                 elif l.startswith("[query aggr]"):
                     if "#t" in l:
-                        aggr_cases += 1
+                        aggr = True
                 elif l.startswith("[table size]"):
                     sz = [int(x) for x in l[l.index("(")+1:l.index(")")].split()]                    
-                    sz = sum([sz[i] * full_schema_size[i] for i in range(len(sz))])
-                    if sz not in schema_size_collector:
-                        schema_size_collector[sz] = 0
-                    schema_size_collector[sz] += 1
-                    break
-                    #collector.append(max(l))
+                    tsize = sum([sz[i] * full_schema_size[i] for i in range(len(sz))])
+            if aggr:
+                aggr_cases += 1
+            if qsize not in query_size_collector:
+                query_size_collector[qsize] = 0
+            query_size_collector[qsize] += 1
+            if tsize not in schema_size_collector:
+                schema_size_collector[tsize] = 0
+            schema_size_collector[tsize] += 1
+
     pprint(query_size_collector)
-    pprint(schema_size_collector)
-    pprint(aggr_cases)
+    print(schema_size_collector)
+    print(aggr_cases)
     
 
 if __name__ == '__main__':
     table_size_dict = calculate_table_size("../benchmarks/calcite")
     #print(table_size_dict)
-    #parse_outputs([sys.argv[1], sys.argv[2]])
-    read_stats("calcite_symbreak", table_size_dict)
+    #print(table_size_dict)
+    parse_outputs(["calcite_symbreak", "calcite_nosymbreak"], table_size_dict)
+    #pprint(table_size_dict)
+    #read_stats("calcite_nosymbreak", table_size_dict)
 
 
 

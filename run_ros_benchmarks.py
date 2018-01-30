@@ -110,7 +110,7 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                         if os.path.isfile(os.path.join(log_dir, item))]
 
     for fname in os.listdir(input_dir):
-        if fname.endswith('.rkt'):
+        if fname.endswith('.rkt') and not ("correct" in fname):
             if os.path.splitext(fname)[0] in finished_cases:
                 print("[Ignore]{}".format(fname))
             else:
@@ -144,5 +144,5 @@ if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
-    run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_nosymbreak")
+    run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
     #print(quick_parse("temp.cos"))
