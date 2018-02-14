@@ -2,21 +2,24 @@ import .core
 
 open tactic
 
-meta def pre {α : Type} (st : α) (lemmas : simp_lemmas) (rel : name) (parent : option expr) (subterm : expr) : tactic (α × expr × option expr × bool) :=
-do if rel = `uexp.eq
-   then do trace subterm,
-           trace "before rewrite",
-           (subterm', prf) ← lemmas.rewrite subterm (do trace "here", trace_state) `uexp.eq,
-           trace "after rewrite",
-           trace_state,
-           return (st, subterm', prf, ff)
-   else tactic.fail "foo"
+meta def pre {α : Type}
+    (st : α)
+    (lemmas : simp_lemmas)
+    (rel : name)
+    (parent : option expr)
+    (subterm : expr) : tactic (α × expr × option expr × bool) :=
+do trace subterm,
+   ty ← infer_type subterm,
+   ue ← mk_const `uexp,
+   if ty = ue
+   then do (subterm', prf) ← lemmas.rewrite subterm (do trace "here", trace_state) `uexp.eq,
+            trace subterm',
+            trace prf,
+            return (st, subterm', prf, ff) -- stop processing here
+    else return (st, subterm, none, tt)
 
 meta def post {α : Type} (st : α) (lemmas : simp_lemmas) (rel : name) (parent : option expr) (subterm : expr) : tactic (α × expr × option expr × bool) :=
--- do if rel = `related
---    then tactic.fail "triggered"
---    else tactic.fail "post does not match
-    return (st, subterm, none, ff)
+return (st, subterm, none, ff)
 
 -- apply uexp.eq.trans,
 --     apply uexp.eq.mul_distr,
@@ -27,9 +30,12 @@ meta def post {α : Type} (st : α) (lemmas : simp_lemmas) (rel : name) (parent 
 --     apply uexp.eq.mul_comm,
 --     apply uexp.eq.refl
 
+@[simp] lemma my_add_comm : forall (e1 e2 : uexp),
+  uexp.eq (uexp.plus e1 e2) (uexp.plus e2 e1) := by admit
+
 meta def uexp_simp (e : expr) : tactic (expr × expr) :=
-do lemmas ← simp_lemmas.mk.add_simp `uexp.eq.add_comm,
-   -- lemmas ← simp_lemmas.add_simp lemmas `uexp.eq.mul_distr,
+do lemmas ← simp_lemmas.mk.add_simp `my_add_comm,
+  -- lemmas ← simp_lemmas.add_simp lemmas `uexp.eq.mul_distr,
    -- lemmas ← simp_lemmas.add_simp lemmas `uexp.eq.add_func,
    -- lemmas ← simp_lemmas.add_simp lemmas `uexp.eq.mul_comm,
    ((), opt_e, opt_prf) ← ext_simplify_core () {} lemmas (fun _, return ()) pre post `uexp.eq e,
@@ -37,8 +43,16 @@ do lemmas ← simp_lemmas.mk.add_simp `uexp.eq.add_comm,
 
 meta def usimp : tactic unit :=
 do tgt ← target,
-   (new_tgt, prf) ← uexp_simp tgt,
-   trace new_tgt,
-   trace prf,
-   fail "yolo"
+   let rel := tgt.get_app_fn,
+   let args := tgt.get_app_args,
+   if rel.const_name = `uexp.eq
+   then match args with
+   | lhs::rhs::_ :=
+     do (new_tgt, prf) ← uexp_simp lhs,
+        trace new_tgt,
+        trace prf,
+        fail "foo"
+   | _ := fail "inv problem"
+   end
+   else fail "unable to simplify"
 
