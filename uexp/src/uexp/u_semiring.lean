@@ -14,19 +14,23 @@ local infix + := plus
 infix `≃`:50 := ueq
 
 -- commutative semiring axioms
-axiom plus_comm (a b : usr) :       a + b = b + a
-axiom plus_zero (a : usr) :         a + zero = a
-axiom plus_assoc (a b c : usr) :    a + b + c = a + (b + c)
-axiom time_comm (a b c : usr) :     a * b * c =  a * (b * c)
-axiom time_assoc_l (a b c : usr) :    a * (b + c) = a * b + a * c 
-axiom time_assoc_r (a b c : usr) :    (a + b) * c = a * c + b * c
-axiom time_zero (a : usr): a * zero = zero
+@[simp] axiom plus_comm (a b : usr) :       a + b = b + a
+@[simp] axiom plus_zero (a : usr) :         a + zero = a
+@[simp] axiom plus_assoc (a b c : usr) :    a + b + c = a + (b + c)
+@[simp] axiom time_comm (a b : usr) :       a * b = b * a
+@[simp] axiom time_assoc_l (a b c : usr) :  a * (b + c) = a * b + a * c
+@[simp] axiom time_assoc_r (a b c : usr) :  (a + b) * c = a * c + b * c
+@[simp] axiom time_zero (a : usr): a * zero = zero
 
 -- these two lemmas are just to try the new encoding
 lemma eq_mixed_congruence :
     forall (t₁ t₂: tuple) (R: tuple → usr),
-    (t₁ ≃ t₂) * (R t₁) = (t₁ ≃ t₂) * (R t₂) := sorry 
+    (t₁ ≃ t₂) * (R t₁) = (t₁ ≃ t₂) * (R t₂) :=
+begin
+    intros,
+    simp,
+end
 
 lemma eq_sigma_subst:
     forall (R: tuple → usr) (t₂ t : tuple),
-    sig (λ t₁ : tuple,  (t₁ ≃ t₂) * (R t)) = (R t) := sorry 
+    sig (λ t₁ : tuple,  (t₁ ≃ t₂) * (R t)) = (R t) := sorry
