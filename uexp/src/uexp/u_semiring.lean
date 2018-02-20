@@ -28,35 +28,54 @@ inductive usr : Type
 | not : usr → usr
 | ueq {s : Schema} : Tuple s → Tuple s → usr
 
-local infix * := usr.time
-local infix + := usr.plus
 notation `∑` := usr.sig
 notation `∥` u `∥` := usr.squash u 
-notation 0 := usr.zero
-notation 1 := usr.one
 notation s₁ `++` s₂ := tree.node s₁ s₂ 
 
 infix `≃`:50 := usr.ueq
+instance usr_has_add : has_add usr := ⟨usr.plus⟩
+instance usr_has_mul : has_mul usr := ⟨usr.time⟩
+instance usr_has_zero : has_zero usr := ⟨usr.zero⟩
+instance usr_has_one : has_one usr := ⟨usr.one⟩
 
 -- commutative semiring axioms
 @[simp] axiom plus_comm (a b : usr) :       a + b = b + a
 @[simp] axiom plus_zero (a : usr) :         a + 0 = a
 @[simp] axiom plus_assoc (a b c : usr) :    a + b + c = a + (b + c)
 @[simp] axiom time_comm (a b : usr) :       a * b = b * a
-@[simp] axiom time_assoc_l (a b c : usr) :  a * (b + c) = a * b + a * c
-@[simp] axiom time_assoc_r (a b c : usr) :  (a + b) * c = a * c + b * c
+@[simp] axiom time_assoc (a b c : usr) : a * b * c = a * (b * c)
+@[simp] axiom time_distrib_l (a b c : usr) :  a * (b + c) = a * b + a * c
+@[simp] axiom time_distrib_r (a b c : usr) :  (a + b) * c = a * c + b * c
 @[simp] axiom time_zero (a : usr): a * 0 = 0
 @[simp] axiom time_one (a : usr): a * 1 = a
 
--- u-semiring axioms
-@[simp] axiom sig_distr {s: Schema} (f₁ f₂ : Tuple s → usr):
-    ∑ (λ t: Tuple s, (f₁ t) + (f₂ t)) = ∑ (λ t: Tuple s, (f₁ t)) + ∑ (λ t: Tuple s, (f₂ t))
+instance : comm_semiring usr := {
+    add_assoc := plus_assoc,
+    add_zero := plus_zero,
+    zero_add := by intros; rw plus_comm; simp,
+    add_comm := plus_comm,
+    mul_assoc := time_assoc,
+    mul_one := time_one,
+    one_mul := by intros; rw time_comm; simp,
+    left_distrib := time_distrib_l,
+    right_distrib := time_distrib_r,
+    mul_zero := time_zero,
+    zero_mul := by intros; rw time_comm; simp,
+    mul_comm := time_comm,
+    ..usr_has_add,
+    ..usr_has_mul,
+    ..usr_has_zero,
+    ..usr_has_one
+}
+
+@[simp] axiom sig_distr_plus {s : Schema} (f₁ f₂ : Tuple s → usr) :
+    usr.sig (λ t, (f₁ t) + (f₂ t)) = usr.sig (λ t, (f₁ t)) + usr.sig (λ t, (f₂ t))
 @[simp] axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
-    ∑ (λ t₁ : Tuple s, ∑ (λ t₂ : Tuple t, f t₁ t₂)) =
-    ∑ (λ t₂ : Tuple t, ∑ (λ t₁ : Tuple s, f t₁ t₂))
-@[simp] axiom sig_assoc {s: Schema} (a: usr) (f: Tuple s → usr):
-    ∑ (λ t : Tuple s, a * (f t)) =
-    a * ∑ (λ t: Tuple s, f t)
+    usr.sig (λ t₁ : Tuple s, usr.sig (λ t₂ : Tuple t, f t₁ t₂)) =
+    usr.sig (λ t₂ : Tuple t, usr.sig (λ t₁ : Tuple s, f t₁ t₂))
+@[simp] axiom sig_distr_time {s : Schema} (a: usr) (f: Tuple s → usr):
+    usr.sig (λ t : Tuple s, a * (f t)) =
+    a * usr.sig (λ t : Tuple s, f t)
 
 @[simp] axiom squash_zero : usr.squash 0 = 0
 @[simp] axiom squash_one : usr.squash 1 = 1
