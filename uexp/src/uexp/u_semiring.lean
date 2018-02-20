@@ -1,10 +1,25 @@
 -- definition of u-semiring
 constant usr : Type
+constant type: Type
+inductive tree (A:Type)
+| node : tree → tree → tree
+| leaf : A → tree
+| empty : tree
+definition Schema := tree type
+constant denote : type → Type
 constant tuple : Type
+def Tuple (s: Schema) : Type :=
+match s with
+    | (node t0 t1) := (Tuple t0) × (Tuple t1)
+    | (leaf A) := denote A
+    | empty := unit
+end
+
 constant plus : usr → usr → usr
 constant time : usr → usr → usr
 constant zero : usr
 constant one : usr
+
 constant sig : (tuple → usr) → usr -- is that right?
 constant squash : usr → usr
 constant usr.not : usr → usr
@@ -25,7 +40,7 @@ infix `≃`:50 := ueq
 @[simp] axiom time_zero (a : usr): a * zero = zero
 @[simp] axiom time_one (a : usr): a * one = a
 
--- u-semiring axioms (TODO: squash and not)
+-- u-semiring axioms
 @[simp] axiom sig_distr (f₁ f₂ : tuple → usr):
     sig (λ t: tuple, (f₁ t) + (f₂ t)) = sig (λ t: tuple, (f₁ t)) + sig (λ t: tuple, (f₂ t))
 @[simp] axiom sig_commute (f: tuple → tuple → usr):
@@ -43,7 +58,7 @@ infix `≃`:50 := ueq
 @[simp] axiom squash_eq_if_square_eq (x : usr) : x * x = x → squash x = x
 
 @[simp] axiom not_zero : usr.not zero = one
-@[simp] axiom not_time (x y : usr) : usr.not (x * y) = usr.not x + usr.not y
+@[simp] axiom not_time (x y : usr) : usr.not (x * y) = squash (usr.not x + usr.not y)
 @[simp] axiom not_plus (x y : usr) : usr.not (x + y) = usr.not x * usr.not y
 @[simp] axiom not_squash (x : usr) : usr.not (squash x) = squash (usr.not x)
 @[simp] axiom squash_not (x : usr) : squash (usr.not x) = usr.not x
