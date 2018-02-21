@@ -18,25 +18,25 @@ def Tuple : Schema → Type
 | (tree.leaf A) := denote A
 | tree.empty := unit
 
-inductive usr : Type
-| plus : usr → usr → usr
-| time : usr → usr → usr
-| zero : usr
-| one : usr
-| sig {s: Schema}: (Tuple s → usr) → usr
-| squash : usr → usr
-| not : usr → usr
-| ueq {s : Schema} : Tuple s → Tuple s → usr
+constant usr : Type
+constant usr.one : usr
+constant usr.zero : usr
+constant usr.plus : usr → usr → usr
+constant usr.time : usr → usr → usr
+constant usr.sig {s: Schema}: (Tuple s → usr) → usr
+constant usr.squash : usr → usr
+constant usr.not : usr → usr
+constant usr.ueq {s : Schema} : Tuple s → Tuple s → usr
 
 notation `∑` binders `, ` r:(scoped p, usr.sig p) := r
 notation `∥` u `∥` := usr.squash u 
 notation s₁ `++` s₂ := tree.node s₁ s₂ 
 
 infix `≃`:50 := usr.ueq
-instance usr_has_add : has_add usr := ⟨usr.plus⟩
-instance usr_has_mul : has_mul usr := ⟨usr.time⟩
-instance usr_has_zero : has_zero usr := ⟨usr.zero⟩
-instance usr_has_one : has_one usr := ⟨usr.one⟩
+noncomputable instance usr_has_add : has_add usr := ⟨usr.plus⟩
+noncomputable instance usr_has_mul : has_mul usr := ⟨usr.time⟩
+noncomputable instance usr_has_zero : has_zero usr := ⟨usr.zero⟩
+noncomputable instance usr_has_one : has_one usr := ⟨usr.one⟩
 
 -- commutative semiring axioms
 @[simp] axiom plus_comm (a b : usr) :       a + b = b + a
@@ -49,7 +49,7 @@ instance usr_has_one : has_one usr := ⟨usr.one⟩
 @[simp] axiom time_zero (a : usr): a * 0 = 0
 @[simp] axiom time_one (a : usr): a * 1 = a
 
-instance : comm_semiring usr := {
+noncomputable instance : comm_semiring usr := {
     add_assoc := plus_assoc,
     add_zero := plus_zero,
     zero_add := by intros; rw plus_comm; simp,
