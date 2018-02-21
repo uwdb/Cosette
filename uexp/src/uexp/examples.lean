@@ -4,10 +4,10 @@ import .tactics
 -- set_option trace.simp_lemmas.invalid true
 -- set_option trace.simplify true
 
-local infix * := time
-local infix + := plus
+local infix * := usr.time
+local infix + := usr.plus
 
-infix `≃`:50 := ueq
+infix `≃`:50 := usr.ueq
 
 -- these two lemmas are just to try the new encoding
 
@@ -31,7 +31,7 @@ end
 -- this one breaks something
 lemma eq_sigma_subst:
     forall {s: Schema} (R: Tuple s → usr) (t : Tuple s),
-    sig (λ t₁ : Tuple s,  (t₁ ≃ t) * (R t₁)) = (R t) := 
+    ∑ (λ t₁ : Tuple s,  (t₁ ≃ t) * (R t₁)) = (R t) := 
 begin
     intros,
     simp,
