@@ -1,5 +1,4 @@
 import .u_semiring
-
 constant relation : Schema → Type
 constant aggregator : datatype → datatype → Type
 constant const : datatype →  Type
@@ -54,9 +53,22 @@ with Expr : Schema → datatype → Type
 | binaryExpr {Γ S T U} : binary S T U → Expr Γ S → Expr Γ T → Expr Γ U
 | castExpr {Γ Γ' T} : Proj Γ Γ' → Expr Γ' T → Expr Γ T
 
-mutual def denoteSQL, denotePred, denoteProj, denoteExpr
-with denoteSQL : forall {Γ s} (a: SQL Γ s), Query Γ s
+noncomputable mutual def denoteSQL, denotePred, denoteProj, denoteExpr
+with denoteSQL : forall {Γ s} (a: SQL Γ s), Query Γ s 
+| _ _ (SQL.table r) := λ _, (denote_r _ r)  
+| _ _ (SQL.union q₁ q₂):= λ g t, denoteSQL q₁ g t + denoteSQL q₂ g t 
+| _ _ (SQL.minus q₁ q₂) := λ g t, denoteSQL q₁ g t * (usr.not ∥ denoteSQL q₂ g t ∥ )
+| _ _ (SQL.select p q) := λ g t, (denotePred p (g, t)) * (denoteSQL q g t)
+| _ _ (SQL.product q₁ q₂) := λ g t, (denoteSQL q₁ g t.1) * (denoteSQL q₂ g t.2)
+| _ _ (SQL.project proj q) := λ g t', ∑ t, denoteSQL q g t * (denoteProj proj (g, t) ≃  t')
+| _ _ (SQL.distinct q) := λ g t, ∥ denoteSQL q g t ∥ 
+| _ _ (SQL.castSQL f q) := λ g t, denoteSQL q (denoteProj f g) t
 with denotePred : forall {Γ}, Pred Γ →  Tuple Γ → usr
+| _ (Pred.inhabited q) := λ g, ∥ (∑ t, denoteSQL q g t) ∥ 
+| _ _ := sorry
 with denoteProj: forall {Γ Γ'} (cast: Proj Γ Γ'), Tuple Γ  → Tuple Γ'
-with denoteExpr: forall {Γ T} (e : Expr Γ T), Tuple Γ → denote T
-    
+| _ := sorry
+with denoteExpr: forall {Γ T} (e : Expr Γ T), Tuple Γ → denote T 
+| _ := sorry  
+using_well_founded { 
+    dec_tac := tactic.admit}
