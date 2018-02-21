@@ -4,26 +4,26 @@ constant type: Type
 inductive tree (A:Type)
 | node : tree → tree → tree
 | leaf : A → tree
-| empty : tree
+| empty {} : tree
+
 definition Schema := tree type
 constant denote : type → Type
 constant tuple : Type
-def Tuple (s: Schema) : Type :=
-match s with
-    | (node t0 t1) := (Tuple t0) × (Tuple t1)
-    | (leaf A) := denote A
-    | empty := unit
-end
+
+def Tuple : Schema → Type
+| (tree.node t0 t1) := (Tuple t0) × (Tuple t1)
+| (tree.leaf A) := denote A
+| tree.empty := unit
 
 constant plus : usr → usr → usr
 constant time : usr → usr → usr
 constant zero : usr
 constant one : usr
 
-constant sig : (tuple → usr) → usr -- is that right?
+constant sig {s: Schema}: (Tuple s → usr) → usr -- is that right?
 constant squash : usr → usr
 constant usr.not : usr → usr
-constant ueq : tuple → tuple → usr
+constant ueq {s : Schema} : Tuple s → Tuple s → usr
 
 local infix * := time
 local infix + := plus
@@ -41,14 +41,14 @@ infix `≃`:50 := ueq
 @[simp] axiom time_one (a : usr): a * one = a
 
 -- u-semiring axioms
-@[simp] axiom sig_distr (f₁ f₂ : tuple → usr):
-    sig (λ t: tuple, (f₁ t) + (f₂ t)) = sig (λ t: tuple, (f₁ t)) + sig (λ t: tuple, (f₂ t))
-@[simp] axiom sig_commute (f: tuple → tuple → usr):
-    sig (λ t₁ : tuple, sig (λ t₂ : tuple, f t₁ t₂)) =
-    sig (λ t₂ : tuple, sig (λ t₁ : tuple, f t₁ t₂))
-@[simp] axiom sig_assoc (a: usr) (f: tuple → usr):
-    sig (λ t : tuple, a * (f t)) =
-    a * sig (λ t: tuple, f t)
+@[simp] axiom sig_distr {s: Schema} (f₁ f₂ : Tuple s → usr):
+    sig (λ t: Tuple s, (f₁ t) + (f₂ t)) = sig (λ t: Tuple s, (f₁ t)) + sig (λ t: Tuple s, (f₂ t))
+@[simp] axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
+    sig (λ t₁ : Tuple s, sig (λ t₂ : Tuple t, f t₁ t₂)) =
+    sig (λ t₂ : Tuple t, sig (λ t₁ : Tuple s, f t₁ t₂))
+@[simp] axiom sig_assoc {s: Schema} (a: usr) (f: Tuple s → usr):
+    sig (λ t : Tuple s, a * (f t)) =
+    a * sig (λ t: Tuple s, f t)
 
 @[simp] axiom squash_zero : squash zero = zero
 @[simp] axiom squash_one : squash one = one
@@ -64,10 +64,10 @@ infix `≃`:50 := ueq
 @[simp] axiom squash_not (x : usr) : squash (usr.not x) = usr.not x
 
 -- axioms about predicates
-@[simp] axiom eq_subst_l (t₁ t₂: tuple) (R: tuple → usr): (t₁ ≃ t₂) * (R t₁) = (t₁ ≃ t₂) * (R t₂)
-@[simp] axiom eq_subst_r (t₁ t₂: tuple) (R: tuple → usr): 
+@[simp] axiom eq_subst_l {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr): (t₁ ≃ t₂) * (R t₁) = (t₁ ≃ t₂) * (R t₂)
+@[simp] axiom eq_subst_r {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr): 
 (R t₁) *(t₁ ≃ t₂) = (R t₂) * (t₁ ≃ t₂) 
-@[simp] axiom em (t₁ t₂ : tuple) : (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = one
-@[simp] axiom sig_eq (t₁ : tuple) : sig (λ t₂, t₁ ≃ t₂) = one
-@[simp] axiom eq_unique (t' : tuple):
-    sig (λ t: tuple, (t ≃ t')) = one
+@[simp] axiom em {s: Schema} (t₁ t₂ : Tuple s) : (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = one
+@[simp] axiom sig_eq {s: Schema} (t₁ : Tuple s) : sig (λ t₂, t₁ ≃ t₂) = one
+@[simp] axiom eq_unique {s: Schema} (t' : Tuple s):
+    sig (λ t: Tuple s, (t ≃ t')) = one

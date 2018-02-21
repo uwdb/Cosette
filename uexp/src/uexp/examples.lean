@@ -21,7 +21,7 @@ begin
 end
 
 lemma eq_mixed_congruence :
-    forall (t₁ t₂: tuple) (R: tuple → usr),
+    forall {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr),
     (R t₁) * (t₁ ≃ t₂)  = (t₁ ≃ t₂) * (R t₂) :=
 begin
     intros,
@@ -30,8 +30,8 @@ end
 
 -- this one breaks something
 lemma eq_sigma_subst:
-    forall (R: tuple → usr) (t : tuple),
-    sig (λ t₁ : tuple,  (t₁ ≃ t) * (R t₁)) = (R t) := 
+    forall {s: Schema} (R: Tuple s → usr) (t : Tuple s),
+    sig (λ t₁ : Tuple s,  (t₁ ≃ t) * (R t₁)) = (R t) := 
 begin
     intros,
     simp,
