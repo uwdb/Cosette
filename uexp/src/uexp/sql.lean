@@ -5,7 +5,7 @@ constant const : datatype →  Type
 constant unary: datatype → datatype → Type
 constant binary: datatype → datatype → datatype → Type
 
-definition Relation (s : Schema) := Tuple s → usr
+noncomputable definition Relation (s : Schema) := Tuple s → usr
 definition Query (Γ s: Schema) := Tuple Γ → Relation s.
 
 constant denote_r : forall s, relation s → Relation s

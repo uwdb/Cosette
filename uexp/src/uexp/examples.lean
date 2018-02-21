@@ -3,11 +3,6 @@ import .u_semiring
 -- set_option trace.simp_lemmas.invalid true
 set_option trace.simplify true
 
-local infix * := usr.time
-local infix + := usr.plus
-
-infix `≃`:50 := usr.ueq
-
 -- these two lemmas are just to try the new encoding
 
 -- this one works, hoory!
