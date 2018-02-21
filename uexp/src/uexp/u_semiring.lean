@@ -1,4 +1,9 @@
 -- definition of u-semiring
+class denotation (A: Type) (B:Type) := 
+  (denote : A → B)
+
+--def denote {A B: Type} [denotation A B] : A → B := @denotation.denote 
+
 constant datatype: Type
 inductive tree (A:Type)
 | node : tree → tree → tree
@@ -6,8 +11,7 @@ inductive tree (A:Type)
 | empty {} : tree
 
 definition Schema := tree datatype
-constant denote : datatype → Type
-constant tuple : Type
+constant denote : datatype → Type 
 
 def Tuple : Schema → Type
 | (tree.node t0 t1) := (Tuple t0) × (Tuple t1)
@@ -30,6 +34,7 @@ notation `∑` := usr.sig
 notation `∥` u `∥` := usr.squash u 
 notation 0 := usr.zero
 notation 1 := usr.one
+notation s₁ `++` s₂ := tree.node s₁ s₂ 
 
 infix `≃`:50 := usr.ueq
 

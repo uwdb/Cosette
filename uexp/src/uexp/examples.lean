@@ -1,5 +1,4 @@
 import .u_semiring
-import .tactics
 
 -- set_option trace.simp_lemmas.invalid true
 -- set_option trace.simplify true
