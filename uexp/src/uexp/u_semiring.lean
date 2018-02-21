@@ -28,7 +28,7 @@ inductive usr : Type
 | not : usr → usr
 | ueq {s : Schema} : Tuple s → Tuple s → usr
 
-notation `∑` := usr.sig
+notation `∑` binders `, ` r:(scoped p, usr.sig p) := r
 notation `∥` u `∥` := usr.squash u 
 notation s₁ `++` s₂ := tree.node s₁ s₂ 
 
@@ -69,13 +69,11 @@ instance : comm_semiring usr := {
 }
 
 @[simp] axiom sig_distr_plus {s : Schema} (f₁ f₂ : Tuple s → usr) :
-    usr.sig (λ t, (f₁ t) + (f₂ t)) = usr.sig (λ t, (f₁ t)) + usr.sig (λ t, (f₂ t))
+    (∑ t, f₁ t + f₂ t) = (∑ t, f₁ t) + (∑ t, f₂ t)
 @[simp] axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
-    usr.sig (λ t₁ : Tuple s, usr.sig (λ t₂ : Tuple t, f t₁ t₂)) =
-    usr.sig (λ t₂ : Tuple t, usr.sig (λ t₁ : Tuple s, f t₁ t₂))
+    (∑ t₁ t₂, f t₁ t₂) = (∑ t₂ t₁, f t₁ t₂)
 @[simp] axiom sig_distr_time {s : Schema} (a: usr) (f: Tuple s → usr):
-    usr.sig (λ t : Tuple s, a * (f t)) =
-    a * usr.sig (λ t : Tuple s, f t)
+    (∑ t, a * (f t)) = a * (∑ t, f t)
 
 @[simp] axiom squash_zero : usr.squash 0 = 0
 @[simp] axiom squash_one : usr.squash 1 = 1
@@ -95,6 +93,4 @@ instance : comm_semiring usr := {
 @[simp] axiom eq_subst_r {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr): 
 (R t₁) *(t₁ ≃ t₂) = (R t₂) * (t₁ ≃ t₂) 
 @[simp] axiom em {s: Schema} (t₁ t₂ : Tuple s) : (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = 1
-@[simp] axiom sig_eq {s: Schema} (t₁ : Tuple s) : ∑ (λ t₂, t₁ ≃ t₂) = 1
-@[simp] axiom eq_unique {s: Schema} (t' : Tuple s):
-    ∑ (λ t: Tuple s, (t ≃ t')) = 1
+@[simp] axiom eq_unique {s: Schema} (t' : Tuple s) : (∑ t, t ≃ t') = 1
