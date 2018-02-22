@@ -49,6 +49,6 @@ begin
     intros,
     unfold_all_denotations,
     funext, funext,
-    simp,
+    -- simp should work here, but it seems require ac refl now 
     ac_refl,
 end
