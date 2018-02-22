@@ -91,7 +91,7 @@ using_well_founded {
     dec_tac := tactic.admit}
 
 notation p1 `⋅` p2 := (Proj.compose p1 p2)
-notation Γ `⊢` x `:` s := (x:(SQL Γ s))
+notation Γ `⊢` x `~` s := (x:(SQL Γ s))
 notation a `WHERE` c := (SQL.select c a) 
 notation `SELECT` `*` a := (a)
 -- notation `SELECT1` proj q := (Proj.project proj q)

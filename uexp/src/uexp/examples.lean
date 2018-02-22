@@ -1,4 +1,5 @@
 import .u_semiring
+import .sql
 
 -- set_option trace.simp_lemmas.invalid true
 -- set_option trace.simplify true
@@ -33,3 +34,10 @@ begin
     simp,
 end
 
+lemma commutativeSelect:
+ forall Γ s a slct0 slct1,
+    denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct1) WHERE slct0): SQL Γ s) =
+    denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct0) WHERE slct1): SQL Γ s) :=
+begin
+    repeat { dsimp [denoteSQL, denotePred, denoteProj, denoteExpr] } 
+end
