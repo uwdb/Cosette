@@ -1,10 +1,7 @@
 import .u_semiring
 
 -- set_option trace.simp_lemmas.invalid true
-set_option trace.simplify true
-
-local infix * := usr.time
-local infix + := usr.plus
+-- set_option trace.simplify true
 
 infix `≃`:50 := usr.ueq
 
