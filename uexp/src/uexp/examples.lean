@@ -2,7 +2,7 @@ import .u_semiring
 import .sql
 
 -- set_option trace.simp_lemmas.invalid true
--- set_option trace.simplify true
+set_option trace.simplify true
 
 infix `≃`:50 := usr.ueq
 
@@ -34,10 +34,21 @@ begin
     simp,
 end
 
+meta def unfold_all_denotations := `[
+    repeat { unfold denoteSQL
+            <|> unfold denotePred
+            <|> unfold denoteProj
+            <|> unfold denoteExpr }
+]
+
 lemma commutativeSelect:
  forall Γ s a slct0 slct1,
     denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct1) WHERE slct0): SQL Γ s) =
     denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct0) WHERE slct1): SQL Γ s) :=
 begin
-    repeat { dsimp [denoteSQL, denotePred, denoteProj, denoteExpr] } 
+    intros,
+    unfold_all_denotations,
+    funext, funext,
+    simp,
+    ac_refl,
 end
