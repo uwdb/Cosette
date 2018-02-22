@@ -1,9 +1,13 @@
 import .u_semiring
 
 -- set_option trace.simp_lemmas.invalid true
+<<<<<<< HEAD
 -- set_option trace.simplify true
 
 infix `≃`:50 := usr.ueq
+=======
+set_option trace.simplify true
+>>>>>>> f84e13ff01adcd2a1c2d1b476404730d51a787da
 
 -- these two lemmas are just to try the new encoding
 
