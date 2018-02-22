@@ -1,7 +1,7 @@
 import .u_semiring
 
 -- set_option trace.simp_lemmas.invalid true
--- set_option trace.simplify true
+set_option trace.simplify true
 
 local infix * := usr.time
 local infix + := usr.plus
@@ -30,7 +30,7 @@ end
 -- this one breaks something
 lemma eq_sigma_subst:
     forall {s: Schema} (R: Tuple s → usr) (t : Tuple s),
-    ∑ (λ t₁ : Tuple s,  (t₁ ≃ t) * (R t₁)) = (R t) := 
+    (∑ t₁ ,  (t₁ ≃ t) * (R t₁)) = (R t) := 
 begin
     intros,
     simp,
