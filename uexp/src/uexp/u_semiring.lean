@@ -78,7 +78,7 @@ noncomputable instance : comm_semiring usr := {
 @[simp] axiom squash_zero : usr.squash 0 = 0
 @[simp] axiom squash_one : usr.squash 1 = 1
 @[simp] axiom squash_add_squash (x y : usr) :  ∥ ∥ x ∥ + y ∥ = ∥ x + y ∥ 
-@[simp] axiom squash_time (x y : usr) : ∥ x * y ∥  = ∥ x ∥ * ∥ y ∥ 
+@[simp] axiom squash_time (x y : usr) : ∥ x ∥ * ∥ y ∥ = ∥ x * y ∥ 
 @[simp] axiom squash_squared (x : usr) : ∥ x ∥ * ∥ x ∥  = ∥ x ∥ 
 @[simp] axiom squash_eq_if_square_eq (x : usr) : x * x = x → ∥ x ∥ = x
 
