@@ -42,3 +42,9 @@ do tgt ← target,
    trace prf,
    fail "yolo"
 
+meta def unfold_all_denotations := `[
+    repeat { unfold denoteSQL
+            <|> unfold denotePred
+            <|> unfold denoteProj
+            <|> unfold denoteExpr }
+]

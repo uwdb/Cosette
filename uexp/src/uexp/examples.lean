@@ -1,5 +1,6 @@
 import .u_semiring
 import .sql
+import .tactics
 
 -- set_option trace.simp_lemmas.invalid true
 set_option trace.simplify true
@@ -33,13 +34,6 @@ begin
     intros,
     simp,
 end
-
-meta def unfold_all_denotations := `[
-    repeat { unfold denoteSQL
-            <|> unfold denotePred
-            <|> unfold denoteProj
-            <|> unfold denoteExpr }
-]
 
 lemma commutativeSelect:
  forall Γ s a slct0 slct1,
