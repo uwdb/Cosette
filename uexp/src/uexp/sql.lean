@@ -97,6 +97,23 @@ notation Γ `⊢` x `:` s := (x:(SQL Γ s))
 notation a `WHERE` c := (SQL.select c a) 
 notation `SELECT` `*` a := (a)
 notation `SELECT1` := SQL.project
+noncomputable definition projectSingleton {Γ T s} (e : Expr (Γ ++ s) T)
+  := Proj.e2p e
+noncomputable definition projectNil {Γ s}
+  : Proj (Γ ++ s) empty := Proj.erase
+noncomputable definition projectCons {Γ T s s'}
+  (e : Expr (Γ ++ s) T)
+  (proj : Proj (Γ ++ s) s')
+  : Proj (Γ ++ s) (node (leaf T) s')
+  := Proj.combine (Proj.e2p e) proj
+noncomputable definition select2 {Γ s : Schema} {T T' : datatype}
+    (proj0 : Expr (Γ ++ s) T)
+    (proj1 : Expr (Γ ++ s) T')
+    := SELECT1 (projectCons proj0
+               $ projectCons proj1
+                 projectNil)
+notation `SELECT2` := select2
+    
 notation `FROM1` a := (a) 
 notation `FROM2` a , b := (SQL.product a b) 
 notation a `UNION` `ALL` b := (SQL.union a b)
@@ -110,3 +127,65 @@ notation `TRUE` := (Pred.true)
 notation `DISTINCT` s := (SQL.distinct s)
 
 definition Column (T : datatype) (Γ : Schema) := Proj Γ (leaf T)
+
+open SQL
+open Proj
+open Expr
+
+section constraints
+
+noncomputable definition Index {Γ s t0 t1}
+  (R : SQL Γ s) (k : Column t0 s) (ic : Column t1 s) :=
+  SELECT2 (uvariable (right ⋅ k)) (uvariable (right ⋅ ic)) FROM1 R
+
+definition isKey {s ty} (k : Column ty s) (R : relation s) :=
+  Π t : Tuple s,
+  denote_r R t = (∑ t', (denoteProj k t' ≃ denoteProj k t)
+                      * denote_r R t' * denote_r R t)
+
+end constraints
+
+section groupByProjections
+/-
+A group by projection has access to the context, a selected tuple t,
+and a query that returns all tuples that match t
+-/
+definition GroupByProj (Γ s s') := SQL (Γ ++ s) s → Proj (Γ ++ s) s'
+
+noncomputable definition combineGroupByProj {Γ s s' s''}
+  (p1 : GroupByProj Γ s s') (p2 : GroupByProj Γ s s'')
+  : GroupByProj Γ s (s' ++ s'') := λ a, combine (p1 a) (p2 a)
+
+definition plainGroupByProj {Γ s s'}
+  (p : Proj (Γ ++ s) s') : GroupByProj Γ s s' := λ _, p
+
+noncomputable definition aggregatorGroupByProj {Γ s S T}
+  : aggregator S T → Expr (Γ ++ s) S → GroupByProj Γ s (leaf T)
+  := λ agg e sql,
+  let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
+      := (left.compose left).combine right,
+      e_proj : Proj (Γ ++ s ++ s) (leaf S)
+      := e.castExpr ll_r
+  in aggregate agg $ SELECT1 e_proj FROM1 sql
+
+noncomputable definition proj_agree {Γ} : Π {s}, Proj Γ s → Proj Γ s → Pred Γ
+| (node x y) p0 p1 := proj_agree (p0.compose left) (p1.compose left)
+                AND proj_agree (p0.compose right) (p1.compose right)
+| (leaf t) p0 p1 := Pred.equal (uvariable p0) (uvariable p1)
+| empty _ _ := TRUE
+
+noncomputable definition groupBy {Γ s s' C}
+  (gb_proj : GroupByProj Γ s s')
+  (query : SQL Γ s)
+  (proj2c : Proj (Γ ++ s) C)
+  : SQL Γ s' :=
+  let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
+      := combine (left⋅left) right,
+      -- This should have a more descriptive name
+      subquery : SQL (Γ ++ s) s
+      := SELECT * FROM1 query.castSQL left 
+         WHERE proj_agree (left ⋅ proj2c)
+                          (ll_r ⋅ proj2c)
+  in DISTINCT SELECT1 (gb_proj subquery) FROM1 query
+
+end groupByProjections
