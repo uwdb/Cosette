@@ -30,7 +30,7 @@ constant usr.ueq {s : Schema} : Tuple s → Tuple s → usr
 
 notation `∑` binders `, ` r:(scoped p, usr.sig p) := r
 notation `∥` u `∥` := usr.squash u 
-notation s₁ `++` s₂ := tree.node s₁ s₂ 
+noncomputable instance : has_append Schema := ⟨tree.node⟩
 
 infix `≃`:50 := usr.ueq
 noncomputable instance usr_has_add : has_add usr := ⟨usr.plus⟩

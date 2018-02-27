@@ -1,4 +1,6 @@
 import .u_semiring
+open tree
+
 constant relation : Schema → Type
 constant aggregator : datatype → datatype → Type
 constant const : datatype →  Type
@@ -8,11 +10,11 @@ constant binary: datatype → datatype → datatype → Type
 noncomputable definition Relation (s : Schema) := Tuple s → usr
 definition Query (Γ s: Schema) := Tuple Γ → Relation s.
 
-constant denote_r : forall s, relation s → Relation s
-constant denote_a : forall s t, aggregator s t → (Relation (tree.leaf s) → Tuple (tree.leaf t))
-constant denote_c : forall t, const t → Tuple (tree.leaf t) 
-constant denote_u : forall s t, unary s t → (Tuple (tree.leaf s) → Tuple (tree.leaf t))
-constant denote_b : forall s t u, binary s t u → (Tuple (tree.leaf s) → Tuple (tree.leaf t) → Tuple (tree.leaf u))
+constant denote_r : forall {s}, relation s → Relation s
+constant denote_a : forall {s t}, aggregator s t → (Relation (leaf s) → Tuple (leaf t))
+constant denote_c : forall {t}, const t → Tuple (leaf t) 
+constant denote_u : forall {s t}, unary s t → (Tuple (leaf s) → Tuple (leaf t))
+constant denote_b : forall {s t u}, binary s t u → (Tuple (leaf s) → Tuple (leaf t) → Tuple (leaf u))
 
 -- desugared SQL AST/IR
 mutual inductive SQL, Pred, Proj, Expr
@@ -42,12 +44,12 @@ with Proj : Schema → Schema → Type
 | right  {Γ0 Γ1} : Proj (Γ0 ++ Γ1) Γ1
 | compose  {Γ Γ' Γ''} : Proj Γ Γ' → Proj Γ' Γ'' → Proj Γ Γ''
 | star     {Γ} : Proj Γ Γ
-| e2p {T Γ} : Expr Γ T → Proj Γ (tree.leaf T)
-| erase    {Γ} : Proj Γ tree.empty
+| e2p {T Γ} : Expr Γ T → Proj Γ (leaf T)
+| erase    {Γ} : Proj Γ empty
 
 with Expr : Schema → datatype → Type
-| uvariable {T Γ} (proj:Proj Γ (tree.leaf T)) : Expr Γ T
-| aggregate {Γ S T} : aggregator S T → SQL Γ (tree.leaf S) → Expr Γ T
+| uvariable {T Γ} (proj:Proj Γ (leaf T)) : Expr Γ T
+| aggregate {Γ S T} : aggregator S T → SQL Γ (leaf S) → Expr Γ T
 | constantExpr {Γ S} : const S → Expr Γ S
 | unaryExpr {Γ S T} : unary S T → Expr Γ S → Expr Γ T
 | binaryExpr {Γ S T U} : binary S T U → Expr Γ S → Expr Γ T → Expr Γ U
@@ -55,7 +57,7 @@ with Expr : Schema → datatype → Type
 
 noncomputable mutual def denoteSQL, denotePred, denoteProj, denoteExpr
 with denoteSQL : forall {Γ s} (a: SQL Γ s), Query Γ s 
-| _ _ (SQL.table r) := λ _, (denote_r _ r)  
+| _ _ (SQL.table r) := λ _, (denote_r r)  
 | _ _ (SQL.union q₁ q₂):= λ g t, denoteSQL q₁ g t + denoteSQL q₂ g t 
 | _ _ (SQL.minus q₁ q₂) := λ g t, denoteSQL q₁ g t * (usr.not ∥ denoteSQL q₂ g t ∥ )
 | _ _ (SQL.select p q) := λ g t, (denotePred p (g, t)) * (denoteSQL q g t)
@@ -80,18 +82,18 @@ with denoteProj: forall {Γ Γ'} (proj: Proj Γ Γ'), Tuple Γ  → Tuple Γ'
 | _ _ Proj.star := λ t, t
 | _ _ (Proj.e2p e) := λ t, denoteExpr e t
 | _ _ Proj.erase := λ t, unit.star
-with denoteExpr: forall {Γ T} (e : Expr Γ T), Tuple Γ → Tuple (tree.leaf T)
+with denoteExpr: forall {Γ T} (e : Expr Γ T), Tuple Γ → Tuple (leaf T)
 | _ _ (Expr.uvariable proj) := λ g, denoteProj proj g
-| _ _ (Expr.aggregate aggr q) := λ g, denote_a _ _ aggr (denoteSQL q g)
-| _ _ (Expr.constantExpr c) := λ g, denote_c _ c
-| _ _ (Expr.unaryExpr f e) := λ g, denote_u _ _ f (denoteExpr e g)
-| _ _ (Expr.binaryExpr f e₁ e₂) := λ g, denote_b _ _ _ f (denoteExpr e₁ g) (denoteExpr e₂ g)
+| _ _ (Expr.aggregate aggr q) := λ g, denote_a aggr (denoteSQL q g)
+| _ _ (Expr.constantExpr c) := λ g, denote_c c
+| _ _ (Expr.unaryExpr f e) := λ g, denote_u f (denoteExpr e g)
+| _ _ (Expr.binaryExpr f e₁ e₂) := λ g, denote_b f (denoteExpr e₁ g) (denoteExpr e₂ g)
 | _ _ (Expr.castExpr f e) := λ g, denoteExpr e (denoteProj f g)  
 using_well_founded { 
     dec_tac := tactic.admit}
 
 notation p1 `⋅` p2 := (Proj.compose p1 p2)
-notation Γ `⊢` x `~` s := (x:(SQL Γ s))
+notation Γ `⊢` x `:` s := (x:(SQL Γ s))
 notation a `WHERE` c := (SQL.select c a) 
 notation `SELECT` `*` a := (a)
 notation `SELECT1` := SQL.project
@@ -107,11 +109,4 @@ notation `FALSE` := (Pred.false)
 notation `TRUE` := (Pred.true) 
 notation `DISTINCT` s := (SQL.distinct s)
 
-notation `left` := Proj.left
-notation `right` := Proj.right
-notation `product` := SQL.product
-notation `equal` := Pred.equal
-notation `uvariable` := Expr.uvariable
-notation `and` := Pred.and
-
-definition Column (T:datatype) (Γ):= Proj Γ (tree.leaf T)
+definition Column (T : datatype) (Γ : Schema) := Proj Γ (leaf T)
