@@ -1,3 +1,7 @@
+-- Example 4 for Rule 7: E to F Quantifier Conversion
+-- from Pirahesh et al, Extensible/Rule Based Query Rewrite Optimization in Starburst
+-- SIGMOD 92
+
 schema itp(itemn:int, ponum:int);  -- itemn is a key of itp
 schema itl(itemn:int, wkcen:int, locan:int);
 
