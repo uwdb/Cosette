@@ -21,7 +21,7 @@ lemma pushdownSelect:
     denoteSQL 
     (SELECT * 
     FROM1 (SQL.product r s) 
-    WHERE (Pred.castPred (Proj.combine Proj.left ((Proj.right)⋅(Proj.right))) slct): SQL Γ _) :=
+    WHERE (Pred.castPred (Proj.combine left (right⋅right)) slct): SQL Γ _) :=
 begin
     intros,
     unfold_all_denotations,

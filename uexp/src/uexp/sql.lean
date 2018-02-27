@@ -94,7 +94,7 @@ notation p1 `⋅` p2 := (Proj.compose p1 p2)
 notation Γ `⊢` x `~` s := (x:(SQL Γ s))
 notation a `WHERE` c := (SQL.select c a) 
 notation `SELECT` `*` a := (a)
--- notation `SELECT1` proj q := (Proj.project proj q)
+notation `SELECT1` := SQL.project
 notation `FROM1` a := (a) 
 notation `FROM2` a , b := (SQL.product a b) 
 notation a `UNION` `ALL` b := (SQL.union a b)
@@ -106,3 +106,12 @@ notation `NOT` s0 := (Pred.negate s0)
 notation `FALSE` := (Pred.false) 
 notation `TRUE` := (Pred.true) 
 notation `DISTINCT` s := (SQL.distinct s)
+
+notation `left` := Proj.left
+notation `right` := Proj.right
+notation `product` := SQL.product
+notation `equal` := Pred.equal
+notation `uvariable` := Expr.uvariable
+notation `and` := Pred.and
+
+definition Column (T:datatype) (Γ):= Proj Γ (tree.leaf T)
