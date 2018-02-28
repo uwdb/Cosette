@@ -9,7 +9,7 @@ lemma commutativeSelect:
 begin
     intros,
     unfold_all_denotations,
-    funext, funext,
+    funext,
     -- simp should work here, but it seems require ac refl now 
     ac_refl,
 end
@@ -25,7 +25,7 @@ lemma pushdownSelect:
 begin
     intros,
     unfold_all_denotations,
-    funext, funext,
+    funext,
     ac_refl
 end
 
@@ -36,6 +36,6 @@ lemma disjointSelect:
 begin
     intros,
     unfold_all_denotations,
-    funext, funext,
+    funext,    
     simp,
 end
