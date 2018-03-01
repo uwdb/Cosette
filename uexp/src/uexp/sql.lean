@@ -165,8 +165,8 @@ noncomputable definition aggregatorGroupByProj {Γ s S T}
   let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
       := (left.compose left).combine right,
       e_proj : Proj (Γ ++ s ++ s) (leaf S)
-      := e.castExpr ll_r
-  in aggregate agg $ SELECT1 e_proj FROM1 sql
+      := e2p $ castExpr ll_r e
+  in e2p $ aggregate agg $ SELECT1 e_proj FROM1 sql
 
 noncomputable definition proj_agree {Γ} : Π {s}, Proj Γ s → Proj Γ s → Pred Γ
 | (node x y) p0 p1 := proj_agree (p0.compose left) (p1.compose left)
