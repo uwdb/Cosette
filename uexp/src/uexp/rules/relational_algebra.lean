@@ -2,6 +2,10 @@ import ..u_semiring
 import ..sql
 import ..tactics
 
+open SQL
+open Proj
+open Expr
+
 lemma commutativeSelect:
  forall Γ s a slct0 slct1,
     denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct1) WHERE slct0): SQL Γ s) =
