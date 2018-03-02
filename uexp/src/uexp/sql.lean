@@ -179,13 +179,18 @@ noncomputable definition groupBy {Γ s s' C}
   (query : SQL Γ s)
   (proj2c : Proj (Γ ++ s) C)
   : SQL Γ s' :=
-  let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
+  /-let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
       := combine (left⋅left) right,
       -- This should have a more descriptive name
       subquery : SQL (Γ ++ s) s
       := SELECT * FROM1 query.castSQL left 
          WHERE proj_agree (left ⋅ proj2c)
-                          (ll_r ⋅ proj2c)
-  in DISTINCT SELECT1 (gb_proj subquery) FROM1 query
+                          ((combine (left⋅left) right) ⋅ proj2c)
+  in-/ DISTINCT SELECT1 (gb_proj (SELECT * FROM1 query.castSQL left 
+         WHERE proj_agree (left ⋅ proj2c)
+                          ((combine (left⋅left) right) ⋅ proj2c))) FROM1 query
+
+notation `PLAIN` e := plainGroupByProj (e2p e)
+notation `SELECT` proj `FROM1` a `GROUPBY` v := groupBy proj a v
 
 end groupByProjections
