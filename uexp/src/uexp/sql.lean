@@ -191,6 +191,6 @@ noncomputable definition groupBy {Γ s s' C}
                           ((combine (left⋅left) right) ⋅ proj2c))) FROM1 query
 
 notation `PLAIN` e := plainGroupByProj (e2p e)
-notation `SELECT` proj `FROM1` a `GROUPBY` v := groupBy proj a v
+notation `SELECT`:1 proj `FROM1`:1 a `GROUP`:1 `BY`:1 v := groupBy proj a v
 
 end groupByProjections
