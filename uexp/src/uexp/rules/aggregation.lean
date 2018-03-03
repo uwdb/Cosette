@@ -9,8 +9,6 @@ open Pred
 open SQL
 open tree
 
-#check groupBy
-
 theorem aggegation_query :
 forall (Γ : Schema) s (a : relation s) C0 (value : Column C0 s) C1 (label: Column C1 s) (l : const C1),
     let lbl := @uvariable C1 (Γ ++ s) (right⋅label),
