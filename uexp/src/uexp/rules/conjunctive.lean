@@ -2,6 +2,11 @@ import ..u_semiring
 import ..sql
 import ..tactics
 
+open SQL
+open Pred
+open Expr
+open Proj
+
 lemma CQExample0:
     forall Γ s1 s2 (a: SQL Γ s1) (b: SQL Γ s2)
               ty0 ty1 (x: Column ty0 s1)

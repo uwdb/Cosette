@@ -1,5 +1,3 @@
-import .core
-
 open tactic
 
 meta def pre {α : Type} (st : α) (lemmas : simp_lemmas) (rel : name) (parent : option expr) (subterm : expr) : tactic (α × expr × option expr × bool) :=
