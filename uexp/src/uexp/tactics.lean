@@ -44,5 +44,6 @@ meta def unfold_all_denotations := `[
     repeat { unfold denoteSQL
             <|> unfold denotePred
             <|> unfold denoteProj
-            <|> unfold denoteExpr }
+            <|> unfold denoteExpr
+            <|> unfold groupBy }
 ]

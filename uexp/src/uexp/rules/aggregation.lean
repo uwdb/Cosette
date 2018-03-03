@@ -27,5 +27,9 @@ forall (Γ : Schema) s (a : relation s) C0 (value : Column C0 s) C1 (label: Colu
                    (SELECT * FROM1 (table a) WHERE equal lbl (constantExpr l))
                    (right⋅label))) : SQL Γ _)) :=
 begin
+intros,
+unfold_all_denotations,
+funext,
+simp,
 sorry
 end
