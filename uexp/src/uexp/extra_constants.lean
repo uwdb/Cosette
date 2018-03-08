@@ -12,25 +12,25 @@ end datatypes
 namespace aggregators
 
 constant count {T} : aggregator T datatypes.int
-notation `COUNT` := aggregatorGroupByProj count
+notation `COUNT` `(` e `)` := aggregatorGroupByProj count e
 
 constant sum {T} : aggregator T datatypes.int
-notation `SUM` := aggregatorGroupByProj sum
+notation `SUM` `(` e `)` := aggregatorGroupByProj sum e
 
 constant max {T} : aggregator T datatypes.int
-notation `MAX` := aggregatorGroupByProj max
+notation `MAX` `(` e `)` := aggregatorGroupByProj max e
 
 constant min {T} : aggregator T datatypes.int
-notation `MIN` := aggregatorGroupByProj min
+notation `MIN` `(` e `)` := aggregatorGroupByProj min e
 
 constant avg {T} : aggregator T datatypes.int
-notation `AVG` := aggregatorGroupByProj avg
+notation `AVG` `(` e `)` := aggregatorGroupByProj avg e
 
 end aggregators
 
 namespace predicates
 
 constant gt : Pred (leaf datatypes.int ++ leaf datatypes.int)
-infix `<u`:50 := gt
+infix `>u`:50 := gt
 
 end predicates

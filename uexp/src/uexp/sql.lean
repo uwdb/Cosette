@@ -92,10 +92,10 @@ with denoteExpr: forall {Γ T} (e : Expr Γ T), Tuple Γ → Tuple (leaf T)
 using_well_founded { 
     dec_tac := tactic.admit}
 
-notation p1 `⋅` p2 := (Proj.compose p1 p2)
-notation Γ `⊢` x `:` s := (x:(SQL Γ s))
-notation a `WHERE` c := (SQL.select c a) 
-notation `SELECT` `*` a := (a)
+infix `⋅`:80 := Proj.compose
+--notation Γ `⊢` x `:` s := (x:(SQL Γ s))
+notation a `WHERE` c := SQL.select c a
+notation `SELECT` `*` a := a
 notation `SELECT1` := SQL.project
 noncomputable definition projectSingleton {Γ T s} (e : Expr (Γ ++ s) T)
   := Proj.e2p e
@@ -114,8 +114,8 @@ noncomputable definition select2 {Γ s : Schema} {T T' : datatype}
                  projectNil)
 notation `SELECT2` := select2
     
-notation `FROM1` a := (a) 
-notation `FROM2` a , b := (SQL.product a b) 
+notation `FROM1` a := a
+notation `FROM2` a `,` b := (SQL.product a b) 
 notation a `UNION` `ALL` b := (SQL.union a b)
 notation a `MINUS` b := (SQL.minus a b) 
 notation `EXISTS` s := (Pred.inhabited s)
@@ -179,18 +179,16 @@ noncomputable definition groupBy {Γ s s' C}
   (query : SQL Γ s)
   (proj2c : Proj (Γ ++ s) C)
   : SQL Γ s' :=
-  /-let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
+  let ll_r : Proj (Γ ++ s ++ s) (Γ ++ s)
       := combine (left⋅left) right,
       -- This should have a more descriptive name
       subquery : SQL (Γ ++ s) s
       := SELECT * FROM1 query.castSQL left 
          WHERE proj_agree (left ⋅ proj2c)
-                          ((combine (left⋅left) right) ⋅ proj2c)
-  in-/ DISTINCT SELECT1 (gb_proj (SELECT * FROM1 query.castSQL left 
-         WHERE proj_agree (left ⋅ proj2c)
-                          ((combine (left⋅left) right) ⋅ proj2c))) FROM1 query
+                          (ll_r ⋅ proj2c)
+  in DISTINCT SELECT1 (gb_proj subquery) FROM1 query
 
-notation `PLAIN` e := plainGroupByProj (e2p e)
-notation `SELECT`:1 proj `FROM1`:1 a `GROUP`:1 `BY`:1 v := groupBy proj a v
+notation `PLAIN` `(` e `)` := plainGroupByProj (e2p e)
+notation `SELECT` proj `FROM1`:1 a `GROUP` `BY` v := groupBy proj a v
 
 end groupByProjections
