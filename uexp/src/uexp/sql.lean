@@ -94,9 +94,9 @@ using_well_founded {
 
 infix `⋅`:80 := Proj.compose
 --notation Γ `⊢` x `:` s := (x:(SQL Γ s))
-notation a `WHERE` c := SQL.select c a
-notation `SELECT` `*` a := a
-notation `SELECT1` := SQL.project
+notation a `WHERE`:45 c:45 := SQL.select c a
+notation `SELECT`:45 `*` a := a
+notation `SELECT1`:45 := SQL.project
 noncomputable definition projectSingleton {Γ T s} (e : Expr (Γ ++ s) T)
   := Proj.e2p e
 noncomputable definition projectNil {Γ s}
@@ -112,19 +112,19 @@ noncomputable definition select2 {Γ s : Schema} {T T' : datatype}
     := SELECT1 (projectCons proj0
                $ projectCons proj1
                  projectNil)
-notation `SELECT2` := select2
+notation `SELECT2`:45 := select2
     
-notation `FROM1` a := a
-notation `FROM2` a `,` b := (SQL.product a b) 
-notation a `UNION` `ALL` b := (SQL.union a b)
-notation a `MINUS` b := (SQL.minus a b) 
-notation `EXISTS` s := (Pred.inhabited s)
-notation s0 `AND` s1 := (Pred.and s0 s1)
-notation s0 `OR` s1 := (Pred.or s0 s1) 
-notation `NOT` s0 := (Pred.negate s0)
-notation `FALSE` := (Pred.false) 
-notation `TRUE` := (Pred.true) 
-notation `DISTINCT` s := (SQL.distinct s)
+notation `FROM1`:45 a := a
+notation `FROM2`:45 a `,` b := (SQL.product a b) 
+notation a `UNION`:45 `ALL` b := (SQL.union a b)
+notation a `MINUS`:45 b := (SQL.minus a b) 
+notation `EXISTS`:45 s := (Pred.inhabited s)
+notation s0 `AND`:45 s1 := (Pred.and s0 s1)
+notation s0 `OR`:45 s1 := (Pred.or s0 s1) 
+notation `NOT`:45 s0 := (Pred.negate s0)
+notation `FALSE`:45 := (Pred.false) 
+notation `TRUE`:45 := (Pred.true) 
+notation `DISTINCT`:45 s := (SQL.distinct s)
 
 definition Column (T : datatype) (Γ : Schema) := Proj Γ (leaf T)
 
@@ -142,6 +142,13 @@ definition isKey {s ty} (k : Column ty s) (R : relation s) :=
   Π t : Tuple s,
   denote_r R t = (∑ t', (denoteProj k t' ≃ denoteProj k t)
                       * denote_r R t' * denote_r R t)
+
+definition fKey {s1 s2 ty} (k : Column ty s1)
+                (fk : Column ty s2) (R : relation s1)
+                (S : relation s2) (pk : isKey k R) :=
+    forall (t : Tuple s2),
+      denote_r S t = (∑ t': Tuple s1, (denoteProj k t' ≃ denoteProj fk t)
+                                    * denote_r R t' * denote_r S t)
 
 end constraints
 

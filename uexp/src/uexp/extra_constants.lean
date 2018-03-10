@@ -34,3 +34,11 @@ constant gt : Pred (leaf datatypes.int ++ leaf datatypes.int)
 infix `>u`:50 := gt
 
 end predicates
+
+namespace binary_operators
+
+constant add : binary datatypes.int datatypes.int datatypes.int
+
+end binary_operators
+
+constant null {T : datatype} : const T
