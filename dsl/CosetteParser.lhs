@@ -19,6 +19,8 @@ Syntax and Parser for Cosette.
 > import FunctionsAndTypesForParsing
 > import Utilities
 > import Debug.Trace
+> import Data.Aeson.Types (ToJSON, toJSON)
+> import Data.Aeson
 
 == SQL keywords
 
@@ -135,6 +137,9 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 >                  | Query String QueryExpr
 >                  | Verify String String
 >                    deriving (Eq, Show)
+
+> instance ToJSON CosetteStmt where
+>       toJSON (Schema s t) = object ["schema" .= s]
 
 == parsing ValueExp
 
