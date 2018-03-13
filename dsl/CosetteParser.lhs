@@ -2,6 +2,8 @@
 
 Syntax and Parser for Cosette.
 
+> {-# LANGUAGE DeriveGeneric #-}
+
 > module CosetteParser where
 >
 > import Text.Parsec.String (Parser)
@@ -21,6 +23,7 @@ Syntax and Parser for Cosette.
 > import Debug.Trace
 > import Data.Aeson.Types (ToJSON, toJSON)
 > import Data.Aeson
+> import GHC.Generics
 
 == SQL keywords
 
@@ -58,11 +61,17 @@ Syntax and Parser for Cosette.
 >                | Constant String                  -- constant variable
 >                | VQE QueryExpr                    -- query expressions
 >                | Agg String AggExpr             -- aggregation function
->                  deriving (Eq, Show)
+>                  deriving (Eq, Show, Generic)
+
+> instance ToJSON ValueExpr where
+>       toEncoding = genericToEncoding defaultOptions
 
 > data AggExpr = AV ValueExpr
 >              | AStar
->                deriving (Eq, Show)
+>                deriving (Eq, Show, Generic)
+
+> instance ToJSON AggExpr where
+>       toEncoding = genericToEncoding defaultOptions
 
 === predicate
 
@@ -76,14 +85,20 @@ Syntax and Parser for Cosette.
 >                | Veq ValueExpr ValueExpr   -- equal
 >                | Vgt ValueExpr ValueExpr   -- greater than
 >                | Vlt ValueExpr ValueExpr   -- less than
->                  deriving (Eq, Show)
+>                  deriving (Eq, Show, Generic)
+
+> instance ToJSON Predicate where
+>       toEncoding = genericToEncoding defaultOptions
 
 === select item
 
 > data SelectItem = Star         -- *
 >                 | DStar String -- t.*
 >                 | Proj ValueExpr String
->                   deriving (Eq, Show)
+>                   deriving (Eq, Show, Generic)
+
+> instance ToJSON SelectItem where
+>       toEncoding = genericToEncoding defaultOptions
 
 
 === table ref (in from clause)
@@ -93,7 +108,10 @@ TODO: add Left Join, Semi join etc to table expression
 > data TableExpr = TRBase String                -- base table
 >                | TRUnion TableExpr TableExpr  -- union
 >                | TRQuery QueryExpr            -- query
->                deriving (Eq, Show)
+>                deriving (Eq, Show, Generic)
+
+> instance ToJSON TableExpr where
+>       toEncoding = genericToEncoding defaultOptions
 
 consider add the following to the definition of TableRef
 | TRXProd TableRef TableRef
@@ -101,10 +119,16 @@ if convert list of relation to nested join is move to Cosette AST level
 
 > data TableRef = TR TableExpr String           -- table expr, alias
 >               | TRJoin TableRef JoinType TableRef (Maybe Predicate) 
->                 deriving (Eq, Show)
+>                 deriving (Eq, Show, Generic)
+
+> instance ToJSON TableRef where
+>       toEncoding = genericToEncoding defaultOptions
 
 > data JoinType = InnerJoin | LeftJoin | RightJoin | FullOuterJoin
->                 deriving (Eq, Show)
+>                 deriving (Eq, Show, Generic)
+
+> instance ToJSON JoinType where
+>       toEncoding = genericToEncoding defaultOptions
 
 > getTe :: TableRef -> TableExpr
 > getTe (TR t _) = t
@@ -123,10 +147,17 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 >                ,qGroup :: Maybe Grouping
 >                ,qDistinct:: Bool}
 >                | UnionAll QueryExpr QueryExpr
->                deriving (Eq, Show)
+>                deriving (Eq, Show, Generic)
+
+> instance ToJSON QueryExpr where
+>       toEncoding = genericToEncoding defaultOptions
+
 
 > data Grouping = GroupBy [ValueExpr] (Maybe Predicate)
->                 deriving (Eq, Show)
+>                 deriving (Eq, Show, Generic)
+
+> instance ToJSON Grouping where
+>       toEncoding = genericToEncoding defaultOptions
 
 === Cosette Statement
 
@@ -136,10 +167,10 @@ TODO: currently, grouping only supports columns rather than arbitrary value expr
 >                  | Const String String
 >                  | Query String QueryExpr
 >                  | Verify String String
->                    deriving (Eq, Show)
+>                    deriving (Eq, Show, Generic)
 
 > instance ToJSON CosetteStmt where
->       toJSON (Schema s t) = object ["schema" .= s]
+>       toEncoding = genericToEncoding defaultOptions
 
 == parsing ValueExp
 

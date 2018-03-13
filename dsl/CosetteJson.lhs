@@ -1,5 +1,6 @@
 Generates an AST in JSON from Cosette
 
+> {-# LANGUAGE OverloadedStrings #-}
 
 > import CosetteParser
 > import Data.Aeson.Encode.Pretty
@@ -14,10 +15,10 @@ Generates an AST in JSON from Cosette
 > getStmt txt = 
 >   case ret of
 >       Right ret' ->
->           C.unpack ((encodePretty ret))
+>           C.unpack ((encodePretty ret'))
 >       Left err -> "ERROR: " ++ (show err)
 >   where
->       ret = (parse (whitespace *> cosetteProgram <* eof) "" p)
+>       ret = (parse (whitespace *> cosetteProgram <* eof) "" txt)
 
 > main = do
 >   cont <- getContents
