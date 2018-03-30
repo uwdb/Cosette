@@ -26,8 +26,8 @@ begin
     congr,
     funext,
     apply congr_arg _,
-    have eq_subst_l' : ∀ {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → Tuple s) (e : Tuple s), (t₁ ≃ t₂) * (R t₁ ≃ e) = (t₁ ≃ t₂) * (R t₂ ≃ e),
+    have eq_subst_l' : ∀ {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → Tuple s) (e : Tuple s), (t₁ ≃ t₂) * (e ≃ R t₁) = (t₁ ≃ t₂) * (e ≃ R t₂),
     { intros, rw eq_subst_l },
-    rw eq_subst_l',
+    rewrite eq_subst_l',
     --rw eq_subst_l (denoteProj x t) (denoteProj y t) _,-- (λ k, (denote_b add (denoteProj x t) k) ≃ t')   
 end
