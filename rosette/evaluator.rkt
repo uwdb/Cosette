@@ -171,6 +171,7 @@
                   (dedup (filter (lambda (x)(not (equal? (car ele) (car x))))
                                  (cdr table))))]))]))
 
+; normalized table, merge the mutiplicity of the same tuples
 (define (dedup-accum table)
   (cond 
     [(equal? '() table) '()]
@@ -299,5 +300,6 @@
     [(eq? l '()) #t]
     [else (&& (distinct-to-all-list (car l) (cdr l)) (list-distinct? (cdr l)))]))
 
+;; here, we treat two empty list 'distinct' 
 (define (distinct-to-all-list x l)
   (foldl && #t (map (lambda (y) (not (eq? x y))) l)))
