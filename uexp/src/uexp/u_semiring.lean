@@ -70,10 +70,14 @@ noncomputable instance : comm_semiring usr := {
 
 @[simp] axiom sig_distr_plus {s : Schema} (f₁ f₂ : Tuple s → usr) :
     (∑ t, f₁ t + f₂ t) = (∑ t, f₁ t) + (∑ t, f₂ t)
-@[simp] axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
+-- adding the sig_commute to the set of simplification lemma 
+-- will make it run forever
+axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
     (∑ t₁ t₂, f t₁ t₂) = (∑ t₂ t₁, f t₁ t₂)
 @[simp] axiom sig_distr_time {s : Schema} (a: usr) (f: Tuple s → usr):
-    (∑ t, a * (f t)) = a * (∑ t, f t)
+    a * (∑ t, f t) = (∑ t, a * (f t)) 
+@[simp] axiom sig_pair_split {s₁ s₂: Schema} (f: Tuple (s₁ ++ s₂) → usr):
+    (∑ t, (f t)) = (∑ t₁ t₂, (f (t₁, t₂)))
 
 @[simp] axiom squash_zero : usr.squash 0 = 0
 @[simp] axiom squash_one : usr.squash 1 = 1
@@ -81,6 +85,20 @@ noncomputable instance : comm_semiring usr := {
 @[simp] axiom squash_time (x y : usr) : ∥ x ∥ * ∥ y ∥ = ∥ x * y ∥ 
 @[simp] axiom squash_squared (x : usr) : ∥ x ∥ * ∥ x ∥  = ∥ x ∥ 
 @[simp] axiom squash_eq_if_square_eq (x : usr) : x * x = x → ∥ x ∥ = x
+@[simp] lemma squash_idempotent (x: usr): ∥ ∥ x ∥ ∥ = ∥ x ∥ :=
+begin
+    rewrite <- (@plus_zero (∥ x ∥)),
+    rewrite squash_add_squash,
+    rewrite plus_zero,
+    rewrite plus_zero,
+end
+
+@[simp] lemma squash_time_squash (x y: usr): ∥ ∥ x ∥ * y ∥ = ∥ x * y ∥ :=
+begin
+    rewrite <- squash_time,
+    rewrite squash_idempotent,
+    rewrite squash_time,
+end 
 
 @[simp] axiom not_zero : usr.not 0 = 1
 @[simp] axiom not_time (x y : usr) : usr.not (x * y) =  ∥ usr.not x + usr.not y ∥ 
@@ -94,3 +112,7 @@ noncomputable instance : comm_semiring usr := {
 (R t₁) *(t₁ ≃ t₂) = (R t₂) * (t₁ ≃ t₂) 
 @[simp] axiom em {s: Schema} (t₁ t₂ : Tuple s) : (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = 1
 @[simp] axiom eq_unique {s: Schema} (t' : Tuple s) : (∑ t, t ≃ t') = 1
+@[simp] axiom eq_symm {s: Schema} (t₁ t₂ : Tuple s):
+    (t₁ = t₂) = (t₂ = t₁)
+axiom eq_pair {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) (t: Tuple (s₁ ++ s₂)): 
+    (t ≃ (t₁, t₂)) = (t₁ ≃ t.1) * (t₂ ≃ t.2)

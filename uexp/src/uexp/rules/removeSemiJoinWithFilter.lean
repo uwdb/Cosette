@@ -29,6 +29,9 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    try {ac_refl},
-    sorry
+    apply congr_arg _,
+    funext,
+    apply congr_arg _,
+    funext,
+    ac_refl,
 end

@@ -29,6 +29,5 @@ begin
     have eq_subst_l' : ∀ {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → Tuple s) (e : Tuple s), (t₁ ≃ t₂) * (R t₁ ≃ e) = (t₁ ≃ t₂) * (R t₂ ≃ e),
     { intros, rw eq_subst_l },
     rw eq_subst_l',
-    --rw eq_subst_l (denoteProj x t) (denoteProj y t) _,-- (λ k, (denote_b add (denoteProj x t) k) ≃ t')
-    
+    --rw eq_subst_l (denoteProj x t) (denoteProj y t) _,-- (λ k, (denote_b add (denoteProj x t) k) ≃ t')   
 end

@@ -39,7 +39,9 @@ lemma disjointSelect:
     denoteSQL ((DISTINCT ((SELECT * FROM1 a WHERE slct0) UNION ALL (SELECT * FROM1 a WHERE slct1))) : SQL Γ _) :=
 begin
     intros,
-    unfold_all_denotations,
-    funext,    
+    unfold denoteSQL,
+    funext,
+    unfold denotePred,
+    rewrite squash_time_squash,
     simp,
 end

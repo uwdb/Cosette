@@ -37,6 +37,8 @@ begin
     congr,
     funext,
     apply congr_arg _,
+    funext,
     apply congr_arg _,
+    funext,
     sorry -- TODO: here push predicate into squashed expressions and SDP is required  
 end

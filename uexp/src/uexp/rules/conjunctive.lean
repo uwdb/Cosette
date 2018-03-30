@@ -21,5 +21,6 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    simp,
     sorry -- TODO: SDP should be used here
 end
