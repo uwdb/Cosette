@@ -42,3 +42,6 @@ iter_left <|> applyc `plus_comm_p >> iter_left
 
 meta def solve : tactic unit :=
 repeat $ reflexivity <|> cancel
+
+meta def solve_single :=
+reflexivity <|> cancel

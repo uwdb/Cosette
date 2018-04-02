@@ -4,16 +4,25 @@
 import .monoid .smt .simp .cancellation_solver .cancellation_solver_opt
 local infix * := star
 
-meta def build_plus_l : ℕ → expr
-| 0     := `(asM 0)
-| (n+1) := `(asM %%(reflect n.succ) * %%(build_plus_l n))
+meta def build_plus_l : ℕ → tactic expr
+| 0     := tactic.to_expr ``(asM 0)
+| (n+1) := do x ← build_plus_l n,
+        tactic.to_expr ``(asM %%(reflect n.succ) * %%x)
 
-meta def build_plus_r : ℕ → expr
-| 0     := `(asM 0)
-| (n+1) := `(%%(build_plus_r n) * asM %%(reflect n.succ))
+meta def build_plus_r : ℕ → tactic expr
+| 0     := tactic.to_expr ``(asM 0)
+| (n+1) := do 
+     right ← build_plus_r n,
+     tactic.to_expr ``(%%right * asM %%(reflect n.succ))
 
-meta def benchmark (n : ℕ) : expr :=
-`(%%(build_plus_l n) = (%%(build_plus_r n) : m))
+meta def x : pexpr := ``(1) 
+
+#check tactic.to_expr
+
+meta def benchmark (n : ℕ) : tactic expr :=
+ do left ← build_plus_l n,
+    right ← build_plus_r n,
+    return `(%%left = (%%right : m))
 
 open tactic monad
 
