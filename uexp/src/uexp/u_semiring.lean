@@ -116,3 +116,18 @@ end
     (t₁ ≃ t₂) = (t₂ ≃ t₁)
 axiom eq_pair {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) (t: Tuple (s₁ ++ s₂)): 
     (t ≃ (t₁, t₂)) = (t₁ ≃ t.1) * (t₂ ≃ t.2)
+@[simp] axiom eq_unit {s: Schema} (t₁ t₂: Tuple s): (t₁ ≃ t₂) = 1
+
+-- lemmas
+@[simp] lemma sig_eq_subst {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
+begin
+    have hq: (∑ t, ((t ≃  t') * (R t))) = (∑ t, (t ≃ t') * R t'),
+    { congr, funext, apply eq_subst_l },
+    rw hq,
+    have hq1: (∑ t, (t ≃ t') * R t') = (∑ t, R t' * (t ≃ t')),
+    { congr, funext, rw time_comm},
+    rw hq1,
+    rw ← sig_distr_time,
+    rw eq_unique,
+    rw time_one,
+end

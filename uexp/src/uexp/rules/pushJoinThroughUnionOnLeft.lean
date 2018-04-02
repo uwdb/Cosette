@@ -20,6 +20,4 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    try {ac_refl},
-    sorry
 end

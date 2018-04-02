@@ -45,5 +45,8 @@ theorem rule :
                       WHERE (Pred.equal (uvariable empnoProj) (constantExpr i)))
                GROUP BY (combine jobProj salProj) : SQL Γ _) :=
 begin
-    admit
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
 end

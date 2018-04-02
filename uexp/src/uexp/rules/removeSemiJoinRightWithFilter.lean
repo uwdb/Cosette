@@ -27,11 +27,4 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    apply congr_arg _,
-    funext,
-    apply congr_arg _,
-    funext,
-    apply congr_arg _,
-    funext,
-    ac_refl,
 end

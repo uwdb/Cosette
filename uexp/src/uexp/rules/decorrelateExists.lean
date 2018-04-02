@@ -42,5 +42,9 @@ theorem rule :
             WHERE (equal (uvariable (right⋅left⋅emp_deptno))
                          (uvariable (right⋅right⋅left)))) : SQL Γ _) :=
 begin
-admit
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
+    sorry
 end

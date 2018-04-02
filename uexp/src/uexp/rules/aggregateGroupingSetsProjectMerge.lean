@@ -32,5 +32,5 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    admit
+    simp,
 end

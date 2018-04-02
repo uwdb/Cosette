@@ -21,7 +21,4 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    rewrite sig_commute,
-    try {ac_refl},
-    sorry,
 end

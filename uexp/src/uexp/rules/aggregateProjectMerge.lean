@@ -34,5 +34,8 @@ theorem rule :
                       FROM1 table rel_emp
                       GROUP BY combine empnoProj deptnoProj : SQL Γ _) :=
 begin
-admit
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
 end

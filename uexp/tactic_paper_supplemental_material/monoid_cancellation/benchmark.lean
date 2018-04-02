@@ -27,7 +27,8 @@ meta def benchmark (n : ℕ) : tactic expr :=
 open tactic monad
 
 meta def run_single_bench (n : ℕ) (t : tactic unit) := run_async $ do
-bench_goal ← mk_meta_var (benchmark n),
+ty ← benchmark n,
+bench_goal ← mk_meta_var ty,
 set_goals [bench_goal],
 dunfold [`benchmark, `build_plus_l, `build_plus_r],
 timetac ("n = " ++ to_string n ++ ": ") (abstract t)
