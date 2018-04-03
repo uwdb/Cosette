@@ -206,9 +206,12 @@
                (list (table-info-name (query-named-table-ref qtf)))]
               [(query-rename? qtf) (used-table-info-one (query-rename-query qtf))]
               [(query-rename-full? qtf) (used-table-info-one (query-rename-full-query qtf))]
-              [(query-left-outer-join-2? qtf) 
-               (append (used-table-info-one (query-left-outer-join-2-query1 qtf))
-                       (used-table-info-one (query-left-outer-join-2-query2 qtf)))]
+              [(query-left-outer-join? qtf) 
+               (append (used-table-info-one (query-left-outer-join-query1 qtf))
+                       (used-table-info-one (query-left-outer-join-query2 qtf)))]
+              [(query-left-outer-join-1? qtf) 
+               (append (used-table-info-one (query-left-outer-join-1-query1 qtf))
+                       (used-table-info-one (query-left-outer-join-1-query2 qtf)))]
               [(query-union-all? qtf) 
                (append (used-table-info-one (query-union-all-query1 qtf))
                        (used-table-info-one (query-union-all-query2 qtf)))]

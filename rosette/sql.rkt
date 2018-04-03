@@ -25,7 +25,6 @@
 (define-syntax-rule (RENAME t name) (rename-table t name))
 (define-syntax-rule (LEFT-OUTER-JOIN q1 q2 p) (query-left-outer-join q1 q2 p))
 (define-syntax-rule (LEFT-OUTER-JOIN-1 q1 q2 k1 k2) (query-left-outer-join-1 q1 q2 k1 k2))
-(define-syntax-rule (LEFT-OUTER-JOIN-2 q1 q2 join-query) (query-left-outer-join-2 q1 q2 join-query))
 
 (define-syntax AS
   (syntax-rules () [(AS q [t l]) (query-rename-full q t l)]

@@ -213,14 +213,9 @@
                                  (forall-eq-constr mconstr)
                                  (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
                                q2-ref-update-map))))]
-      [(or (query-left-outer-join-2? query)
-           (query-left-outer-join-1? query))
-       (let* ([q1 (if (query-left-outer-join-2? query)
-                      (query-left-outer-join-2-query1 query)
-                      (query-left-outer-join-1-query1 query))]
-              [q2 (if (query-left-outer-join-2? query)
-                      (query-left-outer-join-2-query2 query)
-                      (query-left-outer-join-1-query2 query))]
+      [(query-left-outer-join-1? query)
+       (let* ([q1 (query-left-outer-join-1-query1 query)]
+              [q2 (query-left-outer-join-1-query2 query)]
               [q1-schema-size (length (extract-schema q1))]
               [q1-ref-indexes (build-list q1-schema-size values)]
               [q2-schema-size (length (extract-schema q2))]

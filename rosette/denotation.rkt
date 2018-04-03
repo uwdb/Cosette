@@ -39,17 +39,19 @@
        (map (lambda (col-name index)
               (hash-set! name-hash col-name (+ index (hash-count index-map))))
             schema (range (length schema)))
-       (let* ([t1 (eval (denote-sql q1 index-map) ns)]
-              [t2 (eval (denote-sql q2 index-map) ns)]
+       (let* ([fq1 (eval (denote-sql q1 index-map) ns)]
+              [fq2 (eval (denote-sql q2 index-map) ns)]
               [on-clause (eval (denote-filter pred name-hash) ns)]
               [new-name "dummy"]
               [new-schema (extract-schema query)])
          `(lambda (e)
-            (let* ([content-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) 
-                                       (Table-content (xproduct (,t1 e) (,t2 e) "dummy")))]
+            (let* ([t1 (,fq1 e)]
+                   [t2 (,fq2 e)]
+                   [content-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) 
+                                       (Table-content (xproduct t1 t2 "dummy")))]
                    [post-filter (map (lambda (r) (cons (car r) (if (,on-clause (car r)) (cdr r) 0))) content-w-env)]
                    [t12 (Table ,new-name ',new-schema post-filter)])
-            (left-outer-join-2 (,t1 e) (,t2 e) t12)))
+            (left-outer-join-2 t1 t2 t12)))
          ))
      ;;;;; TODO
      ]
@@ -62,13 +64,6 @@
         [k2 (query-left-outer-join-1-key2 query)])
        `(lambda (e) (left-outer-join-1 ,q1 ,q2 ,k1 ,k2)))
      ]
-    ; denote left-outer-join table
-    [(query-left-outer-join-2? query)
-     (let* 
-       ([q1 `(,(denote-sql (query-left-outer-join-2-query1 query) index-map) e)]
-        [q2 `(,(denote-sql (query-left-outer-join-2-query2 query) index-map) e)]
-        [jq `(,(denote-sql (query-left-outer-join-2-join-result query) index-map) e)])
-       `(lambda (e) (left-outer-join-2 ,q1 ,q2 ,jq)))]
     ; query union all
     [(query-union-all? query)
      (let* 
@@ -181,9 +176,6 @@
     [(query-left-outer-join-1? query) 
      (append (extract-schema (query-left-outer-join-1-query1 query)) 
              (extract-schema (query-left-outer-join-1-query2 query)))]
-    [(query-left-outer-join-2? query) 
-     (append (extract-schema (query-left-outer-join-2-query1 query)) 
-             (extract-schema (query-left-outer-join-2-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
            [cnames (extract-schema (query-rename-query query))])
