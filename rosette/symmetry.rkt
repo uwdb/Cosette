@@ -205,7 +205,7 @@
               [q2-ref-update-map (map (lambda (x) (v-ref x))
                                       (append (build-list q1-schema-size values) 
                                               (build-list q2-schema-size values)))])
-         (list (forall-eq q1 (remove-constr-if-val 
+         (list (forall-eq q1 (remove-constr-if-val
                                (forall-eq-constr mconstr) 
                                (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
                (forall-eq q2 (subst-v-ref

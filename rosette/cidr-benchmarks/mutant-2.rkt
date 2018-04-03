@@ -42,14 +42,15 @@
 ; WHERE instructor.id == teaches.id
 
 (define q2
-  (AS (LEFT-OUTER-JOIN-1 (NAMED instructor) (NAMED teaches) 0 1)
+  (AS (LEFT-OUTER-JOIN (NAMED instructor) (NAMED teaches) (BINOP "c.id" = "d.id"))
       ["t1" (list "id1" "name" "cname" "id2")]))
 
 (define q3
   (SELECT (VALS "t1.id1" "t1.name" "t1.cname" "t1.id2")
-   FROM (AS (LEFT-OUTER-JOIN-1 (NAMED teaches) (NAMED instructor) 1 0)
-      	["t1" (list "cname" "id2" "id1" "name")])
+   FROM (AS (LEFT-OUTER-JOIN (NAMED teaches) (NAMED instructor) (BINOP "d.id" = "c.id"))
+            ["t1" (list "cname" "id2" "id1" "name")])
    WHERE (TRUE)))
+
 ; expect model
 ;(run q2)
 ;(run q4)
