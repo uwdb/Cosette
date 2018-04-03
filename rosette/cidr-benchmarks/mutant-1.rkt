@@ -40,14 +40,14 @@
    ["t1" (list "dept" "budget")]))
 
 (define q2
-  (LEFT-OUTER-JOIN (NAMED course) q1 1 0))
+  (LEFT-OUTER-JOIN-1 (NAMED course) q1 1 0))
 
 ;SELECT course.id, department.dept name FROM course LEFT
 ;OUTER JOIN department USING (dept name)
 ;WHERE department.budget > 70000;
 
 (define q3
-  (AS (LEFT-OUTER-JOIN (NAMED course) (NAMED department) 1 0)
+  (AS (LEFT-OUTER-JOIN-1 (NAMED course) (NAMED department) 1 0)
       ["t1" (list "id" "dept1" "dept2" "budget")]))
 
 (define q4

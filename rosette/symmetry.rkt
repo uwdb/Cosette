@@ -24,6 +24,11 @@
 
 ;;;;;;;;;;;; functions for generating symmetry breaking conditions ;;;;;;;;;;;;
 
+(define (go-break-symmetry-single q1)
+  (let* ([c1 (big-step (init-forall-eq-constraint q1) 20)]
+         [flat-constr (flatten (list c1))])
+   flat-constr))
+
 (define (go-break-symmetry-bounded q1 q2)
   (let* ([c1 (big-step (init-forall-eq-constraint q1) 20)]
          [c2 (big-step (init-forall-eq-constraint q2) 20)]
@@ -188,14 +193,34 @@
            inner-q
            (c-conj (list (subst-v-ref (forall-eq-constr mconstr) ref-map) 
                          (c-from-sql-filter sel-pred inner-q-name-hash)))))]
+      [(query-left-outer-join? query)
+       (let* ([q1 (query-left-outer-join-query1 query)]
+              [q2 (query-left-outer-join-query2 query)]
+              [pred (query-left-outer-join-pred query)]
+              [q1-schema-size (length (extract-schema q1))]
+              [q1-ref-indexes (build-list q1-schema-size values)]
+              [q2-schema-size (length (extract-schema q2))]
+              [q2-ref-indexes (build-list q2-schema-size (lambda (x) (+ x q1-schema-size)))]
+              ; don't forget to update ref indexes for q2
+              [q2-ref-update-map (map (lambda (x) (v-ref x))
+                                      (append (build-list q1-schema-size values) 
+                                              (build-list q2-schema-size values)))])
+         (list (forall-eq q1 (remove-constr-if-val 
+                               (forall-eq-constr mconstr) 
+                               (lambda (x) (contain-out-of-range-v-ref x q1-ref-indexes))))
+               (forall-eq q2 (subst-v-ref
+                               (remove-constr-if-val 
+                                 (forall-eq-constr mconstr)
+                                 (lambda (x) (contain-out-of-range-v-ref x q2-ref-indexes)))
+                               q2-ref-update-map))))]
       [(or (query-left-outer-join-2? query)
-           (query-left-outer-join? query))
+           (query-left-outer-join-1? query))
        (let* ([q1 (if (query-left-outer-join-2? query)
                       (query-left-outer-join-2-query1 query)
-                      (query-left-outer-join-query1 query))]
+                      (query-left-outer-join-1-query1 query))]
               [q2 (if (query-left-outer-join-2? query)
                       (query-left-outer-join-2-query2 query)
-                      (query-left-outer-join-query2 query))]
+                      (query-left-outer-join-1-query2 query))]
               [q1-schema-size (length (extract-schema q1))]
               [q1-ref-indexes (build-list q1-schema-size values)]
               [q2-schema-size (length (extract-schema q2))]

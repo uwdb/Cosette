@@ -8,6 +8,7 @@
 
 (provide cosette-sol->json 
          cosette-solve
+         cosette-check-non-empty
          table-info
          solve-queries
          solve-queries-symbreak
@@ -62,6 +63,18 @@
          (displayln "[Table evaluation results]")
          (displayln (format "  ~a" (clean-ret-table (denote-and-run q1t))))
          (displayln (format "  ~a" (clean-ret-table (denote-and-run q2t))))
+         (cons "NEQ" clean-tables))]
+      [else (cons "EQ"  (list))])))
+
+(define (cosette-check-non-empty q input-tables)
+  (let ([solution (verify (always-empty q))])
+    (cond 
+      [(sat? solution) 
+       (let* ([tables (evaluate input-tables solution)]
+              [qt (evaluate q solution)]
+              [clean-tables (map clean-ret-table tables)])
+         (displayln "[Table evaluation results]")
+         (displayln (format "  ~a" (clean-ret-table (denote-and-run qt))))
          (cons "NEQ" clean-tables))]
       [else (cons "EQ"  (list))]))) 
 

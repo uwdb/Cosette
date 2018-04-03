@@ -11,6 +11,7 @@
          assert-table-col-distinct ;; assert that all values in a column is distinct from each other
          same ;; assert two queries are the same 
          neq ;; assert two queries are not the same
+         always-empty ;; a query always produce empty result
          ) 
 
 ;;;;; Symbolic utilities
@@ -39,7 +40,8 @@
   ; generating symbolic table row by row
   (let ([gen-row (lambda (x)
                    (cons (gen-sv-list num-col)
-                         (gen-pos-sv)))])
+                         (gen-pos-sv)
+                         ))])
     (build-list num-row gen-row)))
 
 (define (subst-mconstr v sv-base sv-current)
@@ -126,3 +128,6 @@
 
 (define (neq q1 q2)
   (assert (not (bag-equal (get-content (run q1)) (get-content (run q2))))))
+
+(define (always-empty q)
+  (assert (table-content-empty? (get-content (run q)))))

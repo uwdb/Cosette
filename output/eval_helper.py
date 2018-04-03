@@ -43,16 +43,14 @@ def parse_outputs(log_dirs, table_size_dict={}):
 
                     table_size = [int(i) for i in table_size.split()]
 
-                    if max(table_size) > 1:
-                        print (case_name)
+                    #if max(table_size) > 1:
+                        #print (case_name)
                         #print(table_size)
 
                     case_result.append((table_size, real_time))
 
             record[case_name] = case_result
         method_results[log_dir] = record
-
-    #pprint(method_results)
 
 
     all_cases = list(set(all_cases))
@@ -69,7 +67,6 @@ def parse_outputs(log_dirs, table_size_dict={}):
             record_lens.append(len(method_results[method][case]))
 
         if min(record_lens) == 0:
-            print(case)
             continue
 
         for method in method_results:
@@ -139,28 +136,30 @@ def read_stats(folder, table_size_dict):
     return stats
     
 def process_case_name(s):
-    return s[4:].replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj")
+    return s.replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj").replace("cse344au", "").replace("csep544","").replace("_", "-")
 
 if __name__ == '__main__':
         
-    '''
+    
     table_size_dict = calculate_table_size("../benchmarks/calcite")
-    stats = read_stats("calcite_nosymbreak", table_size_dict)
-    result = parse_outputs(["calcite_symbreak", "calcite_nosymbreak"], table_size_dict)
+    stats = read_stats("qex_test", table_size_dict)
+    result = parse_outputs(["qex_test", "qex_test_2"], table_size_dict)
+
     for x in result:
-        if not stats[x[0]][1]:
-            print("{} & {} & {} & {} & {} & {} \\\\".format(process_case_name(x[0]), stats[x[0]][0], x[1], x[2], x[3], x[4]))
+        #if not stats[x[0]][1]:
+            #print("{} & {} & {} & {} & {}".format(process_case_name(x[0]), x[1], x[2], x[3], x[4]))
+            print("{} ".format(x[4]))
     '''
     
     table_size_dict = calculate_table_size("../benchmarks/homeworks")
     stats = read_stats("homeworks_symbreak", table_size_dict)
     result = parse_outputs(["homeworks_symbreak_simple", "homeworks_nosymbreak_new"], table_size_dict)
-    
+    '''
     print(len(result))
 
-    for x in result:
+    #for x in result:
         #if stats[x[0]][1]:
-            print("{} & {} & {} & {} & {} & {} \\\\".format((x[0]), stats[x[0]][0], x[1], x[2], x[3], x[4]))
+    #        print("{} & {} & {} & {} & {} & {} \\\\".format(process_case_name(x[0])[1:], stats[x[0]][0], x[1], x[2], x[3], x[4]))
     
 
 

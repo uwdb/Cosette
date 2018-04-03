@@ -144,5 +144,6 @@ if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
-    run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
+    run_benchmarks("benchmarks/calcite", ".", "./output/qex_test")
+    #run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
     #print(quick_parse("temp.cos"))

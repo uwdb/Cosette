@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../sql.rkt" "../evaluator.rkt" "../denotation.rkt" "../table.rkt" "../syntax.rkt")
+(require "../equal.rkt" "../sql.rkt" "../evaluator.rkt" "../denotation.rkt" "../table.rkt" "../syntax.rkt")
 
 ;; several test xproduct
 (define content-a
@@ -34,6 +34,7 @@
         (list 3 5 6)))
 
 (define table1 (Table "t1" '("a" "b" "c") content-b))
+(define table2 (Table "t2" '("a" "b" "c") content-b))
 
 (define q                                                                                                                                                     
   (query-aggr-general 
@@ -113,7 +114,12 @@
    FROM (NAMED table1)
    WHERE (BINOP "t1.c" < str_charlie_)
    GROUP-BY (list "t1.a" "t1.b")
-   HAVING (TRUE))) 
+   HAVING (TRUE)))
+
+(define q5 (LEFT-OUTER-JOIN (NAMED table1) (NAMED table2) (BINOP "t1.b" = "t2.a"))) 
+(define q6 (LEFT-OUTER-JOIN-1 (NAMED table1) (NAMED table2) 1 0))
+
+(bag-equal (Table-content (denote-and-run q5)) (Table-content (denote-and-run q6)))
 
 (define b_plus (broad-casting-bexpr-wrapper +))
 

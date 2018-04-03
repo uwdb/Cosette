@@ -60,7 +60,8 @@
 
 (define q4
   (AS 
-    (LEFT-OUTER-JOIN-2 (NAMED course) (NAMED takes) q3)
+    (LEFT-OUTER-JOIN (NAMED course) (NAMED takes) 
+                     (BINOP "c.cid" equal? "d.cid"))
     ["t" (list "cid1" "dept" "id" "cid2")]))
 
 (define q5
