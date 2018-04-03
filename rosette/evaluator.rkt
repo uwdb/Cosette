@@ -240,20 +240,10 @@
                        [else 0])))
          join-result)))
 
-; left outer join on two tables
-(define (left-outer-join-1 table1 table2 index1 index2)
-  (let* ([content1 (Table-content table1)]
-         [content2 (Table-content table2)])
-    (Table 
-      (string-append (get-table-name table1)
-                     (get-table-name table2))
-      (schema-join table1 table2) 
-      (left-outer-join-raw content1 content2 index1 index2 
-                           (length (get-schema table1)) (length (get-schema table2))))))
 
 ; another version of left-outer-join
 ; table12 is the join result of table1 and table2 under some condition
-(define (left-outer-join-2 table1 table2 table12)
+(define (left-outer-join-from-join-result table1 table2 table12)
   (let* ([content1 (Table-content table1)]
          [content2 (Table-content table2)]
          [content12 (Table-content table12)])
@@ -263,12 +253,6 @@
       (adding-null-rows content1 content2 content12 
                         (length (get-schema table1)) 
                         (length (get-schema table2))))))
-
-
-; left outer join two tables based on index1 and index2, this is raw because content1 content2 contains no table schema
-(define (left-outer-join-raw content1 content2 index1 index2 schema-size-1 schema-size-2)
-  (let ([content12 (equi-join content1 content2 (list (cons index1 index2)) schema-size-1)])
-    (adding-null-rows content1 content2 content12 schema-size-1 schema-size-2)))
 
 ; content12 is the join result of content1 and content2 under some condition, 
 ; this functions helps extending the join result with rows in content1 but not in content 2

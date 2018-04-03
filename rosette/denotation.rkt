@@ -51,18 +51,8 @@
                                        (Table-content (xproduct t1 t2 "dummy")))]
                    [post-filter (map (lambda (r) (cons (car r) (if (,on-clause (car r)) (cdr r) 0))) content-w-env)]
                    [t12 (Table ,new-name ',new-schema post-filter)])
-            (left-outer-join-2 t1 t2 t12)))
+            (left-outer-join-from-join-result t1 t2 t12)))
          ))
-     ;;;;; TODO
-     ]
-    ; denote left-outer-join table
-    [(query-left-outer-join-1? query)
-     (let* 
-       ([q1 `(,(denote-sql (query-left-outer-join-1-query1 query) index-map) e)]
-        [q2 `(,(denote-sql (query-left-outer-join-1-query2 query) index-map) e)]
-        [k1 (query-left-outer-join-1-key1 query)]
-        [k2 (query-left-outer-join-1-key2 query)])
-       `(lambda (e) (left-outer-join-1 ,q1 ,q2 ,k1 ,k2)))
      ]
     ; query union all
     [(query-union-all? query)
@@ -173,9 +163,6 @@
     [(query-left-outer-join? query) 
      (append (extract-schema (query-left-outer-join-query1 query)) 
              (extract-schema (query-left-outer-join-query2 query)))]
-    [(query-left-outer-join-1? query) 
-     (append (extract-schema (query-left-outer-join-1-query1 query)) 
-             (extract-schema (query-left-outer-join-1-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
            [cnames (extract-schema (query-rename-query query))])

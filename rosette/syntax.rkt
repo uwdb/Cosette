@@ -16,7 +16,6 @@
 (struct query-rename (query table-name) #:transparent)
 (struct query-rename-full (query table-name column-names) #:transparent)
 (struct query-left-outer-join (query1 query2 pred) #:transparent)
-(struct query-left-outer-join-1 (query1 query2 key1 key2) #:transparent)
 (struct query-union-all (query1 query2))
 (struct query-aggr-general (query where-filter gb-fields select-args having-filter) #:transparent)
 

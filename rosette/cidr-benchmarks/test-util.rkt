@@ -33,5 +33,5 @@
 (define test-table-2
   (Table "b" (list "d1" "c2" "c3") concrete-table-2-col))
 
-(define q (LEFT-OUTER-JOIN-1 (NAMED test-table-1) (NAMED test-table-2) 0 0))
+(define q (LEFT-OUTER-JOIN (NAMED test-table-1) (NAMED test-table-2) (BINOP "a.c1" = "b.d1")))
 (displayln (run q))

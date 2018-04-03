@@ -117,9 +117,6 @@
    HAVING (TRUE)))
 
 (define q5 (LEFT-OUTER-JOIN (NAMED table1) (NAMED table2) (BINOP "t1.b" = "t2.a"))) 
-(define q6 (LEFT-OUTER-JOIN-1 (NAMED table1) (NAMED table2) 1 0))
-
-(bag-equal (Table-content (denote-and-run q5)) (Table-content (denote-and-run q6)))
 
 (define b_plus (broad-casting-bexpr-wrapper +))
 

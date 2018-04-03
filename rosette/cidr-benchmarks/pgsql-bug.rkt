@@ -35,8 +35,8 @@
 ;              ON "Extent2.id" = "UnionAll2.c1" 
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
-#lang rosette  
-                                                                                                                                               
+#lang rosette
+
 (require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
@@ -105,7 +105,7 @@
 (define q0-part-2
   (AS 
     (UNION-ALL
-      (UNION-ALL (NAMED t3) (NAMED t4))      
+      (UNION-ALL (NAMED t3) (NAMED t4))
       (NAMED t5))
     ["UnionAll2" (list "ID" "C")]))
 
@@ -183,5 +183,3 @@
 ;10         ->  Seq Scan on "CurrentDateTimeDefaultValues" "Extent3" 
 ;11         ->  Seq Scan on "NewGuidDefaultValues" "Extent4" 
 ;12         ->  Seq Scan on "EnumDefaultValues" "Extent5"
-
-
