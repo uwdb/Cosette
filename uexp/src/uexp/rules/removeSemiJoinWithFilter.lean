@@ -28,5 +28,10 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    simp
+    simp,
+    congr,
+    funext,
+    congr,
+    funext,
+    ac_refl,
 end

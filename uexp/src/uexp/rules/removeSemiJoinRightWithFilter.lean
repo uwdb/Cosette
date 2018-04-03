@@ -27,4 +27,11 @@ begin
     unfold_all_denotations,
     funext,
     simp,
+    congr,
+    funext,
+    congr,
+    funext,
+    congr,
+    funext,
+    ac_refl,
 end

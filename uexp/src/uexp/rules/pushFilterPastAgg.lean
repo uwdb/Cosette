@@ -23,6 +23,7 @@ denoteSQL
  begin
     intros,
     unfold_all_denotations,
+    unfold combineGroupByProj,
     funext,
     simp,
     sorry
