@@ -52,8 +52,7 @@
                    [post-filter (map (lambda (r) (cons (car r) (if (,on-clause (car r)) (cdr r) 0))) content-w-env)]
                    [t12 (Table ,new-name ',new-schema post-filter)])
             (left-outer-join-from-join-result t1 t2 t12)))
-         ))
-     ]
+         ))]
     ; query union all
     [(query-union-all? query)
      (let* 
@@ -196,7 +195,6 @@
         (,(val-aggr-subq-agg-func value) 
           (map (lambda (r) (cons (car (car r)) (cdr r))) 
                (get-content (,(denote-sql (val-aggr-subq-query value) nmap) e)))))]))
-
 
 (define (denote-value-w-broadcasting value nmap gb-fields val-mode)
   (cond                                                                                                                                                       
