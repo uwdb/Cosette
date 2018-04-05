@@ -52,17 +52,11 @@
 
 (displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 
-(define m-tables
-  (init-sym-tables-mconstr 
-    table-info-list 
-    table-size-list
-    (go-break-symmetry-bounded qt1 qt2)))
+(define m-tables (init-sym-tables table-info-list table-size-list))
+(assert-sym-tables-mconstr m-tables (go-break-symmetry-bounded qt1 qt2))
 
-(define m-tables-2
-  (init-sym-tables-mconstr 
-    table-info-list 
-    table-size-list
-    (go-break-symmetry-bounded-simplify qt1 qt2)))
+(define m-tables-2 (init-sym-tables table-info-list table-size-list))
+(assert-sym-tables-mconstr m-tables-2 (go-break-symmetry-bounded-intersect qt1 qt2))
 
 ;(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 

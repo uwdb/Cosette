@@ -36,10 +36,8 @@
 
 (define c1 (big-step (init-constraint qt1) 20))
 
-(define m-tables (init-sym-tables-mconstr 
-                   table-info-list 
-                   table-size-list 
-                   (go-break-symmetry-single qt1)))
+(define m-tables (init-sym-tables table-info-list table-size-list))
+(assert-sym-tables-mconstr m-tables (go-break-symmetry-single qt1))
 
 ;(displayln m-tables)
 

@@ -45,11 +45,8 @@
 (define c1 (big-step (init-constraint qt1) 20))
 (define c2 (big-step (init-constraint qt2) 20))
 
-(define m-tables
-  (init-sym-tables-mconstr 
-    table-info-list 
-    table-size-list
-    (go-break-symmetry-bounded qt1 qt2)))
+(define m-tables (init-sym-tables table-info-list table-size-list))
+(assert-sym-tables-mconstr m-tables (go-break-symmetry-bounded qt1 qt2))
 
 (displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
 

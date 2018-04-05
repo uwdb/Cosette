@@ -40,16 +40,15 @@
 (define qt1 (q1 empty-tables))
 (define qt2 (q2 empty-tables))
 
-(define c1 (big-step (init-constraint qt1) 20))
-(define c2 (big-step (init-constraint qt2) 20))
+(define c1 (big-step (init-forall-eq-constraint qt1) 20))
+(define c2 (big-step (init-forall-eq-constraint qt2) 20))
 
-(define m-tables
-  (init-sym-tables-mconstr 
-    table-info-list 
-    table-size-list
-    (go-break-symmetry-bounded qt1 qt2)))
+(define m-tables (init-sym-tables table-info-list table-size-list))
+(assert-sym-tables-mconstr m-tables (go-break-symmetry-bounded qt1 qt2))
 
-(displayln (to-str (go-break-symmetry-bounded qt1 qt2)))
+;(display (to-str (go-break-symmetry-bounded qt1 qt2)))
+
+;(go-break-symmetry-bounded qt1 qt2)
 
 (define (test-now instance tables)
     (let* ([q1 ((list-ref instance 0) tables)]

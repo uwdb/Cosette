@@ -35,9 +35,10 @@
         (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (cosette-solve qt1 qt2 tables)))
   (define (test-now-mconstr instance table-size-list)
-      (let* ([tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
+      (let* ([tables (init-sym-tables table-info-list table-size-list)]
              [qt1 (fq1 tables)]
              [qt2 (fq2 tables)])
+        (assert-sym-tables-mconstr tables mconstr)
         (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
         (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (cosette-solve qt1 qt2 tables)))

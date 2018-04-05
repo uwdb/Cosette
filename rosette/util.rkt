@@ -62,8 +62,10 @@
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-qex-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x) (cons (gen-sv-list num-col) 1))])
-    (build-list num-row gen-row)))
+  (let* ([gen-row (lambda (x) (cons (gen-sv-list num-col) 1))]
+         [table (build-list num-row gen-row)])
+    (assert (table-content-ascending? table))
+    table))
 
 (define (subst-mconstr v sv-base sv-current)
   (cond

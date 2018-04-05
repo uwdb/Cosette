@@ -277,7 +277,7 @@
   (cond 
     [(v-uexpr? v) (contain-out-of-range-v-ref (v-uexpr-v v) ref-indexes)]
     [(v-bexpr? v) (or (contain-out-of-range-v-ref (v-bexpr-v1 v) ref-indexes)
-                      (contain-out-of-range-v-ref (v-bexpr-v1 v) ref-indexes))]
+                      (contain-out-of-range-v-ref (v-bexpr-v2 v) ref-indexes))]
     [(v-ref? v) (not (index-of ref-indexes (v-ref-id v)))]
     [else #f]))
 
@@ -413,13 +413,11 @@
 
 (define (mconstr-to-hashmap constr-list)
   ; generate a hash map for ease of creating table
-  (let ([qname->str 
-         (lambda (q) (if (query-named? q) (Table-name (query-named-table-ref q)) "q"))])
-    (make-hash
-      (map (lambda (x) 
-             (cond [(forall-eq? x)
-                    (cons (qname->str (forall-eq-query x)) (forall-eq-constr x))])) 
-           constr-list))))
+  (let ([qname->str (lambda (q) (if (query-named? q) (Table-name (query-named-table-ref q)) "q"))])
+    (make-hash (map (lambda (x) (cond [(forall-eq? x)
+                                       (cons (qname->str (forall-eq-query x)) 
+                                             (forall-eq-constr x))])) 
+                    constr-list))))
 
 (define (queries-to-str queries)
   ; pretty printing tables involved in these constraints

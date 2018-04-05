@@ -14,6 +14,7 @@
          solve-queries-symbreak
          init-sym-tables
          init-sym-tables-mconstr
+         assert-sym-tables-mconstr
          init-table-size-list
          inc-table-size-list)
 
@@ -136,19 +137,21 @@
                      (list-ref table-size-list i)))
        (build-list (length table-size-list) values)))
 
+(define (assert-sym-tables-mconstr tables mconstr)
+  (let* ([mconstr-map (if (null? mconstr) 
+                          (make-hash) 
+                          (mconstr-to-hashmap mconstr))])
+    (for-each (lambda (table)
+                (let ([c (hash-ref mconstr-map (Table-name table) null)])
+                  (print table)
+                  (displayln (to-str c))
+                  (displayln "---------------------")
+                  (if (null? c) (list) (assert-table-mconstr table c)))) tables)))
+
 (define (init-sym-tables-mconstr table-info-list table-size-list mconstr)
-  ; generate a symbolic table according to table-info and size
-  (define (gen-sym-table-mconstr tf size mconstr)
-    (let* ([schema (table-info-schema tf)]
-           [mconstr-map (mconstr-to-hashmap mconstr)]
-           [table (Table (table-info-name tf) schema (gen-sym-schema (length schema) size))])
-           (assert-table-mconstr table (hash-ref mconstr-map (table-info-name tf) null))
-           table))
-  (map (lambda (i) (gen-sym-table-mconstr
-                     (list-ref table-info-list i)
-                     (list-ref table-size-list i)
-                     mconstr))
-       (build-list (length table-size-list) values)))
+  (let ([tables (init-sym-tables table-info-list table-size-list)]) 
+    (assert-sym-tables-mconstr tables mconstr)
+    tables))
 
 ; given two query functions and the schema definition,
 ; the function will increase the table size one by one trying to solve the question
@@ -176,11 +179,13 @@
          [try-solve
            (lambda (fq1 fq2 table-info-list table-size-list)
              (let* ([empty-tables (init-sym-tables table-info-list 
-                                   (build-list (length table-info-list) (lambda (x) 0)))]
+                                   (build-list (length table-info-list) (lambda (x) 0))
+                                   gen-sym-schema)]
                     [mconstr (go-break-symmetry-bounded (fq1 empty-tables) (fq2 empty-tables))]
-                    [tables (init-sym-tables-mconstr table-info-list table-size-list mconstr)]
+                    [tables (init-sym-tables table-info-list table-size-list)]
                     [q1 (fq1 tables)]
                     [q2 (fq2 tables)])
+               (assert-sym-tables-mconstr tables mconstr)
                (cosette-solve q1 q2 tables)))])
     (define (rec-wrapper table-size-list)
       (let ([sol (time (try-solve fq1 fq2 table-info-list table-size-list))])
@@ -188,7 +193,6 @@
               [else (messenger  table-size-list)
                     (rec-wrapper (inc-table-size-list table-size-list))])))
     (rec-wrapper initial-size)))
-
 
 ;; check which tables are used given a list of fq functions
 (define (used-table-info fq-list table-info-list)
