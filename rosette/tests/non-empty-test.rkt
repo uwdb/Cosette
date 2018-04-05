@@ -3,7 +3,7 @@
 (require "../cosette.rkt" "../util.rkt" "../denotation.rkt" "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt") 
   
 (current-bitwidth #f)
- 
+
 (define-symbolic div_ (~> integer? integer? integer?))
 
 (define t-info (table-info "t" (list "k0" "c1" "f1_a0" "f2_a0" "f0_c0" "f1_c0" "f0_c1" "f1_c2" "f2_c3")))
@@ -46,7 +46,7 @@
 (define (test-now instance tables)
     (let* ([q1 ((list-ref instance 0) tables)])
       ;(println tables)
-      (cosette-check-non-empty q1 tables)))
+      (cosette-check-non-empty q1 tables (list))))
 
 (time (test-now ros-instance m-tables))
 ;(time (test-now ros-instance tables))

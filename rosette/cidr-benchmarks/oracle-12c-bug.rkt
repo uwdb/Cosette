@@ -1,6 +1,7 @@
 #lang rosette
 
-(require "../util.rkt" "../sql.rkt" "../table.rkt" "../symmetry.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
+(require "../util.rkt" "../sql.rkt" "../table.rkt" 
+         "../symmetry.rkt"  "../evaluator.rkt" "../equal.rkt"  rosette/lib/synthax)
 
 ; ------- actual tables (only for test) -------
 
@@ -120,13 +121,18 @@
 
 (define mconstr (run-test s-t s-tr s-ta s-tb #f))
 
-(define s2-t (Table "t" (list "tid" "name") (gen-sym-schema-mconstr 2 1 (list-ref mconstr 0))))
-(define s2-tr (Table "tr" (list "rid" "tid" "type") (gen-sym-schema-mconstr 3 1 (list-ref mconstr 1))))
-(define s2-ta (Table "ta" (list "rid" "status") (gen-sym-schema-mconstr 2 1 (list-ref mconstr 2))))
-(define s2-tb (Table "tb" (list "rid" "status") (gen-sym-schema-mconstr 2 1 (list-ref mconstr 3))))
+(define s2-t (Table "t" (list "tid" "name") (gen-sym-schema 2 1)))
+(define s2-tr (Table "tr" (list "rid" "tid" "type") (gen-sym-schema 3 1)))
+(define s2-ta (Table "ta" (list "rid" "status") (gen-sym-schema 2 1)))
+(define s2-tb (Table "tb" (list "rid" "status") (gen-sym-schema 2 1)))
+
+(assert-table-mconstr s2-t (list-ref mconstr 0))
+(assert-table-mconstr s2-tr (list-ref mconstr 1))
+(assert-table-mconstr s2-ta (list-ref mconstr 2))
+(assert-table-mconstr s2-tb (list-ref mconstr 3))
 
 ;(run-test c-t c-tr c-ta c-tb #t)
-(run-test s-t s-tr s-ta s-tb #t)
+;(run-test s-t s-tr s-ta s-tb #t)
 (run-test s2-t s2-tr s2-ta s2-tb #t)
 
 

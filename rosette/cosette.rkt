@@ -66,17 +66,19 @@
          (cons "NEQ" clean-tables))]
       [else (cons "EQ"  (list))])))
 
-(define (cosette-check-non-empty q input-tables)
+(define (cosette-check-non-empty q input-tables sym-vals)
   (let ([solution (verify (always-empty q))])
     (cond 
       [(sat? solution) 
        (let* ([tables (evaluate input-tables solution)]
+              [vals (evaluate sym-vals solution)]
               [qt (evaluate q solution)]
               [clean-tables (map clean-ret-table tables)])
-         (displayln "[Table evaluation results]")
+         (displayln "[Evaluation Result]")
+         (displayln vals)
          (displayln (format "  ~a" (clean-ret-table (denote-and-run qt))))
-         (cons "NEQ" clean-tables))]
-      [else (cons "EQ"  (list))]))) 
+         (cons "(sat)" clean-tables))]
+      [else (cons "(unsat)"  (list))]))) 
 
 (define (table->jsexpr t) 
   (hasheq 'table-name (get-table-name t) 
@@ -137,13 +139,11 @@
 (define (init-sym-tables-mconstr table-info-list table-size-list mconstr)
   ; generate a symbolic table according to table-info and size
   (define (gen-sym-table-mconstr tf size mconstr)
-    (let ([schema (table-info-schema tf)]
-          [mconstr-map (mconstr-to-hashmap mconstr)])
-      (Table (table-info-name tf) 
-             schema 
-             (gen-sym-schema-mconstr 
-               (length schema) size
-               (hash-ref mconstr-map (table-info-name tf) null))))) 
+    (let* ([schema (table-info-schema tf)]
+           [mconstr-map (mconstr-to-hashmap mconstr)]
+           [table (Table (table-info-name tf) schema (gen-sym-schema (length schema) size))])
+           (assert-table-mconstr table (hash-ref mconstr-map (table-info-name tf) null))
+           table))
   (map (lambda (i) (gen-sym-table-mconstr
                      (list-ref table-info-list i)
                      (list-ref table-size-list i)

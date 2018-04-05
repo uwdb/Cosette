@@ -386,6 +386,25 @@
                   (append (list (forall-eq q (c-conj (auto-set-intersect cores))))
                           (merge-forall-eq-intersect rest-constrs)))])))
 
+;; extract symbolic values used in the constraint
+(define (extract-v-sym v)
+  (cond
+    [(list? v) (flatten (map (lambda (x) (extract-v-sym x)) v))]
+    [(forall-eq? v) (extract-v-sym (forall-eq-constr v))]
+    [(sum-eq? v) (extract-v-sym (sum-eq-constr v))]
+    [(c-primitive? v) (append (extract-v-sym (c-primitive-left v)) 
+                              (extract-v-sym (c-primitive-right v)))]
+    [(c-true? v) (list)]
+    [(c-false? v) (list)]
+    [(c-conj? v) (flatten (map (lambda (x) (extract-v-sym x)) (c-conj-preds v)))]
+    [(c-disj? v) (flatten (map (lambda (x) (extract-v-sym x)) (c-disj-preds v)))]
+    [(c-neg? v) (extract-v-sym (c-neg-pred v))]
+    [(v-const? v) (list)]
+    [(v-uexpr? v) (extract-v-sym (v-uexpr-v v))]
+    [(v-bexpr? v) (append (extract-v-sym (v-bexpr-v1 v)) 
+                          (extract-v-sym (v-bexpr-v2 v)))]
+    [(v-ref? v) (list)]
+    [(v-symval? v) (list v)]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

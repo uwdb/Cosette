@@ -4,8 +4,8 @@
 (require json)
 
 (provide gen-sym-schema ;; generate a symbolic table based on schema
-         gen-sym-schema-mconstr ;; generate a symbolic table based on schema and meta constraint
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
+         assert-table-mconstr ;; assert using mconstr
          assert-table-non-empty ;; assert that a table is not empty
          assert-table-ordered ;; assert that the table is ordered
          assert-table-col-distinct ;; assert that all values in a column is distinct from each other
@@ -21,27 +21,48 @@
   (define-symbolic* sv integer?)
   sv)
 
-; generate a tuple, n is the number of column
-(define (gen-sv-list n)
-  (build-list n (lambda (x) (gen-sv))))
+; generate a positive symbolic value, used to represent cardinalities of tuples
+(define (gen-non-neg-sv)
+  (define-symbolic* sv-non-neg integer?)
+  (assert (>= sv-non-neg 0))
+  sv-non-neg)
 
 ; generate a positive symbolic value, used to represent cardinalities of tuples
 (define (gen-pos-sv)
   (define-symbolic* sv-pos integer?)
-  (assert (>= sv-pos 0))
+  (assert (> sv-pos 0))
   sv-pos)
 
+; generate a positive symbolic value, used to represent cardinalities of tuples
+(define (gen-0-1-sv)
+  (define-symbolic* sv integer?)
+  (assert (or (= sv 0) (= sv 1)))
+  sv)
+
+; generate a tuple, n is the number of column
+(define (gen-sv-list n)
+  (build-list n (lambda (x) (gen-sv))))
+
 ; generate a positive tuple, n is the number of column
-(define (gen-pos-sv-row n)
-  (build-list n (lambda (x) (gen-pos-sv))))
+(define (gen-non-neg-sv-list n)
+  (build-list n (lambda (x) (gen-non-neg-sv))))
+
+;;;;; table utils
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-sym-schema num-col num-row)
   ; generating symbolic table row by row
-  (let ([gen-row (lambda (x)
-                   (cons (gen-sv-list num-col)
-                         (gen-pos-sv)
-                         ))])
+  (let ([gen-row (lambda (x) (cons (gen-sv-list num-col) (gen-non-neg-sv)))])
+    (build-list num-row gen-row)))
+
+; generate a symbolic table of num-col columns and num-row rows
+(define (gen-pos-sym-schema num-col num-row)
+  (let ([gen-row (lambda (x) (cons (gen-non-neg-sv-list num-col) (gen-non-neg-sv)))])
+    (build-list num-row gen-row)))
+
+; generate a symbolic table of num-col columns and num-row rows
+(define (gen-qex-sym-schema num-col num-row)
+  (let ([gen-row (lambda (x) (cons (gen-sv-list num-col) 1))])
     (build-list num-row gen-row)))
 
 (define (subst-mconstr v sv-base sv-current)
@@ -78,6 +99,15 @@
 (define-namespace-anchor anc)
 (define ns (namespace-anchor->namespace anc))
 
+(define (assert-table-mconstr table mconstr)
+   (if (null? mconstr) 
+       '()
+       (let* ([content (Table-content table)]
+              [base (car (car content))]
+              [cs (foldl (lambda (x y) `(and ,x ,y)) #t 
+                         (map (lambda (x) (subst-mconstr mconstr base (car x))) content))])
+         (assert (eval cs ns)))))
+
 ; generate constraints and assertions from meta constraints 
 (define (gen-sym-schema-mconstr num-col num-row mconstr)
   (if (or (eq? num-row 0) (null? mconstr)) 
@@ -86,26 +116,12 @@
               (build-list 
                 num-row 
                 (lambda (x)
-                  (cons (gen-sv-list num-col) (gen-pos-sv))))]
+                  (cons (gen-sv-list num-col) (gen-non-neg-sv))))]
               [base (car (car sym-table))]
               [cs (foldl (lambda (x y) `(and ,x ,y)) #t 
                          (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table))])
-        ;(writeln  (foldl (lambda (x y) `(and ,x ,y)) #t 
-        ;         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table)))
-        ;(assert (and (and (= sv$85 sv$81) (> sv$85 2)) (and (and (= sv$83 sv$81) (> sv$83 2)) (and (and (= sv$81 sv$81) (> sv$81 2)) #t))))
-        ;(assert 
-        ;  (foldl (lambda (x y) `(and ,x ,y)) #t 
-        ;         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table)))
-        ;(asserts)
         (assert (eval cs ns))
         sym-table)))
-
-; generate a symbolic table of num-col columns and num-row rows
-(define (gen-pos-sym-schema num-col num-row)
-  (let ([gen-row (lambda (x)
-                   (cons (gen-pos-sv-row num-col)
-                         (gen-pos-sv)))])
-    (build-list num-row gen-row)))
 
 ; an assertion for table content non-empty
 ; input type is Table (instead of table content)
