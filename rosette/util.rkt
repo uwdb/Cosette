@@ -4,6 +4,7 @@
 (require json)
 
 (provide gen-sym-schema ;; generate a symbolic table based on schema
+         gen-qex-sym-schema ;; generate a symbolic table based on qex schema
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
          assert-table-mconstr ;; assert using mconstr
          assert-table-non-empty ;; assert that a table is not empty

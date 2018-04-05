@@ -13,7 +13,7 @@
          solve-queries
          solve-queries-symbreak
          init-sym-tables
-         init-sym-tables-mconstr
+         init-sym-tables-from-func
          assert-sym-tables-mconstr
          init-table-size-list
          inc-table-size-list)
@@ -137,21 +137,26 @@
                      (list-ref table-size-list i)))
        (build-list (length table-size-list) values)))
 
+
+(define (init-sym-tables-from-func table-info-list table-size-list table-init-func)
+  ; generate a symbolic table according to table-info and size as well as generation function
+  (define (gen-sym-table-from-info tf size)
+    (let ([schema (table-info-schema tf)])
+      (Table (table-info-name tf) 
+             schema 
+             (table-init-func (length schema) size))))
+  (map (lambda (i) (gen-sym-table-from-info
+                     (list-ref table-info-list i)
+                     (list-ref table-size-list i)))
+       (build-list (length table-size-list) values)))
+
 (define (assert-sym-tables-mconstr tables mconstr)
   (let* ([mconstr-map (if (null? mconstr) 
                           (make-hash) 
                           (mconstr-to-hashmap mconstr))])
     (for-each (lambda (table)
                 (let ([c (hash-ref mconstr-map (Table-name table) null)])
-                  (print table)
-                  (displayln (to-str c))
-                  (displayln "---------------------")
                   (if (null? c) (list) (assert-table-mconstr table c)))) tables)))
-
-(define (init-sym-tables-mconstr table-info-list table-size-list mconstr)
-  (let ([tables (init-sym-tables table-info-list table-size-list)]) 
-    (assert-sym-tables-mconstr tables mconstr)
-    tables))
 
 ; given two query functions and the schema definition,
 ; the function will increase the table size one by one trying to solve the question

@@ -52,6 +52,4 @@
 (displayln (to-str (go-break-symmetry-bounded q1 q2)))
 (displayln (to-str (go-break-symmetry-bounded q2 q3)))
 
-
-
 ; (time (verify (same q1 q2)))
