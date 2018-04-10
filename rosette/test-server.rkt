@@ -12,13 +12,9 @@
 
 ;; get the commandline arguments
 (define args (current-command-line-arguments))
-
-(unless (equal? (vector-length args) 1) (error "require a single filename"))
-
+(unless (equal? (vector-length args) 2) (error "[Error] Usage: racket test-server.rkt file_name max-time"))
 (define rosfile (vector-ref args 0))
-
-;; max allowed solver time
-(define max-time 60)
+(define max-time (string->number (vector-ref args 1)))
 
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads
@@ -45,7 +41,7 @@
 ;; main thread
 (define ret '(1))
 
-(let loop ()
+(let loop () 
   (define item (channel-get main-channel))
   (case item
     [(timeout) (void)]

@@ -21,7 +21,7 @@
  HAVING (BINOP (VAL-UNOP aggr-max (val-column-ref "x.actual_time")) < 180)))
 
 (define (q2 tables) 
-  (SELECT-DISTINCT (VALS "q.city") 
+  (SELECT (VALS "q.city") 
   FROM (AS (SELECT (VALS "f.origin_city" (VAL-UNOP aggr-max (val-column-ref "f.actual_time"))) 
  FROM (AS (NAMED (list-ref tables 3)) ["f"]) 
  WHERE (TRUE) GROUP-BY (list "f.origin_city") 
@@ -31,7 +31,7 @@
 (define ros-instance (list q1 q2 (list months-info weekdays-info carriers-info flights-info))) 
 
 (define table-info-list (list months-info weekdays-info carriers-info flights-info))
-(define table-size-list (make-list (length table-info-list) 1))
+(define table-size-list (make-list (length table-info-list) 7))
 
 (define empty-tables (init-sym-tables table-info-list 
                                       (build-list (length table-info-list) (lambda (x) 0))))

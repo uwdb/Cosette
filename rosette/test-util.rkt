@@ -1,23 +1,32 @@
 #lang rosette
 
-(require "symmetry.rkt" "cosette.rkt" "syntax.rkt")
+(require "symmetry.rkt" "cosette.rkt" "syntax.rkt" "util.rkt")
 
 (provide run-experiment) 
 
 (define symbreak #t)
 (define simplify-constr #t)
+(define qex-encoding #t)
+
+(displayln (format "[[symbreak]] ~a" symbreak))
+
+; the symmetry breaking function
+(define symbreak-func 
+  (if simplify-constr 
+      go-break-symmetry-bounded-intersect 
+      go-break-symmetry-bounded))
+
+(define table-init-func
+  (if qex-encoding gen-qex-sym-schema gen-sym-schema))
 
 (define (run-experiment ros-instance)
-  (displayln (format "[[symbreak]] ~a" symbreak))
-  (define symbreak-func (if simplify-constr go-break-symmetry-bounded-intersect go-break-symmetry-bounded))
   (define fq1 (list-ref ros-instance 0))
   (define fq2 (list-ref ros-instance 1))
   (define table-info-list (last ros-instance))
   (define initial-table-size-list (init-table-size-list (list fq1 fq2) table-info-list))
   (define mconstr
     (let* ([empty-tables 
-            (init-sym-tables table-info-list 
-                             (build-list (length table-info-list) (lambda (x) 0)))]
+            (init-sym-tables table-info-list (build-list (length table-info-list) (lambda (x) 0)))]
            [qt1 (fq1 empty-tables)]
            [qt2 (fq2 empty-tables)])
       (let*-values ([(mconstr t-cpu t-real t-gc) 
@@ -28,17 +37,10 @@
         (displayln "--------------------")
         (car mconstr))))
   (define (test-now instance table-size-list)
-      (let* ([tables (init-sym-tables table-info-list table-size-list)]
+      (let* ([tables (init-sym-tables-from-func table-info-list table-size-list table-init-func)]
              [qt1 (fq1 tables)]
              [qt2 (fq2 tables)])
-        (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
-        (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
-        (cosette-solve qt1 qt2 tables)))
-  (define (test-now-mconstr instance table-size-list)
-      (let* ([tables (init-sym-tables table-info-list table-size-list)]
-             [qt1 (fq1 tables)]
-             [qt2 (fq2 tables)])
-        (assert-sym-tables-mconstr tables mconstr)
+        (if symbreak (assert-sym-tables-mconstr tables mconstr) (list))
         (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
         (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
         (cosette-solve qt1 qt2 tables)))
@@ -54,9 +56,7 @@
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (flush-output)
              (test-loop (inc-table-size-list table-size-list) test-func)])))
-  (if symbreak
-      (test-loop initial-table-size-list test-now-mconstr)
-      (test-loop initial-table-size-list test-now)))
+  (test-loop initial-table-size-list test-now))
 
 
 ;; query: the sql query to extract schema for
@@ -81,7 +81,6 @@
      (+ (query-size (query-union-all-query1 query))
         (query-size (query-union-all-query2 query))
         1)]))
-
 
 ;; query: the sql query to extract schema for
 (define (query-contain-aggr query)

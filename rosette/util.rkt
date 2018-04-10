@@ -6,13 +6,16 @@
 (provide gen-sym-schema ;; generate a symbolic table based on schema
          gen-qex-sym-schema ;; generate a symbolic table based on qex schema
          gen-pos-sym-schema ;; generate table that contains only positive symbolic values
+         prop-table-empty
+         prop-table-non-empty
+         prop-table-ordered
+         prop-table-col-distinct
          assert-table-mconstr ;; assert using mconstr
          assert-table-non-empty ;; assert that a table is not empty
          assert-table-ordered ;; assert that the table is ordered
          assert-table-col-distinct ;; assert that all values in a column is distinct from each other
          same ;; assert two queries are the same 
          neq ;; assert two queries are not the same
-         always-empty ;; a query always produce empty result
          ) 
 
 ;;;;; Symbolic utilities
@@ -53,8 +56,10 @@
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-sym-schema num-col num-row)
   ; generating symbolic table row by row
-  (let ([gen-row (lambda (x) (cons (gen-sv-list num-col) (gen-non-neg-sv)))])
-    (build-list num-row gen-row)))
+  (let* ([gen-row (lambda (x) (cons (gen-sv-list num-col) (gen-non-neg-sv)))]
+         [table (build-list num-row gen-row)])
+    (assert (table-content-non-desc? table))
+    table))
 
 ; generate a symbolic table of num-col columns and num-row rows
 (define (gen-pos-sym-schema num-col num-row)
@@ -65,10 +70,11 @@
 (define (gen-qex-sym-schema num-col num-row)
   (let* ([gen-row (lambda (x) (cons (gen-sv-list num-col) 1))]
          [table (build-list num-row gen-row)])
-    (assert (table-content-ascending? table))
+    (assert (table-content-non-desc? table))
     table))
 
 (define (subst-mconstr v sv-base sv-current)
+  ;; sv-base is a hashtable that maps values to symbolic 
   (cond
     [(c-primitive? v)
      `(,(c-primitive-op v)
@@ -95,7 +101,8 @@
        ,(subst-mconstr (v-bexpr-v1 v) sv-base sv-current) 
        ,(subst-mconstr (v-bexpr-v2 v) sv-base sv-current))]
     [(v-ref? v) (list-ref sv-current (v-ref-id v))]
-    [(v-symval? v) (list-ref sv-base (v-symval-id v))]
+    [(v-symval? v) 
+     (hash-ref! sv-base (v-symval-id v) (gen-sv))]
     [else v]))
 
 ; the namespace used to evaluate constraint
@@ -105,41 +112,27 @@
 (define (assert-table-mconstr table mconstr)
    (if (null? mconstr) 
        '()
-       (let* ([content (Table-content table)]
-              [base (car (car content))]
-              [cs (foldl (lambda (x y) `(and ,x ,y)) #t 
-                         (map (lambda (x) (subst-mconstr mconstr base (car x))) content))])
+       (let* ([optimized-mconstr (remove-unused-constr mconstr)]
+              [content (Table-content table)]
+              [base (make-hash)]
+              [cs (foldl (lambda (x y) `(and ,x ,y)) #t
+                         (map (lambda (x) (subst-mconstr optimized-mconstr base (car x))) content))])
          (assert (eval cs ns)))))
-
-; generate constraints and assertions from meta constraints 
-(define (gen-sym-schema-mconstr num-col num-row mconstr)
-  (if (or (eq? num-row 0) (null? mconstr)) 
-      (list)
-      (let* ([sym-table 
-              (build-list 
-                num-row 
-                (lambda (x)
-                  (cons (gen-sv-list num-col) (gen-non-neg-sv))))]
-              [base (car (car sym-table))]
-              [cs (foldl (lambda (x y) `(and ,x ,y)) #t 
-                         (map (lambda (x) (subst-mconstr mconstr base (car x))) sym-table))])
-        (assert (eval cs ns))
-        sym-table)))
 
 ; an assertion for table content non-empty
 ; input type is Table (instead of table content)
-(define (assert-table-non-empty table)
-  (assert (not (table-content-empty? (get-content table)))))
-
+(define (prop-table-empty table) (table-content-empty? (get-content table)))
+(define (prop-table-non-empty table) (not (prop-table-empty table)))
 ; breaking symmetry of a table
-(define (assert-table-ordered table)
-  (assert (table-content-ascending? (get-content table))))
-
+(define (prop-table-ordered table) (table-content-non-desc? (get-content table)))
 ; assert that all element in a column is distinct, it enforces that all multiplicity set to 1
-(define (assert-table-col-distinct table col-num)
-  (assert 
-    (and (list-distinct? (map (lambda (r) (list-ref (car r) col-num)) (get-content table)))
-         (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) (get-content table))))))
+(define (prop-table-col-distinct table col-num) 
+  (and (list-distinct? (map (lambda (r) (list-ref (car r) col-num)) (get-content table)))
+       (foldl && #t (map (lambda (r) (and (eq? (cdr r) 0) (eq? (cdr r) 1))) (get-content table)))))
+
+(define (assert-table-non-empty table) (assert (prop-table-non-empty table)))
+(define (assert-table-ordered table) (assert (prop-table-ordered table)))
+(define (assert-table-col-distinct table col-num) (assert (prop-table-col-distinct table col-num)))
 
 ;; assertions
 (define (same q1 q2)
@@ -148,5 +141,3 @@
 (define (neq q1 q2)
   (assert (not (bag-equal (get-content (run q1)) (get-content (run q2))))))
 
-(define (always-empty q)
-  (assert (table-content-empty? (get-content (run q)))))

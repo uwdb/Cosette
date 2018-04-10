@@ -2,18 +2,19 @@
 
 #lang rosette
 
-(require "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt" "symmetry.rkt")
+(require "util.rkt" "evaluator.rkt" "table.rkt" "sql.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt" "symmetry.rkt")
 (require racket/pretty)
 (require json)
 
 (provide cosette-sol->json 
          cosette-solve
-         cosette-check-non-empty
+         cosette-check-output-prop
          table-info
          solve-queries
          solve-queries-symbreak
          init-sym-tables
          init-sym-tables-from-func
+         assert-sym-tables
          assert-sym-tables-mconstr
          init-table-size-list
          inc-table-size-list)
@@ -43,10 +44,9 @@
          [schema (Table-schema table)]
          [content (Table-content table)]
          [new-content 
-           (map (lambda (r) 
-                  (cons 
-                    (map (lambda (v) (zero-if-symbolic v)) (car r))
-                    (zero-if-symbolic (cdr r)))) content)])
+           (dedup-accum (map (lambda (r) (cons (map (lambda (v) (zero-if-symbolic v)) (car r)) 
+                                               (zero-if-symbolic (cdr r)))) 
+                             content))])
     (Table name schema new-content)))
 
 (define (zero-if-symbolic v)
@@ -67,8 +67,8 @@
          (cons "NEQ" clean-tables))]
       [else (cons "EQ"  (list))])))
 
-(define (cosette-check-non-empty q input-tables sym-vals)
-  (let ([solution (verify (always-empty q))])
+(define (cosette-check-output-prop q input-tables sym-vals output-prop)
+  (let ([solution (verify (assert (output-prop (run q))))])
     (cond 
       [(sat? solution) 
        (let* ([tables (evaluate input-tables solution)]
@@ -150,10 +150,13 @@
                      (list-ref table-size-list i)))
        (build-list (length table-size-list) values)))
 
+; apply the assertion function to each table in the table list
+(define (assert-sym-tables tables assert-func)
+  (for-each (lambda (table) (assert-func table)) tables))
+
+; apply assertions generated from mconstr to each table
 (define (assert-sym-tables-mconstr tables mconstr)
-  (let* ([mconstr-map (if (null? mconstr) 
-                          (make-hash) 
-                          (mconstr-to-hashmap mconstr))])
+  (let* ([mconstr-map (if (null? mconstr) (make-hash) (mconstr-to-hashmap mconstr))])
     (for-each (lambda (table)
                 (let ([c (hash-ref mconstr-map (Table-name table) null)])
                   (if (null? c) (list) (assert-table-mconstr table c)))) tables)))

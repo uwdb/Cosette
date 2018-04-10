@@ -82,11 +82,10 @@ def run_benchmarks(input_dir, cosette_dir="."):
             print("[Output] {}".format(result))
 '''            
 
-def run_one_benchmark(rosette_file, cosette_dir, log_dir=None):
+def run_one_benchmark(rosette_file, cosette_dir, log_dir, time_limit):
 
         case_name = os.path.splitext(os.path.basename(rosette_file))[0]
-        
-        cmd_ros = 'cd {}; ./rosette_solve.sh {}'.format(cosette_dir, rosette_file)
+        cmd_ros = 'cd {}; ./rosette_solve.sh {} {}'.format(cosette_dir, rosette_file, time_limit)
 
         if log_dir:
             log_file = os.path.join(log_dir, case_name + ".log")
@@ -104,7 +103,7 @@ def run_one_benchmark(rosette_file, cosette_dir, log_dir=None):
                 continue
         return result
 
-def run_benchmarks(input_dir, cosette_dir, log_dir):
+def run_benchmarks(input_dir, cosette_dir, log_dir, time_limit):
 
     finished_cases = [os.path.splitext(os.path.basename(item))[0] for item in os.listdir(log_dir) 
                         if os.path.isfile(os.path.join(log_dir, item))]
@@ -115,8 +114,7 @@ def run_benchmarks(input_dir, cosette_dir, log_dir):
                 print("[Ignore]{}".format(fname))
             else:
                 print("[Input] Solving {}".format(fname))
-                result = run_one_benchmark(os.path.join(input_dir, fname), cosette_dir, log_dir)
-                #print("[Output] {}".format(result))
+                result = run_one_benchmark(os.path.join(input_dir, fname), cosette_dir, log_dir, time_limit)
 
 
 def parse_and_test(file_name):
@@ -144,6 +142,7 @@ if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
-    run_benchmarks("benchmarks/calcite", ".", "./output/qex_test")
+    run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-symbreak-v2", 30)
+    #run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-nosymbreak", 10)
     #run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
     #print(quick_parse("temp.cos"))

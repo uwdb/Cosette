@@ -60,6 +60,15 @@
              -1) (table-content-ascending? (cdr table))]
     [else #f]))
 
+(define (table-content-non-desc? table)
+  (cond
+    [(equal? table '()) #t]
+    [(equal? (cdr table) '()) #t]
+    [(<= (dict-order-compare (car (car table)) 
+                                 (car (car (cdr table)))) 
+             0) (table-content-non-desc? (cdr table))]
+    [else #f]))
+
 ; given two lists with the same length, 
 ; judge their partial order under dict order
 ; 0 : l1 == l2

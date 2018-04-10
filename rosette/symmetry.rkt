@@ -24,9 +24,9 @@
 
 ;;;;;;;;;;;; functions for generating symmetry breaking conditions ;;;;;;;;;;;;
 
-(define (go-break-symmetry-single q1)
-  (let* ([c1 (big-step (init-forall-eq-constraint q1) 20)]
-         [flat-constr (flatten (list c1))])
+(define (go-break-symmetry-single q)
+  (let* ([c (big-step (init-forall-eq-constraint q) 20)]
+         [flat-constr (flatten (list c))])
    flat-constr))
 
 (define (go-break-symmetry-bounded q1 q2)
@@ -82,7 +82,7 @@
              [queries-before (take queries index)]
              [queries-after (drop queries (+ index 1))]
              [q-schema-size (length (extract-schema query))]
-             [schema-size-before 
+             [schema-size-before
               (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-before))]
              [schema-size-after 
               (foldl + 0 (map (lambda (q) (length (extract-schema q))) queries-after))])
@@ -356,7 +356,7 @@
 
 
 (define (merge-forall-eq raw-constraints)
-  ; merging constraints 
+  ; merging constraints
   (let ([constraints (constr-flatten raw-constraints)])
     (cond [(empty? constraints) (list)]
           [else (let* ([q (forall-eq-query (car constraints))]
@@ -406,6 +406,26 @@
     [(v-ref? v) (list)]
     [(v-symval? v) (list v)]))
 
+(define (remove-unused-constr v)
+  (cond
+    [(list? v) (map (lambda (x) (remove-unused-constr x)) v)]
+    [(forall-eq? v) (forall-eq (forall-eq-query v) (remove-unused-constr (forall-eq-constr v)))]
+    [(sum-eq? v) (sum-eq (sum-eq-queries v) (remove-unused-constr (sum-eq-constr v)))]
+    [(c-primitive? v) 
+     (if (or (and (v-symval? (c-primitive-left v)) (v-const? (c-primitive-right v)))
+             (and (v-symval? (c-primitive-right v)) (v-const? (c-primitive-left v))))
+         (c-true)
+         v)]
+    [(c-true? v) v]
+    [(c-false? v) v]
+    [(c-conj? v) (c-conj (map (lambda (x) (remove-unused-constr x)) (c-conj-preds v)))]
+    [(c-disj? v) (c-disj (map (lambda (x) (remove-unused-constr x)) (c-disj-preds v)))]
+    [(c-neg? v) (c-neg (remove-unused-constr (c-neg-pred v)))]
+    [(v-const? v) v]
+    [(v-uexpr? v) v]
+    [(v-bexpr? v) v]
+    [(v-ref? v) v]
+    [(v-symval? v) v]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;   utility   ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -142,13 +142,13 @@ if __name__ == '__main__':
         
     
     table_size_dict = calculate_table_size("../benchmarks/calcite")
-    stats = read_stats("qex_test", table_size_dict)
-    result = parse_outputs(["qex_test", "qex_test_2"], table_size_dict)
+    stats = read_stats("calcite-qex-nosymbreak", table_size_dict)
+    result = parse_outputs(["calcite-qex-symbreak", "calcite-qex-nosymbreak"], table_size_dict)
 
     for x in result:
         #if not stats[x[0]][1]:
             #print("{} & {} & {} & {} & {}".format(process_case_name(x[0]), x[1], x[2], x[3], x[4]))
-            print("{} ".format(x[4]))
+            print("{} {} ".format(x[0], x[4]))
     '''
     
     table_size_dict = calculate_table_size("../benchmarks/homeworks")
