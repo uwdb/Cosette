@@ -12,10 +12,13 @@
 
 ;; get the commandline arguments
 (define args (current-command-line-arguments))
-(unless (equal? (vector-length args) 2) (error "[Error] Usage: racket test-server.rkt file_name max-time"))
+(unless (equal? (vector-length args) 5) (error "[Error] Usage: racket test-server.rkt file_name max-time symbreak? simplify? qex-enc?"))
 (define rosfile (vector-ref args 0))
 (define max-time (string->number (vector-ref args 1)))
-
+(define symbreak (if (equal? (vector-ref args 2) "#t") #t #f))
+(define simplify-constr (if (equal? (vector-ref args 3) "#t") #t #f))
+(define qex-encoding (if (equal? (vector-ref args 4) "#t") #t #f))
+    
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads
 (define main-channel (make-channel))
@@ -34,7 +37,8 @@
   (thread (lambda ()
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
-              [(list q1 q2 tables) (run-experiment (list q1 q2 tables))]
+              [(list q1 q2 tables) 
+               (run-experiment (list q1 q2 tables) symbreak simplify-constr qex-encoding)]
               [_ (error "error on loading rosette source code.")])
             )))
 

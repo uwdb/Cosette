@@ -4,22 +4,15 @@
 
 (provide run-experiment) 
 
-(define symbreak #t)
-(define simplify-constr #t)
-(define qex-encoding #t)
-
-(displayln (format "[[symbreak]] ~a" symbreak))
-
-; the symmetry breaking function
-(define symbreak-func 
-  (if simplify-constr 
-      go-break-symmetry-bounded-intersect 
-      go-break-symmetry-bounded))
-
-(define table-init-func
-  (if qex-encoding gen-qex-sym-schema gen-sym-schema))
-
-(define (run-experiment ros-instance)
+(define (run-experiment ros-instance symbreak simplify-constr qex-encoding)
+  (displayln (format "[[config]] symbreak:~a, simplify-constr:~a, qex-encoding:~a" 
+                     symbreak simplify-constr qex-encoding))
+  (define symbreak-func ;the symmetry breaking function
+    (if simplify-constr 
+        go-break-symmetry-bounded-intersect 
+        go-break-symmetry-bounded))
+  (define table-init-func ;the function used to define symbolic tables
+    (if qex-encoding gen-qex-sym-schema gen-sym-schema))
   (define fq1 (list-ref ros-instance 0))
   (define fq2 (list-ref ros-instance 1))
   (define table-info-list (last ros-instance))

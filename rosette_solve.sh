@@ -5,7 +5,6 @@ NAME=Cosette
 BUILD=generated
 
 FILE="$1"
-TIME="$2"
 
 filename=$(basename "$FILE")
 filename="${filename%.*}"
@@ -21,4 +20,4 @@ cd rosette
 
 #echo "[OK] solving "$BUILD/$UUID.rkt
 
-racket test-server.rkt $BUILD/$UUID.rkt $TIME
+racket test-server.rkt $BUILD/$UUID.rkt "$2" "$3" "$4" "$5"

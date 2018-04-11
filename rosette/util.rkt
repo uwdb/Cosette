@@ -110,7 +110,7 @@
 (define ns (namespace-anchor->namespace anc))
 
 (define (assert-table-mconstr table mconstr)
-   (if (null? mconstr) 
+   (if (null? mconstr)
        '()
        (let* ([optimized-mconstr (remove-unused-constr mconstr)]
               [content (Table-content table)]
