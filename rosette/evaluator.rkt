@@ -192,6 +192,9 @@
             (filter (lambda (x) (not (equal? (car ele) (car x))))
                     (cdr table)))))]))
 
+(define (remove-zero table)
+  (filter (lambda (t) (not (eq? (cdr t) 0))) table))
+
 (define (projection indices table)
   (let ([proj-single (lambda (r)
                        (map (lambda (i)

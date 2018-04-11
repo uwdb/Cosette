@@ -44,9 +44,9 @@
          [schema (Table-schema table)]
          [content (Table-content table)]
          [new-content 
-           (dedup-accum (map (lambda (r) (cons (map (lambda (v) (zero-if-symbolic v)) (car r)) 
-                                               (zero-if-symbolic (cdr r)))) 
-                             content))])
+          (remove-zero (dedup-accum (map (lambda (r) (cons (map (lambda (v) (zero-if-symbolic v)) (car r)) 
+                                                           (zero-if-symbolic (cdr r)))) 
+                                         content)))])
     (Table name schema new-content)))
 
 (define (zero-if-symbolic v)
@@ -76,10 +76,10 @@
               [qt (evaluate q solution)]
               [clean-tables (map clean-ret-table tables)])
          (displayln "[Evaluation Result]")
-         (displayln vals)
+         (displayln (format "  ~a" vals))
          (displayln (format "  ~a" (clean-ret-table (denote-and-run qt))))
          (cons "(sat)" clean-tables))]
-      [else (cons "(unsat)"  (list))]))) 
+      [else (cons "(unsat)"  (list))])))
 
 (define (table->jsexpr t) 
   (hasheq 'table-name (get-table-name t) 
