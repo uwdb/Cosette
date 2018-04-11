@@ -25,14 +25,6 @@
 
 (define ros-instance (list q (list product-info orders-info customers-info))) 
 
-(define args (current-command-line-arguments))
-
-(define symbreak 
-  (if (= (vector-length args) 1) 
-      (eq? (vector-ref args 0) "t")
-      #t))
-
-
 (define table-info-list (last ros-instance))
 (define table-size-list (make-list (length table-info-list) 10))
 (define empty-tables (init-sym-tables table-info-list (build-list (length table-info-list) (lambda (x) 0))))
@@ -50,7 +42,6 @@
     (let* ([q ((list-ref instance 0) tables)])
       (cosette-check-output-prop q tables (list) prop-table-empty)))
 
-(if symbreak
-	(time (test-now ros-instance m-tables))
-	(time (test-now ros-instance tables)))
+(time (test-now ros-instance m-tables))
+;(time (test-now ros-instance tables))
 

@@ -40,11 +40,13 @@
   (define (test-loop table-size-list test-func)
     (let*-values ([(sol t-cpu t-real t-gc) 
                    (time-apply test-func (list ros-instance table-size-list))])
-      (cond [(eq? (car (car sol)) "NEQ") 
+      (cond [(eq? (car (car sol)) "NEQ")
              (displayln "[NEQ]")
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (pretty-display (cdr (car sol)))
-             (displayln "")]
+             (displayln "")
+             (flush-output)
+             (test-loop (inc-table-size-list table-size-list) test-func)]
             [else 
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (flush-output)
