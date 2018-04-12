@@ -29,5 +29,4 @@
   FROM (JOIN (AS (NAMED (list-ref tables 4)) ["emp0"]) (AS (NAMED (list-ref tables 3)) ["dept0"])) 
   WHERE (BINOP "emp0.deptno" = "dept0.deptno")))
 
-
 (define ros-instance (list q1 q2 (list t-info account-info bonus-info dept-info emp-info))) 

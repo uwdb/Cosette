@@ -12,13 +12,14 @@
 
 ;; get the commandline arguments
 (define args (current-command-line-arguments))
-(displayln (vector-length args))
-(unless (equal? (vector-length args) 4) 
-  (error "[Error] Usage: racket qex-test-server.rkt file_name max-time symbreak? qex-enc?"))
+(unless (> (vector-length args) 2) 
+  (error "[Error] Usage: racket qex-test-server.rkt file_name max-time [--symbreak] [--qex-enc]"))
 (define rosfile (vector-ref args 0))
 (define max-time (string->number (vector-ref args 1)))
-(define symbreak (if (equal? (vector-ref args 2) "#t") #t #f))
-(define qex-encoding (if (equal? (vector-ref args 3) "#t") #t #f))
+
+(define symbreak (if (equal? (vector-member "--symbreak" args) #f) #f #t))
+(define qex-encoding (if (equal? (vector-member "--qex-enc" args) #f) #f #t))
+
     
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads

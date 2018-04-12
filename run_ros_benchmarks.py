@@ -47,7 +47,7 @@ def prepare_calcite_benchmarks(input_dir, output_dir):
 
 
 def prepare_hw_benchmarks(input_dir, output_dir):
-    
+    # prepare hw benchmarks for evaluation
     for filename in os.listdir(input_dir):
         if filename.endswith(".cos"):
             case_name = filename[:-4]
@@ -61,11 +61,26 @@ def prepare_hw_benchmarks(input_dir, output_dir):
                 else:
                     print(case_name)
 
-'''
-def run_benchmarks(input_dir, cosette_dir="."):
-    def run_benchmark(rosette_file, cosette_dir):
-        cmd_ros = 'cd {}; ./rosette_solve.sh '.format(cosette_dir) + rosette_file
+
+def run_equiv_check_benchmarks(input_dir, cosette_dir, log_dir, 
+                               time_limit, symbreak, simplify, qex_enc):
+
+    def run_equiv_check(rosette_file):
+
+        flags = ""
+        flags += " --symbreak" if symbreak else ""
+        flags += " --qex-enc" if qex_enc else ""
+        flags += " --simplify" if simplify else ""
+
+        case_name = os.path.splitext(os.path.basename(rosette_file))[0]
+        cmd_ros = 'cd {}; ./rosette_solve.sh {} {} {}'.format(cosette_dir, rosette_file, time_limit, flags)
+
+        if log_dir:
+            log_file = os.path.join(log_dir, case_name + ".log")
+            cmd_ros += " > {}".format(log_file)
+
         proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
+        
         while True:
             retcode = proc.poll()
             if retcode is not None:
@@ -74,42 +89,8 @@ def run_benchmarks(input_dir, cosette_dir="."):
             else:
                 time.sleep(.1)
                 continue
+
         return result
-    for fname in os.listdir(input_dir):
-        if fname.endswith('.rkt') and (not fname.startswith("__")):
-            result = run_benchmark(os.path.join(input_dir, fname), cosette_dir)
-            print("[Input] Solving {}".format(fname))
-            print("[Output] {}".format(result))
-'''            
-
-def run_equiv_check(rosette_file, cosette_dir, log_dir, 
-                    time_limit, symbreak, simplify, qex_enc):
-
-    f = lambda x: "#t" if x else "#f"
-
-    case_name = os.path.splitext(os.path.basename(rosette_file))[0]
-    cmd_ros = 'cd {}; ./rosette_solve.sh {} {} {} {} {}'.format(cosette_dir, rosette_file, time_limit, 
-                                                                f(symbreak), f(simplify), f(qex_enc))
-
-    if log_dir:
-        log_file = os.path.join(log_dir, case_name + ".log")
-        cmd_ros += " > {}".format(log_file)
-
-    proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
-    
-    while True:
-        retcode = proc.poll()
-        if retcode is not None:
-            result = proc.stdout.read() + proc.stderr.read()
-            break
-        else:
-            time.sleep(.1)
-            continue
-            
-    return result
-
-def run_equiv_check_benchmarks(input_dir, cosette_dir, log_dir, 
-                               time_limit, symbreak, simplify, qex_enc):
 
     finished_cases = [os.path.splitext(os.path.basename(item))[0] for item in os.listdir(log_dir) 
                         if os.path.isfile(os.path.join(log_dir, item))]
@@ -120,17 +101,19 @@ def run_equiv_check_benchmarks(input_dir, cosette_dir, log_dir,
                 print("[Ignore]{}".format(fname))
             else:
                 print("[Input] Solving {}".format(fname))
-                result = run_equiv_check(os.path.join(input_dir, fname), cosette_dir, log_dir, 
-                                            time_limit, symbreak, simplify, qex_enc)
+                result = run_equiv_check(os.path.join(input_dir, fname))
 
 def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir, 
                                time_limit, symbreak, qex_enc):
 
     def run_prop_check(rosette_file):
 
-        f = lambda x: "#t" if x else "#f"
+        flags = ""
+        flags += " --symbreak" if symbreak else ""
+        flags += " --qex-enc" if qex_enc else ""
+
         case_name = os.path.splitext(os.path.basename(rosette_file))[0]
-        cmd_ros = 'cd {}; ./qex_solve.sh {} {} {} {}'.format(cosette_dir, rosette_file, time_limit, f(symbreak), f(qex_enc))
+        cmd_ros = 'cd {}; ./qex_solve.sh {} {} {}'.format(cosette_dir, rosette_file, time_limit, flags)
 
         if log_dir:
             log_file = os.path.join(log_dir, case_name + ".log")
@@ -164,35 +147,13 @@ def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir,
                 result = run_prop_check(os.path.join(input_dir, fname))
 
 
-def parse_and_test(file_name):
-
-    fname = sys.argv[1]
-
-    ros_file = quick_parse(fname)
-    lines = ros_file.split("\n")
-
-    for i in range(len(lines)):
-        if lines[i].startswith("(require "):
-            lines[i] = '(require "../cosette.rkt" "../util.rkt" "../denotation.rkt" "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt" "../test-util.rkt")'
-    
-    # max 30 sec, symbreak, simplify, not using qex encoding
-    lines.append("(run-experiment ros-instance 30 #t #t #f)")
-    lines.append(";{}".format(fname))
-    
-    ros_file = "\n".join(lines)
-
-    with open("rosette/generated/temp.rkt", "w") as f:
-        f.write(ros_file)
-
-    #run_one_benchmark("testtemp.rkt", ".", "output/temp")
-
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-symbreak-v2", 30)
-    run_equiv_check_benchmarks("rosette/scythe-benchmarks", ".", "./output/scythe-symbreak", 30, True, True, False)
-    #run_prop_check_benchmarks("rosette/qex-benchmarks", ".", "./output/qex-symbreak", 10, True, True)
+    #run_equiv_check_benchmarks("rosette/scythe-benchmarks", ".", "./output/scythe-symbreak", time_limit=30, symbreak=True, simplify=True, qex_enc=False)
+    run_prop_check_benchmarks("rosette/qex-benchmarks", ".", "./output/qex-nosymbreak", 10, False, True)
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-nosymbreak", 10)
     #run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
     #print(quick_parse("temp.cos"))

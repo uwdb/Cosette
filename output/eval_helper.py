@@ -52,7 +52,6 @@ def parse_outputs(log_dirs, table_size_dict={}):
             record[case_name] = case_result
         method_results[log_dir] = record
 
-
     all_cases = list(set(all_cases))
     speed_up = []
 
@@ -79,7 +78,6 @@ def parse_outputs(log_dirs, table_size_dict={}):
 
         speed_up.append(v)
 
-        #print(records)
         num_sv = 0
         for i in range(len(table_size_dict[case])):
             num_sv += records[0][0][i] * table_size_dict[case][i]
@@ -139,27 +137,19 @@ def process_case_name(s):
     return s.replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj").replace("cse344au", "").replace("csep544","").replace("_", "-")
 
 if __name__ == '__main__':
-        
-    
-    table_size_dict = calculate_table_size("../benchmarks/calcite")
-    stats = read_stats("calcite-qex-nosymbreak", table_size_dict)
-    result = parse_outputs(["calcite-qex-symbreak", "calcite-qex-nosymbreak"], table_size_dict)
+
+    #instance = ["../benchmarks/calcite", "calcite-qex-symbreak", "calcite-qex-nosymbreak"]
+    instance = ["../rosette/qex-benchmarks", "qex-symbreak", "qex-nosymbreak"]
+
+    table_size_dict = calculate_table_size(instance[0])
+    stats = read_stats(instance[1], table_size_dict)
+    result = parse_outputs([instance[1], instance[2]], table_size_dict)
 
     for x in result:
         #if not stats[x[0]][1]:
             #print("{} & {} & {} & {} & {}".format(process_case_name(x[0]), x[1], x[2], x[3], x[4]))
             print("{} {} ".format(x[0], x[4]))
-    '''
-    
-    table_size_dict = calculate_table_size("../benchmarks/homeworks")
-    stats = read_stats("homeworks_symbreak", table_size_dict)
-    result = parse_outputs(["homeworks_symbreak_simple", "homeworks_nosymbreak_new"], table_size_dict)
-    '''
+ 
     print(len(result))
-
-    #for x in result:
-        #if stats[x[0]][1]:
-    #        print("{} & {} & {} & {} & {} & {} \\\\".format(process_case_name(x[0])[1:], stats[x[0]][0], x[1], x[2], x[3], x[4]))
-    
 
 

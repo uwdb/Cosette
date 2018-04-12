@@ -12,13 +12,16 @@
 
 ;; get the commandline arguments
 (define args (current-command-line-arguments))
-(unless (equal? (vector-length args) 5) (error "[Error] Usage: racket test-server.rkt file_name max-time symbreak? simplify? qex-enc?"))
+(unless (> (vector-length args) 2) 
+  (error "[Error] Usage: racket test-server.rkt file_name max-time symbreak? simplify? qex-enc?"))
+
 (define rosfile (vector-ref args 0))
 (define max-time (string->number (vector-ref args 1)))
-(define symbreak (if (equal? (vector-ref args 2) "#t") #t #f))
-(define simplify-constr (if (equal? (vector-ref args 3) "#t") #t #f))
-(define qex-encoding (if (equal? (vector-ref args 4) "#t") #t #f))
-    
+; check if the flag is in
+(define symbreak (if (equal? (vector-member "--symbreak" args) #f) #f #t))
+(define simplify-constr (if (equal? (vector-member "--simplify" args) #f) #f #t))
+(define qex-encoding (if (equal? (vector-member "--qex-enc" args) #f) #f #t))
+
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads
 (define main-channel (make-channel))

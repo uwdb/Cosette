@@ -29,6 +29,12 @@
   (syntax-rules () [(AS q [t l]) (query-rename-full q t l)]
                    [(AS q [t]) (query-rename q t)]))
 
+(define-syntax-rule (MAX v) (VAL-UNOP aggr-max (VAL v)))
+(define-syntax-rule (SUM v) (VAL-UNOP aggr-sum (VAL v)))
+(define-syntax-rule (MIN v) (VAL-UNOP aggr-min (VAL v)))
+(define-syntax-rule (COUNT v) (VAL-UNOP aggr-min (VAL v)))
+(define-syntax-rule (COUNT-DISTINCT v) (VAL-UNOP aggr-count-distinct (VAL v)))
+
 ;; UNIT table is a table with 1 row and empty schema
 (define unit-table (Table "UNIT" (list) (list (cons (list) 1))))
 (define-syntax-rule (UNIT) unit-table)
