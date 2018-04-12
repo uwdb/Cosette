@@ -44,10 +44,10 @@
               (NAMED (list-ref tables 4)))
    WHERE (AND (AND (AND (AND (BINOP "c.dept_name" = "student.dept_name")
                    		(BINOP "c.course_id" = "takes.course_id"))
-                   (BINOP "student.ID" >= "takes.ID"))
+                   (BINOP "student.ID" = "takes.ID"))
               (BINOP "s.sec_id" = "takes.sec_id"))
               (BINOP "s.course_id" = "c.course_id"))
-   GROUP-BY (list "student.ID" "student.dept_name")
+   GROUP-BY (list "student.ID")
    HAVING (BINOP (COUNT "c.course_id") >= 2)))
 
 ;(define ros-instance (list q1 (list course department instructor teaches section takes student) (list) prop-table-empty)) 

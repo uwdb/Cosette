@@ -36,7 +36,7 @@
                   ["a" (list "ID" "time_slot_id" "year")]))
    WHERE (BINOP "student.ID" = "a.ID")
    GROUP-BY (list "student.ID" "student.name")
-   HAVING (BINOP (COUNT "student.ID") > 1)))
+   HAVING (BINOP (COUNT-DISTINCT "student.ID") > 2)))
 
 (define (q2 tables)
   (SELECT (VALS "student.ID" "student.name")
@@ -51,7 +51,7 @@
                   ["a" (list "ID" "time_slot_id" "year")]))
    WHERE (BINOP "student.ID" = "a.ID")
    GROUP-BY (list "student.ID" "student.name")
-   HAVING (BINOP (COUNT "student.ID") > 1)))
+   HAVING (BINOP (COUNT-DISTINCT "student.ID") > 2)))
 
 ;(define ros-instance (list q1 (list course department instructor teaches section takes student) (list) prop-table-empty)) 
 (define ros-instance (list q1 q2 (list course department instructor teaches section takes student)))

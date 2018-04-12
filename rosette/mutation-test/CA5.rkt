@@ -40,10 +40,10 @@
                     (NAMED (list-ref tables 1)))
               (NAMED (list-ref tables 3)))
    WHERE (AND (BINOP "c.dept_name" = "d.dept_name")
-              (BINOP "d.budget" >= (VAL-BINOP "t.year" + 4)))
+              (BINOP "d.budget" = (VAL-BINOP "t.year" + 4)))
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (VAL-BINOP (SUM "c.credits") div_ (COUNT "c.credits")) > 100000)
-               (BINOP (COUNT "d.building") = 2))))
+               (BINOP (COUNT "d.building") >= 2))))
 
 ;(define ros-instance (list q1 (list course department instructor teaches) (list) prop-table-empty)) 
 

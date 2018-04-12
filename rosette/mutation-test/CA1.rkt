@@ -28,7 +28,7 @@
    WHERE (BINOP "c.dept_name" = "d.dept_name")
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (SUM "c.credits") > 10)
-               (BINOP (COUNT-DISTINCT "c.credits") > 3))))
+               (BINOP (COUNT-DISTINCT "c.credits") > 5))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.dept_name" (SUM "c.credits"))
@@ -37,7 +37,7 @@
    WHERE (BINOP "c.dept_name" = "d.dept_name")
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (SUM "c.credits") > 10)
-               (BINOP (COUNT-DISTINCT "c.credits") > 5))))
+               (BINOP (COUNT-DISTINCT "c.credits") > 8))))
 
 ;(define ros-instance (list q1 (list course department) (list) prop-table-empty)) 
 (define ros-instance (list q1 q2 (list course department))) 

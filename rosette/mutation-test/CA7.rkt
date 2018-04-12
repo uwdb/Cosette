@@ -32,12 +32,12 @@
                    WHERE (AND (BINOP "c.dept_name" = "d.dept_name") 
                               (BINOP "c.title" = 11))
                    GROUP-BY (list "c.dept_name")
-                   HAVING (BINOP (COUNT "c.course_id") > 2))
+                   HAVING (BINOP (COUNT-DISTINCT "c.course_id") > 4))
                   ["a" (list "max_credit")]))
    WHERE (BINOP "c.credits" = "a.max_credit")))
 
 (define (q2 tables)
-  (SELECT-DISTINCT (VALS "c.dept_name")
+  (SELECT (VALS "c.dept_name")
    FROM (JOIN (NAMED (list-ref tables 0))
               (AS (SELECT (VALS (MAX "c.credits"))
                    FROM (JOIN (NAMED (list-ref tables 0))
@@ -45,7 +45,7 @@
                    WHERE (AND (BINOP "c.dept_name" = "d.dept_name") 
                               (BINOP "c.title" = 11))
                    GROUP-BY (list "c.dept_name")
-                   HAVING (BINOP (COUNT "c.course_id") >= 4))
+                   HAVING (BINOP (COUNT-DISTINCT "c.course_id") > 4))
                   ["a" (list "max_credit")]))
    WHERE (BINOP "c.credits" = "a.max_credit")))
 

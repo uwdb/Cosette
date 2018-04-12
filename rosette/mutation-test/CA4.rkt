@@ -36,7 +36,7 @@
               (BINOP "d.dept_name" = "i.dept_name"))
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (VAL-BINOP (SUM "i.salary") div_ (COUNT "i.salary")) > 50000)
-               (BINOP (COUNT "i.salary") = 3))))
+               (BINOP (COUNT-DISTINCT "i.salary") = 4))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.dept_name" (VAL-BINOP (SUM "i.salary") div_ (COUNT "i.salary")))
@@ -49,7 +49,7 @@
               (BINOP "d.dept_name" = "i.dept_name"))
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (VAL-BINOP (SUM "i.salary") div_ (COUNT "i.salary")) > 50000)
-               (BINOP (COUNT "i.salary") >= 3))))
+               (BINOP (COUNT-DISTINCT "i.salary") > 4))))
 
 ;(define ros-instance (list q1 (list course department instructor teaches) (list) prop-table-empty)) 
 (define ros-instance (list q1 q2 (list course department instructor teaches))) 

@@ -41,7 +41,8 @@
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
               [(list q1 q2 tables) 
-               (run-experiment (list q1 q2 tables) symbreak simplify-constr qex-encoding)]
+               (run-experiment (list q1 q2 tables) symbreak simplify-constr qex-encoding)
+               (channel-put main-channel 'timeout)]
               [_ (error "error on loading rosette source code.")])
             )))
 
@@ -54,7 +55,7 @@
     [(timeout) (void)]
     [else (set! ret item) (loop)]))
 
-(displayln 
-  (cond 
-    [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
-    [else (jsexpr->string (hasheq 'status "UNSAT" 'size ret))]))
+;(displayln 
+;  (cond 
+;    [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
+;    [else (jsexpr->string (hasheq 'status "UNSAT" 'size ret))]))

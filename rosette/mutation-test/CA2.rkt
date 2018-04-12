@@ -31,8 +31,8 @@
    WHERE (AND (BINOP "c.dept_name" = "d.dept_name")
               (BINOP "d.dept_name" = "i.dept_name"))
    GROUP-BY (list "c.dept_name")
-   HAVING (AND (BINOP (SUM "i.salary") > 10000)
-               (BINOP (MAX "i.salary") < 7500))))
+   HAVING (AND (BINOP (SUM "i.salary") > 100)
+               (BINOP (MAX "i.salary") < 75))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.dept_name" (SUM "i.salary"))
@@ -42,8 +42,8 @@
    WHERE (AND (BINOP "c.dept_name" = "d.dept_name")
               (BINOP "d.dept_name" = "i.dept_name"))
    GROUP-BY (list "c.dept_name")
-   HAVING (AND (BINOP (SUM "i.salary") >= 10000)
-               (BINOP (MAX "i.salary") < 7500))))
+   HAVING (AND (BINOP (SUM "i.salary") >= 100)
+               (BINOP (MAX "i.salary") < 75))))
 
 ;(define ros-instance (list q1 (list course department instructor) (list) prop-table-empty)) 
 (define ros-instance (list q1 q2 (list course department instructor))) 

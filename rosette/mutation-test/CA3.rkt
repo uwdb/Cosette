@@ -32,7 +32,7 @@
               (BINOP "c.course_id" = "t.course_id"))
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (SUM "d.budget") > 100000)
-               (BINOP (COUNT "d.budget") > 1))))
+               (BINOP (COUNT "d.budget") > 10))))
 
 (define (q2 tables) 
   (SELECT (VALS "c.dept_name" (SUM "d.budget"))
@@ -43,7 +43,7 @@
               (BINOP "c.course_id" = "t.course_id"))
    GROUP-BY (list "c.dept_name")
    HAVING (AND (BINOP (SUM "d.budget") > 100000)
-               (BINOP (COUNT-DISTINCT "d.budget") > 1))))
+               (BINOP (COUNT-DISTINCT "d.budget") > 10))))
 
 ;(define ros-instance (list q1 (list course department instructor teaches) (list) prop-table-empty)) 
 
