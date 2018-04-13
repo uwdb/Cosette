@@ -786,7 +786,13 @@ In this pass, we collect all string literals, and make constant declarations for
 > closeParen = lexeme $ char ')'
 
 > stringToken :: Parser String
-> stringToken = lexeme (char '\'' *> manyTill anyChar (char '\''))
+> stringToken =
+>     let repl ' ' = "_"
+>         repl '_' = "__"
+>         repl x = [x]
+>     in lexeme $ do
+>     s <- (char '\'' *> manyTill anyChar (char '\''))
+>     return (concatMap repl s)
 
 > dot :: Parser Char
 > dot = lexeme $ char '.'
@@ -795,6 +801,7 @@ In this pass, we collect all string literals, and make constant declarations for
 > eq = lexeme $ char '='
 
 > gt :: Parser Char
+> 
 > gt = lexeme $ char '>'
 
 > lt :: Parser Char

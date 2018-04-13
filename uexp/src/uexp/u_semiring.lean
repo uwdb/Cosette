@@ -117,8 +117,8 @@ end
     (t₁ ≃ t₂) = (t₂ ≃ t₁)
 axiom eq_pair {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) (t: Tuple (s₁ ++ s₂)): 
     (t ≃ (t₁, t₂)) = (t₁ ≃ t.1) * (t₂ ≃ t.2)
-@[simp] axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
-    (t₁ ≃ t₂) * (t₂ ≃ t₃) * (t₁ ≃ t₃) = (t₁ ≃ t₂) * (t₂ ≃ t₃)
+axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
+    (t₁ ≃ t₂) * (t₂ ≃ t₃) = (t₁ ≃ t₂) * (t₂ ≃ t₃) * (t₁ ≃ t₃) 
 -- TODO: the following could be a lemma
 @[simp] axiom eq_cancel {s: Schema} (t₁ t₂ : Tuple s):
     (t₁ ≃ t₂) * (t₁ ≃ t₂) = (t₁ ≃ t₂)

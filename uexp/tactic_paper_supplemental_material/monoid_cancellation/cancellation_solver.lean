@@ -45,3 +45,14 @@ repeat $ reflexivity <|> cancel
 
 meta def solve_single :=
 reflexivity <|> cancel
+
+lemma monoid_ex1 (a b c d: m):
+    (a * b * c) * c = c * (b * c) * a :=
+begin
+    applyc `plus_assoc_p1,
+    applyc `plus_assoc_p1,
+    applyc `plus_comm_p,
+    applyc `plus_assoc_c1,
+    applyc `plus_assoc_c1,
+    sorry
+end

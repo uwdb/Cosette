@@ -152,6 +152,11 @@ class EndToEndTests(unittest.TestCase):
         """ test union empty, for now at least it should not be NEQ, wait Coq part to return EQ """
         self.assertNotEqual(
             get_status("./examples/sqlrewrites/unionEmpty.cos"), 'NEQ', "union_empty")
+    
+    def test_string_with_space(self):
+        """ test string with space"""
+        self.assertEqual(
+            get_status("./examples/inequal_queries/string_ex1.cos"), 'NEQ', "string_ex1")
 
 if __name__ == '__main__':
     unittest.main()
