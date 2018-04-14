@@ -113,7 +113,7 @@ def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir,
         flags += " --qex-enc" if qex_enc else ""
 
         case_name = os.path.splitext(os.path.basename(rosette_file))[0]
-        cmd_ros = 'cd {}; ./qex_solve.sh {} {} {}'.format(cosette_dir, rosette_file, time_limit, flags)
+        cmd_ros = 'cd {}; sh qex_solve.sh {} {} {}'.format(cosette_dir, rosette_file, time_limit, flags)
 
         if log_dir:
             log_file = os.path.join(log_dir, case_name + ".log")
@@ -153,7 +153,11 @@ if __name__ == '__main__':
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite_symbreak")
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-symbreak-v2", 30)
     #run_equiv_check_benchmarks("rosette/scythe-benchmarks", ".", "./output/scythe-symbreak", time_limit=30, symbreak=True, simplify=True, qex_enc=False)
-    run_prop_check_benchmarks("rosette/qex-benchmarks", ".", "./output/qex-nosymbreak", 10, False, True)
+    #run_prop_check_benchmarks("rosette/qex-benchmarks", ".", "./output/qex-symbreak-qex", 20, True, True)
+    #run_prop_check_benchmarks("rosette/qex-benchmarks", ".", "./output/qex-nosymbreak-qex", 20, False, True)
     #run_benchmarks("benchmarks/calcite", ".", "./output/calcite-qex-nosymbreak", 10)
     #run_benchmarks("benchmarks/homeworks", ".", "./output/homeworks_symbreak_simple")
     #print(quick_parse("temp.cos"))
+
+    run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-symbreak", time_limit=300, symbreak=True, simplify=True, qex_enc=False)
+    run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-nosymbreak-qex", time_limit=300, symbreak=False, simplify=True, qex_enc=True)

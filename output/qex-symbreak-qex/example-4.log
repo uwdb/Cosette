@@ -1,0 +1,150 @@
+[[config]] symbreak:#t, qex-encoding:#t
+[inference time] 2
+[constraint]
+Scores,
+ForallEQ[(r[2] > 2) ∧ ((x$0 > 5)) ∧ (((r[0] = @0)))]
+
+[query size] 3
+[query aggr] #t
+--------------------
+[Evaluation Result]
+  (31)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1)) 35) . 1)))
+[table size] (1 0) [real time] 66 ms
+[Evaluation Result]
+  (254)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1)) 382) . 1)))
+[table size] (2 0) [real time] 25 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1)) 510) . 1)))
+[table size] (3 0) [real time] 29 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (4 0) [real time] 30 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (5 0) [real time] 37 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (6 0) [real time] 40 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (7 0) [real time] 115 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (8 0) [real time] 50 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1031) . 1)))
+[table size] (9 0) [real time] 64 ms
+[Evaluation Result]
+  (254)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1535) . 1)))
+[table size] (10 0) [real time] 115 ms
+[Evaluation Result]
+  (8)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 2057) . 1)))
+[table size] (11 0) [real time] 134 ms
+[Evaluation Result]
+  (6)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 1052) . 1)))
+[table size] (12 0) [real time] 94 ms
+[Evaluation Result]
+  (231)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 2539) . 1)))
+[table size] (13 0) [real time] 181 ms
+[Evaluation Result]
+  (44)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 4142) . 1)))
+[table size] (14 0) [real time] 202 ms
+[Evaluation Result]
+  (254)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 3327) . 1)))
+[table size] (15 0) [real time] 238 ms
+[Evaluation Result]
+  (240)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 3361) . 1)))
+[table size] (16 0) [real time] 262 ms
+[Evaluation Result]
+  (255)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 3511) . 1)))
+[table size] (17 0) [real time] 298 ms
+[Evaluation Result]
+  (191)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5445) . 1)))
+[table size] (18 0) [real time] 339 ms
+[Evaluation Result]
+  (191)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 4423) . 1)))
+[table size] (19 0) [real time] 378 ms
+[Evaluation Result]
+  (246)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5367) . 1)))
+[table size] (20 0) [real time] 457 ms
+[Evaluation Result]
+  (184)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 4434) . 1)))
+[table size] (21 0) [real time] 474 ms
+[Evaluation Result]
+  (254)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5402) . 1)))
+[table size] (22 0) [real time] 547 ms
+[Evaluation Result]
+  (222)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 4576) . 1)))
+[table size] (23 0) [real time] 590 ms
+[Evaluation Result]
+  (247)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 6527) . 1)))
+[table size] (24 0) [real time] 711 ms
+[Evaluation Result]
+  (190)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5446) . 1)))
+[table size] (25 0) [real time] 744 ms
+[Evaluation Result]
+  (30)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 6179) . 1)))
+[table size] (26 0) [real time] 816 ms
+[Evaluation Result]
+  (158)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 6559) . 1)))
+[table size] (27 0) [real time] 891 ms
+[Evaluation Result]
+  (190)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 7508) . 1)))
+[table size] (28 0) [real time] 1014 ms
+[Evaluation Result]
+  (30)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 7206) . 1)))
+[table size] (29 0) [real time] 1101 ms
+[Evaluation Result]
+  (246)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 4477) . 1)))
+[table size] (30 0) [real time] 1215 ms
+[Evaluation Result]
+  (238)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5494) . 1)))
+[table size] (31 0) [real time] 1256 ms
+[Evaluation Result]
+  (191)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 8531) . 1)))
+[table size] (32 0) [real time] 1552 ms
+[Evaluation Result]
+  (255)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 5567) . 1)))
+[table size] (33 0) [real time] 1581 ms
+[Evaluation Result]
+  (126)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 9348) . 1)))
+[table size] (34 0) [real time] 1683 ms
+[Evaluation Result]
+  (180)
+  #(struct:Table dummy (dummy dummy) (((((0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1) (0 . 1)) 6601) . 1)))
+[table size] (35 0) [real time] 1848 ms
+{"size":[1],"status":"UNSAT"}

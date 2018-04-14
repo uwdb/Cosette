@@ -1,0 +1,56 @@
+[[config]] symbreak:#f, qex-encoding:#t
+[inference time] 2
+[constraint]
+Scores,
+ForallEQ[#t]
+Scores,
+ForallEQ[(((r[0] = @0)))]
+
+[query size] 6
+[query aggr] #t
+--------------------
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((0 0) . 1)))
+[table size] (1 0) [real time] 31 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 0) . 1) ((510 0) . 1)))
+[table size] (2 0) [real time] 66 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((1 511) . 1)))
+[table size] (3 0) [real time] 44 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((511 510) . 1)))
+[table size] (4 0) [real time] 56 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((128 32) . 1)))
+[table size] (5 0) [real time] 255 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-216 505) . 1)))
+[table size] (6 0) [real time] 441 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((82 328) . 1)))
+[table size] (7 0) [real time] 1004 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((333 3) . 1)))
+[table size] (8 0) [real time] 1736 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((0 0) . 1) ((2 0) . 1) ((129 0) . 1)))
+[table size] (9 0) [real time] 2434 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((64 385) . 1)))
+[table size] (10 0) [real time] 3597 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 0) . 1) ((-384 0) . 1)))
+[table size] (11 0) [real time] 5534 ms
+{"size":[1],"status":"UNSAT"}

@@ -1,0 +1,30 @@
+[[config]] symbreak:#t, qex-encoding:#t
+[inference time] 3
+[constraint]
+P,
+ForallEQ[((val$0 > 1))]
+O,
+ForallEQ[((val$0 > 1))]
+C,
+ForallEQ[((val$0 > 1)) ∧ ((r[0] = @0))]
+
+[query size] 6
+[query aggr] #t
+--------------------
+[Evaluation Result]
+  (508)
+  #(struct:Table dummy (dummy dummy) (((0 126225) . 1)))
+[table size] (1 1 1) [real time] 41 ms
+[Evaluation Result]
+  (508)
+  #(struct:Table dummy (dummy dummy) (((0 7345) . 1)))
+[table size] (2 1 1) [real time] 48 ms
+[Evaluation Result]
+  (460)
+  #(struct:Table dummy (dummy dummy) (((36 90229) . 1)))
+[table size] (2 2 1) [real time] 31 ms
+[Evaluation Result]
+  (31)
+  #(struct:Table dummy (dummy dummy) (((32 3348) . 1)))
+[table size] (2 2 2) [real time] 151 ms
+{"size":[1],"status":"UNSAT"}

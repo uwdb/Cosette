@@ -1,0 +1,28 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+emp,
+ForallEQ[(r[1] = @0) ∧ (r[6] = @1) ∧ (r[7] = @2) ∧ (r[6] > 5000)]
+
+[query size] 3 3
+[query aggr] #t #t
+--------------------
+[table size] (0 0 0 0 1) [real time] 32 ms
+[table size] (0 0 0 0 2) [real time] 63 ms
+[table size] (0 0 0 0 3) [real time] 379 ms
+[table size] (0 0 0 0 4) [real time] 478 ms
+[table size] (0 0 0 0 5) [real time] 512 ms
+[table size] (0 0 0 0 6) [real time] 575 ms
+[table size] (0 0 0 0 7) [real time] 901 ms
+[table size] (0 0 0 0 8) [real time] 1153 ms
+[table size] (0 0 0 0 9) [real time] 1774 ms
+[table size] (0 0 0 0 10) [real time] 2817 ms
+[table size] (0 0 0 0 11) [real time] 3708 ms
+[table size] (0 0 0 0 12) [real time] 5281 ms
+[table size] (0 0 0 0 13) [real time] 7315 ms
+[table size] (0 0 0 0 14) [real time] 10448 ms
+[table size] (0 0 0 0 15) [real time] 15014 ms
+[table size] (0 0 0 0 16) [real time] 23456 ms
+[table size] (0 0 0 0 17) [real time] 30405 ms
+[table size] (0 0 0 0 18) [real time] 43430 ms
+[table size] (0 0 0 0 19) [real time] 69568 ms

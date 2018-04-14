@@ -1,0 +1,19 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[(r[0] = @0) ∧ (r[0] = 10)]
+emp,
+ForallEQ[(r[1] = @1)]
+
+[query size] 5 5
+[query aggr] #f #f
+--------------------
+[table size] (1 1) [real time] 29 ms
+[table size] (2 1) [real time] 35 ms
+[table size] (2 2) [real time] 347 ms
+[table size] (3 2) [real time] 369 ms
+[table size] (3 3) [real time] 826 ms
+[table size] (4 3) [real time] 2406 ms
+[table size] (4 4) [real time] 16423 ms
+[table size] (5 4) [real time] 54538 ms

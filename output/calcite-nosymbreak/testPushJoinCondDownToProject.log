@@ -1,0 +1,51 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+emp,
+ForallEQ[(r[7] = @1)]
+dept,
+ForallEQ[(r[0] = @0)]
+
+[query size] 4 6
+[query aggr] #f #f
+--------------------
+[table size] (0 0 0 1 1) [real time] 27 ms
+[table size] (0 0 0 2 1) [real time] 23 ms
+[table size] (0 0 0 2 2) [real time] 19 ms
+[table size] (0 0 0 3 2) [real time] 22 ms
+[table size] (0 0 0 3 3) [real time] 31 ms
+[table size] (0 0 0 4 3) [real time] 105 ms
+[table size] (0 0 0 4 4) [real time] 53 ms
+[table size] (0 0 0 5 4) [real time] 66 ms
+[table size] (0 0 0 5 5) [real time] 99 ms
+[table size] (0 0 0 6 5) [real time] 130 ms
+[table size] (0 0 0 6 6) [real time] 184 ms
+[table size] (0 0 0 7 6) [real time] 230 ms
+[table size] (0 0 0 7 7) [real time] 320 ms
+[table size] (0 0 0 8 7) [real time] 390 ms
+[table size] (0 0 0 8 8) [real time] 554 ms
+[table size] (0 0 0 9 8) [real time] 621 ms
+[table size] (0 0 0 9 9) [real time] 812 ms
+[table size] (0 0 0 10 9) [real time] 1049 ms
+[table size] (0 0 0 10 10) [real time] 1396 ms
+[table size] (0 0 0 11 10) [real time] 1531 ms
+[table size] (0 0 0 11 11) [real time] 1953 ms
+[table size] (0 0 0 12 11) [real time] 2115 ms
+[table size] (0 0 0 12 12) [real time] 2649 ms
+[table size] (0 0 0 13 12) [real time] 3993 ms
+[table size] (0 0 0 13 13) [real time] 3575 ms
+[table size] (0 0 0 14 13) [real time] 4334 ms
+[table size] (0 0 0 14 14) [real time] 5267 ms
+[table size] (0 0 0 15 14) [real time] 7780 ms
+[table size] (0 0 0 15 15) [real time] 7089 ms
+[table size] (0 0 0 16 15) [real time] 8290 ms
+[table size] (0 0 0 16 16) [real time] 9802 ms
+[table size] (0 0 0 17 16) [real time] 15250 ms
+[table size] (0 0 0 17 17) [real time] 13415 ms
+[table size] (0 0 0 18 17) [real time] 15479 ms
+[table size] (0 0 0 18 18) [real time] 17863 ms
+[table size] (0 0 0 19 18) [real time] 20303 ms
+[table size] (0 0 0 19 19) [real time] 32454 ms
+[table size] (0 0 0 20 19) [real time] 29767 ms
+[table size] (0 0 0 20 20) [real time] 33934 ms
+[table size] (0 0 0 21 20) [real time] 38451 ms

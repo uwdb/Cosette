@@ -1,0 +1,44 @@
+[[config]] symbreak:#t, qex-encoding:#t
+[inference time] 3
+[constraint]
+Students,
+ForallEQ[((x$0 > 15)) ∧ ((r[1] = @0))]
+Scores,
+ForallEQ[((r[2] > 2)) ∧ ((x$0 > 15))]
+
+[query size] 4
+[query aggr] #t
+--------------------
+[Evaluation Result]
+  (127)
+  #(struct:Table dummy (dummy dummy) (((0 131) . 1)))
+[table size] (1 1) [real time] 72 ms
+[Evaluation Result]
+  (16)
+  #(struct:Table dummy (dummy dummy) (((0 511) . 1)))
+[table size] (2 1) [real time] 22 ms
+[Evaluation Result]
+  (256)
+  #(struct:Table dummy (dummy dummy) (((0 511) . 1)))
+[table size] (2 2) [real time] 31 ms
+[Evaluation Result]
+  (256)
+  #(struct:Table dummy (dummy dummy) (((0 510) . 1)))
+[table size] (3 2) [real time] 36 ms
+[Evaluation Result]
+  (130)
+  #(struct:Table dummy (dummy dummy) (((0 484) . 1)))
+[table size] (3 3) [real time] 230 ms
+[Evaluation Result]
+  (238)
+  #(struct:Table dummy (dummy dummy) (((0 1278) . 1)))
+[table size] (4 3) [real time] 390 ms
+[Evaluation Result]
+  (35)
+  #(struct:Table dummy (dummy dummy) (((0 45) . 1)))
+[table size] (4 4) [real time] 2681 ms
+[Evaluation Result]
+  (239)
+  #(struct:Table dummy (dummy dummy) (((0 259) . 1)))
+[table size] (5 4) [real time] 7748 ms
+{"size":[1],"status":"UNSAT"}

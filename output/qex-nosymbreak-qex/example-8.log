@@ -1,0 +1,164 @@
+[[config]] symbreak:#f, qex-encoding:#t
+[inference time] 2
+[constraint]
+Students,
+ForallEQ[((r[1] = @0))]
+Scores,
+ForallEQ[((r[1] = 10) ∧ ((r[2] > 0))) ∧ ((r[2] = @1))]
+
+[query size] 4
+[query aggr] #f
+--------------------
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((0 1) . 1)))
+[table size] (1 1) [real time] 27 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((0 510) . 1)))
+[table size] (2 1) [real time] 15 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 1)))
+[table size] (2 2) [real time] 17 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-511 1) . 1) ((318 254) . 1)))
+[table size] (3 2) [real time] 21 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((495 511) . 2) ((496 511) . 2)))
+[table size] (3 3) [real time] 58 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((510 510) . 6)))
+[table size] (4 3) [real time] 29 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 9)))
+[table size] (4 4) [real time] 33 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((510 510) . 8)))
+[table size] (5 4) [real time] 41 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 16)))
+[table size] (5 5) [real time] 48 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 20)))
+[table size] (6 5) [real time] 61 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((494 510) . 20) ((510 510) . 5)))
+[table size] (6 6) [real time] 138 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 30)))
+[table size] (7 6) [real time] 68 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 36)))
+[table size] (7 7) [real time] 92 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 42)))
+[table size] (8 7) [real time] 98 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 49)))
+[table size] (8 8) [real time] 113 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 56)))
+[table size] (9 8) [real time] 131 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 510) . 56)))
+[table size] (9 9) [real time] 139 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 510) . 40)))
+[table size] (10 9) [real time] 164 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 81)))
+[table size] (10 10) [real time] 178 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 90)))
+[table size] (11 10) [real time] 199 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 510) . 50)))
+[table size] (11 11) [real time] 217 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 110)))
+[table size] (12 11) [real time] 244 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((10 65) . 1) ((-508 10) . 1) ((-504 10) . 1) ((-16 10) . 1) ((0 10) . 1) ((51 10) . 1) ((226 10) . 1) ((294 10) . 1) ((387 10) . 1) ((394 10) . 1) ((404 10) . 1) ((490 10) . 1)))
+[table size] (12 12) [real time] 747 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-494 495) . 1) ((12 495) . 1)))
+[table size] (13 12) [real time] 798 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 144)))
+[table size] (13 13) [real time] 318 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 156)))
+[table size] (14 13) [real time] 344 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-192 3) . 1) ((160 3) . 1) ((16 2) . 1) ((33 2) . 1) ((44 2) . 1) ((84 2) . 1)))
+[table size] (14 14) [real time] 1142 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 182)))
+[table size] (15 14) [real time] 399 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 196)))
+[table size] (15 15) [real time] 425 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((256 32) . 1) ((88 256) . 1) ((121 256) . 1) ((188 256) . 1) ((215 256) . 1) ((226 136) . 1) ((273 64) . 1) ((-422 331) . 1) ((422 331) . 1)))
+[table size] (16 15) [real time] 1576 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((322 1) . 1) ((322 3) . 1)))
+[table size] (16 16) [real time] 1693 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 240)))
+[table size] (17 16) [real time] 560 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 256)))
+[table size] (17 17) [real time] 688 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((418 502) . 1) ((418 507) . 1) ((418 510) . 1) ((146 510) . 2)))
+[table size] (18 17) [real time] 2410 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 510) . 68)))
+[table size] (18 18) [real time] 670 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 306)))
+[table size] (19 18) [real time] 721 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((2 9) . 2) ((4 9) . 1) ((6 9) . 1)))
+[table size] (19 19) [real time] 3271 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((-512 1) . 1) ((510 511) . 342)))
+[table size] (20 19) [real time] 831 ms
+{"size":[1],"status":"UNSAT"}

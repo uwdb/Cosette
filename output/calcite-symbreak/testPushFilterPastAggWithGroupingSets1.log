@@ -1,0 +1,33 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+dept,
+ForallEQ[(r[0] = @0) ∧ (r[1] = @1) ∧ (r[1] = str_charlie_$0)]
+
+[query size] 2 2
+[query aggr] #t #t
+--------------------
+[table size] (0 0 0 1 0) [real time] 27 ms
+[table size] (0 0 0 2 0) [real time] 28 ms
+[table size] (0 0 0 3 0) [real time] 345 ms
+[table size] (0 0 0 4 0) [real time] 380 ms
+[table size] (0 0 0 5 0) [real time] 460 ms
+[table size] (0 0 0 6 0) [real time] 409 ms
+[table size] (0 0 0 7 0) [real time] 548 ms
+[table size] (0 0 0 8 0) [real time] 658 ms
+[table size] (0 0 0 9 0) [real time] 971 ms
+[table size] (0 0 0 10 0) [real time] 1309 ms
+[table size] (0 0 0 11 0) [real time] 1731 ms
+[table size] (0 0 0 12 0) [real time] 2157 ms
+[table size] (0 0 0 13 0) [real time] 3077 ms
+[table size] (0 0 0 14 0) [real time] 3649 ms
+[table size] (0 0 0 15 0) [real time] 4834 ms
+[table size] (0 0 0 16 0) [real time] 6454 ms
+[table size] (0 0 0 17 0) [real time] 8178 ms
+[table size] (0 0 0 18 0) [real time] 10890 ms
+[table size] (0 0 0 19 0) [real time] 14064 ms
+[table size] (0 0 0 20 0) [real time] 16859 ms
+[table size] (0 0 0 21 0) [real time] 25334 ms
+[table size] (0 0 0 22 0) [real time] 29790 ms
+[table size] (0 0 0 23 0) [real time] 40770 ms
+[table size] (0 0 0 24 0) [real time] 56027 ms

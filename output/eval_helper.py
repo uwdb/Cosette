@@ -139,7 +139,9 @@ def process_case_name(s):
 if __name__ == '__main__':
 
     #instance = ["../benchmarks/calcite", "calcite-qex-symbreak", "calcite-qex-nosymbreak"]
-    instance = ["../rosette/qex-benchmarks", "qex-symbreak", "qex-nosymbreak"]
+    #instance = ["../rosette/qex-benchmarks", "qex-symbreak-qex", "qex-nosymbreak-qex"]
+    #instance = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
+    instance = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
 
     table_size_dict = calculate_table_size(instance[0])
     stats = read_stats(instance[1], table_size_dict)

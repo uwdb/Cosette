@@ -1,0 +1,35 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
+[inference time] 5
+[constraint]
+emp,
+ForallEQ[]
+
+[query size] 8 8
+[query aggr] #f #f
+--------------------
+[table size] (0 0 0 0 1) [real time] 58 ms
+[table size] (0 0 0 0 2) [real time] 33 ms
+[table size] (0 0 0 0 3) [real time] 35 ms
+[table size] (0 0 0 0 4) [real time] 54 ms
+[table size] (0 0 0 0 5) [real time] 160 ms
+[table size] (0 0 0 0 6) [real time] 158 ms
+[table size] (0 0 0 0 7) [real time] 276 ms
+[table size] (0 0 0 0 8) [real time] 435 ms
+[table size] (0 0 0 0 9) [real time] 679 ms
+[table size] (0 0 0 0 10) [real time] 982 ms
+[table size] (0 0 0 0 11) [real time] 1493 ms
+[table size] (0 0 0 0 12) [real time] 1965 ms
+[table size] (0 0 0 0 13) [real time] 2753 ms
+[table size] (0 0 0 0 14) [real time] 3652 ms
+[table size] (0 0 0 0 15) [real time] 4740 ms
+[table size] (0 0 0 0 16) [real time] 6330 ms
+[table size] (0 0 0 0 17) [real time] 7943 ms
+[table size] (0 0 0 0 18) [real time] 9916 ms
+[table size] (0 0 0 0 19) [real time] 12575 ms
+[table size] (0 0 0 0 20) [real time] 15839 ms
+[table size] (0 0 0 0 21) [real time] 18244 ms
+[table size] (0 0 0 0 22) [real time] 22623 ms
+[table size] (0 0 0 0 23) [real time] 27941 ms
+[table size] (0 0 0 0 24) [real time] 33532 ms
+[table size] (0 0 0 0 25) [real time] 37752 ms
+[table size] (0 0 0 0 26) [real time] 44879 ms
