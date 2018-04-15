@@ -1,0 +1,8 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#t
+[inference time] 4
+[constraint]
+t,
+ForallEQ[(r[1] = @2)]
+i,
+ForallEQ[(r[0] = @0) ∧ (r[1] = @1)]
+

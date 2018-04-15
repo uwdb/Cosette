@@ -1,0 +1,42 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 5
+[constraint]
+flights,
+ForallEQ[]
+carriers,
+ForallEQ[(r[1] = @0)]
+
+[query size] 5 5
+[query aggr] #f #f
+--------------------
+[Table evaluation results]
+  #(struct:Table dummy (dummy) ())
+  #(struct:Table dummy (dummy) (((0) . 1)))
+[NEQ]
+[table size] (0 0 1 1) [real time] 72 ms
+(#(struct:Table months (mid month) ())
+ #(struct:Table weekdays (did day_of_week) ())
+ #(struct:Table carriers (cid name) (((0 0) . 1)))
+ #(struct:Table
+   flights
+   (fid
+    year
+    month_id
+    day_of_month
+    day_of_week_id
+    carrier_id
+    flight_num
+    origin_city
+    origin_state
+    dest_city
+    dest_state
+    departure_delay
+    taxi_out
+    arrival_delay
+    canceled
+    actual_time
+    distance
+    capacity
+    price)
+   (((0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0) . 1))))
+

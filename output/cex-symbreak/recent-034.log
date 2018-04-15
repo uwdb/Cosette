@@ -1,0 +1,106 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 6 6
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 28 ms
+[table size] (2) [real time] 25 ms
+[table size] (3) [real time] 21 ms
+[table size] (4) [real time] 24 ms
+[table size] (5) [real time] 26 ms
+[table size] (6) [real time] 95 ms
+[table size] (7) [real time] 29 ms
+[table size] (8) [real time] 29 ms
+[table size] (9) [real time] 31 ms
+[table size] (10) [real time] 37 ms
+[table size] (11) [real time] 39 ms
+[table size] (12) [real time] 41 ms
+[table size] (13) [real time] 46 ms
+[table size] (14) [real time] 54 ms
+[table size] (15) [real time] 55 ms
+[table size] (16) [real time] 62 ms
+[table size] (17) [real time] 70 ms
+[table size] (18) [real time] 80 ms
+[table size] (19) [real time] 81 ms
+[table size] (20) [real time] 84 ms
+[table size] (21) [real time] 96 ms
+[table size] (22) [real time] 111 ms
+[table size] (23) [real time] 114 ms
+[table size] (24) [real time] 107 ms
+[table size] (25) [real time] 130 ms
+[table size] (26) [real time] 141 ms
+[table size] (27) [real time] 139 ms
+[table size] (28) [real time] 157 ms
+[table size] (29) [real time] 178 ms
+[table size] (30) [real time] 165 ms
+[table size] (31) [real time] 178 ms
+[table size] (32) [real time] 182 ms
+[table size] (33) [real time] 204 ms
+[table size] (34) [real time] 216 ms
+[table size] (35) [real time] 229 ms
+[table size] (36) [real time] 238 ms
+[table size] (37) [real time] 255 ms
+[table size] (38) [real time] 293 ms
+[table size] (39) [real time] 274 ms
+[table size] (40) [real time] 286 ms
+[table size] (41) [real time] 298 ms
+[table size] (42) [real time] 312 ms
+[table size] (43) [real time] 328 ms
+[table size] (44) [real time] 350 ms
+[table size] (45) [real time] 505 ms
+[table size] (46) [real time] 389 ms
+[table size] (47) [real time] 401 ms
+[table size] (48) [real time] 420 ms
+[table size] (49) [real time] 510 ms
+[table size] (50) [real time] 451 ms
+[table size] (51) [real time] 470 ms
+[table size] (52) [real time] 487 ms
+[table size] (53) [real time] 502 ms
+[table size] (54) [real time] 530 ms
+[table size] (55) [real time] 545 ms
+[table size] (56) [real time] 570 ms
+[table size] (57) [real time] 589 ms
+[table size] (58) [real time] 605 ms
+[table size] (59) [real time] 624 ms
+[table size] (60) [real time] 651 ms
+[table size] (61) [real time] 935 ms
+[table size] (62) [real time] 874 ms
+[table size] (63) [real time] 706 ms
+[table size] (64) [real time] 728 ms
+[table size] (65) [real time] 758 ms
+[table size] (66) [real time] 769 ms
+[table size] (67) [real time] 805 ms
+[table size] (68) [real time] 839 ms
+[table size] (69) [real time] 875 ms
+[table size] (70) [real time] 912 ms
+[table size] (71) [real time] 932 ms
+[table size] (72) [real time] 955 ms
+[table size] (73) [real time] 959 ms
+[table size] (74) [real time] 1010 ms
+[table size] (75) [real time] 1441 ms
+[table size] (76) [real time] 1067 ms
+[table size] (77) [real time] 1113 ms
+[table size] (78) [real time] 1144 ms
+[table size] (79) [real time] 1183 ms
+[table size] (80) [real time] 1553 ms
+[table size] (81) [real time] 1215 ms
+[table size] (82) [real time] 1250 ms
+[table size] (83) [real time] 1326 ms
+[table size] (84) [real time] 1301 ms
+[table size] (85) [real time] 1340 ms
+[table size] (86) [real time] 2023 ms
+[table size] (87) [real time] 1439 ms
+[table size] (88) [real time] 1432 ms
+[table size] (89) [real time] 1468 ms
+[table size] (90) [real time] 1496 ms
+[table size] (91) [real time] 1558 ms
+[table size] (92) [real time] 1590 ms
+[table size] (93) [real time] 1632 ms
+[table size] (94) [real time] 1701 ms
+[table size] (95) [real time] 1727 ms
+[table size] (96) [real time] 1768 ms
+[table size] (97) [real time] 1826 ms

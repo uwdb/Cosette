@@ -1,0 +1,17 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 6 5
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 40 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy) (((-4 -8) . 2)))
+  #(struct:Table t5 (created_at1 sum_count) (((-4 -16) . 1)))
+[NEQ]
+[table size] (2) [real time] 57 ms
+(#(struct:Table input (created_at count) (((-4 -8) . 1) ((-4 0) . 1))))
+

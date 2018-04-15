@@ -1,0 +1,44 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 6
+[constraint]
+weekdays,
+ForallEQ[(r[1] = str_monday_$0)]
+carriers,
+ForallEQ[(r[1] = str_alaska_airlines_inc._$0)]
+flights,
+ForallEQ[(r[6] = @0) ∧ (r[7] = str_seattle_wa_$0) ∧ (r[9] = str_boston_ma_$0)]
+
+[query size] 6 6
+[query aggr] #f #f
+--------------------
+[Table evaluation results]
+  #(struct:Table dummy (dummy) (((0) . 1)))
+  #(struct:Table dummy (dummy) ())
+[NEQ]
+[table size] (0 1 1 1) [real time] 46 ms
+(#(struct:Table months (mid month) ())
+ #(struct:Table weekdays (did day_of_week) (((0 0) . 1)))
+ #(struct:Table carriers (cid name) (((0 0) . 1)))
+ #(struct:Table
+   flights
+   (fid
+    year
+    month_id
+    day_of_month
+    day_of_week_id
+    carrier_id
+    flight_num
+    origin_city
+    origin_state
+    dest_city
+    dest_state
+    departure_delay
+    taxi_out
+    arrival_delay
+    canceled
+    actual_time
+    distance
+    capacity
+    price)
+   (((0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 0 0) . 1))))
+

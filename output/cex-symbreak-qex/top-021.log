@@ -1,0 +1,20 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#t
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 5 5
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 39 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy dummy) (((0 0 0 0) . 1) ((1 0 1 0) . 1)))
+  #(struct:Table dummy (dummy dummy dummy dummy) (((0 0 0 0) . 1) ((1 0 0 0) . 1) ((0 0 1 0) . 1) ((1 0 1 0) . 1)))
+[NEQ]
+[table size] (2) [real time] 366 ms
+(#(struct:Table
+   input
+   (ID CHARGEID CHARGETYPE SERVICEMONTH)
+   (((0 0 0 0) . 1) ((1 0 1 0) . 1))))
+

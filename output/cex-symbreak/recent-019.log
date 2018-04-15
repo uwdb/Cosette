@@ -1,0 +1,20 @@
+[[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 6 6
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 32 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy) ())
+  #(struct:Table dummy (dummy dummy dummy) (((-1 0 7) . 1)))
+[NEQ]
+[table size] (2) [real time] 126 ms
+(#(struct:Table
+   input
+   (CustomerID Balance Date)
+   (((-2 0 7) . 1) ((-1 7 0) . 1))))
+

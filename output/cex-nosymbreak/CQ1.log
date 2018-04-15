@@ -1,0 +1,19 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
+[inference time] 3
+[constraint]
+c,
+ForallEQ[(r[0] = @0) ∧ (r[3] = @1)]
+
+[query size] 2 2
+[query aggr] #f #f
+--------------------
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy) (((0 0) . 1)))
+  #(struct:Table dummy (dummy dummy) ())
+[NEQ]
+[table size] (1 0 0 0) [real time] 29 ms
+(#(struct:Table c (course_id dept_name credits title) (((0 0 3 0) . 1)))
+ #(struct:Table d (dept_name budget building) ())
+ #(struct:Table i (salary dept_name) ())
+ #(struct:Table t (course_id year semester) ()))
+

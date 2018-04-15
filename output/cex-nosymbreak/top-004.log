@@ -1,0 +1,17 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 7 6
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 37 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy) (((-4 0 -7) . 8) ((7 1 -8) . 4)))
+  #(struct:Table dummy (dummy dummy dummy) (((7 1 -8) . 8)))
+[NEQ]
+[table size] (2) [real time] 156 ms
+(#(struct:Table input (id rev content) (((-4 0 -7) . 8) ((7 1 -8) . 4))))
+

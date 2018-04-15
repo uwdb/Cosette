@@ -1,0 +1,13 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
+[inference time] 4
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 6 6
+[query aggr] #t #t
+--------------------
+[table size] (1) [real time] 57 ms
+[table size] (2) [real time] 59 ms
+[table size] (3) [real time] 4224 ms
+[table size] (4) [real time] 46437 ms

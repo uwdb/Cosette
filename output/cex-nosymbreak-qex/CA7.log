@@ -1,0 +1,30 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 4
+[constraint]
+d,
+ForallEQ[]
+c,
+ForallEQ[]
+
+[query size] 7 7
+[query aggr] #t #t
+--------------------
+[table size] (1 1 0 0 0 0 0) [real time] 18 ms
+[table size] (2 1 0 0 0 0 0) [real time] 30 ms
+[table size] (2 2 0 0 0 0 0) [real time] 352 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy) (((0) . 1)))
+  #(struct:Table dummy (dummy) (((0) . 3)))
+[NEQ]
+[table size] (3 2 0 0 0 0 0) [real time] 1567 ms
+(#(struct:Table
+   c
+   (course_id title dept_name credits)
+   (((-1 11 0 0) . 1) ((0 11 0 0) . 1) ((1 11 0 0) . 1)))
+ #(struct:Table d (dept_name building budget) (((0 -1 1) . 1) ((1 0 0) . 1)))
+ #(struct:Table i (ID name dept_name salary) ())
+ #(struct:Table t (ID course_id sec_id year) ())
+ #(struct:Table s (course_id sec_id year building room_number time_slot_id) ())
+ #(struct:Table takes (ID course_id sec_id year grade) ())
+ #(struct:Table student (ID name dept_name tot_cred) ()))
+

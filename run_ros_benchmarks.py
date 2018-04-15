@@ -162,7 +162,7 @@ if __name__ == '__main__':
     #run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-symbreak", time_limit=300, symbreak=True, simplify=True, qex_enc=False)
     #run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-nosymbreak-qex", time_limit=300, symbreak=False, simplify=True, qex_enc=True)
     
-    run_equiv_check_benchmarks("benchmarks/homeworks", ".", "./output/homeworks-symbreak", time_limit=60, symbreak=True, simplify=True, qex_enc=False)
-    run_equiv_check_benchmarks("benchmarks/homeworks", ".", "./output/calcite-nosymbreak", time_limit=60, symbreak=False, simplify=True, qex_enc=False)
-    run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-symbreak-qex", time_limit=60, symbreak=True, simplify=True, qex_enc=True)
-    run_equiv_check_benchmarks("benchmarks/calcite", ".", "./output/calcite-nosymbreak-qex", time_limit=60, symbreak=False, simplify=True, qex_enc=True)
+    run_equiv_check_benchmarks("rosette/query-disambiguation", ".", "./output/cex-symbreak", time_limit=60, symbreak=True, simplify=True, qex_enc=False)
+    run_equiv_check_benchmarks("rosette/query-disambiguation", ".", "./output/cex-nosymbreak", time_limit=60, symbreak=False, simplify=True, qex_enc=False)
+    run_equiv_check_benchmarks("rosette/query-disambiguation", ".", "./output/cex-symbreak-qex", time_limit=60, symbreak=True, simplify=True, qex_enc=True)
+    run_equiv_check_benchmarks("rosette/query-disambiguation", ".", "./output/cex-nosymbreak-qex", time_limit=60, symbreak=False, simplify=True, qex_enc=True)

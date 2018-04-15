@@ -1,0 +1,16 @@
+[[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
+[inference time] 5
+[constraint]
+input,
+ForallEQ[]
+
+[query size] 6 6
+[query aggr] #t #t
+--------------------
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy) ())
+  #(struct:Table dummy (dummy dummy dummy) (((0 0 0) . 1)))
+[NEQ]
+[table size] (1) [real time] 51 ms
+(#(struct:Table input (Person Group Age) (((0 0 0) . 1))))
+
