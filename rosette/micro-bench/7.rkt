@@ -1,29 +1,28 @@
 #lang rosette
 
-(current-bitwidth 10)
+(current-bitwidth #f)
 
 (require "../cosette.rkt" "../util.rkt" "../denotation.rkt" 
          "../sql.rkt" "../evaluator.rkt" "../syntax.rkt" "../symmetry.rkt") 
 
 (provide ros-instance)
 
-(define scores-info (table-info "Scores" (list "StudentID" "CourseID" "Points")))
-(define students-info (table-info "Students" (list "StudentNr" "StudentName")))
+(define product-info (table-info "P" (list "id" "name" "price")))
+(define orders-info (table-info "O" (list "order_id" "customer_id")))
+(define customers-info (table-info "C" (list "customer_id" "name")))
 
-; DECLARE @x as tinyint;
-; SELECT DISTINCT Scores.StudentID, SUM(Scores.Points)
-; FROM Scores
-; WHERE Scores.Points > 2
-; HAVING SUM(Scores.Points) >= @x AND @x > 5
+; SELECT C.CustomerID, Count(O.OrderID)
+; FROM Orders AS O
+; JOIN Customers AS C ON
+; O.CustomerID = C.CustomerID
+; GROUP BY C.CustomerID HAVING
+; Count(O.OrderID) > 1
 
 (define (q tables)
-   (SELECT-DISTINCT (VALS "t.StudentID" "t.Points")
-    FROM (AS (SELECT (VALS "Scores.StudentID" (SUM "Scores.Points"))
-              FROM   (NAMED (list-ref tables 0))
-              WHERE (BINOP "Scores.Points" > 2)
-              GROUP-BY (list)         
-              HAVING (BINOP (COUNT-DISTINCT "Scores.Points") >= 7))
-       ["t" (list "StudentID" "Points")])
-    WHERE (TRUE)))
+   (SELECT (VALS "C.customer_id" (VAL-UNOP aggr-count (val-column-ref "O.order_id")))
+    FROM  (JOIN (NAMED (list-ref tables 2)) (NAMED (list-ref tables 1)))
+    WHERE (BINOP "O.customer_id" = "C.customer_id") 
+    GROUP-BY (list "C.customer_id")         
+    HAVING (BINOP (COUNT-DISTINCT "O.order_id") > 7)))
 
-(define ros-instance (list q (list scores-info students-info) (list) prop-table-empty)) 
+(define ros-instance (list q (list product-info orders-info customers-info) (list) prop-table-empty)) 

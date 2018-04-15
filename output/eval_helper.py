@@ -84,13 +84,82 @@ def parse_outputs(log_dirs, table_size_dict={}, return_all=False):
         result.append([case, num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
 
     def takeSecond(elem):
-        return elem[4]
+        return int(elem[0])
     
-    return sorted(result, reverse=True, key=takeSecond)
+    return sorted(result, reverse=False, key=takeSecond)
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 2]))
     #for x in sorted(result, reverse=True, key=takeSecond):
     #    print("{} & {} & {} & {} & {} \\\\".format(x[0], x[1], x[2], x[3], x[4]))
+
+
+
+def parse_outputs_mb(log_dirs):
+
+    method_results = {}
+
+    all_cases = []
+
+    for log_dir in log_dirs:
+        record = {}
+        for fname in os.listdir(log_dir):
+            case_name = fname.split(".")[0]
+            all_cases.append(case_name)
+            #print(case_name)
+            #print(table_size_dict[case_name])
+            case_result = []
+            with open(os.path.join(log_dir, fname), encoding='utf-8') as f: 
+                lines = [l.strip() for l in f.readlines() if "[table size]" in l]
+                for l in lines:
+                    
+                    table_size = l[l.index("[table size]")+len("[table size]")+2: l.index("[real time]")-2]
+                    real_time = int(l[l.index("[real time]")+len("[read time]"): l.index("ms")])
+
+                    table_size = [int(i) for i in table_size.split()]
+
+                    #if max(table_size) > 1:
+                        #print (case_name)
+                        #print(table_size)
+
+                    case_result.append((table_size, real_time))
+
+            record[case_name] = case_result
+        method_results[log_dir] = record
+
+    all_cases = list(set(all_cases))
+    speed_up = []
+
+    result = []
+
+    for case in all_cases:
+        records = []
+        record_lens = []
+
+        for method in method_results:
+            record_lens.append(len(method_results[method][case]))
+
+        if min(record_lens) == 0:
+            continue
+
+        
+
+        for method in method_results:
+
+            records.append(max([x[1] for x in method_results[method][case]]))
+
+        print(records)
+
+        result.append([case, records[0], records[1]])
+
+    def takeSecond(elem):
+        return int(elem[0])
+    
+    return sorted(result, reverse=False, key=takeSecond)
+    #print(len(speed_up))
+    #print(len([x for x in speed_up if x > 2]))
+    #for x in sorted(result, reverse=True, key=takeSecond):
+    #    print("{} & {} & {} & {} & {} \\\\".format(x[0], x[1], x[2], x[3], x[4]))
+
 
 
 
@@ -149,16 +218,20 @@ if __name__ == '__main__':
     #instance1 = ["../rosette/cex-benchmarks", "cex-symbreak", "cex-nosymbreak"]
     #instance2 = ["../rosette/cex-benchmarks", "cex-symbreak-qex", "cex-nosymbreak-qex"]
 
-    instance1 = ["../rosette/qex-bench-new", "qex-symbreak", "qex-nosymbreak"]
-    instance2 = ["../rosette/qex-bench-new", "qex-symbreak-qex", "qex-nosymbreak-qex"]
+    #instance1 = ["../rosette/qex-bench-new", "qex-symbreak", "qex-nosymbreak"]
+    #instance2 = ["../rosette/qex-bench-new", "qex-symbreak-qex", "qex-nosymbreak-qex"]
+
+    instance1 = ["../rosette/micro-bench", "mb_symbreak", "mb_nosymbreak"]
+    instance2 = ["../rosette/micro-bench", "mb_symbreak_qex", "mb_nosymbreak_qex"]
 
     table_size_dict = calculate_table_size(instance1[0])
     stats = read_stats(instance1[1], table_size_dict)
-    result1 = parse_outputs([instance1[1], instance1[2]], table_size_dict)
-    result2 = parse_outputs([instance2[1], instance2[2]], table_size_dict)
+    result1 = parse_outputs_mb([instance1[1], instance1[2]])
+    result2 = parse_outputs_mb([instance2[1], instance2[2]])
 
     def wrap_time(x):
-        return round(x / 1000., 2)
+        return x
+        #return round(x / 1000., 2)
 
     result2_dict = {}
     for x in result2:
@@ -169,11 +242,18 @@ if __name__ == '__main__':
         y = result2_dict[x[0]]
         if stats[x[0]][1]:
         #if not ("top" in x[0] or "recent" in x[0]):
-            print(" {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
-                    process_case_name(x[0]), stats[x[0]][0],
-                    y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
-                    x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]
-                    ))
+            #print(" {} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
+            #        process_case_name(x[0]), stats[x[0]][0],
+            #        y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
+            #        x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]
+            #        ))
+            print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(y[1] / y[2]), "cos-r"))
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(y[2]), "cos"))
+            
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[1]), "qex-r"))
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[2]), "qex"))
+
+            #print(" {}, {}, {}".format(process_case_name(x[0]), wrap_time(x[2]), wrap_time(x[3])))
             #print("{} {} ".format(x[0], x[4]))
             #print("{} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
             #        process_case_name(x[0]), stats[x[0]][0],
