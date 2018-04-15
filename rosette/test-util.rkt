@@ -90,8 +90,7 @@
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (pretty-display (cdr (car sol)))
              (displayln "")
-             (flush-output)
-             (test-loop (inc-table-size-list table-size-list) test-func)]
+             (flush-output)]
             [else 
              (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
              (flush-output)
