@@ -146,7 +146,6 @@ def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir,
                 print("[Input] Solving {}".format(fname))
                 result = run_prop_check(os.path.join(input_dir, fname))
 
-
 if __name__ == '__main__':
     #prepare_calcite_benchmarks("./examples/calcite/", output_dir="benchmarks/calcite")
     #prepare_hw_benchmarks("./examples/homeworks/", output_dir="benchmarks/homeworks")

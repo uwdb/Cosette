@@ -138,29 +138,6 @@ def process_case_name(s):
 
 if __name__ == '__main__':
 
-
-    instance = ["../rosette/qex-benchmarks", "qex-symbreak-qex", "qex-nosymbreak-qex"]
-    table_size_dict = calculate_table_size(instance[0])
-    stats = read_stats(instance[1], table_size_dict)
-    result = parse_outputs([instance[1], instance[2]], table_size_dict)
-
-    def wrap_time(x):
-        return round(x / 1000., 2)
-
-    print(result)
-
-    for i in range(len(result)):
-        x = result[i]
-        print("{} {} ".format(x[0], x[4]))
-            #print("{} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
-            #        process_case_name(x[0]), stats[x[0]][0],
-            #        wrap_time(y[2]), wrap_time(y[3]), y[4],
-            #        wrap_time(x[2]), wrap_time(x[3]), x[4]))
-
-    sys.exit(0)
- 
-    print(len(result1))
-
     #instance = ["../benchmarks/calcite", "calcite-qex-symbreak", "calcite-qex-nosymbreak"]
     #instance = ["../rosette/qex-benchmarks", "qex-symbreak-qex", "qex-nosymbreak-qex"]
     #instance = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
@@ -171,6 +148,9 @@ if __name__ == '__main__':
 
     #instance1 = ["../rosette/cex-benchmarks", "cex-symbreak", "cex-nosymbreak"]
     #instance2 = ["../rosette/cex-benchmarks", "cex-symbreak-qex", "cex-nosymbreak-qex"]
+
+    instance1 = ["../rosette/qex-bench-new", "qex-symbreak", "qex-nosymbreak"]
+    instance2 = ["../rosette/qex-bench-new", "qex-symbreak-qex", "qex-nosymbreak-qex"]
 
     table_size_dict = calculate_table_size(instance1[0])
     stats = read_stats(instance1[1], table_size_dict)
