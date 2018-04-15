@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy) (((2 -8) . 2) ((4 -8) . 1)))
   #(struct:Table dummy (dummy dummy) (((2 -8) . 1) ((4 -8) . 1)))
 [NEQ]
-[table size] (2) [real time] 568 ms
+[table size] (2) [real time] 571 ms
 (#(struct:Table input (ID Payment_type) (((2 -8) . 8) ((4 -8) . 2))))
 

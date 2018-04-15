@@ -1,5 +1,5 @@
 [[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
-[inference time] 4
+[inference time] 5
 [constraint]
 s,
 ForallEQ[]
@@ -13,10 +13,10 @@ ForallEQ[]
 [query size] 8 8
 [query aggr] #t #t
 --------------------
-[table size] (1 0 0 0 1 1 1) [real time] 44 ms
-[table size] (2 0 0 0 1 1 1) [real time] 35 ms
-[table size] (2 0 0 0 2 1 1) [real time] 28 ms
-[table size] (2 0 0 0 2 2 1) [real time] 47 ms
+[table size] (1 0 0 0 1 1 1) [real time] 46 ms
+[table size] (2 0 0 0 1 1 1) [real time] 28 ms
+[table size] (2 0 0 0 2 1 1) [real time] 35 ms
+[table size] (2 0 0 0 2 2 1) [real time] 54 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy) (((-8) . 2)))
   #(struct:Table dummy (dummy) (((-8) . 1)))

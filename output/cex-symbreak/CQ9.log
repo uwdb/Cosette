@@ -1,5 +1,5 @@
 [[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
-[inference time] 4
+[inference time] 5
 [constraint]
 student,
 ForallEQ[(r[1] = @1)]
@@ -12,14 +12,14 @@ ForallEQ[]
 [query aggr] #t #t
 --------------------
 [table size] (0 0 0 0 1 1 1) [real time] 41 ms
-[table size] (0 0 0 0 2 1 1) [real time] 33 ms
-[table size] (0 0 0 0 2 2 1) [real time] 736 ms
-[table size] (0 0 0 0 2 2 2) [real time] 1009 ms
+[table size] (0 0 0 0 2 1 1) [real time] 29 ms
+[table size] (0 0 0 0 2 2 1) [real time] 729 ms
+[table size] (0 0 0 0 2 2 2) [real time] 1006 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy) (((0 -7) . 1)))
   #(struct:Table dummy (dummy dummy) ())
 [NEQ]
-[table size] (0 0 0 0 3 2 2) [real time] 28363 ms
+[table size] (0 0 0 0 3 2 2) [real time] 27911 ms
 (#(struct:Table c (course_id title dept_name credits) ())
  #(struct:Table d (dept_name building budget) ())
  #(struct:Table i (ID name dept_name salary) ())

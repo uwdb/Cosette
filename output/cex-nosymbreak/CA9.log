@@ -1,5 +1,5 @@
 [[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
-[inference time] 4
+[inference time] 3
 [constraint]
 t,
 ForallEQ[]
@@ -15,7 +15,7 @@ ForallEQ[]
   #(struct:Table dummy (dummy) (((-16) . 1)))
   #(struct:Table dummy (dummy) (((-8) . 1)))
 [NEQ]
-[table size] (0 0 2 2 0 0 0) [real time] 189 ms
+[table size] (0 0 2 2 0 0 0) [real time] 179 ms
 (#(struct:Table c (course_id title dept_name credits) ())
  #(struct:Table d (dept_name building budget) ())
  #(struct:Table

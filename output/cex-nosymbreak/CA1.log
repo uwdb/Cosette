@@ -1,28 +1,28 @@
 [[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#f
-[inference time] 3
+[inference time] 4
 [constraint]
 d,
 ForallEQ[]
 c,
-ForallEQ[(r[2] = @0)]
+ForallEQ[(r[1] = @0)]
 
 [query size] 4 4
 [query aggr] #t #t
 --------------------
 [table size] (1 1) [real time] 36 ms
-[table size] (2 1) [real time] 27 ms
-[table size] (2 2) [real time] 442 ms
+[table size] (2 1) [real time] 30 ms
+[table size] (2 2) [real time] 447 ms
 [Table evaluation results]
-  #(struct:Table dummy (dummy dummy) (((-16 2310) . 1)))
+  #(struct:Table dummy (dummy dummy) (((-16 15) . 1)))
   #(struct:Table dummy (dummy dummy) ())
 [NEQ]
-[table size] (3 2) [real time] 2538 ms
+[table size] (3 2) [real time] 2703 ms
 (#(struct:Table
    c
-   (course_id title dept_name credits)
-   (((-15 -15 -16 15) . 1) ((-15 1 -16 0) . 23) ((-8 4 -16 2) . 31)))
+   (course_id dept_name credits)
+   (((-8 -16 0) . 2) ((-7 -16 0) . 6) ((-7 -16 1) . 3)))
  #(struct:Table
    d
    (dept_name building budget)
-   (((-16 4 1) . 30) ((-14 -4 0) . 27))))
+   (((-16 -12 1) . 2) ((-16 -4 0) . 3))))
 

@@ -9,80 +9,18 @@ ForallEQ[(r[1] = @0)]
 [query size] 4 4
 [query aggr] #t #t
 --------------------
-[table size] (0 0 1 1) [real time] 28 ms
-[table size] (0 0 2 1) [real time] 83 ms
+[table size] (0 0 1 1) [real time] 26 ms
+[table size] (0 0 2 1) [real time] 81 ms
 [Table evaluation results]
-  #(struct:Table dummy (dummy) (((-1024) . 2)))
-  #(struct:Table dummy (dummy) (((-1024) . 1)))
+  #(struct:Table dummy (dummy) (((950) . 2)))
+  #(struct:Table dummy (dummy) (((950) . 1)))
 [NEQ]
-[table size] (0 0 2 2) [real time] 2619 ms
+[table size] (0 0 2 2) [real time] 2258 ms
 (#(struct:Table months (mid month) ())
  #(struct:Table weekdays (did day_of_week) ())
- #(struct:Table
-   carriers
-   (cid name)
-   (((-992 -1024) . 981) ((-896 -1024) . 1647)))
+ #(struct:Table carriers (cid name) (((-967 950) . 1655) ((-964 950) . 1741)))
  #(struct:Table
    flights
-   (fid
-    year
-    month_id
-    day_of_month
-    day_of_week_id
-    carrier_id
-    flight_num
-    origin_city
-    origin_state
-    dest_city
-    dest_state
-    departure_delay
-    taxi_out
-    arrival_delay
-    canceled
-    actual_time
-    distance
-    capacity
-    price)
-   (((-259
-      -1024
-      32
-      -1022
-      509
-      -992
-      -515
-      509
-      -515
-      -3
-      -3
-      -3
-      -996
-      -3
-      -259
-      253
-      765
-      -131
-      1)
-     .
-     1666)
-    ((-4
-      2
-      32
-      -1022
-      1020
-      -992
-      1020
-      -4
-      1020
-      -4
-      -4
-      -4
-      -996
-      -4
-      -516
-      -516
-      508
-      -772
-      0)
-     .
-     955))))
+   (fid year month_id day_of_month carrier_id)
+   (((765 0 4 -1024 -964) . 2047) ((1020 0 4 -1024 -967) . 1815))))
 

@@ -7,12 +7,12 @@ ForallEQ[]
 [query size] 5 5
 [query aggr] #t #t
 --------------------
-[table size] (1 0 0 0 0 0 0) [real time] 55 ms
+[table size] (1 0 0 0 0 0 0) [real time] 54 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy) (((0) . 1)))
   #(struct:Table dummy (dummy) (((0) . 1) ((6) . 1)))
 [NEQ]
-[table size] (2 0 0 0 0 0 0) [real time] 273 ms
+[table size] (2 0 0 0 0 0 0) [real time] 270 ms
 (#(struct:Table
    c
    (course_id title dept_name credits)

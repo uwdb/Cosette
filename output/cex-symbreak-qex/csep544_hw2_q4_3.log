@@ -9,8 +9,8 @@ ForallEQ[(r[1] = @0)]
 [query size] 4 4
 [query aggr] #t #t
 --------------------
-[table size] (0 0 1 1) [real time] 25 ms
-[table size] (0 0 2 1) [real time] 42 ms
-[table size] (0 0 2 2) [real time] 346 ms
-[table size] (0 0 3 2) [real time] 864 ms
-[table size] (0 0 3 3) [real time] 16959 ms
+[table size] (0 0 1 1) [real time] 24 ms
+[table size] (0 0 2 1) [real time] 37 ms
+[table size] (0 0 2 2) [real time] 336 ms
+[table size] (0 0 3 2) [real time] 787 ms
+[table size] (0 0 3 3) [real time] 17876 ms
