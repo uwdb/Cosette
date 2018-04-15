@@ -1,5 +1,5 @@
 [[config]] symbreak:#f, qex-encoding:#t
-[inference time] 2
+[inference time] 3
 [constraint]
 O,
 ForallEQ[#t]
@@ -11,14 +11,14 @@ ForallEQ[((r[0] = @0))]
 --------------------
 [table size] (0 1 1) [real time] 10 ms
 [table size] (0 2 1) [real time] 18 ms
-[table size] (0 2 2) [real time] 245 ms
-[table size] (0 3 2) [real time] 465 ms
-[table size] (0 3 3) [real time] 1372 ms
+[table size] (0 2 2) [real time] 241 ms
+[table size] (0 3 2) [real time] 457 ms
+[table size] (0 3 3) [real time] 1373 ms
 [Evaluation Result]
   ()
   #(struct:Table dummy (dummy dummy) (((-3 2) . 1)))
 [NEQ]
-[table size] (0 4 3) [real time] 3701 ms
+[table size] (0 4 3) [real time] 3581 ms
 (#(struct:Table P (id name price) ())
  #(struct:Table
    O

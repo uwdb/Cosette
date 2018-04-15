@@ -17,7 +17,7 @@ ForallEQ[((val$0 > 1)) ∧ ((r[0] = @0))]
   (424)
   #(struct:Table dummy (dummy dummy) (((392 62484) . 1)))
 [NEQ]
-[table size] (2 2 1) [real time] 131 ms
+[table size] (2 2 1) [real time] 127 ms
 (#(struct:Table P (id name price) (((219 0 164) . 1) ((250 0 -119) . 1)))
  #(struct:Table
    O
