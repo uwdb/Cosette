@@ -27,7 +27,7 @@
     FROM  (JOIN (JOIN (NAMED (list-ref tables 2)) (NAMED (list-ref tables 1))) (NAMED (list-ref tables 0)))
     WHERE (AND (AND (BINOP "O.product_id" = "P.id") (BINOP "O.customer_id" = "C.customer_id")) (BINOP val > 1))
     GROUP-BY (list "C.customer_id")         
-    HAVING (AND (BINOP (COUNT-DISTINCT "C.customer_id") > 4)
+    HAVING (AND (BINOP (COUNT-DISTINCT "O.order_quantity") > 3)
     			(BINOP (VAL-UNOP aggr-sum (VAL-BINOP (val-column-ref "O.order_quantity") * (val-column-ref "P.price"))) > (+ val 100)))))
 
 (define ros-instance (list q (list product-info orders-info customers-info) (list val) prop-table-empty)) 

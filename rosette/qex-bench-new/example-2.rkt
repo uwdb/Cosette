@@ -19,11 +19,10 @@
 ; Count(O.OrderID) > 1
 
 (define (q tables)
-   (SELECT (VALS "C.customer_id" (VAL-UNOP aggr-max (val-column-ref "O.order_id")))
+   (SELECT (VALS "C.customer_id" (VAL-UNOP aggr-count (val-column-ref "O.order_id")))
     FROM  (JOIN (NAMED (list-ref tables 2)) (NAMED (list-ref tables 1)))
     WHERE (BINOP "O.customer_id" = "C.customer_id") 
     GROUP-BY (list "C.customer_id")         
-    HAVING (AND (BINOP (COUNT-DISTINCT "C.customer_id") > 4) 
-                (BINOP (VAL-UNOP aggr-max (val-column-ref "O.order_id")) > 1))))
+    HAVING (BINOP (COUNT-DISTINCT "O.order_id") > 3)))
 
 (define ros-instance (list q (list product-info orders-info customers-info) (list) prop-table-empty)) 

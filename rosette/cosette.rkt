@@ -78,8 +78,8 @@
          (displayln "[Evaluation Result]")
          (displayln (format "  ~a" vals))
          (displayln (format "  ~a" (clean-ret-table (denote-and-run qt))))
-         (cons "(sat)" clean-tables))]
-      [else (cons "(unsat)"  (list))])))
+         (cons "NEQ" clean-tables))]
+      [else (cons "EQ"  (list))])))
 
 (define (table->jsexpr t) 
   (hasheq 'table-name (get-table-name t) 

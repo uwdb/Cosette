@@ -11,14 +11,14 @@ ForallEQ[((r[0] = @0))]
 --------------------
 [table size] (0 1 1) [real time] 10 ms
 [table size] (0 2 1) [real time] 18 ms
-[table size] (0 2 2) [real time] 245 ms
-[table size] (0 3 2) [real time] 465 ms
-[table size] (0 3 3) [real time] 1372 ms
+[table size] (0 2 2) [real time] 233 ms
+[table size] (0 3 2) [real time] 460 ms
+[table size] (0 3 3) [real time] 1356 ms
 [Evaluation Result]
   ()
   #(struct:Table dummy (dummy dummy) (((-3 2) . 1)))
 [NEQ]
-[table size] (0 4 3) [real time] 3701 ms
+[table size] (0 4 3) [real time] 3639 ms
 (#(struct:Table P (id name price) ())
  #(struct:Table
    O

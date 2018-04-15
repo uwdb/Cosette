@@ -40,7 +40,8 @@
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
               [(list fq1 tables extra-symvals check-prop) 
-               (run-qex-experiment (list fq1 tables extra-symvals check-prop) symbreak qex-encoding)]
+               (run-qex-experiment (list fq1 tables extra-symvals check-prop) symbreak qex-encoding)
+               (channel-put main-channel 'timeout)]
               [_ (error "error on loading rosette source code.")])
             )))
 
@@ -53,7 +54,3 @@
     [(timeout) (void)]
     [else (set! ret item) (loop)]))
 
-(displayln 
-  (cond 
-    [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
-    [else (jsexpr->string (hasheq 'status "UNSAT" 'size ret))]))
