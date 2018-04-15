@@ -57,7 +57,6 @@ def parse_outputs(log_dirs, table_size_dict={}):
 
     result = []
 
-
     for case in all_cases:
         records = []
         record_lens = []
@@ -86,6 +85,7 @@ def parse_outputs(log_dirs, table_size_dict={}):
 
     def takeSecond(elem):
         return elem[4]
+    
     return sorted(result, reverse=True, key=takeSecond)
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 2]))
@@ -134,24 +134,39 @@ def read_stats(folder, table_size_dict):
     return stats
     
 def process_case_name(s):
-    return s.replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj").replace("cse344au", "").replace("csep544","").replace("_", "-")
+    return s.replace("test", "").replace("Aggregate", "Aggr").replace("Aggr", "Agg").replace("Grouping", "Group").replace("Constant", "Const").replace("With", "").replace("Inference", "Infer").replace("Conjunct", "Conj").replace("cse344au", "").replace("csep544","").replace("_", "-")
 
 if __name__ == '__main__':
 
     #instance = ["../benchmarks/calcite", "calcite-qex-symbreak", "calcite-qex-nosymbreak"]
     #instance = ["../rosette/qex-benchmarks", "qex-symbreak-qex", "qex-nosymbreak-qex"]
     #instance = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
-    instance = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
+    #instance = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
 
-    table_size_dict = calculate_table_size(instance[0])
-    stats = read_stats(instance[1], table_size_dict)
-    result = parse_outputs([instance[1], instance[2]], table_size_dict)
+    instance1 = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
+    instance2 = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
+    table_size_dict = calculate_table_size(instance1[0])
+    stats = read_stats(instance1[1], table_size_dict)
+    result1 = parse_outputs([instance1[1], instance1[2]], table_size_dict)
+    result2 = parse_outputs([instance2[1], instance2[2]], table_size_dict)
 
-    for x in result:
-        #if not stats[x[0]][1]:
-            #print("{} & {} & {} & {} & {}".format(process_case_name(x[0]), x[1], x[2], x[3], x[4]))
-            print("{} {} ".format(x[0], x[4]))
+    def wrap_time(x):
+        return round(x / 1000., 2)
+
+    result2_dict = {}
+    for x in result2:
+        result2_dict[x[0]] = x
+
+    for i in range(len(result1)):
+        x = result1[i]
+        y = result2_dict[x[0]]
+        if not stats[x[0]][1]:
+            print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
+                    process_case_name(x[0]), stats[x[0]][0],
+                    y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
+                    x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]))
+            #print("{} {} ".format(x[0], x[4]))
  
-    print(len(result))
+    print(len(result1))
 
 
