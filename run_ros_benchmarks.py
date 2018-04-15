@@ -140,9 +140,9 @@ def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir,
 
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and not ("correct" in fname):
-            if os.path.splitext(fname)[0] in finished_cases:
-                print("[Ignore]{}".format(fname))
-            else:
+            #if os.path.splitext(fname)[0] in finished_cases:
+            #    print("[Ignore]{}".format(fname))
+            #else:
                 print("[Input] Solving {}".format(fname))
                 result = run_prop_check(os.path.join(input_dir, fname))
 
@@ -167,7 +167,7 @@ if __name__ == '__main__':
     # run_equiv_check_benchmarks("rosette/cex-benchmarks", ".", "./output/cex-symbreak-qex", time_limit=60, symbreak=True, simplify=True, qex_enc=True)
     # run_equiv_check_benchmarks("rosette/cex-benchmarks", ".", "./output/cex-nosymbreak-qex", time_limit=60, symbreak=False, simplify=True, qex_enc=True)
 
-    run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-symbreak", 120, True, True)
-    run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-nosymbreak", 120, False, True)
+    run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-symbreak", 120, True, False)
+    run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-nosymbreak", 120, False, False)
     run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-symbreak-qex", 120, True, True)
     run_prop_check_benchmarks("rosette/qex-bench-new", ".", "./output/qex-nosymbreak-qex", 120, False, True)

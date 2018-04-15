@@ -7,27 +7,25 @@
 
 (provide ros-instance)
 
-(define product-info (table-info "P" (list "id" "name" "price")))
-(define orders-info (table-info "O" (list "order_id" "customer_id" "order_quantity" "product_id")))
-(define customers-info (table-info "C" (list "customer_id" "name")))
+(define scores-info (table-info "Scores" (list "StudentID" "CourseID" "Points")))
+(define students-info (table-info "Students" (list "StudentNr" "StudentName")))
 
-(define-symbolic* val integer?)
+; DECLARE @x as tinyint;
+; SELECT Students.StudentName, SUM(Points)
+; FROM Scores JOIN Students ON Scores.StudentID = Students.StudentNr
+; WHERE Scores.Points > 2 AND Students.StudentName LIKE "John%"
+; GROUP BY Students.StudentName
+; HAVING SUM(Points) >= @x AND @x > 15
 
-; DECLARE @value AS INT;
-; SELECT C.CustomerID, SUM(OP.OrderProductQuantity * P.ProductPrice)
-; Orders AS O 
-; JOIN Products AS P ON O.ProductID = P.ProductID
-; JOIN Customers AS C ON O.CustomerID = C.CustomerID
-; WHERE @value > 1
-; GROUP BY C.CustomerID
-; HAVING SUM(OP.OrderProductQuantity * P.ProductPrice) > 100 + @value
+(define-symbolic* x integer?)
 
 (define (q tables)
-   (SELECT (VALS "C.customer_id" (VAL-UNOP aggr-sum (VAL-BINOP (val-column-ref "O.order_quantity") * (val-column-ref "P.price"))))
-    FROM  (JOIN (JOIN (NAMED (list-ref tables 2)) (NAMED (list-ref tables 1))) (NAMED (list-ref tables 0)))
-    WHERE (AND (AND (BINOP "O.product_id" = "P.id") (BINOP "O.customer_id" = "C.customer_id")) (BINOP val > 1))
-    GROUP-BY (list "C.customer_id")         
-    HAVING (AND (BINOP (COUNT-DISTINCT "O.order_quantity") > 3)
-    			(BINOP (VAL-UNOP aggr-sum (VAL-BINOP (val-column-ref "O.order_quantity") * (val-column-ref "P.price"))) > (+ val 100)))))
+  (SELECT (VALS "Students.StudentName" (VAL-UNOP aggr-sum (val-column-ref "Scores.Points")))
+   FROM   (JOIN (NAMED (list-ref tables 0)) (NAMED (list-ref tables 1)))
+   WHERE  (AND (BINOP "Scores.StudentID" = "Students.StudentNr") (BINOP "Scores.Points" > 2))
+   GROUP-BY (list "Students.StudentName")         
+   HAVING (AND (BINOP (COUNT-DISTINCT "Scores.Points") > 5)
+   			(AND (BINOP (VAL-UNOP aggr-sum (val-column-ref "Scores.Points")) > x) 
+               (BINOP x > 15)))))
 
-(define ros-instance (list q (list product-info orders-info customers-info) (list val) prop-table-empty)) 
+(define ros-instance (list q (list scores-info students-info) (list x) prop-table-empty))

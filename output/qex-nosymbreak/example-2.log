@@ -1,5 +1,5 @@
-[[config]] symbreak:#f, qex-encoding:#t
-[inference time] 3
+[[config]] symbreak:#f, qex-encoding:#f
+[inference time] 2
 [constraint]
 O,
 ForallEQ[#t]
@@ -9,20 +9,14 @@ ForallEQ[((r[0] = @0))]
 [query size] 4
 [query aggr] #t
 --------------------
-[table size] (0 1 1) [real time] 10 ms
-[table size] (0 2 1) [real time] 18 ms
-[table size] (0 2 2) [real time] 237 ms
-[table size] (0 3 2) [real time] 456 ms
-[table size] (0 3 3) [real time] 1382 ms
+[table size] (0 1 1) [real time] 23 ms
+[table size] (0 2 1) [real time] 15 ms
 [Evaluation Result]
   ()
-  #(struct:Table dummy (dummy dummy) (((-3 2) . 1)))
+  #(struct:Table dummy (dummy dummy) (((-8 462) . 1)))
 [NEQ]
-[table size] (0 4 3) [real time] 3645 ms
+[table size] (0 2 2) [real time] 461 ms
 (#(struct:Table P (id name price) ())
- #(struct:Table
-   O
-   (order_id customer_id)
-   (((-1 -1) . 1) ((0 -3) . 1) ((0 -2) . 1) ((1 -4) . 1)))
- #(struct:Table C (customer_id name) (((-3 0) . 2) ((-1 -1) . 1))))
+ #(struct:Table O (order_id customer_id) (((-8 -8) . 21)))
+ #(struct:Table C (customer_id name) (((-8 0) . 22))))
 
