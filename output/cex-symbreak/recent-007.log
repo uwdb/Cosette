@@ -1,5 +1,5 @@
 [[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#f
-[inference time] 4
+[inference time] 5
 [constraint]
 input,
 ForallEQ[]
@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy dummy) (((-8 -8 -1 -8) . 1)))
   #(struct:Table dummy (dummy dummy dummy dummy) (((-8 -8 1 -8) . 1)))
 [NEQ]
-[table size] (2) [real time] 305 ms
+[table size] (2) [real time] 309 ms
 (#(struct:Table input (Employee FromDate ToDate Code) (((-8 -8 -1 -8) . 8))))
 

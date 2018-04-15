@@ -1,5 +1,5 @@
 [[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
-[inference time] 4
+[inference time] 5
 [constraint]
 flights,
 ForallEQ[]
@@ -10,7 +10,7 @@ ForallEQ[(r[1] = @0)]
 [query aggr] #t #t
 --------------------
 [table size] (0 0 1 1) [real time] 13 ms
-[table size] (0 0 2 1) [real time] 24 ms
-[table size] (0 0 2 2) [real time] 537 ms
-[table size] (0 0 3 2) [real time] 1519 ms
-[table size] (0 0 3 3) [real time] 54693 ms
+[table size] (0 0 2 1) [real time] 30 ms
+[table size] (0 0 2 2) [real time] 534 ms
+[table size] (0 0 3 2) [real time] 1503 ms
+[table size] (0 0 3 3) [real time] 55032 ms

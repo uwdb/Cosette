@@ -1,5 +1,5 @@
 [[config]] symbreak:#f, simplify-constr:#t, qex-encoding:#t
-[inference time] 5
+[inference time] 4
 [constraint]
 input,
 ForallEQ[]
@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy) (((1 0 0) . 1)))
   #(struct:Table dummy (dummy dummy dummy) (((0 -1 1) . 1)))
 [NEQ]
-[table size] (2) [real time] 234 ms
+[table size] (2) [real time] 231 ms
 (#(struct:Table input (id customer total) (((0 -1 1) . 1) ((1 0 0) . 1))))
 

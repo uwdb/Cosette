@@ -12,7 +12,7 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy) (((0 -1 0) . 1) ((1 -1 1) . 1)))
   #(struct:Table dummy (dummy dummy dummy) (((0 -1 1) . 1) ((1 -1 1) . 1)))
 [NEQ]
-[table size] (0 0 0 2) [real time] 489 ms
+[table size] (0 0 0 2) [real time] 488 ms
 (#(struct:Table months (mid month) ())
  #(struct:Table weekdays (did day_of_week) ())
  #(struct:Table carriers (cid name) ())

@@ -7,8 +7,8 @@ ForallEQ[]
 [query size] 5 4
 [query aggr] #t #f
 --------------------
-[table size] (1) [real time] 12 ms
-[table size] (2) [real time] 64 ms
+[table size] (1) [real time] 13 ms
+[table size] (2) [real time] 65 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy dummy dummy dummy) (((0 -1 0 0 -1) . 1) ((0 0 0 0 -2) . 2)))
   #(struct:Table dummy (dummy dummy dummy dummy dummy) (((0 -1 0 0 -1) . 2) ((0 0 0 0 -2) . 2)))

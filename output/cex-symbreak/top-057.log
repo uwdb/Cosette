@@ -7,12 +7,12 @@ ForallEQ[]
 [query size] 5 5
 [query aggr] #t #t
 --------------------
-[table size] (1) [real time] 29 ms
+[table size] (1) [real time] 28 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy dummy) (((0 0 4) . 8) ((7 7 6) . 9)))
   #(struct:Table dummy (dummy dummy dummy) (((0 0 4) . 8) ((7 0 6) . 9) ((0 7 4) . 8) ((7 7 6) . 9)))
 [NEQ]
-[table size] (2) [real time] 249 ms
+[table size] (2) [real time] 243 ms
 (#(struct:Table
    input
    (ID Name City Birthyear)

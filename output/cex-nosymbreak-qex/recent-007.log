@@ -7,12 +7,12 @@ ForallEQ[]
 [query size] 6 6
 [query aggr] #t #t
 --------------------
-[table size] (1) [real time] 20 ms
+[table size] (1) [real time] 19 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy dummy dummy) (((-1 0 0 0) . 2) ((0 0 1 0) . 2)))
   #(struct:Table dummy (dummy dummy dummy dummy) (((-1 0 1 0) . 1) ((0 0 1 0) . 1)))
 [NEQ]
-[table size] (2) [real time] 330 ms
+[table size] (2) [real time] 322 ms
 (#(struct:Table
    input
    (Employee FromDate ToDate Code)

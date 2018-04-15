@@ -15,7 +15,7 @@ ForallEQ[(r[1] = @0)]
   #(struct:Table dummy (dummy) (((0) . 2)))
   #(struct:Table dummy (dummy) (((0) . 1)))
 [NEQ]
-[table size] (0 0 2 2) [real time] 7006 ms
+[table size] (0 0 2 2) [real time] 6921 ms
 (#(struct:Table months (mid month) ())
  #(struct:Table weekdays (did day_of_week) ())
  #(struct:Table carriers (cid name) (((-380 0) . 2069)))

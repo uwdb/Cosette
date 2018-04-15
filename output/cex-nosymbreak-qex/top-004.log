@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy) (((-3 0 -7) . 1) ((7 5 -8) . 1)))
   #(struct:Table dummy (dummy dummy dummy) (((7 5 -8) . 2)))
 [NEQ]
-[table size] (2) [real time] 106 ms
+[table size] (2) [real time] 116 ms
 (#(struct:Table input (id rev content) (((-3 0 -7) . 1) ((7 5 -8) . 1))))
 

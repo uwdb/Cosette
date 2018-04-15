@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy) ())
   #(struct:Table dummy (dummy dummy dummy) (((0 0 -1) . 1) ((1 0 0) . 1)))
 [NEQ]
-[table size] (2) [real time] 56 ms
+[table size] (2) [real time] 59 ms
 (#(struct:Table input (id name city) (((0 0 -1) . 1) ((1 0 0) . 1))))
 

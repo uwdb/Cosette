@@ -1,5 +1,5 @@
 [[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#t
-[inference time] 4
+[inference time] 5
 [constraint]
 input,
 ForallEQ[]
@@ -12,7 +12,7 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy dummy) (((0 0 0 0) . 1) ((1 0 1 0) . 1)))
   #(struct:Table dummy (dummy dummy dummy dummy) (((0 0 0 0) . 1) ((1 0 0 0) . 1) ((0 0 1 0) . 1) ((1 0 1 0) . 1)))
 [NEQ]
-[table size] (2) [real time] 366 ms
+[table size] (2) [real time] 358 ms
 (#(struct:Table
    input
    (ID CHARGEID CHARGETYPE SERVICEMONTH)

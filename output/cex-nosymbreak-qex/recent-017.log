@@ -7,13 +7,13 @@ ForallEQ[]
 [query size] 10 10
 [query aggr] #t #t
 --------------------
-[table size] (1) [real time] 28 ms
-[table size] (2) [real time] 483 ms
+[table size] (1) [real time] 26 ms
+[table size] (2) [real time] 484 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy dummy) (((-1 -1 12) . 1)))
   #(struct:Table dummy (dummy dummy dummy) (((-1 -1 12) . 2)))
 [NEQ]
-[table size] (3) [real time] 978 ms
+[table size] (3) [real time] 960 ms
 (#(struct:Table
    input
    (emp_id emp_sal emp_grp)

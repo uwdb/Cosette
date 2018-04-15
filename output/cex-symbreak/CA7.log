@@ -10,13 +10,13 @@ ForallEQ[]
 [query aggr] #t #t
 --------------------
 [table size] (1 1 0 0 0 0 0) [real time] 30 ms
-[table size] (2 1 0 0 0 0 0) [real time] 31 ms
-[table size] (2 2 0 0 0 0 0) [real time] 512 ms
+[table size] (2 1 0 0 0 0 0) [real time] 32 ms
+[table size] (2 2 0 0 0 0 0) [real time] 517 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy) (((-16) . 1)))
   #(struct:Table dummy (dummy) (((-16) . 20)))
 [NEQ]
-[table size] (3 2 0 0 0 0 0) [real time] 4320 ms
+[table size] (3 2 0 0 0 0 0) [real time] 4345 ms
 (#(struct:Table
    c
    (course_id title dept_name credits)

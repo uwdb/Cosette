@@ -12,7 +12,7 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy dummy) ())
   #(struct:Table dummy (dummy dummy dummy dummy) (((-8 -7 -4 -7) . 4)))
 [NEQ]
-[table size] (2) [real time] 297 ms
+[table size] (2) [real time] 306 ms
 (#(struct:Table
    input
    (ID CHARGEID CHARGETYPE SERVICEMONTH)

@@ -9,13 +9,13 @@ ForallEQ[(r[1] = @0)]
 [query size] 4 4
 [query aggr] #t #t
 --------------------
-[table size] (0 0 1 1) [real time] 27 ms
-[table size] (0 0 2 1) [real time] 26 ms
+[table size] (0 0 1 1) [real time] 26 ms
+[table size] (0 0 2 1) [real time] 27 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy) (((0) . 2)))
   #(struct:Table dummy (dummy) (((0) . 1)))
 [NEQ]
-[table size] (0 0 2 2) [real time] 5827 ms
+[table size] (0 0 2 2) [real time] 5907 ms
 (#(struct:Table months (mid month) ())
  #(struct:Table weekdays (did day_of_week) ())
  #(struct:Table carriers (cid name) (((-1024 0) . 969)))

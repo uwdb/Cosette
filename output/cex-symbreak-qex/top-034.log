@@ -1,5 +1,5 @@
 [[config]] symbreak:#t, simplify-constr:#t, qex-encoding:#t
-[inference time] 5
+[inference time] 4
 [constraint]
 input,
 ForallEQ[]
@@ -12,6 +12,6 @@ ForallEQ[]
   #(struct:Table dummy (dummy dummy dummy) (((0 0 -1) . 2) ((1 -1 -1) . 1)))
   #(struct:Table dummy (dummy dummy dummy) (((0 0 -1) . 1) ((0 -1 -1) . 1) ((1 -1 -1) . 1)))
 [NEQ]
-[table size] (2) [real time] 638 ms
+[table size] (2) [real time] 630 ms
 (#(struct:Table input (Train Dest Time) (((0 0 -1) . 1) ((1 -1 -1) . 1))))
 

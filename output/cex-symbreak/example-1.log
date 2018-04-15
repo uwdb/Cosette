@@ -7,11 +7,11 @@ ForallEQ[]
 [query size] 13 13
 [query aggr] #t #t
 --------------------
-[table size] (1) [real time] 48 ms
+[table size] (1) [real time] 46 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy) (((2 -8) . 2) ((4 -8) . 1)))
   #(struct:Table dummy (dummy dummy) (((2 -8) . 1) ((4 -8) . 1)))
 [NEQ]
-[table size] (2) [real time] 578 ms
+[table size] (2) [real time] 568 ms
 (#(struct:Table input (ID Payment_type) (((2 -8) . 8) ((4 -8) . 2))))
 

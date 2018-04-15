@@ -10,6 +10,6 @@ ForallEQ[(r[1] = @0)]
 [query aggr] #t #t
 --------------------
 [table size] (0 0 1 1) [real time] 14 ms
-[table size] (0 0 2 1) [real time] 38 ms
-[table size] (0 0 2 2) [real time] 383 ms
-[table size] (0 0 3 2) [real time] 1398 ms
+[table size] (0 0 2 1) [real time] 37 ms
+[table size] (0 0 2 2) [real time] 377 ms
+[table size] (0 0 3 2) [real time] 1388 ms

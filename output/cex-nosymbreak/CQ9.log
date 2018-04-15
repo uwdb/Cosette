@@ -13,13 +13,13 @@ ForallEQ[]
 --------------------
 [table size] (0 0 0 0 1 1 1) [real time] 39 ms
 [table size] (0 0 0 0 2 1 1) [real time] 29 ms
-[table size] (0 0 0 0 2 2 1) [real time] 706 ms
-[table size] (0 0 0 0 2 2 2) [real time] 842 ms
+[table size] (0 0 0 0 2 2 1) [real time] 696 ms
+[table size] (0 0 0 0 2 2 2) [real time] 835 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy) (((0 -1) . 1)))
   #(struct:Table dummy (dummy dummy) ())
 [NEQ]
-[table size] (0 0 0 0 3 2 2) [real time] 38624 ms
+[table size] (0 0 0 0 3 2 2) [real time] 38976 ms
 (#(struct:Table c (course_id title dept_name credits) ())
  #(struct:Table d (dept_name building budget) ())
  #(struct:Table i (ID name dept_name salary) ())

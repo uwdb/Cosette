@@ -11,14 +11,14 @@ ForallEQ[(r[0] = @0) ∧ (r[1] = @1)]
 [query size] 7 7
 [query aggr] #t #t
 --------------------
-[table size] (0 0 0 0 1 1 1) [real time] 42 ms
-[table size] (0 0 0 0 2 1 1) [real time] 35 ms
-[table size] (0 0 0 0 2 2 1) [real time] 1266 ms
+[table size] (0 0 0 0 1 1 1) [real time] 43 ms
+[table size] (0 0 0 0 2 1 1) [real time] 39 ms
+[table size] (0 0 0 0 2 2 1) [real time] 1240 ms
 [Table evaluation results]
   #(struct:Table dummy (dummy dummy) ())
   #(struct:Table dummy (dummy dummy) (((-8 0) . 1)))
 [NEQ]
-[table size] (0 0 0 0 2 2 2) [real time] 6735 ms
+[table size] (0 0 0 0 2 2 2) [real time] 6748 ms
 (#(struct:Table c (course_id title dept_name credits) ())
  #(struct:Table d (dept_name building budget) ())
  #(struct:Table i (ID name dept_name salary) ())

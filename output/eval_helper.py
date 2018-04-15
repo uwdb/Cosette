@@ -146,8 +146,8 @@ if __name__ == '__main__':
     #instance1 = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
     #instance2 = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
 
-    instance1 = ["../rosette/query-disambiguation", "cex-symbreak", "cex-nosymbreak"]
-    instance2 = ["../rosette/query-disambiguation", "cex-symbreak-qex", "cex-nosymbreak-qex"]
+    instance1 = ["../rosette/cex-benchmarks", "cex-symbreak", "cex-nosymbreak"]
+    instance2 = ["../rosette/cex-benchmarks", "cex-symbreak-qex", "cex-nosymbreak-qex"]
 
     table_size_dict = calculate_table_size(instance1[0])
     stats = read_stats(instance1[1], table_size_dict)
