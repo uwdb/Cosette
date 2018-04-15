@@ -10,11 +10,6 @@
  
 (define course (table-info "c" (list "course_id" "title" "dept_name" "credits")))
 (define department (table-info "d" (list "dept_name" "building" "budget")))
-(define instructor (table-info "i" (list "ID" "name" "dept_name" "salary")))
-(define teaches (table-info "t" (list "ID" "course_id" "sec_id" "year")))
-(define section (table-info "s" (list "course_id" "sec_id" "year" "building" "room_number" "time_slot_id")))
-(define takes (table-info "takes" (list "ID" "course_id" "sec_id" "year" "grade")))
-(define student (table-info "student" (list "ID" "name" "dept_name" "tot_cred")))
 
 ; SELECT c.dept_name, SUM(c.credits)
 ; FROM course c INNER JOIN department d

@@ -78,8 +78,8 @@ def parse_outputs(log_dirs, table_size_dict={}):
         speed_up.append(v)
 
         num_sv = 0
-        for i in range(len(table_size_dict[case])):
-            num_sv += records[0][0][i] * table_size_dict[case][i]
+        #for i in range(len(table_size_dict[case])):
+           # num_sv += records[0][0][i] * table_size_dict[case][i]
 
         result.append([case, num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
 
@@ -162,14 +162,18 @@ if __name__ == '__main__':
         result2_dict[x[0]] = x
 
     for i in range(len(result1)):
-        x = result1[i]
-        y = result2_dict[x[0]]
-        if not stats[x[0]][1]:
-            print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
-                    process_case_name(x[0]), stats[x[0]][0],
-                    y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
-                    x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]))
+            x = result1[i]
+            y = result2_dict[x[0]]
+        #if not stats[x[0]][1]:
+            #print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
+            #        process_case_name(x[0]), stats[x[0]][0],
+            #        y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
+            #        x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]))
             #print("{} {} ".format(x[0], x[4]))
+            print("{} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
+                    process_case_name(x[0]), stats[x[0]][0],
+                    wrap_time(y[2]), wrap_time(y[3]), y[4],
+                    wrap_time(x[2]), wrap_time(x[3]), x[4]))
  
     print(len(result1))
 
