@@ -14,7 +14,7 @@
  
 (define carriers-info (table-info "carriers" (list "cid" "name")))
  
-(define flights-info (table-info "flights" (list "fid" "year" "month_id" "day_of_month" "day_of_week_id" "carrier_id" "flight_num" "origin_city" "origin_state" "dest_city" "dest_state" "departure_delay" "taxi_out" "arrival_delay" "canceled" "actual_time" "distance" "capacity" "price")))
+(define flights-info (table-info "flights" (list "fid" "year" "month_id" "day_of_month" "carrier_id")))
  
 
 (define (q1 tables) 

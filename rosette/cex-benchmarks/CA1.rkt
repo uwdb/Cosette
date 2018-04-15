@@ -8,7 +8,7 @@
  
 (current-bitwidth #f)
  
-(define course (table-info "c" (list "course_id" "title" "dept_name" "credits")))
+(define course (table-info "c" (list "course_id" "dept_name" "credits")))
 (define department (table-info "d" (list "dept_name" "building" "budget")))
 
 ; SELECT c.dept_name, SUM(c.credits)
