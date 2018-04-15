@@ -1,0 +1,46 @@
+[[config]] symbreak:#f, qex-encoding:#t
+[inference time] 2
+[constraint]
+Scores,
+ForallEQ[(r[2] > 2) ∧ (((r[0] = @0)))]
+
+[query size] 3
+[query aggr] #t
+--------------------
+[table size] (1 0) [real time] 12 ms
+[table size] (2 0) [real time] 22 ms
+[table size] (3 0) [real time] 27 ms
+[table size] (4 0) [real time] 47 ms
+[table size] (5 0) [real time] 41 ms
+[table size] (6 0) [real time] 118 ms
+[table size] (7 0) [real time] 226 ms
+[table size] (8 0) [real time] 411 ms
+[table size] (9 0) [real time] 716 ms
+[table size] (10 0) [real time] 1355 ms
+[table size] (11 0) [real time] 2310 ms
+[table size] (12 0) [real time] 3594 ms
+[table size] (13 0) [real time] 5500 ms
+[Evaluation Result]
+  ()
+  #(struct:Table dummy (dummy dummy) (((((-512 . 0) (1 . 0) (4 . 1) (5 . 1) (6 . 0) (7 . 1) (8 . 0) (9 . 1) (10 . 1) (11 . 0) (76 . 1) (77 . 1) (78 . 1) (79 . 1)) 1245) . 1)))
+[NEQ]
+[table size] (14 0) [real time] 8649 ms
+(#(struct:Table
+   Scores
+   (StudentID CourseID Points)
+   (((-512 1 2) . 1)
+    ((1 -512 0) . 1)
+    ((4 -512 64) . 1)
+    ((5 -512 16) . 1)
+    ((6 -512 1) . 1)
+    ((7 -512 446) . 1)
+    ((8 -512 -1) . 1)
+    ((9 -512 128) . 1)
+    ((10 -512 130) . 1)
+    ((11 -512 -512) . 1)
+    ((76 511 256) . 1)
+    ((77 -512 10) . 1)
+    ((78 -512 3) . 1)
+    ((79 505 192) . 1)))
+ #(struct:Table Students (StudentNr StudentName) ()))
+

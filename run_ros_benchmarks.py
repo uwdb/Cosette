@@ -140,9 +140,9 @@ def run_prop_check_benchmarks(input_dir, cosette_dir, log_dir,
 
     for fname in os.listdir(input_dir):
         if fname.endswith('.rkt') and not ("correct" in fname):
-            #if os.path.splitext(fname)[0] in finished_cases:
-            #    print("[Ignore]{}".format(fname))
-            #else:
+            if os.path.splitext(fname)[0] in finished_cases:
+                print("[Ignore]{}".format(fname))
+            else:
                 print("[Input] Solving {}".format(fname))
                 result = run_prop_check(os.path.join(input_dir, fname))
 
