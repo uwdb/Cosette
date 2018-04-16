@@ -1,25 +1,24 @@
 [[config]] symbreak:#f, qex-encoding:#f
 [inference time] 2
 [constraint]
-Scores,
-ForallEQ[(r[2] > 2) ∧ (((r[0] = @0)))]
+O,
+ForallEQ[#t]
+C,
+ForallEQ[((r[0] = @0))]
 
-[query size] 3
+[query size] 4
 [query aggr] #t
 --------------------
-[table size] (1 0) [real time] 23 ms
-[table size] (2 0) [real time] 18 ms
-[table size] (3 0) [real time] 29 ms
-[table size] (4 0) [real time] 48 ms
-[table size] (5 0) [real time] 47 ms
+[table size] (0 1 1) [real time] 24 ms
+[table size] (0 2 1) [real time] 15 ms
+[table size] (0 2 2) [real time] 444 ms
+[table size] (0 3 2) [real time] 810 ms
 [Evaluation Result]
   ()
-  #(struct:Table dummy (dummy dummy) (((((-512 . 511) (257 . 0) (384 . 0) (449 . 0) (450 . 383) (451 . 0)) 7152) . 1)))
+  #(struct:Table dummy (dummy dummy) (((-8 858) . 1)))
 [NEQ]
-[table size] (6 0) [real time] 180 ms
-(#(struct:Table
-   Scores
-   (StudentID CourseID Points)
-   (((-512 -512 8) . 511) ((257 -301 -512) . 255) ((450 68 8) . 383)))
- #(struct:Table Students (StudentNr StudentName) ()))
+[table size] (0 3 3) [real time] 8170 ms
+(#(struct:Table P (id name price) ())
+ #(struct:Table O (order_id customer_id) (((-6 -8) . 22)))
+ #(struct:Table C (customer_id name) (((-8 0) . 39))))
 

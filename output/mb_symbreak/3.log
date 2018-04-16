@@ -1,19 +1,22 @@
 [[config]] symbreak:#t, qex-encoding:#f
 [inference time] 2
 [constraint]
-Scores,
-ForallEQ[(r[2] > 2) ∧ (((r[0] = @0)))]
+O,
+ForallEQ[#t]
+C,
+ForallEQ[((r[0] = @0))]
 
-[query size] 3
+[query size] 4
 [query aggr] #t
 --------------------
-[table size] (1 0) [real time] 27 ms
-[table size] (2 0) [real time] 17 ms
+[table size] (0 1 1) [real time] 25 ms
+[table size] (0 2 1) [real time] 20 ms
 [Evaluation Result]
   ()
-  #(struct:Table dummy (dummy dummy) (((((0 . 2) (0 . 0) (0 . 0)) 6) . 1)))
+  #(struct:Table dummy (dummy dummy) (((-8 174) . 1)))
 [NEQ]
-[table size] (3 0) [real time] 47 ms
-(#(struct:Table Scores (StudentID CourseID Points) (((0 -512 3) . 2)))
- #(struct:Table Students (StudentNr StudentName) ()))
+[table size] (0 2 2) [real time] 411 ms
+(#(struct:Table P (id name price) ())
+ #(struct:Table O (order_id customer_id) (((-8 -8) . 3) ((-7 -8) . 3)))
+ #(struct:Table C (customer_id name) (((-8 0) . 29))))
 
