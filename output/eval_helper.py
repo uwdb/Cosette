@@ -84,9 +84,9 @@ def parse_outputs(log_dirs, table_size_dict={}, return_all=False):
         result.append([case, num_sv, records[1][1], records[0][1], float("{:.2}".format(v))])
 
     def takeSecond(elem):
-        return int(elem[0])
+        return int(elem[4])
     
-    return sorted(result, reverse=False, key=takeSecond)
+    return sorted(result, reverse=True, key=takeSecond)
     #print(len(speed_up))
     #print(len([x for x in speed_up if x > 2]))
     #for x in sorted(result, reverse=True, key=takeSecond):
@@ -152,7 +152,7 @@ def parse_outputs_mb(log_dirs):
         result.append([case, records[0], records[1]])
 
     def takeSecond(elem):
-        return int(elem[0])
+        return int(elem[4])
     
     return sorted(result, reverse=False, key=takeSecond)
     #print(len(speed_up))
@@ -215,23 +215,23 @@ if __name__ == '__main__':
     #instance1 = ["../benchmarks/calcite", "calcite-symbreak", "calcite-nosymbreak"]
     #instance2 = ["../benchmarks/calcite", "calcite-symbreak-qex", "calcite-nosymbreak-qex"]
 
-    #instance1 = ["../rosette/cex-benchmarks", "cex-symbreak", "cex-nosymbreak"]
-    #instance2 = ["../rosette/cex-benchmarks", "cex-symbreak-qex", "cex-nosymbreak-qex"]
+    instance1 = ["../rosette/cex-benchmarks", "2cex-symbreak", "2cex-nosymbreak"]
+    instance2 = ["../rosette/cex-benchmarks", "2cex-symbreak-qex", "2cex-nosymbreak-qex"]
 
     #instance1 = ["../rosette/qex-bench-new", "qex-symbreak", "qex-nosymbreak"]
     #instance2 = ["../rosette/qex-bench-new", "qex-symbreak-qex", "qex-nosymbreak-qex"]
 
-    instance1 = ["../rosette/micro-bench", "mb_symbreak", "mb_nosymbreak"]
-    instance2 = ["../rosette/micro-bench", "mb_symbreak_qex", "mb_nosymbreak_qex"]
+    #instance1 = ["../rosette/micro-bench", "mb_symbreak", "mb_nosymbreak"]
+    #instance2 = ["../rosette/micro-bench", "mb_symbreak_qex", "mb_nosymbreak_qex"]
 
     table_size_dict = calculate_table_size(instance1[0])
     stats = read_stats(instance1[1], table_size_dict)
-    result1 = parse_outputs_mb([instance1[1], instance1[2]])
-    result2 = parse_outputs_mb([instance2[1], instance2[2]])
+    result1 = parse_outputs([instance1[1], instance1[2]], table_size_dict)
+    result2 = parse_outputs([instance2[1], instance2[2]], table_size_dict)
 
     def wrap_time(x):
-        return x
-        #return round(x / 1000., 2)
+        #return x
+        return round(x / 1000., 2)
 
     result2_dict = {}
     for x in result2:
@@ -247,18 +247,19 @@ if __name__ == '__main__':
             #        y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
             #        x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]
             #        ))
-            print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(y[1] / y[2]), "cos-r"))
-            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(y[2]), "cos"))
-            
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(y[1] / y[2]), "cos-r"))
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[1]), "cos-r"))
+            #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[2]), "cos"))
+
             #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[1]), "qex-r"))
             #print("{{ \"id\": {}, \"t1\": {}, \"src\":\"{}\" }},".format(process_case_name(x[0]), wrap_time(x[2]), "qex"))
 
             #print(" {}, {}, {}".format(process_case_name(x[0]), wrap_time(x[2]), wrap_time(x[3])))
             #print("{} {} ".format(x[0], x[4]))
-            #print("{} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
-            #        process_case_name(x[0]), stats[x[0]][0],
-            #        wrap_time(y[2]), wrap_time(y[3]), y[4],
-            #        wrap_time(x[2]), wrap_time(x[3]), x[4]))
+            print("{} & {} & {} & {} & {} & {} & {} & {} & {} & {} \\\\".format(
+                    process_case_name(x[0]), stats[x[0]][0],
+                    y[1], wrap_time(y[2]), wrap_time(y[3]), y[4],
+                    x[1], wrap_time(x[2]), wrap_time(x[3]), x[4]))
  
     print(len(result1))
 
