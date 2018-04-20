@@ -37,16 +37,17 @@ def list.swap_ith_forward {α : Type} {f : Type → Type} [alternative f]
 lemma swap_gives_result_if_index_in_range {α : Type}
   : ∀ (ls : list α) i,
     i + 2 < list.length ls →
-    ∃ ls', list.swap_ith_forward i ls = some ls' :=
+    { ls' : list α // list.swap_ith_forward i ls = some ls' } :=
 begin
   intros ls i h,
   revert ls,
   induction i with j ih;
   intros; cases ls with x ys,
-  { cases h },
-  { cases ys with y zs, cases h, cases h_a,
-    existsi (y :: x :: zs), refl },
-  { cases h },
+  { exfalso, cases h },
+  { cases ys with y zs,
+    { exfalso, cases h, cases h_a },
+    { existsi (y :: x :: zs), refl } },
+  { exfalso, cases h },
   { cases ih ys _ with ys' h',
     existsi x :: ys', unfold list.swap_ith_forward,
     rw h', refl,
@@ -100,18 +101,23 @@ meta def move_to_front (i : nat) : tactic unit :=
         next_iter
   in nat.repeat loop i $ return ()
 
-meta def TDP : tactic unit := 
-  let loop : ℕ → tactic unit → tactic unit :=
-      λ iter_num next_iter, do
-        ⟨schemas, body⟩ ← get_lhs_repr,
-        sorry
-  in sorry
+meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
+  let loop (iter_num : ℕ) (next_iter : tactic unit) : tactic unit :=
+      next_iter <|> do
+      move_to_front iter_num,
+      to_expr ``(congr_arg usr.sig) >>= apply,
+      funext,
+      easy_case_solver <|> TDP'
+  in do
+    num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_repr,
+    nat.repeat loop num_vars easy_case_solver
+
+meta def TDP := TDP' reflexivity
 end TDP
 
-example {p q r} {f : Tuple p → Tuple q → Tuple r → usr}
-  : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r), f a b c)
-  = (∑ (c : Tuple r) (a : Tuple p) (b : Tuple q), f a b c) :=
+example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
+  : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)
+  = (∑ (c : Tuple r) (a : Tuple p) (d : Tuple s) (b : Tuple q), f a b c d) :=
 begin
-  move_to_front 2,
-  refl
+  TDP
 end
