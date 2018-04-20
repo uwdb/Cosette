@@ -1,3 +1,7 @@
+-- Example 3 for Rule 6: Add Keys
+-- from Pirahesh et al, Extensible/Rule Based Query Rewrite Optimization in Starburst
+-- SIGMOD 92
+
 schema itp(itemno:int, np:int);
 schema itm(itemno:int, type:int);
 
