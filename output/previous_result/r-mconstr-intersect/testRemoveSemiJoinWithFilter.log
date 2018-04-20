@@ -1,0 +1,49 @@
+[[symbreak]] #t
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[]
+emp,
+ForallEQ[(r[1] = @0) ∧ (r[1] = str_foo_$0)]
+
+--------------------
+[table size] (0 0 0 1 1) [real time] 31 ms
+[table size] (0 0 0 2 1) [real time] 30 ms
+[table size] (0 0 0 2 2) [real time] 19 ms
+[table size] (0 0 0 3 2) [real time] 22 ms
+[table size] (0 0 0 3 3) [real time] 33 ms
+[table size] (0 0 0 4 3) [real time] 47 ms
+[table size] (0 0 0 4 4) [real time] 74 ms
+[table size] (0 0 0 5 4) [real time] 97 ms
+[table size] (0 0 0 5 5) [real time] 152 ms
+[table size] (0 0 0 6 5) [real time] 195 ms
+[table size] (0 0 0 6 6) [real time] 290 ms
+[table size] (0 0 0 7 6) [real time] 352 ms
+[table size] (0 0 0 7 7) [real time] 489 ms
+[table size] (0 0 0 8 7) [real time] 633 ms
+[table size] (0 0 0 8 8) [real time] 877 ms
+[table size] (0 0 0 9 8) [real time] 1022 ms
+[table size] (0 0 0 9 9) [real time] 1308 ms
+[table size] (0 0 0 10 9) [real time] 1542 ms
+[table size] (0 0 0 10 10) [real time] 1942 ms
+[table size] (0 0 0 11 10) [real time] 2484 ms
+[table size] (0 0 0 11 11) [real time] 2781 ms
+[table size] (0 0 0 12 11) [real time] 3555 ms
+[table size] (0 0 0 12 12) [real time] 4141 ms
+[table size] (0 0 0 13 12) [real time] 5239 ms
+[table size] (0 0 0 13 13) [real time] 5616 ms
+[table size] (0 0 0 14 13) [real time] 6900 ms
+[table size] (0 0 0 14 14) [real time] 7819 ms
+[table size] (0 0 0 15 14) [real time] 9177 ms
+[table size] (0 0 0 15 15) [real time] 11094 ms
+[table size] (0 0 0 16 15) [real time] 12263 ms
+[table size] (0 0 0 16 16) [real time] 13496 ms
+[table size] (0 0 0 17 16) [real time] 15452 ms
+[table size] (0 0 0 17 17) [real time] 17990 ms
+[table size] (0 0 0 18 17) [real time] 21640 ms
+[table size] (0 0 0 18 18) [real time] 23851 ms
+[table size] (0 0 0 19 18) [real time] 26429 ms
+[table size] (0 0 0 19 19) [real time] 28511 ms
+[table size] (0 0 0 20 19) [real time] 32101 ms
+[table size] (0 0 0 20 20) [real time] 36111 ms
+{"size":[1],"status":"UNSAT"}

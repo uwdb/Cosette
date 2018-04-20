@@ -1,0 +1,43 @@
+[[symbreak]] #t
+[inference time] 10
+[constraint]
+carriers,
+ForallEQ[(r[1] = @0)]
+flights,
+ForallEQ[(r[7] = str_seattle_wa_$0)]
+
+--------------------
+[query size] 4 4
+[query aggr] #t #t
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy) (((4 2) . 1)))
+  #(struct:Table dummy (dummy dummy) (((4 1) . 0)))
+[NEQ]
+[table size] (0 0 1 1) [real time] 86 ms
+(#(struct:Table months (mid month) ())
+ #(struct:Table weekdays (did day_of_week) ())
+ #(struct:Table carriers (cid name) (((4 4) . 1)))
+ #(struct:Table
+   flights
+   (fid
+    year
+    month_id
+    day_of_month
+    day_of_week_id
+    carrier_id
+    flight_num
+    origin_city
+    origin_state
+    dest_city
+    dest_state
+    departure_delay
+    taxi_out
+    arrival_delay
+    canceled
+    actual_time
+    distance
+    capacity
+    price)
+   (((0 0 0 0 0 4 0 3 7 0 0 0 0 0 2 0 0 0 0) . 1))))
+
+{"size":[1],"status":"UNSAT"}

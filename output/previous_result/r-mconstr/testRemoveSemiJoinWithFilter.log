@@ -1,0 +1,49 @@
+[[symbreak]] #t
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[#t ∨ #t]
+emp,
+ForallEQ[(r[1] = str_foo_$0) ∧ (r[1] = @0) ∨ (r[1] = str_foo_$0) ∧ (r[1] = @0)]
+
+--------------------
+[table size] (0 0 0 1 1) [real time] 32 ms
+[table size] (0 0 0 2 1) [real time] 34 ms
+[table size] (0 0 0 2 2) [real time] 21 ms
+[table size] (0 0 0 3 2) [real time] 28 ms
+[table size] (0 0 0 3 3) [real time] 38 ms
+[table size] (0 0 0 4 3) [real time] 49 ms
+[table size] (0 0 0 4 4) [real time] 76 ms
+[table size] (0 0 0 5 4) [real time] 101 ms
+[table size] (0 0 0 5 5) [real time] 154 ms
+[table size] (0 0 0 6 5) [real time] 196 ms
+[table size] (0 0 0 6 6) [real time] 295 ms
+[table size] (0 0 0 7 6) [real time] 353 ms
+[table size] (0 0 0 7 7) [real time] 490 ms
+[table size] (0 0 0 8 7) [real time] 630 ms
+[table size] (0 0 0 8 8) [real time] 885 ms
+[table size] (0 0 0 9 8) [real time] 1028 ms
+[table size] (0 0 0 9 9) [real time] 1310 ms
+[table size] (0 0 0 10 9) [real time] 1529 ms
+[table size] (0 0 0 10 10) [real time] 1954 ms
+[table size] (0 0 0 11 10) [real time] 2503 ms
+[table size] (0 0 0 11 11) [real time] 2792 ms
+[table size] (0 0 0 12 11) [real time] 3575 ms
+[table size] (0 0 0 12 12) [real time] 4180 ms
+[table size] (0 0 0 13 12) [real time] 5216 ms
+[table size] (0 0 0 13 13) [real time] 5582 ms
+[table size] (0 0 0 14 13) [real time] 6556 ms
+[table size] (0 0 0 14 14) [real time] 8176 ms
+[table size] (0 0 0 15 14) [real time] 9255 ms
+[table size] (0 0 0 15 15) [real time] 11266 ms
+[table size] (0 0 0 16 15) [real time] 12342 ms
+[table size] (0 0 0 16 16) [real time] 13627 ms
+[table size] (0 0 0 17 16) [real time] 15538 ms
+[table size] (0 0 0 17 17) [real time] 18080 ms
+[table size] (0 0 0 18 17) [real time] 22001 ms
+[table size] (0 0 0 18 18) [real time] 24069 ms
+[table size] (0 0 0 19 18) [real time] 25439 ms
+[table size] (0 0 0 19 19) [real time] 30002 ms
+[table size] (0 0 0 20 19) [real time] 32249 ms
+[table size] (0 0 0 20 20) [real time] 36363 ms
+{"size":[1],"status":"UNSAT"}

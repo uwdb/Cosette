@@ -1,0 +1,27 @@
+[[symbreak]] #t
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[(r[1] = str_foo_$0) ∧ (#t) ∨ (r[1] = str_foo_$0)]
+emp,
+ForallEQ[#t ∨ (r[1] = @0) ∨ #t ∨ (r[1] = @0)]
+
+--------------------
+[table size] (1 1) [real time] 43 ms
+[table size] (2 1) [real time] 16 ms
+[table size] (2 2) [real time] 34 ms
+[table size] (3 2) [real time] 44 ms
+[table size] (3 3) [real time] 148 ms
+[table size] (4 3) [real time] 242 ms
+[table size] (4 4) [real time] 688 ms
+[table size] (5 4) [real time] 1086 ms
+[table size] (5 5) [real time] 2650 ms
+[table size] (6 5) [real time] 3602 ms
+[table size] (6 6) [real time] 7866 ms
+[table size] (7 6) [real time] 10695 ms
+[table size] (7 7) [real time] 20738 ms
+[table size] (8 7) [real time] 26650 ms
+[table size] (8 8) [real time] 47741 ms
+[table size] (9 8) [real time] 59614 ms
+[table size] (9 9) [real time] 103617 ms
+{"size":[1],"status":"UNSAT"}

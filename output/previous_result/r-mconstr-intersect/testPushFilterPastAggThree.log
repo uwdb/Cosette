@@ -1,0 +1,30 @@
+[[symbreak]] #t
+[inference time] 4
+[constraint]
+emp,
+ForallEQ[(r[7] = @0)]
+
+--------------------
+[table size] (0 0 0 0 1) [real time] 27 ms
+[table size] (0 0 0 0 2) [real time] 20 ms
+[table size] (0 0 0 0 3) [real time] 311 ms
+[table size] (0 0 0 0 4) [real time] 361 ms
+[table size] (0 0 0 0 5) [real time] 392 ms
+[table size] (0 0 0 0 6) [real time] 497 ms
+[table size] (0 0 0 0 7) [real time] 608 ms
+[table size] (0 0 0 0 8) [real time] 751 ms
+[table size] (0 0 0 0 9) [real time] 1134 ms
+[table size] (0 0 0 0 10) [real time] 1612 ms
+[table size] (0 0 0 0 11) [real time] 2262 ms
+[table size] (0 0 0 0 12) [real time] 3397 ms
+[table size] (0 0 0 0 13) [real time] 4071 ms
+[table size] (0 0 0 0 14) [real time] 6624 ms
+[table size] (0 0 0 0 15) [real time] 7852 ms
+[table size] (0 0 0 0 16) [real time] 12751 ms
+[table size] (0 0 0 0 17) [real time] 14792 ms
+[table size] (0 0 0 0 18) [real time] 24713 ms
+[table size] (0 0 0 0 19) [real time] 28724 ms
+[table size] (0 0 0 0 20) [real time] 48902 ms
+[table size] (0 0 0 0 21) [real time] 57632 ms
+[table size] (0 0 0 0 22) [real time] 75229 ms
+{"size":[1],"status":"UNSAT"}

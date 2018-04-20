@@ -1,0 +1,30 @@
+[[symbreak]] #f
+[query size] 2 3
+[query aggr] #t #t
+[inference time] 4
+[constraint]
+emp,
+ForallEQ[(r[2] = str_clerk_$0) ∧ (r[6] = str_null_$0) ∧ (str_clerk_$0 = @0) ∨ (r[2] = str_clerk_$0) ∧ (r[6] = str_null_$0) ∧ (r[2] = @0)]
+
+--------------------
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 1) [real time] 30 ms
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 2) [real time] 122 ms
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 3) [real time] 505 ms
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 4) [real time] 4109 ms
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 5) [real time] 5842 ms
+[query size] 2 3
+[query aggr] #t #t
+[table size] (0 0 0 0 6) [real time] 89048 ms
+[query size] 2 3
+[query aggr] #t #t
+{"size":[1],"status":"UNSAT"}

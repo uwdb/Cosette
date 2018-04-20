@@ -1,0 +1,45 @@
+[[symbreak]] #t
+[query size] 5 5
+[query aggr] #f #f
+[inference time] 5
+[constraint]
+dept,
+ForallEQ[(r[0] = 10) ∧ (r[0] = @0) ∨ (r[0] = 10) ∧ (r[0] = 10) ∧ (r[0] = @0)]
+emp,
+ForallEQ[(r[1] = @1) ∨ (r[1] = @1)]
+
+--------------------
+[table size] (1 1) [real time] 32 ms
+[table size] (2 1) [real time] 26 ms
+[table size] (2 2) [real time] 22 ms
+[table size] (3 2) [real time] 32 ms
+[table size] (3 3) [real time] 61 ms
+[table size] (4 3) [real time] 74 ms
+[table size] (4 4) [real time] 123 ms
+[table size] (5 4) [real time] 185 ms
+[table size] (5 5) [real time] 261 ms
+[table size] (6 5) [real time] 388 ms
+[table size] (6 6) [real time] 622 ms
+[table size] (7 6) [real time] 743 ms
+[table size] (7 7) [real time] 1068 ms
+[table size] (8 7) [real time] 1261 ms
+[table size] (8 8) [real time] 1976 ms
+[table size] (9 8) [real time] 2333 ms
+[table size] (9 9) [real time] 2799 ms
+[table size] (10 9) [real time] 4489 ms
+[table size] (10 10) [real time] 4498 ms
+[table size] (11 10) [real time] 6519 ms
+[table size] (11 11) [real time] 7980 ms
+[table size] (12 11) [real time] 8932 ms
+[table size] (12 12) [real time] 12667 ms
+[table size] (13 12) [real time] 15227 ms
+[table size] (13 13) [real time] 20127 ms
+[table size] (14 13) [real time] 20496 ms
+[table size] (14 14) [real time] 24555 ms
+[table size] (15 14) [real time] 40710 ms
+[table size] (15 15) [real time] 40478 ms
+[table size] (16 15) [real time] 47776 ms
+[table size] (16 16) [real time] 54811 ms
+[table size] (17 16) [real time] 85506 ms
+[table size] (17 17) [real time] 95088 ms
+{"size":[1],"status":"UNSAT"}

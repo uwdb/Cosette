@@ -1,0 +1,24 @@
+[[symbreak]] #t
+[query size] 2 2
+[query aggr] #t #t
+[inference time] 3
+[constraint]
+emp,
+ForallEQ[(r[0] = 10) ∧ (r[6] = @2) ∧ (10 = @1) ∧ (r[2] = @0) ∨ (r[0] = 10) ∧ (r[6] = @2) ∧ (r[0] = @1) ∧ (r[2] = @0)]
+
+--------------------
+[table size] (1) [real time] 44 ms
+[table size] (2) [real time] 108 ms
+[table size] (3) [real time] 679 ms
+[table size] (4) [real time] 442 ms
+[table size] (5) [real time] 769 ms
+[table size] (6) [real time] 1689 ms
+[table size] (7) [real time] 1842 ms
+[table size] (8) [real time] 4063 ms
+[table size] (9) [real time] 4741 ms
+[table size] (10) [real time] 11994 ms
+[table size] (11) [real time] 28091 ms
+[table size] (12) [real time] 68023 ms
+[table size] (13) [real time] 145468 ms
+[table size] (14) [real time] 297741 ms
+{"size":[1],"status":"UNSAT"}

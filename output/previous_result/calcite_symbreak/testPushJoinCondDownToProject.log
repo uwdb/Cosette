@@ -1,0 +1,57 @@
+[[symbreak]] #t
+[query size] 4 6
+[query aggr] #f #f
+[inference time] 5
+[constraint]
+emp,
+ForallEQ[(#t) ∧ (r[7] = @1) ∨ (r[7] = @1)]
+dept,
+ForallEQ[(#t) ∧ (r[0] = @0) ∨ (r[0] = @0)]
+
+--------------------
+[table size] (0 0 0 1 1) [real time] 30 ms
+[table size] (0 0 0 2 1) [real time] 21 ms
+[table size] (0 0 0 2 2) [real time] 21 ms
+[table size] (0 0 0 3 2) [real time] 22 ms
+[table size] (0 0 0 3 3) [real time] 42 ms
+[table size] (0 0 0 4 3) [real time] 37 ms
+[table size] (0 0 0 4 4) [real time] 46 ms
+[table size] (0 0 0 5 4) [real time] 68 ms
+[table size] (0 0 0 5 5) [real time] 82 ms
+[table size] (0 0 0 6 5) [real time] 121 ms
+[table size] (0 0 0 6 6) [real time] 228 ms
+[table size] (0 0 0 7 6) [real time] 216 ms
+[table size] (0 0 0 7 7) [real time] 299 ms
+[table size] (0 0 0 8 7) [real time] 352 ms
+[table size] (0 0 0 8 8) [real time] 481 ms
+[table size] (0 0 0 9 8) [real time] 617 ms
+[table size] (0 0 0 9 9) [real time] 755 ms
+[table size] (0 0 0 10 9) [real time] 1019 ms
+[table size] (0 0 0 10 10) [real time] 1350 ms
+[table size] (0 0 0 11 10) [real time] 1450 ms
+[table size] (0 0 0 11 11) [real time] 1883 ms
+[table size] (0 0 0 12 11) [real time] 2040 ms
+[table size] (0 0 0 12 12) [real time] 2514 ms
+[table size] (0 0 0 13 12) [real time] 3960 ms
+[table size] (0 0 0 13 13) [real time] 3499 ms
+[table size] (0 0 0 14 13) [real time] 4159 ms
+[table size] (0 0 0 14 14) [real time] 5068 ms
+[table size] (0 0 0 15 14) [real time] 7579 ms
+[table size] (0 0 0 15 15) [real time] 6903 ms
+[table size] (0 0 0 16 15) [real time] 7979 ms
+[table size] (0 0 0 16 16) [real time] 9448 ms
+[table size] (0 0 0 17 16) [real time] 15014 ms
+[table size] (0 0 0 17 17) [real time] 13085 ms
+[table size] (0 0 0 18 17) [real time] 15228 ms
+[table size] (0 0 0 18 18) [real time] 17170 ms
+[table size] (0 0 0 19 18) [real time] 19848 ms
+[table size] (0 0 0 19 19) [real time] 31386 ms
+[table size] (0 0 0 20 19) [real time] 28409 ms
+[table size] (0 0 0 20 20) [real time] 32681 ms
+[table size] (0 0 0 21 20) [real time] 36842 ms
+[table size] (0 0 0 21 21) [real time] 41615 ms
+[table size] (0 0 0 22 21) [real time] 46868 ms
+[table size] (0 0 0 22 22) [real time] 78142 ms
+[table size] (0 0 0 23 22) [real time] 72846 ms
+[table size] (0 0 0 23 23) [real time] 82886 ms
+{"size":[1],"status":"UNSAT"}

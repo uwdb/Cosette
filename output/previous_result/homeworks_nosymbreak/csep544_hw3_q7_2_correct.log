@@ -1,0 +1,21 @@
+[[symbreak]] #f
+[inference time] 11
+[constraint]
+flights,
+ForallEQ[(r[9] = str_san_francisco_ca_$0) ∧ (r[7] = str_seattle_wa_$0) ∨ (r[9] = str_san_francisco_ca_$0) ∧ (r[7] = str_seattle_wa_$0) ∧ (#t)]
+carriers,
+ForallEQ[(r[1] = @0) ∨ (r[1] = @0)]
+
+--------------------
+[query size] 5 4
+[query aggr] #f #f
+[table size] (0 0 1 1) [real time] 88 ms
+[query size] 5 4
+[query aggr] #f #f
+[table size] (0 0 2 1) [real time] 310 ms
+[query size] 5 4
+[query aggr] #f #f
+[table size] (0 0 2 2) [real time] 964 ms
+[query size] 5 4
+[query aggr] #f #f
+{"size":[1],"status":"UNSAT"}

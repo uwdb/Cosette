@@ -1,0 +1,43 @@
+[[symbreak]] #t
+[query size] 5 5
+[query aggr] #t #t
+[inference time] 12
+[constraint]
+flights,
+ForallEQ[(r[9] = @1) ∨ (r[7] = @0) ∨ #t ∨ (r[15] = @2) ∧ (r[9] = @1) ∧ (r[7] = @0)]
+
+--------------------
+[table size] (0 0 0 1) [real time] 98 ms
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy) (((-4 -8 0) . 1)))
+  #(struct:Table dummy (dummy dummy dummy) (((-4 -8 2) . 1) ((-2 -8 2) . 0)))
+[NEQ]
+[table size] (0 0 0 2) [real time] 1193 ms
+(#(struct:Table months (mid month) ())
+ #(struct:Table weekdays (did day_of_week) ())
+ #(struct:Table carriers (cid name) ())
+ #(struct:Table
+   flights
+   (fid
+    year
+    month_id
+    day_of_month
+    day_of_week_id
+    carrier_id
+    flight_num
+    origin_city
+    origin_state
+    dest_city
+    dest_state
+    departure_delay
+    taxi_out
+    arrival_delay
+    canceled
+    actual_time
+    distance
+    capacity
+    price)
+   (((0 0 0 0 0 0 0 -4 0 -8 0 0 0 0 0 0 0 0 0) . 15)
+    ((0 0 0 0 0 0 0 -2 0 -8 0 0 0 0 0 2 0 0 0) . 0))))
+
+{"size":[1],"status":"UNSAT"}

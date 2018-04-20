@@ -1,0 +1,45 @@
+[[symbreak]] #t
+[inference time] 12
+[constraint]
+carriers,
+ForallEQ[(r[1] = @0)]
+months,
+ForallEQ[(r[1] = str_july_$0)]
+flights,
+ForallEQ[]
+
+--------------------
+[query size] 8 8
+[query aggr] #f #t
+[Table evaluation results]
+  #(struct:Table dummy (dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy) (((0 0 0 0 209 0 0 0 209 418) . 2700)))
+  #(struct:Table dummy (dummy dummy dummy dummy dummy dummy dummy dummy dummy dummy) (((((0 . 2700)) 0 ((0 . 2700)) ((0 . 2700)) ((209 . 2700)) 0 ((0 . 2700)) ((0 . 2700)) ((209 . 2700)) ((418 . 2700))) . 1)))
+[NEQ]
+[table size] (1 0 1 1) [real time] 112 ms
+(#(struct:Table months (mid month) (((0 0) . 15)))
+ #(struct:Table weekdays (did day_of_week) ())
+ #(struct:Table carriers (cid name) (((0 0) . 5)))
+ #(struct:Table
+   flights
+   (fid
+    year
+    month_id
+    day_of_month
+    day_of_week_id
+    carrier_id
+    flight_num
+    origin_city
+    origin_state
+    dest_city
+    dest_state
+    departure_delay
+    taxi_out
+    arrival_delay
+    canceled
+    actual_time
+    distance
+    capacity
+    price)
+   (((0 2015 0 15 0 0 0 0 0 0 0 0 0 0 0 209 0 0 0) . 6))))
+
+{"size":[1],"status":"UNSAT"}

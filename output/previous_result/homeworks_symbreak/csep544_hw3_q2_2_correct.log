@@ -1,0 +1,18 @@
+[[symbreak]] #t
+[query size] 2 3
+[query aggr] #t #t
+[inference time] 9
+[constraint]
+flights,
+ForallEQ[(r[7] = @0) ∨ (r[7] = @0)]
+
+--------------------
+[table size] (0 0 0 1) [real time] 86 ms
+[table size] (0 0 0 2) [real time] 179 ms
+[table size] (0 0 0 3) [real time] 689 ms
+[table size] (0 0 0 4) [real time] 834 ms
+[table size] (0 0 0 5) [real time] 887 ms
+[table size] (0 0 0 6) [real time] 1257 ms
+[table size] (0 0 0 7) [real time] 1905 ms
+[table size] (0 0 0 8) [real time] 3704 ms
+{"size":[1],"status":"UNSAT"}
