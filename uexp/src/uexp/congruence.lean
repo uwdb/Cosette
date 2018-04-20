@@ -9,7 +9,7 @@ private meta def walk_product : expr → tactic unit
     then return ()
     else do h ← to_expr ``(eq_symm %%t₁ %%t₂),
             try $ rewrite_target h,
-            tactic.trace $ "rewriting " ++ h.to_string,
+            -- tactic.trace $ "rewriting " ++ h.to_string,
             return ()
 | _ := return ()
 
@@ -58,54 +58,62 @@ meta def trans_step :=
 -- set_option pp. false
 -- set_option trace.simplify true
 section
-variables {s: Schema} {t₁ t₂ t₃: Tuple s} {a b c d: usr} 
+variables {s: Schema} {t₁ t₂ t₃: Tuple s} {a b c d e: usr} 
 private meta def simp_solve :=
     `[intros, simp, assumption <|> ac_refl ]
 
-lemma prod_unit_p1: c = d → 1 * c = d := by simp_solve
-
-lemma plus_assoc_p1: a * (b * c) = d → (a * b) * c = d := by simp_solve
-
-lemma prod_assoc_p2: 
-b * (a * c) = d → (a * b) * c = d := 
+-- should match the equations in the tail?
+lemma prod_eq_trans_1 : 
+(t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * (d * (t₁ ≃ t₃)) = e → 
+(t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * d = e  := 
 begin
     intros,
-    rw ← a_1,
-    ac_refl
+    rw ← a,
+    rw ← time_assoc,
+    rw eq_trans,
+    simp,
 end
 
-lemma plus_comm_p : a * b = c → b * a = c := by simp_solve
-
-lemma plus_unit_c : a = b → a = 1 * b := by simp_solve
-
-lemma plus_assoc_c1 : d = a * (b * c) → (a * b) * c = d := 
+lemma prod_eq_trans_2 : 
+(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * (d * (t₂ ≃ t₃)) = e → 
+(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e  := 
 begin
     intros,
-    rw a_1,
-    ac_refl,
+    rw ← a,
+    rw ← time_assoc,
+    simp,
 end
 
-lemma plus_assoc_c2 : d = b * (a * c) → (a * b) * c = d :=
+lemma prod_eq_trans_3 : 
+(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * (d * (t₃ ≃ t₂)) = e → 
+(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e  := 
 begin
     intros,
-    rw a_1,
-    ac_refl,
-end    
-
-lemma plus_comm_c : c = a * b → c = b * a := by simp_solve
-
-lemma plus_cancel : 
-(t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) = d  := 
-begin
-    intros,
-    rw a_1,
-    rw a_2,
+    rw ← a,
+    rw ← time_assoc,
+    simp,
 end
 end
 
-lemma congr_ex1 {s: Schema} (a b c d: Tuple s):
-     (a ≃ b) * (b ≃ c) * (a ≃ c) = (a ≃ c) * (b ≃ c)   :=
+-- make sure all product is right assoc
+meta def right_assoc :=
+    `[repeat {rewrite time_assoc}]
+
+-- change the goal to the form  a x 1 = b x 1
+lemma add_unit (a b: usr):
+    a * 1 = b * 1 → a = b :=
+begin
+    simp,
+    intros, 
+    assumption,
+end
+
+lemma congr_ex1 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ b) * (d ≃ e) * (b ≃ c)  = (a ≃ c) * (b ≃ c) * (e ≃ d)  :=
 begin
     unify_eq,
+    right_assoc,
+    apply add_unit,
     sorry
 end
+
