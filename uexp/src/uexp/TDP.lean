@@ -1,5 +1,5 @@
 import .u_semiring
-
+import .cosette_tactics
 section TDP
 
 open tactic
@@ -27,12 +27,6 @@ match e with
 | `(%%a = %%b) := return $ sigma_expr_to_sigma_repr a
 | _ := failed
 end
-
-def list.swap_ith_forward {α : Type} {f : Type → Type} [alternative f]
-  : nat → list α → f (list α)
-| 0 (x::y::zs) := pure $ y :: x :: zs
-| (nat.succ n) (x::xs) := list.cons x <$> list.swap_ith_forward n xs
-| _ _ := failure
 
 lemma swap_gives_result_if_index_in_range {α : Type}
   : ∀ (ls : list α) i,

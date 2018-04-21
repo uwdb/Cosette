@@ -62,8 +62,13 @@ variables {s: Schema} {t₁ t₂ t₃: Tuple s} {a b c d e: usr}
 private meta def simp_solve :=
     `[intros, simp, assumption <|> ac_refl ]
 
+lemma usr_eq_symm: a = b → b = a := 
+begin
+    intros, rewrite a_1, 
+end
+
 -- should match the equations in the tail?
-lemma prod_eq_trans_1 : 
+lemma ueq_trans_1 : 
 (t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * (d * (t₁ ≃ t₃)) = e → 
 (t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * d = e  := 
 begin
@@ -74,7 +79,7 @@ begin
     simp,
 end
 
-lemma prod_eq_trans_2 : 
+lemma ueq_trans_2 : 
 (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * (d * (t₂ ≃ t₃)) = e → 
 (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e  := 
 begin
@@ -84,7 +89,7 @@ begin
     simp,
 end
 
-lemma prod_eq_trans_3 : 
+lemma ueq_trans_3 : 
 (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * (d * (t₃ ≃ t₂)) = e → 
 (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e  := 
 begin
@@ -116,4 +121,5 @@ begin
     apply add_unit,
     sorry
 end
+
 
