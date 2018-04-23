@@ -35,30 +35,30 @@
 ;              ON "Extent2.id" = "UnionAll2.c1" 
 ;WHERE  ( "Extent1.fk_property" IS NOT NULL ) AND ( "Extent1.fk_property" = 783 ) 
 
-#lang rosette  
-                                                                                                                                               
+#lang rosette
+
 (require "../util.rkt" "../sql.rkt" "../table.rkt"  "../evaluator.rkt" "../equal.rkt")
 
 ;=============================== Concrete tables for testing =====================
 
 (define ct1
     (Table "DefaultPropertyValues" (list "ID" "fk_Property")
-	   (list (cons (list 3 783) 1)
-		 (cons (list 10 783) 1)
-		 (cons (list 9 1) 1)
-		 (cons (list 8 0) 1))))
+     (list (cons (list 3 783) 1)
+     (cons (list 10 783) 1)
+     (cons (list 9 1) 1)
+     (cons (list 8 0) 1))))
 
 (define ct3
   (Table "CurrentDateTimeDefaultValues" (list "ID" "C")
-	 (list (cons (list 3 4) 1))))
+   (list (cons (list 3 4) 1))))
 
 (define ct4
   (Table "NewGuidDefaultValues" (list "ID" "C")
-	 (list (cons (list 3 4) 1))))
+   (list (cons (list 3 4) 1))))
 
 (define ct5
   (Table "EnumDefaultValues" (list "ID" "C")
-	 (list (cons (list 3 4) 1))))
+   (list (cons (list 3 4) 1))))
 
 ;=========================== Symbolic tables for verification =============
 
@@ -97,20 +97,20 @@
   (AS
     (SELECT (VALS "t12.ID1" "t12.fk_Property1" "t12.ID2" "t12.fk_Property2")
       FROM (AS (JOIN (AS (NAMED t1) ["t1" (list "ID" "fk_Property")])
-		     (AS (NAMED t1) ["t2" (list "ID" "fk_Property")]))
-	       ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
+         (AS (NAMED t1) ["t2" (list "ID" "fk_Property")]))
+         ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
      WHERE (BINOP "t12.ID1" = "t12.ID2"))
     ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")]))
 
 (define q0-part-2
   (AS 
-    (UNION-ALL 
-      (UNION-ALL (NAMED t3) (NAMED t4))	     
+    (UNION-ALL
+      (UNION-ALL (NAMED t3) (NAMED t4))
       (NAMED t5))
     ["UnionAll2" (list "ID" "C")]))
 
 (define q0-part-3
-  (AS (LEFT-OUTER-JOIN q0-part-1 q0-part-2 0 0)
+  (AS (LEFT-OUTER-JOIN q0-part-1 q0-part-2 (BINOP "t12.ID1" = "UnionAll2.ID"))
       ["J1" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C")]))
 
 (define q0
@@ -118,7 +118,7 @@
     (VALS "J1.ID1" "J1.fk_Property1" "J1.ID2" "J1.fk_Property2" "J1.ID3" "J1.C")
     FROM q0-part-3
     WHERE (AND (BINOP "J1.fk_Property1" (lambda (x y) (not (equal? x y))) sqlnull)
-	       (BINOP "J1.fk_Property1" = 783))))
+         (BINOP "J1.fk_Property1" = 783))))
 
 ; lines 05-08
 (define q1-part-1
@@ -127,51 +127,43 @@
       (VALS "t1.ID" "t1.fk_Property")
       FROM (AS (NAMED t1) ["t1" (list "ID" "fk_Property")])
       WHERE (AND (BINOP "t1.fk_Property" (lambda (x y) (not (equal? x y))) sqlnull)
-		 (BINOP "t1.fk_Property" = 783)))
+     (BINOP "t1.fk_Property" = 783)))
     ["t1" (list "ID" "fk_Property")]))
 
 ; lines 01-08
 (define q1-part-2
-  (SELECT 
-    (VALS "t12.ID1" "t12.fk_Property1" "t12.ID2" "t12.fk_Property2")
-    FROM (AS 
-	   (JOIN (NAMED t1)
-		 q1-part-1)
-	   ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
-    WHERE (BINOP "t12.ID1" = "t12.ID2")))
+  (AS (SELECT (VALS "t12.ID1" "t12.fk_Property1" "t12.ID2" "t12.fk_Property2")
+       FROM (AS (JOIN (NAMED t1) q1-part-1)
+                ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
+       WHERE (BINOP "t12.ID1" = "t12.ID2"))
+      ["q1p2" (list "ID1" "fk_Property1" "ID2" "fk_Property2")]))
 
 ; lines 14-15
 (define q1-part-3
-   (SELECT
-     (VALS "t5.ID" "t5.C")
-     FROM (AS (NAMED t5) ["t5" (list "ID" "C")])
-     WHERE (EXISTS 
-	     (SELECT (VALS "t2.ID")
-	      FROM (AS (NAMED t1) ["t2" (list "ID" "fk_Property")])
-	      WHERE (BINOP "t5.ID" = "t2.ID")))))
+   (SELECT (VALS "t5.ID" "t5.C") 
+    FROM (AS (NAMED t5) ["t5" (list "ID" "C")])
+    WHERE (EXISTS 
+            (SELECT (VALS "t2.ID")
+             FROM (AS (NAMED t1) ["t2" (list "ID" "fk_Property")])
+             WHERE (BINOP "t5.ID" = "t2.ID")))))
 
 (define q1-part-4
-  (AS 
-    (UNION-ALL 
-      (UNION-ALL (NAMED t3) 
-		 (UNION-ALL (NAMED t4) 
-			    (NAMED t5)))
-    q1-part-3) ["U" (list "ID" "C")]))
+  (AS (UNION-ALL (UNION-ALL (NAMED t3) (UNION-ALL (NAMED t4) (NAMED t5))) q1-part-3) 
+      ["U" (list "ID" "C")]))
 
 (define q1
-  (AS (LEFT-OUTER-JOIN q1-part-2 q1-part-4 0 0)
+  (AS (LEFT-OUTER-JOIN q1-part-2 q1-part-4 (BINOP "q1p2.ID1" = "U.ID"))
       ["R" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C")]))
 
 (define q2-part-2 q1-part-2)
 (define q2-part-4
-  (AS (UNION-ALL (NAMED t3) 
-		 (UNION-ALL (NAMED t4) 
-			    (NAMED t5)))
+  (AS (UNION-ALL (NAMED t3) (UNION-ALL (NAMED t4) (NAMED t5)))
       ["U" (list "ID" "C1")]))
 
 (define q2
-    (AS (LEFT-OUTER-JOIN q2-part-2 q2-part-4 0 0)     
-	["R" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C1")]))
+    (AS (LEFT-OUTER-JOIN q2-part-2 q2-part-4 (BINOP "q1p2.ID1" = "U.ID"))
+        ["R" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C1")]))
+
 ;(run q0)
 ;(run q1)
 ;(run q2)
@@ -191,5 +183,3 @@
 ;10         ->  Seq Scan on "CurrentDateTimeDefaultValues" "Extent3" 
 ;11         ->  Seq Scan on "NewGuidDefaultValues" "Extent4" 
 ;12         ->  Seq Scan on "EnumDefaultValues" "Extent5"
-
-

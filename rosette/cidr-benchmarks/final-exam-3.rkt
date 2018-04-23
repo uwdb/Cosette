@@ -75,14 +75,10 @@
 
 (define q2-part
   (AS 
-    (LEFT-OUTER-JOIN-2
+    (LEFT-OUTER-JOIN
       (NAMED Usr)
       (NAMED Picture)
-      (SELECT 
-    	(VALS "x.uid" "x.uname" "x.city" "y.uid" "y.size")
-   	 FROM (JOIN (AS (NAMED Usr) ["x" (list "uid" "uname" "city")])
-		       (AS (NAMED Picture) ["y" (list "uid" "size")]))
-    	 WHERE (AND (BINOP "x.uid" = "y.uid") (BINOP "y.size" > 1000000))))
+      (AND (BINOP "Usr.uid" = "Picture.uid") (BINOP "Picture.size" > 1000000)))
     ["table" (list "x_uid" "x_uname" "x_city" "y_uid" "y_size")]))
 
 (define q2

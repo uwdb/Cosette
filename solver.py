@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 import tempfile
 import time
 import json
+from pprint import pprint
 
 def solve(cos_source, cos_folder=".", show_compiled=False):
     """ cos_source: Cosette source code, in string
@@ -50,6 +51,7 @@ def solve(cos_source, cos_folder=".", show_compiled=False):
                     time.sleep(.1)
                     continue
         ret = parse_results(results)
+        pprint(ret)
     else: # either coq_parse or ros_parse is False
         # the entire result is error
         ret["result"] = "ERROR"

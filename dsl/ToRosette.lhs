@@ -545,10 +545,10 @@ convert RosTableRef to sexp
 >   toSexp (RosTR t a) =
 >     case t of
 >       RosTRQuery q -> toSexp t
->       _ -> addParen $ uw ["NAMED",
->                           "(RENAME",
->                           toSexp t,
->                           (addEscStr a) ++ ")"]
+>       _ -> addParen $ uw ["AS",
+>                           "(NAMED",
+>                           (toSexp t) ++ ")",
+>                           "[" ++ (addEscStr a) ++ "]"]
 >   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp

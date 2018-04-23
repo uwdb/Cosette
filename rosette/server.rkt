@@ -1,6 +1,8 @@
 #lang racket/load
 
-(require "cosette.rkt" "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt")
+(require "cosette.rkt" "util.rkt" "table.rkt" 
+         "equal.rkt" "syntax.rkt" "denotation.rkt"
+         "test-util.rkt")
 (require json)
 
 ;; daemon of the rosette backend
@@ -37,7 +39,7 @@
             (define (messenger message) (channel-put main-channel message))
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
-              [(list q1 q2 tables) (solve-queries q1 q2 tables messenger)]
+              [(list q1 q2 tables) (solve-queries-symbreak q1 q2 tables messenger)]
               [_ (error "error on loading rosette source code.")])
             )))
 
@@ -50,8 +52,7 @@
     [(timeout) (void)]
     [else (set! ret item) (loop)]))
 
-(displayln (cond
-             [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
-             [else (jsexpr->string
-                    (hasheq 'status "UNSAT"
-                            'size ret))]))
+(displayln 
+  (cond 
+    [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
+    [else (jsexpr->string (hasheq 'status "UNSAT" 'size ret))]))
