@@ -1,5 +1,5 @@
 import .u_semiring
-
+import .cosette_tactics
 section TDP
 
 open tactic
@@ -14,6 +14,7 @@ meta def sigma_expr_to_sigma_repr : expr → usr_sigma_repr
   end
 | e := ⟨[], e⟩
 
+-- This needs to be a tactic so we can resolve `Tuple and `usr.sig
 meta def sigma_repr_to_sigma_expr : usr_sigma_repr → tactic expr
 | ⟨[], body⟩ := return body
 | ⟨t::ts, body⟩ := do
@@ -27,17 +28,26 @@ match e with
 | _ := failed
 end
 
-meta def list.swap_ith_forward {α : Type}
-  : Π (i : nat) (ls : list α), /-nat.succ i < ls.length →-/ tactic (list α)
---| 0 [] h := absurd (lt.trans h $ nat.zero_lt_succ 0) $ lt_irrefl 1
---| (nat.succ n) [] h := false.elim $ 
---                       nat.lt_le_antisymm (nat.zero_lt_succ $ nat.succ n) $
---                       nat.le_of_lt h
---| 0 [x] h := absurd h $ lt_irrefl 1
---| (nat.succ n) [x] h := absurd (lt.trans (nat.lt_of_succ_lt_succ h) $ nat.zero_lt_succ _) $ lt_irrefl _
-| 0 (x::y::zs) := return $ y :: x :: zs
-| (nat.succ n) (x::y::zs) := list.cons x <$> list.swap_ith_forward n (y :: zs)
-| _ _ := failed
+lemma swap_gives_result_if_index_in_range {α : Type}
+  : ∀ (ls : list α) i,
+    i + 2 < list.length ls →
+    { ls' : list α // list.swap_ith_forward i ls = some ls' } :=
+begin
+  intros ls i h,
+  revert ls,
+  induction i with j ih;
+  intros; cases ls with x ys,
+  { exfalso, cases h },
+  { cases ys with y zs,
+    { exfalso, cases h, cases h_a },
+    { existsi (y :: x :: zs), refl } },
+  { exfalso, cases h },
+  { cases ih ys _ with ys' h',
+    existsi x :: ys', unfold list.swap_ith_forward,
+    rw h', refl,
+    apply nat.lt_of_succ_lt_succ,
+    assumption }
+end
 
 meta def expr.swap_free_vars (i : nat) (j : nat) : expr → expr
 | (expr.var n) := if n = i
@@ -79,21 +89,29 @@ meta def swap_ith_sigma_forward (i : nat)
 
 meta def move_to_front (i : nat) : tactic unit :=
   let loop : ℕ → tactic unit → tactic unit :=
-      λ iter_num next_iter, do
-        repr ← get_lhs_repr,
-        swap_ith_sigma_forward iter_num repr,
+      λ iter_num next_iter,
+        get_lhs_repr >>=
+        swap_ith_sigma_forward iter_num >>
         next_iter
-  in nat.repeat loop i (return ())
+  in nat.repeat loop i $ return ()
 
-meta def TDP : tactic unit := do
-  failed
+meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
+  let loop (iter_num : ℕ) (next_iter : tactic unit) : tactic unit :=
+      next_iter <|> do
+      move_to_front iter_num,
+      to_expr ``(congr_arg usr.sig) >>= apply,
+      funext,
+      easy_case_solver <|> TDP'
+  in do
+    num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_repr,
+    nat.repeat loop num_vars easy_case_solver
 
+meta def TDP := TDP' reflexivity
 end TDP
 
-example {p q r} {f : Tuple p → Tuple q → Tuple r → usr}
-  : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r), f a b c)
-  = (∑ (c : Tuple r) (a : Tuple p) (b : Tuple q), f a b c) :=
+example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
+  : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)
+  = (∑ (c : Tuple r) (a : Tuple p) (d : Tuple s) (b : Tuple q), f a b c d) :=
 begin
-  move_to_front 2,
-  refl
+  TDP
 end
