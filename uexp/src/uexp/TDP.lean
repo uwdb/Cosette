@@ -89,9 +89,9 @@ meta def swap_ith_sigma_forward (i : nat)
 
 meta def move_to_front (i : nat) : tactic unit :=
   let loop : ℕ → tactic unit → tactic unit :=
-      λ iter_num next_iter,
-        get_lhs_repr >>=
-        swap_ith_sigma_forward iter_num >>
+      λ iter_num next_iter, do
+        repr ← get_lhs_repr,
+        swap_ith_sigma_forward iter_num repr,
         next_iter
   in nat.repeat loop i $ return ()
 

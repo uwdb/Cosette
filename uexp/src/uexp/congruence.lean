@@ -1,4 +1,5 @@
 import .u_semiring
+import .cosette_tactics
 
 open tactic
 
@@ -98,6 +99,10 @@ begin
     rw ← time_assoc,
     simp,
 end
+
+lemma prod_symm_assoc :
+a * (b * c) = b * (a * c) := by ac_refl 
+
 end
 
 -- make sure all product is right assoc
@@ -113,8 +118,49 @@ begin
     assumption,
 end
 
+meta def product_to_repr : expr → list expr
+| `(%%a * %%b) := a :: product_to_repr b
+| e := [e] 
+
+meta def repr_to_product : list expr → tactic expr
+| [x] := return x
+| (h::t) :=  do te ← repr_to_product t,
+                to_expr ``(%%h * %%te)
+| [] := failed
+
+meta def get_lhs_repr : tactic (list expr) :=
+target >>= λ e,
+match e with
+| `(%%a = %%b) := return $ product_to_repr a
+| _ := failed
+end
+
+meta def swap_ith_pred_forward (i: nat) (l: list expr) : tactic unit :=
+    do 
+    swapped_list ← list.swap_ith_forward i l,
+    origin_expr ← repr_to_product l,
+    swapped_expr ← repr_to_product swapped_list,
+    eq_lemma ← to_expr ``(%%origin_expr = %%swapped_expr),
+    eq_lemma_name ← mk_fresh_name,
+    tactic.assert eq_lemma_name eq_lemma,
+    repeat_n i $ (to_expr ``(congr_arg (has_mul.mul _)) >>= apply >> return ()),
+    applyc `prod_symm_assoc <|> applyc `mul_comm,
+    eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
+    rewrite_target eq_lemma,
+    clear eq_lemma
+
+meta def move_once (i : nat) : tactic unit :=
+    get_lhs_repr >>= swap_ith_pred_forward i
+
+lemma congr_ex0 (a b c d e f: usr):
+    c * d = e :=
+begin
+    move_once 0,
+    sorry
+end
+
 lemma congr_ex1 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ b) * (d ≃ e) * (b ≃ c)  = (a ≃ c) * (b ≃ c) * (e ≃ d)  :=
+     (a ≃ c) * (e ≃ c)  = (e ≃ c) * (a ≃ c)  :=
 begin
     unify_eq,
     right_assoc,
