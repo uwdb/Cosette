@@ -12,8 +12,8 @@
 ;; output is the aggregation result of the list
 (define (aggr-count l) (foldl + 0 (map cdr l)))
 (define (aggr-sum l) (foldl + 0 (map (lambda (x) (* (car x) (cdr x))) l)))
-(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) -inf.0 (map (lambda (x) (car x)) l)))
-(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) +inf.0 (map (lambda (x) (car x)) l)))
+(define (aggr-max l) (foldl (lambda (v r) (if (> v r) v r)) (car (car l)) (map (lambda (x) (car x)) l)))
+(define (aggr-min l) (foldl (lambda (v r) (if (< v r) v r)) (car (car l)) (map (lambda (x) (car x)) l)))
 (define (aggr-count-distinct l) 
   (cond [(eq? l '()) 0]
         [else (+ 1 (aggr-count-distinct (filter (lambda (x) (not (eq? (car l) x))) (cdr l))))]))
@@ -58,6 +58,15 @@
     [(equal? (dict-order-compare (car (car table)) 
                                  (car (car (cdr table)))) 
              -1) (table-content-ascending? (cdr table))]
+    [else #f]))
+
+(define (table-content-non-desc? table)
+  (cond
+    [(equal? table '()) #t]
+    [(equal? (cdr table) '()) #t]
+    [(<= (dict-order-compare (car (car table)) 
+                                 (car (car (cdr table)))) 
+             0) (table-content-non-desc? (cdr table))]
     [else #f]))
 
 ; given two lists with the same length, 
@@ -183,6 +192,9 @@
             (filter (lambda (x) (not (equal? (car ele) (car x))))
                     (cdr table)))))]))
 
+(define (remove-zero table)
+  (filter (lambda (t) (not (eq? (cdr t) 0))) table))
+
 (define (projection indices table)
   (let ([proj-single (lambda (r)
                        (map (lambda (i)
@@ -240,35 +252,22 @@
                        [else 0])))
          join-result)))
 
-; left outer join on two tables
-(define (left-outer-join table1 table2 index1 index2)
-  (let* ([content1 (Table-content table1)]
-         [content2 (Table-content table2)])
-    (Table 
-      (string-append (get-table-name table1)
-                     (get-table-name table2))
-      (schema-join table1 table2) 
-      (left-outer-join-raw content1 content2 index1 index2 (length (get-schema table1)) (length (get-schema table2))))))
 
 ; another version of left-outer-join
-(define (left-outer-join-2 table1 table2 table12)
+; table12 is the join result of table1 and table2 under some condition
+(define (left-outer-join-from-join-result table1 table2 table12)
   (let* ([content1 (Table-content table1)]
          [content2 (Table-content table2)]
          [content12 (Table-content table12)])
     (Table
-      (string-append (get-table-name table1)
-                     (get-table-name table2))
+      (string-append (get-table-name table1) (get-table-name table2))
       (schema-join table1 table2)
-      (adding-null-rows content1 content2 content12 (length (get-schema table1)) (length (get-schema table2))))))
+      (adding-null-rows content1 content2 content12 
+                        (length (get-schema table1)) 
+                        (length (get-schema table2))))))
 
-
-; left outer join two tables based on index1 and index2, this is raw because content1 content2 contains no table schema
-(define (left-outer-join-raw content1 content2 index1 index2 schema-size-1 schema-size-2)
-  (let ([content12 (equi-join content1 content2 (list (cons index1 index2)) schema-size-1)])
-    (adding-null-rows content1 content2 content12 schema-size-1 schema-size-2)))
-
-; content12 is the join result of content1 and content2 under come condition, 
-;this functions helps extending the join result with rows in content1 but not in content 2
+; content12 is the join result of content1 and content2 under some condition, 
+; this functions helps extending the join result with rows in content1 but not in content 2
 (define (adding-null-rows content1 content2 content12 schema-size-1 schema-size-2)
   (let ([null-cols (map (lambda (x) sqlnull) (build-list schema-size-2 values))])
     (let ([diff-keys (dedup (table-diff (dedup content1) (dedup (projection (build-list schema-size-1 values) content12))))])

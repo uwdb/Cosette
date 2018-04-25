@@ -31,18 +31,28 @@
     ; denote left-outer-join table
     [(query-left-outer-join? query)
      (let* 
-       ([q1 `(,(denote-sql (query-left-outer-join-query1 query) index-map) e)]
-        [q2 `(,(denote-sql (query-left-outer-join-query2 query) index-map) e)]
-        [k1 (query-left-outer-join-key1 query)]
-        [k2 (query-left-outer-join-key2 query)])
-       `(lambda (e) (left-outer-join ,q1 ,q2 ,k1 ,k2)))]
-    ; denote left-outer-join table
-    [(query-left-outer-join-2? query)
-     (let* 
-       ([q1 `(,(denote-sql (query-left-outer-join-2-query1 query) index-map) e)]
-        [q2 `(,(denote-sql (query-left-outer-join-2-query2 query) index-map) e)]
-        [jq `(,(denote-sql (query-left-outer-join-2-join-result query) index-map) e)])
-       `(lambda (e) (left-outer-join-2 ,q1 ,q2 ,jq)))]
+       ([q1 (query-left-outer-join-query1 query)]
+        [q2 (query-left-outer-join-query2 query)]
+        [pred (query-left-outer-join-pred query)]
+        [schema (append (extract-schema q1) (extract-schema q2))]
+        [name-hash (hash-copy index-map)])
+       (map (lambda (col-name index)
+              (hash-set! name-hash col-name (+ index (hash-count index-map))))
+            schema (range (length schema)))
+       (let* ([fq1 (eval (denote-sql q1 index-map) ns)]
+              [fq2 (eval (denote-sql q2 index-map) ns)]
+              [on-clause (eval (denote-filter pred name-hash) ns)]
+              [new-name "dummy"]
+              [new-schema (extract-schema query)])
+         `(lambda (e)
+            (let* ([t1 (,fq1 e)]
+                   [t2 (,fq2 e)]
+                   [content-w-env (map (lambda (r) (cons (append e (car r)) (cdr r))) 
+                                       (Table-content (xproduct t1 t2 "dummy")))]
+                   [post-filter (map (lambda (r) (cons (car r) (if (,on-clause (car r)) (cdr r) 0))) content-w-env)]
+                   [t12 (Table ,new-name ',new-schema post-filter)])
+            (left-outer-join-from-join-result t1 t2 t12)))
+         ))]
     ; query union all
     [(query-union-all? query)
      (let* 
@@ -149,19 +159,25 @@
     [(query-join? query) 
      (append (extract-schema (query-join-query1 query)) 
              (extract-schema (query-join-query2 query)))]
+    [(query-left-outer-join? query) 
+     (append (extract-schema (query-left-outer-join-query1 query)) 
+             (extract-schema (query-left-outer-join-query2 query)))]
     [(query-rename? query)
      (let ([tn (query-rename-table-name query)]
            [cnames (extract-schema (query-rename-query query))])
-       (map (lambda (x) (string-append tn "." x)) cnames))]
+       (map (lambda (x) (string-append tn "." (last (string-split x ".")))) cnames))]
     [(query-rename-full? query)
      (let ([tn (query-rename-full-table-name query)]
            [cnames (query-rename-full-column-names query)])
        (map (lambda (x) (string-append tn "." x)) cnames))]
     [(query-select? query)
      (map (lambda (x) "dummy") (query-select-select-args query))]
+    [(query-select-distinct? query)
+     (map (lambda (x) "dummy") (query-select-distinct-select-args query))]
     [(query-aggr-general? query)
-     (map (lambda (x) "dummy") (query-aggr-general-select-args query))]))
-
+     (map (lambda (x) "dummy") (query-aggr-general-select-args query))]
+    [(query-union-all? query) 
+     (extract-schema (query-union-all-query1 query))]))
 
 ;;; denote value returns tuple -> value
 (define (denote-value value nmap)
@@ -179,7 +195,6 @@
         (,(val-aggr-subq-agg-func value) 
           (map (lambda (r) (cons (car (car r)) (cdr r))) 
                (get-content (,(denote-sql (val-aggr-subq-query value) nmap) e)))))]))
-
 
 (define (denote-value-w-broadcasting value nmap gb-fields val-mode)
   (cond                                                                                                                                                       
@@ -247,7 +262,6 @@
                                   `(,(denote-value x nmap) e))
                                 (filter-nary-op-args f)))))]))
 
-
 ;;; denote filters returns tuple -> bool
 (define (denote-filter-w-broadcasting f nmap gb-fields)
   (cond
@@ -273,22 +287,3 @@
                ;push a quote "list" to make the list a list 
                ,(append '(list) (map (lambda (x) `(,(denote-value-w-broadcasting x nmap gb-fields #t) e))
                                      (filter-nary-op-args f)))))]))
-
-;;(define test-query1
-;;  (SELECT (VALS "t1.c1" "t1.c2" "t1.c3" "t2.c1" "t2.c2" "t2.c3")
-;;   FROM (JOIN (NAMED table1) (AS (NAMED table1) ["t2" '("c1" "c2" "c3")]))
-;;   WHERE (AND (BINOP "t1.c1" < "t2.c2") (BINOP "t1.c3" < "t2.c3"))))
-
-;; (run test-query1)
-
-; (rename-table ((lambda (e) (Table "t1" (list "c1" "c2" "c3") '())) '()) "t2")
-
-; (define denotation-q3
-;   '(lambda (e) (rename-table ((lambda (e) (Table "t1" (list "c1" "c2" "c3") '())) e) "t2")) )
-
-; ((eval (denote-sql q3 '()) ns) '())
-
-; (extract-schema q3)
-; (denote-sql q (make-hash))
-; ((eval (denote-sql q (make-hash)) ns) '())
-

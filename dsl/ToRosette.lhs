@@ -537,18 +537,17 @@ convert Predicate to sexp
 convert RosTableRef to sexp
 
 > instance Sexp RosTableExpr where
->   toSexp (RosTRBase tn) = tn
+>   toSexp (RosTRBase tn) = addParen $ uw ["NAMED", tn]
 >   toSexp (RosTRQuery q) = toSexp q
->   toSexp (RosUnion t1 t2) = addParen $ uw ["TABLE-UNION-ALL", toSexp t1, toSexp t2]
+>   toSexp (RosUnion t1 t2) = addParen $ uw ["UNION-ALL", toSexp t1, toSexp t2]
 
 > instance Sexp RosTableRef where
 >   toSexp (RosTR t a) =
 >     case t of
 >       RosTRQuery q -> toSexp t
->       _ -> addParen $ uw ["NAMED",
->                           "(RENAME",
->                           toSexp t,
->                           (addEscStr a) ++ ")"]
+>       _ -> addParen $ uw ["AS",
+>                           (toSexp t),
+>                           "[" ++ (addEscStr a) ++ "]"]
 >   toSexp (RosTRXProd q1 q2) = addParen $ uw ["JOIN", toSexp q1, toSexp q2]
 
 convert RosQueryExpr to sexp

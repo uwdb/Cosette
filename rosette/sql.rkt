@@ -23,12 +23,17 @@
 (define-syntax-rule (JOIN q1 q2) (query-join q1 q2))
 (define-syntax-rule (NAMED t) (query-named t))
 (define-syntax-rule (RENAME t name) (rename-table t name))
-(define-syntax-rule (LEFT-OUTER-JOIN q1 q2 k1 k2) (query-left-outer-join q1 q2 k1 k2))
-(define-syntax-rule (LEFT-OUTER-JOIN-2 q1 q2 join-query) (query-left-outer-join-2 q1 q2 join-query))
+(define-syntax-rule (LEFT-OUTER-JOIN q1 q2 p) (query-left-outer-join q1 q2 p))
 
 (define-syntax AS
   (syntax-rules () [(AS q [t l]) (query-rename-full q t l)]
                    [(AS q [t]) (query-rename q t)]))
+
+(define-syntax-rule (MAX v) (VAL-UNOP aggr-max (VAL v)))
+(define-syntax-rule (SUM v) (VAL-UNOP aggr-sum (VAL v)))
+(define-syntax-rule (MIN v) (VAL-UNOP aggr-min (VAL v)))
+(define-syntax-rule (COUNT v) (VAL-UNOP aggr-count (VAL v)))
+(define-syntax-rule (COUNT-DISTINCT v) (VAL-UNOP aggr-count-distinct (VAL v)))
 
 ;; UNIT table is a table with 1 row and empty schema
 (define unit-table (Table "UNIT" (list) (list (cons (list) 1))))
