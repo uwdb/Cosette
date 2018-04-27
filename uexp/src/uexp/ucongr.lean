@@ -206,10 +206,7 @@ meta def ucongr : tactic unit := do
     ucongr_lhs,
     applyc `ueq_symm,
     ucongr_lhs,
-    ac_refl
-
-lemma congr_ex {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f))  = (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
-begin
-    ucongr
-end
+    solved ← list.empty <$> tactic.get_goals,
+    if solved then 
+        return ()
+    else ac_refl
