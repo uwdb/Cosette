@@ -47,20 +47,6 @@ match e with
 | _ := return []
 end
 
--- test
-meta def test_collect_ueq :=
-    do rs ← collect_lhs_ueq,
-       tactic.trace rs,
-       return ()
-
-lemma prod_ex_1 {s: Schema} (a b c d: Tuple s):
-    (a ≃ b) * (b ≃ c) * (c ≃ b) = (a ≃ d) :=
-begin
-   unify_ueq,
-   test_collect_ueq,
-   sorry
-end
-
 -- make sure all product is right assoc
 meta def right_assoc :=
     `[repeat {rewrite time_assoc}]
@@ -79,6 +65,13 @@ meta def get_lhs_repr1 : tactic (list expr) :=
 target >>= λ e,
 match e with
 | `(%%a * _ = %%b) := return $ product_to_repr a
+| _ := failed
+end
+
+meta def get_lhs_repr2 : tactic (list expr) :=
+target >>= λ e,
+match e with
+| `(_ * %%a = %%b) := return $ product_to_repr a
 | _ := failed
 end
 
@@ -179,12 +172,44 @@ meta def rw_trans : tactic unit :=
                 else applyc `ueq_trans_4'
             else failed -- same here 
         else return () -- do nothing if cannot use trans of ueq
-    | _ := trace "rw_trans fail" >> failed
+    | _ := fail "rw_trans fail"
     end
 
 meta def pre_ucongr : tactic unit :=
-    `[unify_ueq, right_assoc, apply add_unit]
+    `[remove_unit, unify_ueq, right_assoc, apply add_unit]
+
+meta def ucongr_step : tactic unit := do 
+    pre_ucongr,
+    repr ← get_lhs_repr1,
+    let l := list.length repr in
+    let inner_loop : nat → tactic unit → tactic unit :=
+        λ iter_num next_iter, do 
+          next_iter,
+          forward_i_to_j (1+iter_num) 1,
+          rw_trans in 
+    let outter_loop : nat → tactic unit → tactic unit :=
+        λ iter_num next_iter, do 
+          next_iter,
+          forward_i_to_j iter_num 0,
+          nat.repeat inner_loop (l-1) $ return ()
+    in do nat.repeat outter_loop l $ return ()
+
+meta def ucongr_lhs : tactic unit := do 
+    ucongr_step,
+    new_ueq ← get_lhs_repr2,
+    remove_unit,
+    if list.length new_ueq > 1 then do  -- progress!
+        ucongr_lhs
+    else return ()
 
 meta def ucongr : tactic unit := do 
-    pre_ucongr,
-    return ()
+    ucongr_lhs,
+    applyc `ueq_symm,
+    ucongr_lhs,
+    ac_refl
+
+lemma congr_ex {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f))  = (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
+begin
+    ucongr
+end

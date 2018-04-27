@@ -12,40 +12,40 @@ begin
 end
 
 lemma ueq_trans_1 : 
-(t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * (d * (t₁ ≃ t₃)) = e → (t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * ((t₁ ≃ t₃) * d) = e → (t₁ ≃ t₂) * ((t₂ ≃ t₃) * c) * d = e := by simp_solve
 
 lemma ueq_trans_1' : 
-(t₁ ≃ t₂) * (t₂ ≃ t₃) * (d * (t₁ ≃ t₃)) = e → (t₁ ≃ t₂) * (t₂ ≃ t₃) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₂ ≃ t₃) * ((t₁ ≃ t₃) * d) = e → (t₁ ≃ t₂) * (t₂ ≃ t₃) * d = e := by simp_solve
 
 lemma ueq_trans_2_g : 
-(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * (d * (t₂ ≃ t₃)) = e → (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * ((t₂ ≃ t₃) * d) = e → (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e := by simp_solve
 
 lemma ueq_trans_2_g' : 
-(t₁ ≃ t₂) * (t₁ ≃ t₃) * (d * (t₂ ≃ t₃)) = e → (t₁ ≃ t₂) * (t₁ ≃ t₃) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₁ ≃ t₃) * ((t₂ ≃ t₃) * d) = e → (t₁ ≃ t₂) * (t₁ ≃ t₃) * d = e := by simp_solve
 
 lemma ueq_trans_2_l :
-(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * (d * (t₃  ≃ t₂)) = e → (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * ((t₃  ≃ t₂) * d) = e → (t₁ ≃ t₂) * ((t₁ ≃ t₃) * c) * d = e := by simp_solve
 
 lemma ueq_trans_2_l' :
-(t₁ ≃ t₂) * (t₁ ≃ t₃) * (d * (t₃  ≃ t₂)) = e → (t₁ ≃ t₂) * (t₁ ≃ t₃) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₁ ≃ t₃) * ((t₃  ≃ t₂) * d) = e → (t₁ ≃ t₂) * (t₁ ≃ t₃) * d = e := by simp_solve
 
 lemma ueq_trans_3_g :  
-(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * (d * (t₁ ≃ t₃)) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * ((t₁ ≃ t₃) * d) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e := by simp_solve
 
 lemma ueq_trans_3_g' :  
-(t₁ ≃ t₂) * (t₃ ≃ t₂) * (d * (t₁ ≃ t₃)) = e → (t₁ ≃ t₂) * (t₃ ≃ t₂) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₃ ≃ t₂) * ((t₁ ≃ t₃) * d) = e → (t₁ ≃ t₂) * (t₃ ≃ t₂) * d = e := by simp_solve
 
 lemma ueq_trans_3_l :
-(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * (d * (t₃ ≃ t₁)) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * ((t₃ ≃ t₁) * d) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₂) * c) * d = e := by simp_solve
 
 lemma ueq_trans_3_l' :
-(t₁ ≃ t₂) * (t₃ ≃ t₂) * (d * (t₃  ≃ t₁)) = e → (t₁ ≃ t₂) * (t₃ ≃ t₂) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₃ ≃ t₂) * ((t₃  ≃ t₁) * d) = e → (t₁ ≃ t₂) * (t₃ ≃ t₂) * d = e := by simp_solve
 
 lemma ueq_trans_4 :
-(t₁ ≃ t₂) * ((t₃ ≃ t₁) * c) * (d * (t₃ ≃ t₂)) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₁) * c) * d = e := by simp_solve
+(t₁ ≃ t₂) * ((t₃ ≃ t₁) * c) * ((t₃ ≃ t₂) * d) = e → (t₁ ≃ t₂) * ((t₃ ≃ t₁) * c) * d = e := by simp_solve
 
 lemma ueq_trans_4' :
-(t₁ ≃ t₂) * (t₃ ≃ t₁) * (d * (t₃ ≃ t₂)) = e → (t₁ ≃ t₂) * (t₃ ≃ t₁) * d = e := by simp_solve
+(t₁ ≃ t₂) * (t₃ ≃ t₁) * ((t₃ ≃ t₂) * d) = e → (t₁ ≃ t₂) * (t₃ ≃ t₁) * d = e := by simp_solve
 
 lemma prod_symm_assoc :
 a * (b * c) = b * (a * c) := by ac_refl 
