@@ -39,7 +39,7 @@
             (define (messenger message) (channel-put main-channel message))
             ; call the solve-queries function
             (match (dynamic-require rosfile 'ros-instance)
-              [(list q1 q2 tables) (solve-queries-symbreak q1 q2 tables messenger)]
+              [(list q1 q2 tables) (solve-queries q1 q2 tables messenger)]
               [_ (error "error on loading rosette source code.")])
             )))
 
