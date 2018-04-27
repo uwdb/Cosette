@@ -16,11 +16,12 @@ def get_status(source):
 
 
 def run():
+    print(get_status("./examples/temp.cos"))
     #print(get_status("./examples/sqlrewrites/CQExample0.cos"))
     #print(get_status("./examples/sqlrewrites/SelfJoin0.cos"))
     #print(get_status("./examples/sqlrewrites/commutativeSelect.cos"))
     #print(get_status("./examples/sqlrewrites/inlineCorrelatedSubqueries.cos"))
-    print(get_status("./examples/sqlrewrites/projectionDistributesOverUnion.cos"))
+    #print(get_status("./examples/sqlrewrites/projectionDistributesOverUnion.cos"))
     #print(get_status("./examples/sqlrewrites/projectJoinTranspose.cos"))
     #print(get_status("./examples/sqlrewrites/joinCommute.cos"))
     #print(get_status("./examples/sqlrewrites/timesAndDiv.cos"))
