@@ -6,8 +6,8 @@ import .cosette_tactics
 
 open tactic
 
-private meta def walk_product : expr → tactic unit
-| `(%%a * %%b) := walk_product a >> walk_product b
+private meta def flip_ueq : expr → tactic unit
+| `(%%a * %%b) := flip_ueq a >> flip_ueq b
 | `(%%t₁ ≃ %%t₂) :=
   if t₁ > t₂
     then return ()
@@ -21,16 +21,19 @@ private meta def walk_product : expr → tactic unit
 meta def unify_ueq : tactic unit := do
   t ← tactic.target,
   match t with
-  | `(%%a = %%b) := walk_product a >> walk_product b
+  | `(%%a = %%b) := flip_ueq a >> flip_ueq b
   | _ := failed
   end
+
+meta def remove_unit : tactic unit :=
+    `[repeat {rw time_one <|> rw time_one'}]
 
 -- collect ueq (equality predicate) from prod
 meta def collect_ueq : expr → tactic (list expr)
 | `(%%a * %%b) := 
-    do lhs ← collect_ueq a,
-       rhs ← collect_ueq b,
-       return (lhs ++ rhs)
+    do l ← collect_ueq a,
+       r ← collect_ueq b,
+       return (l ++ r)
 | e := match e with
         | `(%%a ≃ %%b) := return [e] 
         | _            := return []
@@ -62,15 +65,6 @@ end
 meta def right_assoc :=
     `[repeat {rewrite time_assoc}]
 
--- change the goal to the form  a x 1 = b x 1
-lemma add_unit (a b: usr):
-    a * 1 = b * 1 → a = b :=
-begin
-    simp,
-    intros, 
-    assumption,
-end
-
 meta def product_to_repr : expr → list expr
 | `(%%a * %%b) := a :: product_to_repr b
 | e := [e] 
@@ -81,10 +75,10 @@ meta def repr_to_product : list expr → tactic expr
                 to_expr ``(%%h * %%te)
 | [] := failed
 
-meta def get_lhs_repr : tactic (list expr) :=
+meta def get_lhs_repr1 : tactic (list expr) :=
 target >>= λ e,
 match e with
-| `(%%a = %%b) := return $ product_to_repr a
+| `(%%a * _ = %%b) := return $ product_to_repr a
 | _ := failed
 end
 
@@ -108,31 +102,89 @@ meta def forward_i_to_j (i : nat) (j: nat) : tactic unit :=
     let loop : nat → tactic unit → tactic unit := 
         λ iter_num next_iter, do
         next_iter,
-        repr ← get_lhs_repr,
+        repr ← get_lhs_repr1,
         swap_element_forward (i - iter_num -1) repr
     in nat.repeat loop (i - j) $ return ()
 
-lemma congr_ex0 (a b c d e f: usr):
-    a * (b * (c * (d * e)))  = f :=
-begin
-    forward_i_to_j 3 1,
-    sorry
-end
+meta def rw_trans : tactic unit :=
+    do 
+    ueq_dict ← collect_lhs_ueq,
+    t ← get_lhs,
+    match t with
+    | `(((%%a ≃ %%b) * ((%%c ≃ %%d) * _)) * _ ) := 
+        if (b = c) then
+            if (a > d) then do 
+                ne ← to_expr ``(%%a ≃ %%d),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_1
+            else failed
+        else if (a = c) then 
+            if (b > d) then do
+                ne ← to_expr ``(%%b ≃ %%d),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_2_g 
+            else if (d > b) then do
+                ne ← to_expr ``(%%d ≃ %%b),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_2_l
+            else failed -- there should no other case (TODO: revisit here)
+        else if (b = d) then 
+            if (a > c) then do 
+                ne ← to_expr ``(%%a ≃ %%c),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_3_g
+            else if (c > a) then do
+                ne ← to_expr ``(%%c ≃ %%a),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_3_l
+            else failed -- same here
+        else if (a = d) then
+            if (c > b) then do 
+                ne ← to_expr ``(%%c ≃ %%b),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_4
+            else failed -- same here 
+        else return () -- do nothing if cannot use trans of ueq
+    | `((%%a ≃ %%b) * (%%c ≃ %%d) * _) :=
+        if (b = c) then
+            if (a > d) then do 
+                ne ← to_expr ``(%%a ≃ %%d),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_1'
+            else failed
+        else if (a = c) then 
+            if (b > d) then do
+                ne ← to_expr ``(%%b ≃ %%d),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_2_g' 
+            else if (d > b) then do
+                ne ← to_expr ``(%%d ≃ %%b),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_2_l'
+            else failed -- there should no other case (TODO: revisit here)
+        else if (b = d) then 
+            if (a > c) then do 
+                ne ← to_expr ``(%%a ≃ %%c),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_3_g'
+            else if (c > a) then do
+                ne ← to_expr ``(%%c ≃ %%a),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_3_l'
+            else failed -- same here
+        else if (a = d) then
+            if (c > b) then do 
+                ne ← to_expr ``(%%c ≃ %%b),
+                if expr_in ne ueq_dict then return ()
+                else applyc `ueq_trans_4'
+            else failed -- same here 
+        else return () -- do nothing if cannot use trans of ueq
+    | _ := trace "rw_trans fail" >> failed
+    end
 
-lemma congr_ex1 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f))  = (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
-begin
-    unify_ueq,
-    right_assoc,
-    apply add_unit,
-    try {rw ueq_trans_1 <|> rw ueq_trans_2 <|> rw ueq_trans_3}, 
-    sorry
-end
+meta def pre_ucongr : tactic unit :=
+    `[unify_ueq, right_assoc, apply add_unit]
 
-lemma congr_ex2 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ c) * (b ≃ c) * (d ≃ e) * (R a) * (R d)  = 
-     (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
-begin 
-    unify_ueq,
-    sorry
-end
+meta def ucongr : tactic unit := do 
+    pre_ucongr,
+    return ()

@@ -22,4 +22,12 @@ match l with
 | (h :: t) := if h=e then tt else (expr_in e t)
 end)
 
+-- get lhs expr if the goal is a = b
+meta def get_lhs : tactic expr :=
+tactic.target >>= λ e,
+match e with
+| `(%%a = _) := return a
+| _ := tactic.failed
+end
+
 end cosette_tactics
