@@ -2,9 +2,9 @@ import .u_semiring
 /- lemmas used in congruence of u-semirings -/
 
 section
-variables {s: Schema} {t₁ t₂ t₃: Tuple s} {a b c d e: usr} 
+variables {s: Schema} {t₁ t₂ t₃ t₄: Tuple s} {a b c d e: usr} 
 private meta def simp_solve :=
-    `[intros h, rewrite ← h, simp]
+    `[intros h, rewrite ← h, try {simp}]
 
 lemma ueq_symm: a = b → b = a := 
 begin
@@ -55,11 +55,18 @@ lemma time_one' :
 
 -- change the goal to the form  a x 1 = b x 1
 lemma add_unit (a b: usr):
-    a * 1 = b * 1 → a = b :=
+a * 1 = b * 1 → a = b :=
 begin
     simp,
     intros, 
     assumption,
 end
+
+lemma ueq_left_assoc :
+a * (t₁ ≃ t₂) * b = c → (a * (t₁ ≃ t₂)) * b = c := by simp_solve
+
+-- TODO: revisit if squash involved
+lemma ueq_right_assoc :
+a * (t₁ ≃ t₂) * (t₃ ≃ t₄) = a * ((t₁ ≃ t₂) * (t₃ ≃ t₄)) := by simp
 
 end -- end section

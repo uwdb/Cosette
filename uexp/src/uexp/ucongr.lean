@@ -102,6 +102,49 @@ meta def forward_i_to_j (i : nat) (j: nat) : tactic unit :=
         swap_element_forward (i - iter_num -1) repr
     in nat.repeat loop (i - j) $ return ()
 
+private meta def is_ueq : expr → bool
+| `(_ ≃ _) := tt
+| _ := ff
+
+-- make sure ueq is in front of relation
+private meta def ueq_right_order : list expr → bool
+| [x] := tt 
+| (a :: b :: xs) := 
+    if ((¬(is_ueq a)) && (is_ueq b)) then ff
+    else ueq_right_order (b::xs) 
+| [] := tt
+
+-- find the index of relation that is behind ueq
+private meta def idx_of_bad : nat → list expr → tactic nat :=
+λ pos l, 
+match l with 
+| [x] := failure
+| (a :: b :: xs) :=
+    if ((¬(is_ueq a)) && (is_ueq b)) then return (pos+1)
+    else idx_of_bad (pos+1) (b::xs)
+| []:= failure
+end
+
+meta def test_bad : tactic unit := do 
+    lhs ← get_lhs,
+    let l := product_to_repr lhs in do 
+        a ← idx_of_bad 0 l,
+        trace l,
+        trace a,
+        return () 
+
+-- move ueq forward 
+meta def move_ueq_forward : tactic unit := do
+    right_assoc,
+    let move_ueq_step : tactic unit := do
+        lhs ← get_lhs,
+        let l := product_to_repr lhs in do 
+            if ueq_right_order l then 
+                return ()  -- do nothing
+            else return ()
+    in
+    return ()
+
 meta def rw_trans : tactic unit :=
     do 
     ueq_dict ← collect_lhs_ueq,
@@ -206,7 +249,7 @@ meta def ucongr_lhs : tactic unit := do
     else return ()
 
 meta def ucongr : tactic unit := do 
-    usimp,
+    usimp,  -- simp can remove duplicate
     ok ← list.empty <$> tactic.get_goals,
     if ok then do
         return ()
@@ -217,5 +260,5 @@ meta def ucongr : tactic unit := do
     ucongr_lhs,
     solved ← list.empty <$> tactic.get_goals,
     if solved then 
-        return ()
+    return ()
     else ac_refl
