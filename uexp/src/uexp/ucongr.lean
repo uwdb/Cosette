@@ -6,6 +6,9 @@ import .cosette_tactics
 
 open tactic
 
+private meta def usimp : tactic unit :=
+    `[try {simp}]
+
 private meta def flip_ueq : expr → tactic unit
 | `(%%a * %%b) := flip_ueq a >> flip_ueq b
 | `(%%t₁ ≃ %%t₂) :=
@@ -110,7 +113,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%a ≃ %%d),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_1
-            else failed
+            else fail "fail to apply ueq_trans_1"
         else if (a = c) then 
             if (b > d) then do
                 ne ← to_expr ``(%%b ≃ %%d),
@@ -120,7 +123,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%d ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_2_l
-            else failed -- there should no other case (TODO: revisit here)
+            else fail "fail to apply ueq_trans_2_l"
         else if (b = d) then 
             if (a > c) then do 
                 ne ← to_expr ``(%%a ≃ %%c),
@@ -130,13 +133,13 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%c ≃ %%a),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_3_l
-            else failed -- same here
+            else fail "fail to apply ueq_trans_3_l"
         else if (a = d) then
             if (c > b) then do 
                 ne ← to_expr ``(%%c ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_4
-            else failed -- same here 
+            else fail "fail to apply ueq_trans_4"  
         else return () -- do nothing if cannot use trans of ueq
     | `((%%a ≃ %%b) * (%%c ≃ %%d) * _) :=
         if (b = c) then
@@ -144,7 +147,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%a ≃ %%d),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_1'
-            else failed
+            else fail "fail to apply ueq_trans_1'"
         else if (a = c) then 
             if (b > d) then do
                 ne ← to_expr ``(%%b ≃ %%d),
@@ -154,7 +157,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%d ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_2_l'
-            else failed -- there should no other case (TODO: revisit here)
+            else fail "fail to apply ueq_trans_2_l'"
         else if (b = d) then 
             if (a > c) then do 
                 ne ← to_expr ``(%%a ≃ %%c),
@@ -164,19 +167,19 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%c ≃ %%a),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_3_l'
-            else failed -- same here
+            else fail "fail to apply ueq_trans_3_l'"
         else if (a = d) then
             if (c > b) then do 
                 ne ← to_expr ``(%%c ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_4'
-            else failed -- same here 
+            else fail "fail to apply ueq_trans_4'" 
         else return () -- do nothing if cannot use trans of ueq
     | _ := fail "rw_trans fail"
     end
 
 meta def pre_ucongr : tactic unit :=
-    `[remove_unit, unify_ueq, right_assoc, apply add_unit]
+    `[remove_unit, right_assoc, apply add_unit]
 
 meta def ucongr_step : tactic unit := do 
     pre_ucongr,
@@ -203,6 +206,12 @@ meta def ucongr_lhs : tactic unit := do
     else return ()
 
 meta def ucongr : tactic unit := do 
+    usimp,
+    ok ← list.empty <$> tactic.get_goals,
+    if ok then do
+        return ()
+    else do
+    unify_ueq,
     ucongr_lhs,
     applyc `ueq_symm,
     ucongr_lhs,
