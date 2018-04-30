@@ -133,17 +133,26 @@ meta def test_bad : tactic unit := do
         trace a,
         return () 
 
--- move ueq forward 
-meta def move_ueq_forward : tactic unit := do
-    right_assoc,
-    let move_ueq_step : tactic unit := do
+meta def move_ueq_step : tactic unit := do
         lhs ← get_lhs,
         let l := product_to_repr lhs in do 
-            if ueq_right_order l then 
-                return ()  -- do nothing
-            else return ()
-    in
-    return ()
+            if ueq_right_order l then do
+                failed
+            else do 
+                idx ← idx_of_bad 0 l,
+                swap_element_forward (idx - 1) l
+
+-- move ueq 
+meta def move_ueq: tactic unit :=
+    `[right_assoc,
+      repeat {move_ueq_step},
+      repeat {apply ueq_left_assoc_lem},
+      repeat {rw ueq_right_assoc_lem},
+      apply ueq_symm,
+      repeat {move_ueq_step},
+      repeat {apply ueq_left_assoc_lem},
+      repeat {rw ueq_right_assoc_lem}
+      ]
 
 meta def rw_trans : tactic unit :=
     do 
@@ -262,3 +271,11 @@ meta def ucongr : tactic unit := do
     if solved then 
     return ()
     else ac_refl
+
+lemma congr_ex3 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (R c) * (a ≃ c) * (R e) * (b ≃ c) * (d ≃ e) * (R a) * (R d)  = 
+     (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
+begin 
+    move_ueq,
+    sorry
+end

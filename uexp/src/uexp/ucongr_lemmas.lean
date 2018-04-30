@@ -62,11 +62,11 @@ begin
     assumption,
 end
 
-lemma ueq_left_assoc :
-a * (t₁ ≃ t₂) * b = c → (a * (t₁ ≃ t₂)) * b = c := by simp_solve
+lemma ueq_left_assoc_lem :
+a * (t₁ ≃ t₂) * b = c → a * ((t₁ ≃ t₂) * b) = c := by simp_solve
 
 -- TODO: revisit if squash involved
-lemma ueq_right_assoc :
+lemma ueq_right_assoc_lem :
 a * (t₁ ≃ t₂) * (t₃ ≃ t₄) = a * ((t₁ ≃ t₂) * (t₃ ≃ t₄)) := by simp
 
 end -- end section
