@@ -44,3 +44,10 @@ lemma congr_ex5 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
 begin
     ucongr,
 end
+
+lemma congr_ex6 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ c) * R a = 
+     (c ≃ a) * R c :=
+begin
+    ucongr,
+end
