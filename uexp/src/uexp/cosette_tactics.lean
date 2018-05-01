@@ -30,4 +30,13 @@ match e with
 | _ := tactic.failed
 end
 
+meta def solved_or_continue (next: tactic unit) : tactic unit := do 
+    ok ← list.empty <$> tactic.get_goals,
+    if ok then return ()
+    else next
+
+meta def print_goals : tactic unit :=  do 
+    goals ← tactic.get_goals,
+    tactic.trace goals
+
 end cosette_tactics

@@ -110,7 +110,7 @@ end
 @[simp] axiom eq_unit {s: Schema} (t₁: Tuple s): (t₁ ≃ t₁) = 1
 @[simp] axiom eq_subst_l {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr): (t₁ ≃ t₂) * (R t₁) = (t₁ ≃ t₂) * (R t₂)
 @[simp] axiom eq_subst_r {s: Schema} (t₁ t₂: Tuple s) (R: Tuple s → usr): 
-(R t₁) *(t₁ ≃ t₂) = (R t₂) * (t₁ ≃ t₂) 
+(R t₁) * (t₁ ≃ t₂) = (R t₂) * (t₁ ≃ t₂) 
 @[simp] axiom em {s: Schema} (t₁ t₂ : Tuple s) : (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = 1
 @[simp] axiom eq_unique {s: Schema} (t' : Tuple s) : (∑ t, t ≃ t') = 1
 @[simp] axiom eq_symm {s: Schema} (t₁ t₂ : Tuple s):

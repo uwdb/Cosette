@@ -27,7 +27,7 @@ meta def unify_ueq : tactic unit := do
   | _ := failed
   end
 
-meta def remove_unit : tactic unit :=
+meta def remove_all_unit : tactic unit :=
     `[repeat {rw time_one <|> rw time_one'}]
 
 -- collect ueq (equality predicate) from prod
@@ -66,17 +66,19 @@ meta def repr_to_product : list expr → tactic expr
                 to_expr ``(%%h * %%te)
 | [] := failed
 
+-- assuming lhs is in the form of a*b*c
 meta def get_lhs_repr1 : tactic (list expr) :=
 target >>= λ e,
 match e with
-| `(%%a * _ = %%b) := product_to_repr a
+| `(%%a * _ * _ = %%_) := product_to_repr a
 | _ := failed
 end
 
+-- assuming lhs is in the form of a*b*c
 meta def get_lhs_repr2 : tactic (list expr) :=
 target >>= λ e,
 match e with
-| `(_ * %%a = %%b) := product_to_repr a
+| `(_ * %%a * _ = _) := product_to_repr a
 | _ := failed
 end
 
@@ -176,7 +178,7 @@ meta def rw_trans : tactic unit :=
     ueq_dict ← collect_lhs_ueq,
     t ← get_lhs,
     match t with
-    | `(((%%a ≃ %%b) * ((%%c ≃ %%d) * _)) * _ ) := 
+    | `(((%%a ≃ %%b) * ((%%c ≃ %%d) * _)) * _ * _ ) := 
         if (b = c) then
             if (a > d) then do 
                 ne ← to_expr ``(%%a ≃ %%d),
@@ -210,7 +212,7 @@ meta def rw_trans : tactic unit :=
                 else applyc `ueq_trans_4
             else fail "fail to apply ueq_trans_4"  
         else return () -- do nothing if cannot use trans of ueq
-    | `((%%a ≃ %%b) * (%%c ≃ %%d) * _) :=
+    | `((%%a ≃ %%b) * (%%c ≃ %%d) * _ * _) :=
         if (b = c) then
             if (a > d) then do 
                 ne ← to_expr ``(%%a ≃ %%d),
@@ -247,11 +249,7 @@ meta def rw_trans : tactic unit :=
     | _ := fail "rw_trans fail"
     end
 
-meta def pre_ucongr : tactic unit :=
-    `[remove_unit, right_assoc, apply add_unit]
-
 meta def ucongr_step : tactic unit := do 
-    pre_ucongr,
     repr ← get_lhs_repr1,
     let l := list.length repr in
     let inner_loop : nat → tactic unit → tactic unit :=
@@ -269,37 +267,33 @@ meta def ucongr_step : tactic unit := do
 meta def ucongr_lhs : tactic unit := do 
     ucongr_step,
     new_ueq ← get_lhs_repr2,
-    remove_unit,
+    repeat $ applyc `move_ueq_between_com,
     if list.length new_ueq > 1 then do  -- progress!
         ucongr_lhs
     else return ()
 
+private meta def subst_step : tactic unit :=
+   `[try {rw ueq_subst_in_spnf <|> rw ueq_subst_in_spnf}]
+
+meta def subst_lhs : tactic unit := do 
+    repr ← get_lhs_repr1,
+    let l := list.length repr in
+    let loop : nat → tactic unit → tactic unit :=
+        λ iter_num next_iter, do 
+            next_iter,
+            forward_i_to_j iter_num 0,
+            subst_step in
+    nat.repeat loop l $ return ()
+
 meta def ucongr : tactic unit := do 
     usimp,  -- simp can remove duplicate
-    ok ← list.empty <$> tactic.get_goals,
-    if ok then do
-        return ()
-    else do
-    unify_ueq,
+    solved_or_continue $ (do unify_ueq,
+    move_ueq,
+    applyc `add_unit_m,
     ucongr_lhs,
     applyc `ueq_symm,
     ucongr_lhs,
-    solved ← list.empty <$> tactic.get_goals,
-    if solved then 
-    return ()
-    else ac_refl
-
-lemma congr_ex3 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ b) * (R c) * (a ≃ c) * (R d) * (b ≃ c) * (d ≃ e) * (R d)  = 
-     (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
-begin 
-    move_ueq,
-    sorry
-end
-
-lemma congr_ex5 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ f) * (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f))  = (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
-begin
-    move_ueq,
-    sorry
-end
+    solved_or_continue $ (do subst_lhs,
+    applyc `ueq_symm,
+    solved_or_continue $ (do subst_lhs,
+    solved_or_continue $ try ac_refl)))

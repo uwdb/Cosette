@@ -27,6 +27,20 @@ end
 lemma congr_ex4 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
      (a ≃ c) * (b ≃ c) * (d ≃ e) * (R a) * (R d)  = 
      (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
+begin
+    ucongr,
+end
+
+lemma congr_ex3 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ b) * (R c) * (a ≃ c) * (R d) * (b ≃ c) * (d ≃ e)   = 
+     (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R d)  :=
 begin 
-    sorry
+    ucongr,
+end
+
+lemma congr_ex5 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f)) = 
+     (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
+begin
+    ucongr,
 end
