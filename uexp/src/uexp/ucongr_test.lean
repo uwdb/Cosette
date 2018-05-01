@@ -24,7 +24,7 @@ begin
     ucongr,
 end
 
-lemma congr_ex3 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+lemma congr_ex4 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
      (a ≃ c) * (b ≃ c) * (d ≃ e) * (R a) * (R d)  = 
      (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
 begin 

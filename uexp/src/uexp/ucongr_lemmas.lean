@@ -67,6 +67,10 @@ a * (t₁ ≃ t₂) * b = c → a * ((t₁ ≃ t₂) * b) = c := by simp_solve
 
 -- TODO: revisit if squash involved
 lemma ueq_right_assoc_lem :
-a * (t₁ ≃ t₂) * (t₃ ≃ t₄) = a * ((t₁ ≃ t₂) * (t₃ ≃ t₄)) := by simp
+a * ((t₁ ≃ t₂) * (t₃ ≃ t₄)) * d = e → 
+a * (t₁ ≃ t₂) * (t₃ ≃ t₄) * d = e := by simp_solve
+
+lemma ueq_right_assoc_lem' :
+a * ((t₁ ≃ t₂) * ((t₃ ≃ t₄) * c)) * d = e → a * (t₁ ≃ t₂) * ((t₃ ≃ t₄) * c) * d = e  := by simp_solve
 
 end -- end section

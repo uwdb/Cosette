@@ -12,8 +12,7 @@ private meta def usimp : tactic unit :=
 private meta def flip_ueq : expr → tactic unit
 | `(%%a * %%b) := flip_ueq a >> flip_ueq b
 | `(%%t₁ ≃ %%t₂) :=
-  if t₁ > t₂
-    then return ()
+    if t₁ > t₂ then return ()
     else do h ← to_expr ``(eq_symm %%t₁ %%t₂),
             try $ rewrite_target h,
             return ()
@@ -54,9 +53,12 @@ end
 meta def right_assoc :=
     `[repeat {rewrite time_assoc}]
 
-meta def product_to_repr : expr → list expr
-| `(%%a * %%b) := a :: product_to_repr b
+private meta def product_to_repr' : expr → list expr
+| `(%%a * %%b) := a :: product_to_repr' b
 | e := [e] 
+
+meta def product_to_repr (e: expr) : tactic (list expr) :=
+return $ product_to_repr' e 
 
 meta def repr_to_product : list expr → tactic expr
 | [x] := return x
@@ -67,14 +69,14 @@ meta def repr_to_product : list expr → tactic expr
 meta def get_lhs_repr1 : tactic (list expr) :=
 target >>= λ e,
 match e with
-| `(%%a * _ = %%b) := return $ product_to_repr a
+| `(%%a * _ = %%b) := product_to_repr a
 | _ := failed
 end
 
 meta def get_lhs_repr2 : tactic (list expr) :=
 target >>= λ e,
 match e with
-| `(_ * %%a = %%b) := return $ product_to_repr a
+| `(_ * %%a = %%b) := product_to_repr a
 | _ := failed
 end
 
@@ -125,33 +127,48 @@ match l with
 | []:= failure
 end
 
+private meta def all_ueq (l: list expr) : tactic bool :=
+    list.foldl (λ v e, do v' ← v, return $ v' && (is_ueq e)) (return tt) l
+
+meta def add_unit_when_all_ueq : tactic unit := do 
+    lhs ← get_lhs,
+    l ← product_to_repr lhs,
+    all_u ← all_ueq l,
+    if all_u then applyc `add_unit
+    else return ()
+
 meta def test_bad : tactic unit := do 
     lhs ← get_lhs,
-    let l := product_to_repr lhs in do 
-        a ← idx_of_bad 0 l,
-        trace l,
-        trace a,
-        return () 
+    l ←  product_to_repr lhs, 
+    a ← idx_of_bad 0 l,
+    trace l,
+    trace a,
+    return () 
 
 meta def move_ueq_step : tactic unit := do
         lhs ← get_lhs,
-        let l := product_to_repr lhs in do 
-            if ueq_right_order l then do
-                failed
-            else do 
-                idx ← idx_of_bad 0 l,
-                swap_element_forward (idx - 1) l
+        l ← product_to_repr lhs,
+        if ueq_right_order l then do
+            failed
+        else do 
+            idx ← idx_of_bad 0 l,
+            swap_element_forward (idx - 1) l
 
--- move ueq 
+-- move ueq, TODO: revisit here to get general SPNF form 
 meta def move_ueq: tactic unit :=
     `[right_assoc,
+      add_unit_when_all_ueq,
+      apply ueq_symm,
+      add_unit_when_all_ueq,
       repeat {move_ueq_step},
       repeat {apply ueq_left_assoc_lem},
-      repeat {rw ueq_right_assoc_lem},
+      repeat {apply ueq_right_assoc_lem},
+      repeat {apply ueq_right_assoc_lem'},
       apply ueq_symm,
       repeat {move_ueq_step},
       repeat {apply ueq_left_assoc_lem},
-      repeat {rw ueq_right_assoc_lem}
+      repeat {apply ueq_right_assoc_lem},
+      repeat {apply ueq_right_assoc_lem'}
       ]
 
 meta def rw_trans : tactic unit :=
@@ -273,9 +290,16 @@ meta def ucongr : tactic unit := do
     else ac_refl
 
 lemma congr_ex3 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (R c) * (a ≃ c) * (R e) * (b ≃ c) * (d ≃ e) * (R a) * (R d)  = 
+     (a ≃ b) * (R c) * (a ≃ c) * (R d) * (b ≃ c) * (d ≃ e) * (R d)  = 
      (a ≃ b) * (b ≃ c) * (e ≃ d) * (R c) * (R e)  :=
 begin 
+    move_ueq,
+    sorry
+end
+
+lemma congr_ex5 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ f) * (a ≃ c) * ((b ≃ c) * (a ≃ d) * (e ≃ f))  = (c ≃ a) * ((a ≃ b) * ((b ≃ d) * (e ≃ f)))  :=
+begin
     move_ueq,
     sorry
 end
