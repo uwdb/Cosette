@@ -21,52 +21,12 @@ meta def sigma_repr_to_sigma_expr : usr_sigma_repr → tactic expr
   body' ← sigma_repr_to_sigma_expr ⟨ts, body⟩,
   to_expr ``(∑ x : Tuple %%t, %%body')
 
-meta def get_lhs_repr : tactic usr_sigma_repr :=
+meta def get_lhs_sigma_repr : tactic usr_sigma_repr :=
 target >>= λ e,
 match e with
 | `(%%a = %%b) := return $ sigma_expr_to_sigma_repr a
 | _ := failed
 end
-
-lemma swap_gives_result_if_index_in_range {α : Type}
-  : ∀ (ls : list α) i,
-    i + 2 < list.length ls →
-    { ls' : list α // list.swap_ith_forward i ls = some ls' } :=
-begin
-  intros ls i h,
-  revert ls,
-  induction i with j ih;
-  intros; cases ls with x ys,
-  { exfalso, cases h },
-  { cases ys with y zs,
-    { exfalso, cases h, cases h_a },
-    { existsi (y :: x :: zs), refl } },
-  { exfalso, cases h },
-  { cases ih ys _ with ys' h',
-    existsi x :: ys', unfold list.swap_ith_forward,
-    rw h', refl,
-    apply nat.lt_of_succ_lt_succ,
-    assumption }
-end
-
-meta def expr.swap_free_vars (i : nat) (j : nat) : expr → expr
-| (expr.var n) := if n = i
-                    then expr.var j
-                    else if n = j
-                           then expr.var i
-                           else expr.var n
-| (expr.app f x) := expr.app (expr.swap_free_vars f) (expr.swap_free_vars x)
-| (expr.lam n bi ty body) := let ty' := expr.swap_free_vars ty,
-                                 body' := expr.swap_free_vars body
-                             in expr.lam n bi ty' body'
-| (expr.pi n bi ty body) := let ty' := expr.swap_free_vars ty,
-                                body' := expr.swap_free_vars body
-                            in expr.pi n bi ty' body'
-| (expr.elet n ty val body) := let ty' := expr.swap_free_vars ty,
-                                   val' := expr.swap_free_vars val,
-                                   body' := expr.swap_free_vars body
-                               in expr.elet n ty' val' body'
-| ex := ex
 
 meta def swap_ith_sigma_forward (i : nat)
   : usr_sigma_repr → tactic unit
@@ -90,7 +50,7 @@ meta def swap_ith_sigma_forward (i : nat)
 meta def move_to_front (i : nat) : tactic unit :=
   let loop : ℕ → tactic unit → tactic unit :=
       λ iter_num next_iter,
-        get_lhs_repr >>=
+        get_lhs_sigma_repr >>=
         swap_ith_sigma_forward iter_num >>
         next_iter
   in nat.repeat loop i $ return ()
@@ -103,10 +63,11 @@ meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
       funext,
       easy_case_solver <|> TDP'
   in do
-    num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_repr,
+    num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_sigma_repr,
     nat.repeat loop num_vars easy_case_solver
 
 meta def TDP := TDP' reflexivity
+
 end TDP
 
 example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
