@@ -25,6 +25,7 @@
 ; check the containment of element in a list
 (define (element-contain t l)
   (cond
+    [(eq? (cdr t) 0) #t]
     [(empty? l) #f]
     [else (or (equal? t (first l)) (element-contain t (rest l)))]))
 
@@ -44,7 +45,7 @@
 
 ; bag equal definition
 (define (bag-equal table1 table2)
-  (let ([l1 (table-sum table1)])
-    (let ([l2 (table-sum table2)])
-      (and (contain l1 l2) (contain l2 l1)))))
+  (let* ([l1 (table-sum table1)]
+         [l2 (table-sum table2)])
+      (and (contain l1 l2) (contain l2 l1))))
 

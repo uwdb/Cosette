@@ -23,3 +23,4 @@
 (define q3 (query-join (query-named table1) (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3"))))
 
 (define part-of-q3 (query-rename-full (query-named table1) "t2" (list "c1" "c2" "c3")))
+

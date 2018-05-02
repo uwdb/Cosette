@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE, STDOUT
 import tempfile
 import time
 import json
+from pprint import pprint
 
 def solve(cos_source, cos_folder=".", show_compiled=False):
     """ cos_source: Cosette source code, in string

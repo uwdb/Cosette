@@ -3,6 +3,9 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 
+import ..ucongr
+import ..TDP
+
 open Expr
 open Proj
 open Pred
@@ -27,11 +30,5 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    congr,
-    funext,
-    congr,
-    funext,
-    congr,
-    funext,
-    ac_refl,
+    TDP' ucongr,
 end

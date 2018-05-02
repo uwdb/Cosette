@@ -1,6 +1,8 @@
 #lang racket/load
 
-(require "cosette.rkt" "util.rkt" "table.rkt" "equal.rkt" "syntax.rkt" "denotation.rkt")
+(require "cosette.rkt" "util.rkt" "table.rkt" 
+         "equal.rkt" "syntax.rkt" "denotation.rkt"
+         "test-util.rkt")
 (require json)
 
 ;; daemon of the rosette backend
@@ -50,8 +52,7 @@
     [(timeout) (void)]
     [else (set! ret item) (loop)]))
 
-(displayln (cond
-             [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
-             [else (jsexpr->string
-                    (hasheq 'status "UNSAT"
-                            'size ret))]))
+(displayln 
+  (cond 
+    [(eq? (car ret) "NEQ") (cosette-sol->json ret)]
+    [else (jsexpr->string (hasheq 'status "UNSAT" 'size ret))]))

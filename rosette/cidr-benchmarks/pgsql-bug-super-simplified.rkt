@@ -91,7 +91,7 @@
     ["UnionAll2" (list "ID" "C")]))
 
 (define q0-part-3
-  (AS (LEFT-OUTER-JOIN q0-part-1 q0-part-2 0 0)
+  (AS (LEFT-OUTER-JOIN q0-part-1 q0-part-2 (BINOP "t12.ID1" = "UnionAll2.ID"))
       ["J1" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C")]))
 
 (define q0
@@ -113,13 +113,11 @@
 
 ; lines 01-08
 (define q1-part-2
-  (SELECT 
-    (VALS "t12.ID1" "t12.fk_Property1" "t12.ID2" "t12.fk_Property2")
-    FROM (AS 
-	   (JOIN (NAMED t1)
-		 q1-part-1)
-	   ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
-    WHERE (BINOP "t12.ID1" = "t12.ID2")))
+  (AS (SELECT (VALS "t12.ID1" "t12.fk_Property1" "t12.ID2" "t12.fk_Property2")
+              FROM (AS (JOIN (NAMED t1) q1-part-1)
+                       ["t12" (list "ID1" "fk_Property1" "ID2" "fk_Property2")])
+              WHERE (BINOP "t12.ID1" = "t12.ID2"))
+      ["q1p2" (list "ID1" "fk_Property1" "ID2" "fk_Property2")]))
 
 ; lines 14-15
 (define q1-part-3
@@ -138,7 +136,7 @@
       q1-part-3) ["U" (list "ID" "C")]))
 
 (define q1
-  (AS (LEFT-OUTER-JOIN q1-part-2 q1-part-4 0 0)
+  (AS (LEFT-OUTER-JOIN q1-part-2 q1-part-4 (BINOP "q1p2.ID1" = "U.ID"))
       ["R" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C")]))
 
 (define q2-part-2 q1-part-2)
@@ -147,7 +145,7 @@
       ["U" (list "ID" "C1")]))
 
 (define q2
-    (AS (LEFT-OUTER-JOIN q2-part-2 q2-part-4 0 0)     
+    (AS (LEFT-OUTER-JOIN q2-part-2 q2-part-4 (BINOP "q1p2.ID1" = "U.ID"))     
 	["R" (list "ID1" "fk_Property1" "ID2" "fk_Property2" "ID3" "C1")]))
 
 ;(run q0)

@@ -2,6 +2,10 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
+import ..ucongr
+import ..TDP
+
+-- NOTE: this one cannot solved by ucongr, need to be revisited
 
 open Expr
 open Proj

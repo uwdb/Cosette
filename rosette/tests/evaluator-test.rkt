@@ -61,8 +61,6 @@
 (println (static-group-by-raw content-d (list '(1 0) '(0 1))))
 ; (println (xproduct-raw content-a content-b))
 ; (println (get-content (left-outer-join table-a table-b 2 2)))
-; (left-outer-join-raw content-c content-c 0 0 3 3)
-
 
 (define test-table
   (list

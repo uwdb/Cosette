@@ -1,6 +1,6 @@
 #lang rosette
 
-(require "../sql.rkt" "../evaluator.rkt" "../denotation.rkt" "../table.rkt" "../syntax.rkt")
+(require "../equal.rkt" "../sql.rkt" "../evaluator.rkt" "../denotation.rkt" "../table.rkt" "../syntax.rkt")
 
 ;; several test xproduct
 (define content-a
@@ -34,6 +34,7 @@
         (list 3 5 6)))
 
 (define table1 (Table "t1" '("a" "b" "c") content-b))
+(define table2 (Table "t2" '("a" "b" "c") content-b))
 
 (define q                                                                                                                                                     
   (query-aggr-general 
@@ -109,11 +110,21 @@
 (define-symbolic* str_charlie_ integer?)
 
 (define q4
-  (SELECT (VALS "t1.a" (VAL-UNOP aggr-sum (val-column-ref "t1.b")))
+  (SELECT (VALS "t1.a" (VAL-UNOP aggr-sum (VAL-BINOP (val-column-ref "t1.b") + (val-column-ref "t1.b"))))
    FROM (NAMED table1)
-   WHERE (BINOP "t1.c" < str_charlie_)
+   WHERE (BINOP "t1.c" < 15)
    GROUP-BY (list "t1.a" "t1.b")
-   HAVING (TRUE))) 
+   HAVING (TRUE)))
+
+(define q5 (LEFT-OUTER-JOIN (NAMED table1) (NAMED table2) (BINOP "t1.b" = "t2.a"))) 
+
+
+(define q6
+  (SELECT (VALS "t1.a" (SUM (VAL-BINOP "t1.b" + "t1.b")))
+   FROM (NAMED table1)
+   WHERE (BINOP "t1.c" < 15)
+   GROUP-BY (list "t1.a" "t1.b")
+   HAVING (TRUE)))
 
 (define b_plus (broad-casting-bexpr-wrapper +))
 
@@ -134,5 +145,6 @@ table1
 (denote-and-run q3)
 (denote-and-run q3-macro)
 
-(println "q4")
+(println "q4 q6")
 (denote-and-run q4)
+(denote-and-run q6)

@@ -52,6 +52,7 @@ meta def move_to_front (i : nat) : tactic unit :=
       λ iter_num next_iter,
         get_lhs_sigma_repr >>=
         swap_ith_sigma_forward iter_num >>
+
         next_iter
   in nat.repeat loop i $ return ()
 
