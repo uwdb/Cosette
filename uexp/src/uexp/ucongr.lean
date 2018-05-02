@@ -296,4 +296,4 @@ meta def ucongr : tactic unit := do
     solved_or_continue $ (do subst_lhs,
     applyc `ueq_symm,
     solved_or_continue $ (do subst_lhs,
-    solved_or_continue $ try ac_refl)))
+    solved_or_continue $ ac_refl)))

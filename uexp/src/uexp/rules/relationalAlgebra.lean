@@ -45,3 +45,47 @@ begin
     rewrite squash_time_squash,
     simp,
 end
+
+lemma idempotentSelect:
+    forall Γ s (a: SQL Γ s) slct,
+    denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct) WHERE slct): SQL Γ _) =
+    denoteSQL ((SELECT * FROM1 a WHERE slct): SQL Γ _) :=
+begin
+    intros,
+    unfold_all_denotations,
+    sorry
+end
+
+ lemma projectionDistributesOverUnion:
+ forall Γ s (a0 a1: SQL Γ s) slct,
+    denoteSQL ((SELECT * FROM1 (a0 UNION ALL a1) WHERE slct) : SQL Γ _ ) =
+    denoteSQL (((SELECT * FROM1 a0 WHERE slct) UNION ALL (SELECT * FROM1 a1 WHERE slct)) : SQL Γ _ ) :=
+begin
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
+end
+
+lemma productDistributesOverUnion:
+    forall Γ s (a a0 a1: SQL Γ s),
+    denoteSQL (SELECT * FROM1 (product a (a0 UNION ALL a1)) : SQL Γ _ ) = 
+    denoteSQL (((SELECT * FROM2 a, a0) UNION ALL (SELECT * FROM2 a, a1)) : SQL Γ _ ) :=
+begin
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
+end
+
+lemma joinCommute:
+    forall Γ s1 s2 (a:SQL Γ s1) (b:SQL Γ s2),
+    denoteSQL ((project (combine (right⋅right⋅star) (right⋅left⋅star)) (product b a) ) : SQL Γ _ ) =
+    denoteSQL  (SELECT * FROM1 (product a b) : SQL Γ _ ) :=
+begin
+    intros,
+    unfold_all_denotations,
+    funext,
+    simp,
+    sorry
+end
