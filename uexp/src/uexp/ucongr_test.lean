@@ -1,5 +1,7 @@
 import .ucongr
 
+-- set_option profiler true
+
 lemma congr_trans_ex1 {s: Schema} (a b c d e f: Tuple s):
     (a ≃ c) * ((a ≃ b) * (e ≃ f)) = (a ≃ c) * ((a ≃ b) * (f ≃ e)) :=
 begin
