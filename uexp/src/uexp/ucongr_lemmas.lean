@@ -96,4 +96,10 @@ lemma ueq_subst_in_spnf :
 lemma ueq_subst_in_spnf' :
 (t₁ ≃ t₂) * a * (R t₁) = (t₁ ≃ t₂) * a * (R t₂) := by simp
 
+lemma ueq_dedup :
+(t₁ ≃ t₂) * (t₁ ≃ t₂) = (t₁ ≃ t₂) := by simp
+
+lemma ueq_dedup' :
+(t₁ ≃ t₂) * ((t₁ ≃ t₂) * a) = (t₁ ≃ t₂) * a := by simp
+
 end -- end section

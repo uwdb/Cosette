@@ -48,8 +48,15 @@ begin
 end
 
 lemma congr_ex6 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
-     (a ≃ c) * R a = 
-     (c ≃ a) * R c :=
+     (c ≃ d) * (b ≃ c) * (a ≃ b) * R a = 
+     (a ≃ b) * (b ≃ c) * (c ≃ d) * R d :=
+begin
+    ucongr,
+end
+
+lemma congr_ex7 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (a ≃ c) * ((a ≃ b) * (a ≃ c)) = 
+     (c ≃ a) * (a ≃ b):=
 begin
     ucongr,
 end

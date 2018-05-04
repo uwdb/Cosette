@@ -87,7 +87,7 @@ match e with
 | _ := tactic.failed
 end
 
-meta def solved_or_continue (next: tactic unit) : tactic unit := do 
+meta def solved_or_continue (next: tactic unit) : tactic unit := do
     ok ← list.empty <$> tactic.get_goals,
     if ok then return ()
     else next

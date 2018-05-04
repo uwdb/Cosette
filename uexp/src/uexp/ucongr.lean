@@ -6,9 +6,6 @@ import .cosette_tactics
 
 open tactic
 
-private meta def usimp : tactic unit :=
-    `[try {simp}]
-
 private meta def flip_ueq : expr → tactic unit
 | `(%%a * %%b) := flip_ueq a >> flip_ueq b
 | `(%%t₁ ≃ %%t₂) :=
@@ -79,6 +76,14 @@ meta def get_lhs_repr2 : tactic (list expr) :=
 target >>= λ e,
 match e with
 | `(_ * %%a * _ = _) := product_to_repr a
+| _ := failed
+end
+
+-- assuming lhs is in the form of a*b*c
+meta def get_lhs_repr3 : tactic (list expr) :=
+target >>= λ e,
+match e with
+| `(_ * _ * %%a = _) := product_to_repr a
 | _ := failed
 end
 
@@ -194,7 +199,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%d ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_2_l
-            else fail "fail to apply ueq_trans_2_l"
+            else do trace t, fail "fail to apply ueq_trans_2_l"
         else if (b = d) then 
             if (a > c) then do 
                 ne ← to_expr ``(%%a ≃ %%c),
@@ -273,27 +278,79 @@ meta def ucongr_lhs : tactic unit := do
     else return ()
 
 private meta def subst_step : tactic unit :=
-   `[try {rw ueq_subst_in_spnf <|> rw ueq_subst_in_spnf}]
+   `[try {rw ueq_subst_in_spnf <|> rw ueq_subst_in_spnf'}]
 
-meta def subst_lhs : tactic unit := do 
+private meta def ueq_toporder (e₁ e₂: expr) : bool :=
+    match e₁ with 
+    | `(%%a ≃ %%b) := match e₂ with 
+                        | `(%%c ≃ %%d) := if d > a then ff else tt 
+                        | _ := tt
+                       end
+    | _ := tt
+    end
+
+-- topology sort ueqs, so that we can do a single pass of substition 
+meta def topsort_lhs : tactic unit := do 
+    repr ← get_lhs_repr1,
+    sorted ← return $ list.qsort ueq_toporder repr,
+    origin ← repr_to_product repr,
+    new ← repr_to_product sorted,
+    eq_lemma ← to_expr ``(%%origin = %%new),
+    eq_lemma_name ← mk_fresh_name,
+    tactic.assert eq_lemma_name eq_lemma,
+    try ac_refl,
+    eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
+    rewrite_target eq_lemma,
+    clear eq_lemma
+
+meta def repeat_or_sol (f: ℕ → tactic unit) : 
+ℕ → tactic unit 
+| 0 := (f 0)         
+| (nat.succ n) := do 
+    repeat_or_sol n, 
+    ok ← list.empty <$> tactic.get_goals,
+    if ok then return ()
+    else (f n)    
+
+meta def subst_lhs : tactic unit := do
+    topsort_lhs,
     repr ← get_lhs_repr1,
     let l := list.length repr in
-    let loop : nat → tactic unit → tactic unit :=
-        λ iter_num next_iter, do 
-            next_iter,
+    let loop : nat → tactic unit:=
+        λ iter_num, do 
             forward_i_to_j iter_num 0,
             subst_step in
-    nat.repeat loop l $ return ()
+    repeat_or_sol loop l
+
+private meta def remove_dup_step : tactic unit :=
+    `[repeat {rw ueq_dedup<|> rw ueq_dedup'}]
+
+-- assuming LHS and RHS are already in SPNF
+meta def remove_dup_ueq : tactic unit := do
+    repr ← get_lhs_repr1,
+    sorted ← return $ list.qsort (λ x y, x > y) repr,
+    origin ← repr_to_product repr,
+    new ← repr_to_product sorted,
+    eq_lemma ← to_expr ``(%%origin = %%new),
+    eq_lemma_name ← mk_fresh_name,
+    tactic.assert eq_lemma_name eq_lemma,
+    try ac_refl,
+    eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
+    rewrite_target eq_lemma,
+    clear eq_lemma,
+    remove_dup_step 
 
 meta def ucongr : tactic unit := do 
-    usimp,  -- simp can remove duplicate
     solved_or_continue $ (do unify_ueq,
     move_ueq,
     applyc `add_unit_m,
-    ucongr_lhs,
-    applyc `ueq_symm,
+    remove_dup_ueq,
+    solved_or_continue $ (do applyc `ueq_symm,
+    remove_dup_ueq,
+    solved_or_continue $ (do ucongr_lhs,
+    solved_or_continue $ (do applyc `ueq_symm,
     ucongr_lhs,
     solved_or_continue $ (do subst_lhs,
-    applyc `ueq_symm,
-    solved_or_continue $ (do subst_lhs,
-    solved_or_continue $ ac_refl)))
+    solved_or_continue $ (do applyc `ueq_symm,
+    subst_lhs,
+    solved_or_continue $ ac_refl))))))
