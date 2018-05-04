@@ -303,15 +303,6 @@ meta def topsort_lhs : tactic unit := do
     rewrite_target eq_lemma,
     clear eq_lemma
 
-meta def repeat_or_sol (f: ℕ → tactic unit) : 
-ℕ → tactic unit 
-| 0 := (f 0)         
-| (nat.succ n) := do 
-    repeat_or_sol n, 
-    ok ← list.empty <$> tactic.get_goals,
-    if ok then return ()
-    else (f n)    
-
 meta def subst_lhs : tactic unit := do
     topsort_lhs,
     repr ← get_lhs_repr1,

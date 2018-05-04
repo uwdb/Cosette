@@ -96,4 +96,13 @@ meta def print_goals : tactic unit :=  do
     goals ← tactic.get_goals,
     tactic.trace goals
 
+meta def repeat_or_sol (f: ℕ → tactic unit) : 
+ℕ → tactic unit 
+| 0 := (f 0)         
+| (nat.succ n) := do 
+    repeat_or_sol n, 
+    ok ← list.empty <$> tactic.get_goals,
+    if ok then return ()
+    else (f n)    
+
 end cosette_tactics

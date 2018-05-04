@@ -509,9 +509,9 @@ HSPredicate to Coq
 >   toCoq (HSExists q) = addParen $ uw ["EXISTS", toCoq q]
 >   toCoq (HSEq v1 v2) = addParen $ uw ["equal", toCoq v1, toCoq v2]
 >   toCoq (HSGt v1 v2) =
->     addParen $ uw ["castPred (combine", veToProj v1, veToProj v2, ") gt"]
+>     addParen $ uw ["castPred (combine", veToProj v1, veToProj v2, ") predicates.gt"]
 >   toCoq (HSLt v1 v2) =
->     addParen $ uw ["castPred (combine", veToProj v2, veToProj v1, ") gt"]
+>     addParen $ uw ["castPred (combine", veToProj v2, veToProj v1, ") predicates.gt"]
 
 HSTableRef to Coq
 
@@ -552,7 +552,7 @@ HSQueryExpr to Coq
 >           -- the pattern matching is intended to be imcomplete,
 >           -- last field can only AGG
 >           f [t] =  convGSI t 
->           f (h:t) = addParen $ uw ["combine'", convGSI h, f t]
+>           f (h:t) = addParen $ uw ["combineGroupByProj", convGSI h, f t]
 >           convGSI (HSProj (HSAgg af ve)) = addParen $ toCoq  (HSProj (HSAgg af ve))
 >           convGSI (HSProj v) = "PLAIN" ++ (addParen $ uw ["uvariable", toCoq $ HSProj v])
 >           w = if (wh == HSTrue)
