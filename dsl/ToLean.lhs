@@ -653,7 +653,8 @@ generate predicate declarations
 >            "open Proj",
 >            "open Pred",
 >            "open SQL",
->            "open tree \n",
+>            "open tree",
+>            "open binary_operators\n",
 >            "notation `int` := datatypes.int \n"]
 
 > openDef :: String

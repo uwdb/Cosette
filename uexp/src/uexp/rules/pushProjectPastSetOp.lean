@@ -3,6 +3,8 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred

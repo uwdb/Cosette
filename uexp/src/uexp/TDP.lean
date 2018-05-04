@@ -1,5 +1,6 @@
 import .u_semiring
 import .cosette_tactics
+import .ucongr
 section TDP
 
 open tactic
@@ -75,5 +76,5 @@ example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
   : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)
   = (∑ (c : Tuple r) (a : Tuple p) (d : Tuple s) (b : Tuple q), f a b c d) :=
 begin
-  TDP
+  TDP' tactic.ac_refl,
 end

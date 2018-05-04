@@ -37,7 +37,8 @@ end predicates
 
 namespace binary_operators
 
-constant add : binary datatypes.int datatypes.int datatypes.int
+constant add_ : binary datatypes.int datatypes.int datatypes.int
+constant divide_ : binary datatypes.int datatypes.int datatypes.int
 
 end binary_operators
 
