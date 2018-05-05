@@ -60,9 +60,9 @@ with denoteSQL : forall {Γ s} (a: SQL Γ s), Query Γ s
 | _ _ (SQL.table r) := λ _, (denote_r r)  
 | _ _ (SQL.union q₁ q₂):= λ g t, denoteSQL q₁ g t + denoteSQL q₂ g t 
 | _ _ (SQL.minus q₁ q₂) := λ g t, denoteSQL q₁ g t * (usr.not ∥ denoteSQL q₂ g t ∥ )
-| _ _ (SQL.select p q) := λ g t, (denotePred p (g, t)) * (denoteSQL q g t)
+| _ _ (SQL.select p q) := λ g t, (denotePred p (pair g t)) * (denoteSQL q g t)
 | _ _ (SQL.product q₁ q₂) := λ g t, (denoteSQL q₁ g t.1) * (denoteSQL q₂ g t.2)
-| _ _ (SQL.project proj q) := λ g t', ∑ t, denoteSQL q g t * (denoteProj proj (g, t) ≃  t')
+| _ _ (SQL.project proj q) := λ g t', ∑ t, denoteSQL q g t * (denoteProj proj (pair g t) ≃  t')
 | _ _ (SQL.distinct q) := λ g t, ∥ denoteSQL q g t ∥ 
 | _ _ (SQL.castSQL f q) := λ g t, denoteSQL q (denoteProj f g) t
 with denotePred : forall {Γ}, Pred Γ →  Tuple Γ → usr
@@ -75,7 +75,7 @@ with denotePred : forall {Γ}, Pred Γ →  Tuple Γ → usr
 | _ Pred.true := λ _, 1
 | _ (Pred.castPred f p) := λ g, denotePred p (denoteProj f g)
 with denoteProj: forall {Γ Γ'} (proj: Proj Γ Γ'), Tuple Γ  → Tuple Γ'
-| _ _ (Proj.combine proj₁ proj₂) := λ t, (denoteProj proj₁ t, denoteProj proj₂ t)
+| _ _ (Proj.combine proj₁ proj₂) := λ t, pair (denoteProj proj₁ t) (denoteProj proj₂ t)
 | _ _ Proj.left := prod.fst
 | _ _ Proj.right := prod.snd
 | _ _ (Proj.compose proj₁ proj₂) := λ t, denoteProj proj₂ (denoteProj proj₁ t)

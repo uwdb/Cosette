@@ -115,7 +115,7 @@ end
 @[simp] axiom eq_unique {s: Schema} (t' : Tuple s) : (∑ t, t ≃ t') = 1
 @[simp] axiom eq_symm {s: Schema} (t₁ t₂ : Tuple s):
     (t₁ ≃ t₂) = (t₂ ≃ t₁)
-@[simp] axiom eq_pair {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) (t: Tuple (s₁ ++ s₂)): 
+axiom eq_pair {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) (t: Tuple (s₁ ++ s₂)): 
     (t ≃ (t₁, t₂)) = (t₁ ≃ t.1) * (t₂ ≃ t.2)
 axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
     (t₁ ≃ t₂) * (t₂ ≃ t₃) = (t₁ ≃ t₂) * (t₂ ≃ t₃) * (t₁ ≃ t₃) 
@@ -124,7 +124,7 @@ axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
     (t₁ ≃ t₂) * (t₁ ≃ t₂) = (t₁ ≃ t₂)
 
 -- lemmas
-@[simp] lemma sig_eq_subst {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
+lemma sig_eq_subst {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
 begin
     have hq: (∑ t, ((t ≃  t') * (R t))) = (∑ t, (t ≃ t') * R t'),
     { congr, funext, apply eq_subst_l },
@@ -135,4 +135,25 @@ begin
     rw ← sig_distr_time,
     rw eq_unique,
     rw time_one,
+end
+
+attribute [reducible]
+def pair {s1 s2: Schema} (t1 : Tuple s1) (t2:Tuple s2) : Tuple (s1 ++ s2) := (t1, t2)
+
+lemma eq_pair' {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) 
+(t: Tuple (s₁ ++ s₂)) :
+    ((pair t₁ t₂) ≃ t) = (t₁ ≃ t.1) * (t₂ ≃ t.2) := 
+begin
+unfold pair,
+rw eq_symm,
+apply eq_pair,
+end
+
+lemma eq_pair1 {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) 
+(t: Tuple (s₁ ++ s₂)) :
+    (t ≃ (pair t₁ t₂)) = (t.1 ≃ t₁) * (t.2 ≃ t₂) := 
+begin
+unfold pair,
+simp,
+apply eq_pair,
 end

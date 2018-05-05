@@ -88,6 +88,7 @@ match e with
 end
 
 meta def solved_or_continue (next: tactic unit) : tactic unit := do
+    tactic.try tactic.reflexivity,
     ok ← list.empty <$> tactic.get_goals,
     if ok then return ()
     else next

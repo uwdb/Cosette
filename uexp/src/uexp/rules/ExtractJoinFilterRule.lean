@@ -5,6 +5,9 @@ import ..extra_constants
 import ..ucongr
 import ..TDP
 
+set_option profiler true
+
+
 open Expr
 open Proj
 open Pred

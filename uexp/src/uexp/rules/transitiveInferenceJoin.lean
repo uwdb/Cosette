@@ -27,5 +27,6 @@ begin
   unfold_all_denotations,
   funext,
   try {simp},
-  TDP' tactic.ac_refl, -- Here is the problem
+  try {TDP' tactic.ac_refl}, -- Here is the problem
+  sorry    
 end

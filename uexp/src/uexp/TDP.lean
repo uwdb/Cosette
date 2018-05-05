@@ -1,6 +1,8 @@
 import .u_semiring
 import .cosette_tactics
 import .ucongr
+import .extra_constants
+import .sql
 section TDP
 
 open tactic
@@ -42,18 +44,21 @@ meta def swap_ith_sigma_forward (i : nat)
   equality_lemma ← to_expr ``(%%normal_expr = %%swapped_expr),
   eq_lemma_name ← mk_fresh_name,
   tactic.assert eq_lemma_name equality_lemma,
-  repeat $ applyc `congr_arg >> funext,
-  try $ applyc `sig_commute,
+  repeat_n i $ applyc `congr_arg >> funext,
+  applyc `sig_commute,
   eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
   rewrite_target eq_lemma,
   clear eq_lemma
 
+meta def move_once (i: nat) : tactic unit := do
+  lr ← get_lhs_sigma_repr,
+  swap_ith_sigma_forward i lr
+
 meta def move_to_front (i : nat) : tactic unit :=
   let loop : ℕ → tactic unit → tactic unit :=
-      λ iter_num next_iter,
-        get_lhs_sigma_repr >>=
-        swap_ith_sigma_forward iter_num >>
-
+      λ iter_num next_iter, do
+        lr ← get_lhs_sigma_repr,
+        swap_ith_sigma_forward iter_num lr,
         next_iter
   in nat.repeat loop i $ return ()
 
@@ -68,13 +73,20 @@ meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
     num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_sigma_repr,
     nat.repeat loop num_vars easy_case_solver
 
-meta def TDP := TDP' reflexivity
+meta def TDP := TDP' ucongr
 
 end TDP
 
 example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
   : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)
   = (∑ (c : Tuple r) (a : Tuple p) (d : Tuple s) (b : Tuple q), f a b c d) :=
+begin
+  TDP' tactic.ac_refl,
+end
+
+example {p} {R S: Tuple p → usr}
+  : (∑ (a b: Tuple p), R a * S b * S b)
+  = (∑ (a b: Tuple p), R b * S a * S a) :=
 begin
   TDP' tactic.ac_refl,
 end

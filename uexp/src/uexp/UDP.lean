@@ -1,5 +1,6 @@
 import .u_semiring
 import .cosette_tactics
+import .ucongr
 import .TDP
 section UDP
 

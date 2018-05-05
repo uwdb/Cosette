@@ -331,7 +331,11 @@ meta def remove_dup_ueq : tactic unit := do
     clear eq_lemma,
     remove_dup_step 
 
+meta def split_pairs : tactic unit := do 
+    `[repeat {rw eq_pair <|> rw eq_pair'}, try {simp}]
+
 meta def ucongr : tactic unit := do 
+    solved_or_continue $ (do split_pairs,
     solved_or_continue $ (do unify_ueq,
     move_ueq,
     applyc `add_unit_m,
@@ -344,4 +348,4 @@ meta def ucongr : tactic unit := do
     solved_or_continue $ (do subst_lhs,
     solved_or_continue $ (do applyc `ueq_symm,
     subst_lhs,
-    solved_or_continue $ ac_refl))))))
+    solved_or_continue $ ac_refl)))))))

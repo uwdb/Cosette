@@ -1,6 +1,6 @@
 import .ucongr
 
--- set_option profiler true
+set_option profiler true
 
 lemma congr_trans_ex1 {s: Schema} (a b c d e f: Tuple s):
     (a ≃ c) * ((a ≃ b) * (e ≃ f)) = (a ≃ c) * ((a ≃ b) * (f ≃ e)) :=
@@ -59,4 +59,13 @@ lemma congr_ex7 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
      (c ≃ a) * (a ≃ b):=
 begin
     ucongr,
+end
+
+lemma congr_ex8 {s: Schema} (a b c d e f: Tuple s) (R: Tuple s → usr):
+     (pair a b ≃ pair c d) * (pair a c ≃ pair b d) = 
+     (c ≃ a) * (a ≃ b) * (c ≃ d):=
+begin
+    unfold pair,
+    repeat {rw eq_pair'},
+    simp,
 end

@@ -2,6 +2,7 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
+import ..UDP
 
 open Expr
 open Proj
