@@ -43,3 +43,6 @@ constant divide_ : binary datatypes.int datatypes.int datatypes.int
 end binary_operators
 
 constant null {T : datatype} : const T
+
+axiom pred_cancel {s: Schema} {p: Pred s} {t: Tuple s}:
+    (denotePred p t) * (denotePred p t) = (denotePred p t) 

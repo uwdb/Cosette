@@ -329,7 +329,24 @@ meta def remove_dup_ueq : tactic unit := do
     eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
     rewrite_target eq_lemma,
     clear eq_lemma,
-    remove_dup_step 
+    remove_dup_step
+
+private meta def remove_pred_step : tactic unit := 
+    `[repeat {rw pred_cancel <|> rw pred_cancel'}]
+
+meta def remove_dup_pred : tactic unit := do 
+    repr ← get_lhs_repr3,
+    sorted ← return $ list.qsort (λ x y, x > y) repr,
+    origin ← repr_to_product repr,
+    new ← repr_to_product sorted,
+    eq_lemma ← to_expr ``(%%origin = %%new),
+    eq_lemma_name ← mk_fresh_name,
+    tactic.assert eq_lemma_name eq_lemma,
+    try ac_refl,
+    eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
+    rewrite_target eq_lemma,
+    clear eq_lemma,
+    remove_pred_step
 
 meta def split_pairs : tactic unit := do 
     `[repeat {rw eq_pair <|> rw eq_pair'}, try {simp}]
@@ -348,4 +365,8 @@ meta def ucongr : tactic unit := do
     solved_or_continue $ (do subst_lhs,
     solved_or_continue $ (do applyc `ueq_symm,
     subst_lhs,
-    solved_or_continue $ ac_refl)))))))
+    solved_or_continue $ (do remove_dup_pred, 
+    solved_or_continue $ (do applyc `ueq_symm,
+    remove_dup_pred,
+    solved_or_continue ac_refl)))))))))
+

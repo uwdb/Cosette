@@ -1,4 +1,5 @@
 import .u_semiring
+import .extra_constants
 /- lemmas used in congruence of u-semirings -/
 
 section
@@ -101,5 +102,13 @@ lemma ueq_dedup :
 
 lemma ueq_dedup' :
 (t₁ ≃ t₂) * ((t₁ ≃ t₂) * a) = (t₁ ≃ t₂) * a := by simp
+
+lemma pred_cancel' {p: Pred s} {t: Tuple s} {a: usr}:
+(denotePred p t) * ((denotePred p t) * a) =
+(denotePred p t) * a :=
+begin
+    rewrite ← time_assoc,
+    rewrite pred_cancel,
+end 
 
 end -- end section
