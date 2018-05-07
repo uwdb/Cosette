@@ -76,6 +76,14 @@ begin
     assumption,
 end
 
+lemma add_unit_l:
+1 * a = 1 * b → a = b :=
+begin
+    simp,
+    intros,
+    assumption,
+end
+
 lemma ueq_left_assoc_lem :
 a * (t₁ ≃ t₂) * b = c → a * ((t₁ ≃ t₂) * b) = c := by simp_solve
 

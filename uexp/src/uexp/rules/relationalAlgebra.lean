@@ -3,6 +3,8 @@ import ..sql
 import ..tactics
 import ..ucongr
 
+set_option profiler true
+
 open SQL
 open Proj
 open Expr
@@ -55,8 +57,7 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    move_ueq,
-    sorry,
+    ucongr,
 end
 
  lemma projectionDistributesOverUnion:

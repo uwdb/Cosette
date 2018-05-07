@@ -144,11 +144,16 @@ end
 private meta def all_ueq (l: list expr) : tactic bool :=
     list.foldl (λ v e, do v' ← v, return $ v' && (is_ueq e)) (return tt) l
 
-meta def add_unit_when_all_ueq : tactic unit := do 
+private meta def no_ueq (l: list expr) : tactic bool :=
+    list.foldl (λ v e, do v' ← v, return $ v' && ¬ (is_ueq e)) (return tt) l
+
+meta def add_unit_if_needed : tactic unit := do 
     lhs ← get_lhs,
     l ← product_to_repr lhs,
     all_u ← all_ueq l,
-    if all_u then applyc `add_unit
+    no_u ← no_ueq l,
+    if all_u then applyc `add_unit -- add unit when there is no relation expr
+    else if no_u then applyc `add_unit_l -- add unit when there is no ueq
     else return ()
 
 meta def move_ueq_step : tactic unit := do
@@ -163,9 +168,7 @@ meta def move_ueq_step : tactic unit := do
 -- move ueq, TODO: revisit here to get general SPNF form 
 meta def move_ueq: tactic unit :=
     `[right_assoc,
-      add_unit_when_all_ueq,
-      apply ueq_symm,
-      add_unit_when_all_ueq,
+      add_unit_if_needed,
       repeat {move_ueq_step},
       repeat {apply ueq_left_assoc_lem},
       repeat {apply ueq_right_assoc_lem},
@@ -295,7 +298,7 @@ meta def subst_step : tactic unit := do
         try $ rewrite_target lem,
         l' ← get_lhs_expr3,
         beta_reduction l'
-    | _ := fail "fail in subst_step"
+    | _ := return ()
     end
 
 private meta def ueq_toporder (e₁ e₂: expr) : bool :=

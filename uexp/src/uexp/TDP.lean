@@ -73,7 +73,7 @@ meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
     num_vars ← list.length <$> usr_sigma_repr.var_schemas <$> get_lhs_sigma_repr,
     nat.repeat loop num_vars easy_case_solver
 
-meta def TDP := TDP' ucongr
+meta def TDP := TDP' $ ac_refl <|> ucongr
 
 end TDP
 
