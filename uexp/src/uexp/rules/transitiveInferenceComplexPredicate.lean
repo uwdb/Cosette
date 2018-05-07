@@ -5,7 +5,7 @@ import ..extra_constants
 import ..ucongr
 import ..TDP
 
--- set_option profiler true
+set_option profiler true
 
 open Expr
 open Proj
@@ -31,7 +31,5 @@ begin
   unfold_all_denotations,
   funext,
   try {simp},
-  try {TDP' ucongr},
-  sorry
+  TDP,
 end
-  

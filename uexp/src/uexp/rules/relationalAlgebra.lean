@@ -1,6 +1,7 @@
 import ..u_semiring
 import ..sql
 import ..tactics
+import ..ucongr
 
 open SQL
 open Proj
@@ -53,7 +54,9 @@ lemma idempotentSelect:
 begin
     intros,
     unfold_all_denotations,
-    sorry
+    funext,
+    move_ueq,
+    sorry,
 end
 
  lemma projectionDistributesOverUnion:

@@ -50,6 +50,21 @@ meta def expr.swap_free_vars (i : nat) (j : nat) : expr → expr
                                in expr.elet n ty' val' body'
 | ex := ex
 
+meta def expr.subst_var (target: expr) : expr → expr := λ e, 
+if e = target then (expr.var 0)
+else 
+match e with
+| (expr.var n) := expr.var (n+1)
+| (expr.app f x) := expr.app (expr.subst_var f) (expr.subst_var x)
+| (expr.lam n bi ty body) := expr.lam n bi (expr.subst_var ty) (expr.subst_var body)
+| (expr.pi n bi ty body) := expr.pi n bi (expr.subst_var ty) (expr.subst_var body)
+| (expr.elet n ty val body) := let ty' := expr.subst_var ty,
+                                   val' := expr.subst_var val,
+                                   body' := expr.subst_var body
+                               in expr.elet n ty' val' body'
+| ex := ex
+end
+
 def move_nth_to_kth {α : Type} {m : Type → Type} [alternative m] [monad m]
   (initial final : ℕ) (ls : list α) : m (list α) :=
   list.append (ls.take initial) <$>
@@ -105,5 +120,15 @@ meta def repeat_or_sol (f: ℕ → tactic unit) :
     ok ← list.empty <$> tactic.get_goals,
     if ok then return ()
     else (f n)    
+
+meta def beta_reduction (e: expr): tactic unit := do 
+    reduced ← tactic.head_beta e,
+    n ← tactic.mk_fresh_name,
+    tactic.to_expr ``(%%e=%%reduced) >>= tactic.assert n,
+    tactic.reflexivity,
+    eq_lemma ← tactic.resolve_name n >>= tactic.to_expr,
+    tactic.rewrite_target eq_lemma,
+    tactic.clear eq_lemma
+
 
 end cosette_tactics

@@ -87,6 +87,13 @@ match e with
 | _ := failed
 end
 
+meta def get_lhs_expr3 : tactic expr :=
+target >>= λ e,
+match e with
+| `(_ * _ * %%a = _) := return a
+| _ := failed
+end
+
 -- swap i-th element in a product forward
 meta def swap_element_forward (i: nat) (l: list expr) : tactic unit :=
     do 
@@ -144,14 +151,6 @@ meta def add_unit_when_all_ueq : tactic unit := do
     if all_u then applyc `add_unit
     else return ()
 
-meta def test_bad : tactic unit := do 
-    lhs ← get_lhs,
-    l ←  product_to_repr lhs, 
-    a ← idx_of_bad 0 l,
-    trace l,
-    trace a,
-    return () 
-
 meta def move_ueq_step : tactic unit := do
         lhs ← get_lhs,
         l ← product_to_repr lhs,
@@ -199,7 +198,7 @@ meta def rw_trans : tactic unit :=
                 ne ← to_expr ``(%%d ≃ %%b),
                 if expr_in ne ueq_dict then return ()
                 else applyc `ueq_trans_2_l
-            else do trace t, fail "fail to apply ueq_trans_2_l"
+            else fail "fail to apply ueq_trans_2_l"
         else if (b = d) then 
             if (a > c) then do 
                 ne ← to_expr ``(%%a ≃ %%c),
@@ -277,13 +276,32 @@ meta def ucongr_lhs : tactic unit := do
         ucongr_lhs
     else return ()
 
-private meta def subst_step : tactic unit :=
-   `[try {rw ueq_subst_in_spnf <|> rw ueq_subst_in_spnf'}]
+meta def subst_step : tactic unit := do 
+    l ← get_lhs,
+    match l with
+    | `((%%a ≃ %%b) * %%c * %%d * %%e)   := do 
+        ty ← infer_type a,
+        let body := expr.subst_var a e,
+        let em : expr := (expr.lam `x binder_info.default ty body),
+        lem ← to_expr ``(@ueq_subst_in_spnf _ %%a %%b %%c %%d %%em),
+        try $ rewrite_target lem,
+        l' ← get_lhs_expr3,
+        beta_reduction l'
+    | `((%%a ≃ %%b) * %%c * %%e) := do 
+        ty ← infer_type a,
+        let body := expr.subst_var a e,
+        let em : expr := (expr.lam `x binder_info.default ty body),
+        lem ← to_expr ``(@ueq_subst_in_spnf' _ %%a %%b %%c %%em),
+        try $ rewrite_target lem,
+        l' ← get_lhs_expr3,
+        beta_reduction l'
+    | _ := fail "fail in subst_step"
+    end
 
 private meta def ueq_toporder (e₁ e₂: expr) : bool :=
     match e₁ with 
     | `(%%a ≃ %%b) := match e₂ with 
-                        | `(%%c ≃ %%d) := if d > a then ff else tt 
+                        | `(%%c ≃ %%d) := if (d > a) || (d = a) then ff else tt 
                         | _ := tt
                        end
     | _ := tt
@@ -329,6 +347,7 @@ meta def remove_dup_ueq : tactic unit := do
     eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
     rewrite_target eq_lemma,
     clear eq_lemma,
+    r2 ← get_lhs_repr1,
     remove_dup_step
 
 private meta def remove_pred_step : tactic unit := 

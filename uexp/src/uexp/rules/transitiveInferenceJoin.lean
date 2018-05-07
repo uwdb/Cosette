@@ -5,6 +5,8 @@ import ..extra_constants
 import ..ucongr
 import ..TDP
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred
@@ -26,36 +28,5 @@ begin
   unfold_all_denotations,
   funext,
   try {simp},
-  apply congr_arg _,
-  funext,
-  apply congr_arg _,
-  funext,
-  split_pairs,
-  unify_ueq,
-  move_ueq,
-  apply add_unit_m,
-  subst_lhs,
-  apply ueq_symm,
-  subst_lhs,  
-  remove_dup_pred,
-  apply ueq_symm,
-  remove_dup_pred,
-  sorry
-end
-
-example (Γ scm_emp : Schema)
-(rel_emp : relation scm_emp)
-(emp_deptno : Column int scm_emp)
-(t' : Tuple (leaf datatypes.int))
-(t₁ t₂ : Tuple scm_emp):
-(denoteProj emp_deptno t₂≃denoteProj emp_deptno t₁) * 1 *
-      (denotePred predicates.gt (pair (denoteProj emp_deptno t₂) (denote_c integer_7))) =
-(denoteProj emp_deptno t₂≃denoteProj emp_deptno t₁) * 1 *
-      (denotePred predicates.gt (pair (denoteProj emp_deptno t₂) (denote_c integer_7)) *
-         (denotePred predicates.gt (pair (denoteProj emp_deptno t₁) (denote_c integer_7)) *
-            (denote_r rel_emp t₁ * denote_r rel_emp t₂))) :=
-begin
-  unfold pair,
-  rw (@ueq_subst_in_spnf' _ (denoteProj emp_deptno t₂) (denoteProj emp_deptno t₁) 1 (λ t, denotePred predicates.gt (t, (denote_c integer_7)))),
-  sorry
+  TDP
 end
