@@ -33,6 +33,8 @@ begin
     unfold pair,
     simp,
     unfold isKey at ik,
+    apply ueq_symm,
+    remove_dup_sigs,
     -- waiting for chase here
     sorry
 end
