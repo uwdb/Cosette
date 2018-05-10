@@ -24,6 +24,9 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    unfold pair,
     simp,
-    sorry
+    apply congr_arg₂,
+    sorry,
+    sorry,
 end 

@@ -1,5 +1,5 @@
 import .u_semiring
-import .ucongr_lemmas
+import .cosette_lemmas
 import .cosette_tactics
 
 /- congruence procedure for u-semiring -/
@@ -50,78 +50,6 @@ end
 meta def right_assoc :=
     `[repeat {rewrite time_assoc}]
 
-private meta def product_to_repr' : expr → list expr
-| `(%%a * %%b) := a :: product_to_repr' b
-| e := [e] 
-
-meta def product_to_repr (e: expr) : tactic (list expr) :=
-return $ product_to_repr' e 
-
-meta def repr_to_product : list expr → tactic expr
-| [x] := return x
-| (h::t) :=  do te ← repr_to_product t,
-                to_expr ``(%%h * %%te)
-| [] := failed
-
--- assuming lhs is in the form of a*b*c
-meta def get_lhs_repr1 : tactic (list expr) :=
-target >>= λ e,
-match e with
-| `(%%a * _ * _ = %%_) := product_to_repr a
-| _ := failed
-end
-
--- assuming lhs is in the form of a*b*c
-meta def get_lhs_repr2 : tactic (list expr) :=
-target >>= λ e,
-match e with
-| `(_ * %%a * _ = _) := product_to_repr a
-| _ := failed
-end
-
--- assuming lhs is in the form of a*b*c
-meta def get_lhs_repr3 : tactic (list expr) :=
-target >>= λ e,
-match e with
-| `(_ * _ * %%a = _) := product_to_repr a
-| _ := failed
-end
-
-meta def get_lhs_expr3 : tactic expr :=
-target >>= λ e,
-match e with
-| `(_ * _ * %%a = _) := return a
-| _ := failed
-end
-
--- swap i-th element in a product forward
-meta def swap_element_forward (i: nat) (l: list expr) : tactic unit :=
-    do 
-    swapped_list ← list.swap_ith_forward i l,
-    origin_expr ← repr_to_product l,
-    swapped_expr ← repr_to_product swapped_list,
-    eq_lemma ← to_expr ``(%%origin_expr = %%swapped_expr),
-    eq_lemma_name ← mk_fresh_name,
-    tactic.assert eq_lemma_name eq_lemma,
-    repeat_n i $ (to_expr ``(congr_arg (has_mul.mul _)) >>= apply >> return ()),
-    applyc `prod_symm_assoc <|> applyc `mul_comm,
-    eq_lemma ← resolve_name eq_lemma_name >>= to_expr,
-    rewrite_target eq_lemma,
-    clear eq_lemma
-
--- suppose i > j
-meta def forward_i_to_j (i : nat) (j: nat) : tactic unit :=
-    let loop : nat → tactic unit → tactic unit := 
-        λ iter_num next_iter, do
-        next_iter,
-        repr ← get_lhs_repr1,
-        swap_element_forward (i - iter_num -1) repr
-    in nat.repeat loop (i - j) $ return ()
-
-private meta def is_ueq : expr → bool
-| `(_ ≃ _) := tt
-| _ := ff
-
 -- make sure ueq is in front of relation
 private meta def ueq_right_order : list expr → bool
 | [x] := tt 
@@ -149,7 +77,7 @@ private meta def no_ueq (l: list expr) : tactic bool :=
 
 meta def add_unit_if_needed : tactic unit := do 
     lhs ← get_lhs,
-    l ← product_to_repr lhs,
+    l ← ra_product_to_repr lhs,
     all_u ← all_ueq l,
     no_u ← no_ueq l,
     if all_u then applyc `add_unit -- add unit when there is no relation expr
@@ -158,7 +86,7 @@ meta def add_unit_if_needed : tactic unit := do
 
 meta def move_ueq_step : tactic unit := do
         lhs ← get_lhs,
-        l ← product_to_repr lhs,
+        l ← ra_product_to_repr lhs,
         if ueq_right_order l then do
             failed
         else do 
@@ -369,9 +297,6 @@ meta def remove_dup_pred : tactic unit := do
     rewrite_target eq_lemma,
     clear eq_lemma,
     remove_pred_step
-
-meta def split_pairs : tactic unit := do 
-    `[repeat {rw eq_pair <|> rw eq_pair'}, try {simp}]
 
 meta def ucongr : tactic unit := do 
     solved_or_continue $ (do split_pairs,

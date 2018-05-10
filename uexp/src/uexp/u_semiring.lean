@@ -124,7 +124,7 @@ axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
     (t₁ ≃ t₂) * (t₁ ≃ t₂) = (t₁ ≃ t₂)
 
 -- lemmas
-lemma sig_eq_subst {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
+lemma sig_eq_subst_r {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
 begin
     have hq: (∑ t, ((t ≃  t') * (R t))) = (∑ t, (t ≃ t') * R t'),
     { congr, funext, apply eq_subst_l },
@@ -137,7 +137,15 @@ begin
     rw time_one,
 end
 
-attribute [reducible]
+lemma sig_eq_subst_l {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t' ≃ t) * (R t)) =  R t' :=
+begin
+    have hq: (∑ t, ((t' ≃ t) * (R t))) = (∑ t, (t ≃ t') * R t),
+    { congr, funext, rw eq_symm, },
+    rw hq,
+    apply sig_eq_subst_r,
+end
+
+attribute [irreducible]
 def pair {s1 s2: Schema} (t1 : Tuple s1) (t2:Tuple s2) : Tuple (s1 ++ s2) := (t1, t2)
 
 lemma eq_pair' {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) 
