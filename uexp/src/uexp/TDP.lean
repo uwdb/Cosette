@@ -46,21 +46,33 @@ meta def move_sig_back (i: nat) (j: nat) :=
       move_once (i+num)
   in nat.repeat loop (j-i) $ return ()
 
-set_option eqn_compiler.max_steps 4096
+#check @cast
 
+#check expr.instantiate_local
 meta def split_l : expr → tactic (list expr)
 | `(%%a ≃ %%b) := 
   match b with 
     | `((%%c, %%d)) := do
       trace "here", 
       ty ← infer_type a,
+      let args := expr.get_app_args ty,
+      r ← match args.nth 0 with
+      | some `(%%r ++ _) := return r
+      | _ := failure
+      end,
       trace ty,
-      ty2 ← to_expr ``((%%a).1),
+      trace r,
+      ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%a)).1),
+      trace "BELOW",
       trace ty2,
-      x1 ← to_expr ``((%%a).1 ≃ %%c),
-      x2 ← to_expr ``((%%a).1 ≃ %%d),
+      c_ty ← infer_type c,
+      a_ty ← infer_type a,
+      trace a_ty,
+      trace c_ty,
+      -- x1 ← to_expr ``((%%a).1 ≃ %%c),
+      -- x2 ← to_expr ``((%%a).1 ≃ %%d),
       trace "here1",
-      return [x1, x2]
+      return []
     | x := return [x]
   end 
 | x := do trace "no!", return [x]
