@@ -56,5 +56,6 @@ example {r p} {R: Tuple r → usr} {k: Tuple (r++r)}:
   (∑ (a: Tuple r)(b: Tuple p),  R a) := 
 begin
   normalize_sig_body,
-  sorry
+  remove_dup_sigs,
+  ac_refl
 end 
