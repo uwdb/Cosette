@@ -48,8 +48,13 @@ meta def move_sig_back (i: nat) (j: nat) :=
 
 #check @cast
 
+<<<<<<< HEAD
 #check expr.instantiate_local
 meta def split_l : expr → tactic (list expr)
+=======
+meta def split_l (ex : expr) : tactic (list expr) :=
+match ex with
+>>>>>>> 53e0752ed81b8450c9886794e966665a7c44aa65
 | `(%%a ≃ %%b) := 
   match b with 
     | `((%%c, %%d)) := do
@@ -65,17 +70,14 @@ meta def split_l : expr → tactic (list expr)
       ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%a)).1),
       trace "BELOW",
       trace ty2,
-      c_ty ← infer_type c,
-      a_ty ← infer_type a,
-      trace a_ty,
-      trace c_ty,
-      -- x1 ← to_expr ``((%%a).1 ≃ %%c),
-      -- x2 ← to_expr ``((%%a).1 ≃ %%d),
+      x1 ← to_expr ``((%%a).1 ≃ %%c),
+      x2 ← to_expr ``((%%a).2 ≃ %%d),
       trace "here1",
-      return []
-    | x := return [x]
+      return [x1, x2]
+    | _ := return [ex]
   end 
 | x := do trace "no!", return [x]
+end
 
 meta def split_r : expr → tactic (list expr)
 | `((pair %%a %%b) ≃ %%c) := do 
@@ -93,27 +95,44 @@ meta def flatmap_in_repr (f: expr → tactic (list expr)): list expr → tactic 
 | [] := return []
 
 meta def split_pair_in_repr (r: list expr) : tactic (list expr) := do
-s' ←  flatmap_in_repr split_l r,
-flatmap_in_repr split_r s' 
+s' ← flatmap_in_repr split_l r,
+trace s',
+flatmap_in_repr split_r s'
+
+meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × list name)
+| ⟨schemas, body⟩ := do
+  lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
+                           do n ← tactic.mk_fresh_name,
+                              n' ← tactic.mk_fresh_name,
+                              ty ← tactic.to_expr ``(Tuple %%t),
+                              let local_const := expr.local_const n n' binder_info.default ty,
+                              return $ (local_const, n) :: lconsts)
+                        []
+                        $ list.reverse schemas,
+  let ⟨lconsts', names⟩ := lconsts.unzip,
+  return (expr.instantiate_vars body lconsts', names)
 
 -- normalize body of a sigma
 meta def normalize_sig_body : tactic unit := do
   `[try {unfold pair}],
   lr ← get_lhs_sigma_repr,
-  match lr with 
-  |⟨xs, body⟩ := do
+  lr_body_closed ← sigma_repr_to_closed_body_expr lr,
+  match lr_body_closed with 
+  | ⟨body, names⟩ := do
     le ← product_to_repr body,
     sl ← split_pair_in_repr le,
-    trace sl,
-    body' ← repr_to_product le,
+    body' ← repr_to_product sl,
     origin ← get_lhs,
-    new ← sigma_repr_to_sigma_expr ⟨xs, body'⟩,
+    let abstracted := expr.abstract_locals body' (list.reverse names),
+    new ← sigma_repr_to_sigma_expr ⟨lr.var_schemas, abstracted⟩,
     eq_lemma ← tactic.to_expr ``(%%origin = %%new),
     lemma_name ← tactic.mk_fresh_name,
     tactic.assert lemma_name eq_lemma,
-    repeat_n (list.length xs) $ tactic.applyc `congr_arg >> tactic.funext,
-    tactic.ac_refl,
+    repeat_n lr.var_schemas.length $ tactic.applyc `congr_arg >> tactic.funext,
+    split_pairs,
+    tactic.try tactic.ac_refl,
     eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+    trace "ok",
     tactic.rewrite_target eq_lemma_name,
     tactic.clear eq_lemma_name
   end
