@@ -4,6 +4,9 @@ import ..u_semiring
 import ..extra_constants
 import ..UDP
 
+set_option profiler true
+
+
 open Expr
 open Proj
 open Pred

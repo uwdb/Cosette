@@ -4,6 +4,8 @@ import ..u_semiring
 import ..extra_constants
 import ..TDP
 import ..ucongr
+import ..cosette_tactics
+
 
 variable i : const datatypes.int
 

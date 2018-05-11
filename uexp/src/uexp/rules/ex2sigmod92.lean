@@ -2,6 +2,9 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
+import ..UDP
+import ..cosette_tactics
+
 
 open Expr
 open Proj
@@ -44,5 +47,10 @@ theorem rule :
                           (equal (uvariable (right⋅left⋅itp_itemno))
                                  (uvariable (right⋅right⋅itm_itemno))))) : SQL Γ _) :=
 begin
-admit
+    intros,
+    unfold_all_denotations,
+    funext,
+    unfold pair,
+    simp,
+    sorry
 end

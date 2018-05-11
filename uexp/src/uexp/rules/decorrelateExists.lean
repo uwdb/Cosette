@@ -4,6 +4,8 @@ import ..u_semiring
 import ..cosette_lemmas
 import ..extra_constants
 import ..TDP
+import ..cosette_tactics
+
 
 open Expr
 open Proj

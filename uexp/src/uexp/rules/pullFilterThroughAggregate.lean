@@ -3,6 +3,8 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
+import ..cosette_tactics
+
 
 open Expr
 open Proj

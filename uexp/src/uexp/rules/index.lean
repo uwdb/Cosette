@@ -5,6 +5,8 @@ import ..extra_constants
 import ..ucongr
 import ..TDP ..canonize
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred
@@ -24,32 +26,31 @@ lemma IndexQ0:
                        WHERE and (equal (uvariable (right⋅left⋅right⋅left⋅star)) (constantExpr l))
                     (equal (uvariable (right⋅left⋅left⋅star)) (uvariable (right⋅right⋅k))) )) :SQL Γ _) :=
 begin
-  delta Index,
-  intros,
-  delta select2,
-  delta projectCons,
-  unfold_all_denotations,
-  funext,
-  unfold pair,
-  simp,
-  try_me,
-  --unfold isKey at ik,
-  apply ueq_symm,
-  remove_dup_sigs,
-  dsimp,
-  remove_dup_sigs,
-  dsimp,
-  remove_dup_sigs,
-  canonize,
-  remove_dup_sigs,
-  ac_refl
+    delta Index,
+    intros,
+    delta select2,
+    delta projectCons,
+    unfold_all_denotations,
+    funext,
+    unfold pair,
+    simp,
+    unfold isKey at ik,
+    apply ueq_symm,
+    remove_dup_sigs,
+    dsimp,
+    remove_dup_sigs,
+    dsimp,
+    remove_dup_sigs,
+    have h: (∑ (x : Tuple r),
+       (denote_c l≃denoteProj a x) * ((denoteProj k t≃denoteProj k x) * (denote_r R t * denote_r R x))) = (∑ (x : Tuple r),
+       (denote_c l≃denoteProj a x) * ((t≃x) * denote_r R t)),
+    focus{
+        apply congr_arg _,
+        funext,
+        rw (time_comm (denote_r R t)),
+        rw ik,
+    },
+    rw h,
+    remove_dup_sigs,
+    refl,
 end
-
-/-
-(∑ (x : Tuple empty) (x_1 : Tuple r),
-    denote_r R t *
-      (denote_r R x_1 *
-        ((denoteProj k t≃denoteProj k x_1) *
-          ((x≃denoteProj projectNil (g, x_1)) *
-           (denote_c l≃denoteProj a x_1)))))
--/
