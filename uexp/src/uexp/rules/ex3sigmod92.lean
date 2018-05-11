@@ -10,25 +10,6 @@ open SQL
 
 variables i0 i468 : const datatypes.int
 
-open tactic
-
-meta def is_key_type (e : expr) : bool :=
-    do let fn := expr.get_app_fn e,
-    match fn with
-    | (expr.const n _) := n = `isKey
-    | _ := bool.ff
-    end
-
-meta def find_keys : tactic (list expr) :=
-    do hyps ← local_context, 
-       hyp_types ← monad.mapm infer_type hyps,
-       let pairs := list.filter (fun (p: expr × expr), is_key_type p.snd = bool.tt) (list.zip hyps hyp_types),
-       return $ (list.unzip pairs).fst
-
-meta def try_me : tactic unit := do 
-    ks ← find_keys,
-    trace ks
-
 theorem rule :
     forall (Γ scm_itl scm_itp : Schema)
            (rel_itl : relation scm_itl)
