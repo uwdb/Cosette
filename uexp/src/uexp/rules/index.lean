@@ -47,7 +47,6 @@ begin
     focus{
         apply congr_arg _,
         funext,
-        rw (time_comm (denote_r R t)),
         rw ik,
     },
     rw h,
