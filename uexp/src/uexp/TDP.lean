@@ -129,18 +129,6 @@ s' ← flatmap_in_repr split_l r1,
 r ← flatmap_in_repr split_r s',
 return r
 
-meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × list name)
-| ⟨schemas, body⟩ := do
-  lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
-                           do n ← tactic.mk_fresh_name,
-                              ty ← tactic.to_expr ``(Tuple %%t),
-                              let local_const := expr.local_const n n binder_info.default ty,
-                              return $ (local_const, n) :: lconsts)
-                        []
-                        $ list.reverse schemas,
-  let ⟨lconsts', names⟩ := lconsts.unzip,
-  return (expr.instantiate_vars body lconsts', names)
-
 meta def normalize_step (n: nat) : tactic unit := do 
    repeat_n n $ tactic.applyc `congr_arg >> tactic.funext,
    split_pairs

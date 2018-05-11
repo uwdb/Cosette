@@ -254,6 +254,10 @@ meta def repeat_if_progress (f: ℕ → ℕ → (tactic ℕ)) :
 meta structure usr_sigma_repr :=
 (var_schemas : list expr) (body : expr)
 
+meta instance sigma_repr_format : has_to_format usr_sigma_repr :=
+  ⟨λ sig, format.cbrace $ "var_schemas := " ++ to_fmt sig.var_schemas ++ "," ++
+                         " body := " ++ to_fmt sig.body⟩
+
 meta def sigma_expr_to_sigma_repr : expr → usr_sigma_repr
 | `(usr.sig (λ t : Tuple %%s, %%a)) :=
   match sigma_expr_to_sigma_repr a with
@@ -277,6 +281,52 @@ match e with
 | `(%%a = %%b) := return $ sigma_expr_to_sigma_repr a
 | _ := tactic.failed
 end
+
+meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × list name)
+| ⟨schemas, body⟩ := do
+  lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
+                           do n ← tactic.mk_fresh_name,
+                              n' ← tactic.mk_fresh_name,
+                              ty ← tactic.to_expr ``(Tuple %%t),
+                              let local_const := expr.local_const n n' binder_info.default ty,
+                              return $ (local_const, n) :: lconsts)
+                        []
+                        $ list.reverse schemas,
+  let ⟨lconsts', names⟩ := lconsts.unzip,
+  return (expr.instantiate_vars body lconsts', names)
+
+private meta def get_types_of_local_consts
+  (ns : list name) : expr → list (nat × expr)
+| (expr.app f x) := list.bag_inter (get_types_of_local_consts f) $
+                                   get_types_of_local_consts x
+| (expr.lam n bi ty body) := list.bag_inter (get_types_of_local_consts ty) $
+                                            get_types_of_local_consts body
+| (expr.pi n bi ty body) := list.bag_inter (get_types_of_local_consts ty) $
+                                           get_types_of_local_consts body
+| (expr.elet n ty val body) := list.bag_inter (get_types_of_local_consts ty) $
+                               list.bag_inter (get_types_of_local_consts val) $
+                                              get_types_of_local_consts body
+| (expr.local_const n _ _ ty) :=
+  let idx : option nat :=
+      list.rec none (λ n' ns res, if n = n' then some 0 else nat.succ <$> res) ns
+  in match idx with
+  | some i := [(i, ty)]
+  | none := []
+  end
+| _ := []
+
+meta def closed_sigma_repr_to_sigma_repr (body : expr) (names : list name)
+  : tactic usr_sigma_repr := do
+  schemas ← monad.sequence
+            $ list.map (λ p : nat × expr,
+                          match p with
+                          | (_, `(Tuple %%s)) := return s
+                          | _ := tactic.failed
+                          end)
+            $ list.qsort (λ x y : nat × expr, x.fst ≥ y.fst)
+            $ get_types_of_local_consts names body,
+  return $ usr_sigma_repr.mk schemas
+         $ expr.abstract_locals body $ list.reverse names
 
 meta def forward_i_to_j_in_sig (i: nat) (j: nat) : tactic unit := do 
   lr ← get_lhs_sigma_repr,
@@ -308,26 +358,43 @@ meta def sig_body_size : tactic ℕ := do
 meta def split_pairs : tactic unit := do 
     `[repeat {rw eq_pair <|> rw eq_pair'}, try {dsimp}]
 
-meta def is_key_type (e : expr) : bool :=
-    do let fn := expr.get_app_fn e,
+meta def get_table_and_column (e : expr) : option (expr × expr) :=
+  let fn := expr.get_app_fn e in do
     match fn with
-    | (expr.const n _) := n = `isKey
-    | _ := bool.ff
+    | (expr.const n _) :=
+      if n = `isKey
+        then match list.reverse $ expr.get_app_args e with
+             | (rel::col::_) := some (rel, col)
+             | _ := none
+             end
+        else none
+    | _ := none
     end
 
-meta def find_keys : tactic (list expr) :=
-    do hyps ← tactic.local_context, 
-       hyp_types ← monad.mapm tactic.infer_type hyps,
-       let pairs := list.filter (fun (p: expr × expr), is_key_type p.snd = bool.tt) (list.zip hyps hyp_types),
-       return $ (list.unzip pairs).fst
+meta structure key_constraint :=
+(name : expr) (table : expr) (column : expr)
+
+meta instance key_constraint_to_format : has_to_format key_constraint :=
+  ⟨λ kc, format.cbrace $ "name := " ++ to_fmt kc.name ++ "," ++
+                         " table := " ++ to_fmt kc.table ++ "," ++
+                         " column := " ++ to_fmt kc.column⟩
+
+meta def find_keys : tactic (list key_constraint) := do
+  hyps ← tactic.local_context, 
+  hyp_types ← monad.mapm tactic.infer_type hyps,
+  return $ list.filter_map
+              (λ (name_and_type : expr × expr),
+                  match name_and_type with
+                  | (key_name, key_type) :=
+                    match get_table_and_column key_type with
+                    | some (rel, col) := some $ key_constraint.mk key_name rel col
+                    | none := none
+                    end
+                  end)
+         $ list.zip hyps hyp_types
 
 meta def try_me : tactic unit := do 
-    ks ← find_keys,
-    tactic.trace ks
-
--- Keep applying g until it fails
-meta def repeat_with_state {α : Type} {f : Type → Type} [alternative f] [monad f]
-  (g : α → f α) : α → f α
-  := λ a₀, (g a₀ >>= repeat_with_state) <|> return a₀
+  ks ← find_keys,
+  tactic.trace ks
 
 end cosette_tactics

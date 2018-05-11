@@ -139,9 +139,10 @@ noncomputable definition Index {Γ s t0 t1}
   SELECT2 (uvariable (right ⋅ k)) (uvariable (right ⋅ ic)) FROM1 R
 
 definition isKey {s ty} (k : Column ty s) (R : relation s) :=
-  Π t : Tuple s,
-  denote_r R t = (∑ t', (denoteProj k t' ≃ denoteProj k t)
-                      * denote_r R t' * denote_r R t)
+  Π t t' : Tuple s,
+  (denoteProj k t ≃ denoteProj k t') *
+    (denote_r R t' * denote_r R t) =
+  (t ≃ t') * denote_r R t
 
 definition fKey {s1 s2 ty} (k : Column ty s1)
                 (fk : Column ty s2) (R : relation s1)
