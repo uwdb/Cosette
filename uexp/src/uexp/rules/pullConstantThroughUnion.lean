@@ -6,6 +6,8 @@ import ..ucongr
 import ..TDP
 import ..UDP
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred
@@ -26,7 +28,5 @@ begin
     funext,
     unfold pair,
     simp,
-    apply congr_arg₂,
-    sorry,
-    sorry,
+    UDP,
 end 

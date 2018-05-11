@@ -77,13 +77,16 @@ match ex with
 | `(%%a ≃ %%b) := 
   match a, b with
     | _ , `((%%c, %%d)) := do
+      /-
       ty ← infer_type a,
       let args := expr.get_app_args ty,
-      r ← match args.nth 0 with
-      | some `(%%r ++ _) := return r
+      (r1, r2) ← match args.nth 0 with
+      | some `(%%r1 ++ %%r2) := return (r1, r2)
       | _ := failure
       end,
-      ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%a)).1),
+      trace (r1, r2),
+      ty2 ← to_expr ``((@cast %%ty (Tuple %%r1 × Tuple %%r2) (by tactic.reflexivity) (%%a)).1),
+      -/
       x1 ← to_expr ``((%%a).1 ≃ %%c),
       x2 ← to_expr ``((%%a).2 ≃ %%d),
       return [x1, x2]
@@ -104,7 +107,7 @@ match ex with
       | _ := failure
       end,
       ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%b)).1),
-      x1 ← to_expr ``( %%c ≃ (%%b).1),
+      x1 ← to_expr ``(%%c ≃ (%%b).1),
       x2 ← to_expr ``(%%d ≃ (%%b).2),
       return [x1, x2]
     | _, _ := return [ex]
@@ -226,7 +229,8 @@ meta def removal_step : tactic unit := do
 
 meta def remove_dup_sigs : tactic unit := do 
   -- this is a workround, this unnest 3 levels of pair
-  normalize_sig_body, 
+  -- repeat_n 3 $ normalize_sig_body >> try dsimp_target, 
+  repeat_n 3 normalize_sig_body,
   lhs ← get_lhs,
   s ← sig_body_size,
   final ← let loop : ℕ → ℕ → (tactic ℕ) := λ s n, do

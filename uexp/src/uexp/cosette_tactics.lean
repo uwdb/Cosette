@@ -301,6 +301,6 @@ meta def sig_body_size : tactic ℕ := do
   end 
 
 meta def split_pairs : tactic unit := do 
-    `[repeat {rw eq_pair <|> rw eq_pair'}, try {simp}]
+    `[repeat {rw eq_pair <|> rw eq_pair'}, try {dsimp}]
 
 end cosette_tactics
