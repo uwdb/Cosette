@@ -46,45 +46,71 @@ meta def move_sig_back (i: nat) (j: nat) :=
       move_once (i+num)
   in nat.repeat loop (j-i) $ return ()
 
-#check @cast
+meta def break_p : expr →  tactic (list expr)
+| `(%%a ≃ %%b) := 
+  match a, b with
+    | `((%%a1, %%a2)) , `((%%b1, %%b2)) := do
+      x1 ← to_expr ``((%%a1 ≃ %%b1)),
+      x2 ← to_expr ``((%%a2 ≃ %%b2)),
+      l ← break_p x1,
+      r ← break_p x2,
+      return (l ++ r)
+    | _, _ := do x ← to_expr ``((%%a ≃ %%b)), return [x]
+  end 
+| x := return [x]
 
-<<<<<<< HEAD
-#check expr.instantiate_local
-meta def split_l : expr → tactic (list expr)
-=======
+meta def split_p (ex : expr) : tactic (list expr) :=
+match ex with
+| `(%%a ≃ %%b) := 
+  match a, b with
+    | `((%%a1, %%a2)) , `((%%b1, %%b2)) := do
+      x1 ← to_expr ``((%%a).1 ≃ (%%b).1),
+      x2 ← to_expr ``((%%a).2 ≃ (%%b).2),
+      return [x1, x2]
+    | _, _ := return [ex]
+  end 
+| x := return [x]
+end
+
 meta def split_l (ex : expr) : tactic (list expr) :=
 match ex with
->>>>>>> 53e0752ed81b8450c9886794e966665a7c44aa65
 | `(%%a ≃ %%b) := 
-  match b with 
-    | `((%%c, %%d)) := do
-      trace "here", 
+  match a, b with
+    | _ , `((%%c, %%d)) := do
       ty ← infer_type a,
       let args := expr.get_app_args ty,
       r ← match args.nth 0 with
       | some `(%%r ++ _) := return r
       | _ := failure
       end,
-      trace ty,
-      trace r,
       ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%a)).1),
-      trace "BELOW",
-      trace ty2,
       x1 ← to_expr ``((%%a).1 ≃ %%c),
       x2 ← to_expr ``((%%a).2 ≃ %%d),
-      trace "here1",
       return [x1, x2]
-    | _ := return [ex]
+    | _, _ := return [ex]
   end 
-| x := do trace "no!", return [x]
+| x := return [x]
 end
 
-meta def split_r : expr → tactic (list expr)
-| `((pair %%a %%b) ≃ %%c) := do 
-    x1 ← to_expr ``(%%a ≃ (%%c).1),
-    x2 ← to_expr ``(%%b ≃ (%%c).2),
-    return [x1, x2]
-| x := do trace "no!", return [x]
+meta def split_r (ex : expr) : tactic (list expr) :=
+match ex with
+| `(%%a ≃ %%b) := 
+  match a, b with
+    | `((%%c, %%d)), _ := do
+      ty ← infer_type b,
+      let args := expr.get_app_args ty,
+      r ← match args.nth 0 with
+      | some `(%%r ++ _) := return r
+      | _ := failure
+      end,
+      ty2 ← to_expr ``((@cast %%ty (Tuple %%r × Tuple %%r) (by tactic.reflexivity) (%%b)).1),
+      x1 ← to_expr ``( %%c ≃ (%%b).1),
+      x2 ← to_expr ``(%%d ≃ (%%b).2),
+      return [x1, x2]
+    | _, _ := return [ex]
+  end 
+| x := return [x]
+end
 
 
 meta def flatmap_in_repr (f: expr → tactic (list expr)): list expr → tactic (list expr)
@@ -95,9 +121,10 @@ meta def flatmap_in_repr (f: expr → tactic (list expr)): list expr → tactic 
 | [] := return []
 
 meta def split_pair_in_repr (r: list expr) : tactic (list expr) := do
-s' ← flatmap_in_repr split_l r,
-trace s',
-flatmap_in_repr split_r s'
+r1 ← flatmap_in_repr split_p r,
+s' ← flatmap_in_repr split_l r1,
+r ← flatmap_in_repr split_r s',
+return r
 
 meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × list name)
 | ⟨schemas, body⟩ := do
@@ -120,8 +147,8 @@ meta def normalize_sig_body : tactic unit := do
   match lr_body_closed with 
   | ⟨body, names⟩ := do
     le ← product_to_repr body,
-    sl ← split_pair_in_repr le,
-    body' ← repr_to_product sl,
+    s1 ← split_pair_in_repr le, 
+    body' ← repr_to_product s1,
     origin ← get_lhs,
     let abstracted := expr.abstract_locals body' (list.reverse names),
     new ← sigma_repr_to_sigma_expr ⟨lr.var_schemas, abstracted⟩,
@@ -132,7 +159,6 @@ meta def normalize_sig_body : tactic unit := do
     split_pairs,
     tactic.try tactic.ac_refl,
     eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
-    trace "ok",
     tactic.rewrite_target eq_lemma_name,
     tactic.clear eq_lemma_name
   end
@@ -199,7 +225,8 @@ meta def removal_step : tactic unit := do
   end
 
 meta def remove_dup_sigs : tactic unit := do 
-  normalize_sig_body,
+  -- this is a workround, this unnest 3 levels of pair
+  normalize_sig_body, 
   lhs ← get_lhs,
   s ← sig_body_size,
   final ← let loop : ℕ → ℕ → (tactic ℕ) := λ s n, do

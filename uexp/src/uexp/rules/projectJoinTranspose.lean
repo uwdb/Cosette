@@ -20,5 +20,8 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    sorry
+    remove_dup_sigs,
+    apply ueq_symm,
+    normalize_sig_body,
+    remove_dup_sigs,
 end

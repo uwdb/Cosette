@@ -37,6 +37,7 @@ example {r p} {R: Tuple r → usr} :
   (∑ (a1 a2 a3: Tuple r) (b c: Tuple p), (a2 ≃ a1) * (a2 ≃ a3) * (c ≃ b) * (R a1)) = 
   (∑ (a: Tuple r)(b: Tuple p),  R a) := 
 begin
+  normalize_sig_body,
   remove_dup_sigs,
   refl,
 end 
