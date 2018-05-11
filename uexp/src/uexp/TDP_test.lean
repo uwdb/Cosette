@@ -63,5 +63,7 @@ example {r} {R: Tuple r → usr}:
 (∑ (a1), (∑ (a2: Tuple r), (a2 ≃ a1) * R a2 ) * R a1) = 
 (∑ (t: Tuple r), R t * R t) :=
 begin 
-  TDP
+  --remove_dup_sigs,
+  simp,
+  TDP,
 end

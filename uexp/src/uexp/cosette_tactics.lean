@@ -297,15 +297,15 @@ meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × lis
 
 private meta def get_types_of_local_consts
   (ns : list name) : expr → list (nat × expr)
-| (expr.app f x) := list.bag_inter (get_types_of_local_consts f) $
-                                   get_types_of_local_consts x
-| (expr.lam n bi ty body) := list.bag_inter (get_types_of_local_consts ty) $
-                                            get_types_of_local_consts body
-| (expr.pi n bi ty body) := list.bag_inter (get_types_of_local_consts ty) $
-                                           get_types_of_local_consts body
-| (expr.elet n ty val body) := list.bag_inter (get_types_of_local_consts ty) $
-                               list.bag_inter (get_types_of_local_consts val) $
-                                              get_types_of_local_consts body
+| (expr.app f x) := list.union (get_types_of_local_consts f) $
+                               get_types_of_local_consts x
+| (expr.lam n bi ty body) := list.union (get_types_of_local_consts ty) $
+                                        get_types_of_local_consts body
+| (expr.pi n bi ty body) := list.union (get_types_of_local_consts ty) $
+                                       get_types_of_local_consts body
+| (expr.elet n ty val body) := list.union (get_types_of_local_consts ty) $
+                               list.union (get_types_of_local_consts val) $
+                                          get_types_of_local_consts body
 | (expr.local_const n _ _ ty) :=
   let idx : option nat :=
       list.rec none (λ n' ns res, if n = n' then some 0 else nat.succ <$> res) ns

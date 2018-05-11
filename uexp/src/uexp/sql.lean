@@ -141,7 +141,7 @@ noncomputable definition Index {Γ s t0 t1}
 definition isKey {s ty} (k : Column ty s) (R : relation s) :=
   Π t t' : Tuple s,
   (denoteProj k t ≃ denoteProj k t') *
-    (denote_r R t' * denote_r R t) =
+    (denote_r R t * denote_r R t') =
   (t ≃ t') * denote_r R t
 
 definition fKey {s1 s2 ty} (k : Column ty s1)

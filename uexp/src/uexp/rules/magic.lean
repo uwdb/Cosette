@@ -3,7 +3,7 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 import ..ucongr
-import ..TDP
+import ..TDP ..canonize
 
 open Expr
 open Proj
@@ -33,19 +33,14 @@ begin
   unfold pair,
   simp,
   try_me,
+  --unfold isKey at ik,
   apply ueq_symm,
-  try { remove_dup_sigs },
-  repeat { dsimp, remove_dup_sigs },
-  have assert0
-    : (∑ (x : Tuple r),
-       (denote_c l≃denoteProj a x) *
-        ((denoteProj k t≃denoteProj k x) *
-          (denote_r R x * denote_r R t)))
-    = (∑ (x : Tuple r),
-       (denote_c l≃denoteProj a x) *
-        ((t ≃ x) * denote_r R t)),
-  { congr, funext, rw ik },
-  rw assert0,
+  remove_dup_sigs,
+  dsimp,
+  remove_dup_sigs,
+  dsimp,
+  remove_dup_sigs,
+  canonize,
   remove_dup_sigs,
   ac_refl
 end
