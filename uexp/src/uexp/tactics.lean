@@ -49,20 +49,3 @@ meta def unfold_all_denotations := `[
             <|> unfold denoteExpr
             <|> unfold groupBy }
 ]
-
-meta def is_key_type (e : expr) : bool :=
-    do let fn := expr.get_app_fn e,
-    match fn with
-    | (expr.const n _) := n = `isKey
-    | _ := bool.ff
-    end
-
-meta def find_keys : tactic (list expr) :=
-    do hyps ← local_context, 
-       hyp_types ← monad.mapm infer_type hyps,
-       let pairs := list.filter (fun (p: expr × expr), is_key_type p.snd = bool.tt) (list.zip hyps hyp_types),
-       return $ (list.unzip pairs).fst
-
-meta def try_me : tactic unit := do 
-    ks ← find_keys,
-    trace ks

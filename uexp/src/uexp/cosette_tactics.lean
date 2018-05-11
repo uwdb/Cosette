@@ -114,13 +114,18 @@ match l with
 | (h :: t) := if h=e then tt else (expr_in e t)
 end)
 
--- get lhs expr if the goal is a = b
-meta def get_lhs : tactic expr :=
+meta def get_eq_sides : tactic (expr × expr) :=
 tactic.target >>= λ e,
 match e with
-| `(%%a = _) := return a
+| `(%%a = %%b) := return (a, b)
 | _ := tactic.failed
 end
+
+meta def get_lhs : tactic expr :=
+prod.fst <$> get_eq_sides
+
+meta def get_rhs : tactic expr :=
+prod.snd <$> get_eq_sides
 
 meta def solved_or_continue (next: tactic unit) : tactic unit := do
     tactic.try tactic.reflexivity,
@@ -302,5 +307,27 @@ meta def sig_body_size : tactic ℕ := do
 
 meta def split_pairs : tactic unit := do 
     `[repeat {rw eq_pair <|> rw eq_pair'}, try {dsimp}]
+
+meta def is_key_type (e : expr) : bool :=
+    do let fn := expr.get_app_fn e,
+    match fn with
+    | (expr.const n _) := n = `isKey
+    | _ := bool.ff
+    end
+
+meta def find_keys : tactic (list expr) :=
+    do hyps ← tactic.local_context, 
+       hyp_types ← monad.mapm tactic.infer_type hyps,
+       let pairs := list.filter (fun (p: expr × expr), is_key_type p.snd = bool.tt) (list.zip hyps hyp_types),
+       return $ (list.unzip pairs).fst
+
+meta def try_me : tactic unit := do 
+    ks ← find_keys,
+    tactic.trace ks
+
+-- Keep applying g until it fails
+meta def repeat_with_state {α : Type} {f : Type → Type} [alternative f] [monad f]
+  (g : α → f α) : α → f α
+  := λ a₀, (g a₀ >>= repeat_with_state) <|> return a₀
 
 end cosette_tactics
