@@ -5,6 +5,8 @@ import ..extra_constants
 import ..ucongr
 import ..TDP
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred
@@ -29,6 +31,7 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    unfold pair,
     simp,
     sorry
 end    
@@ -43,6 +46,7 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    unfold pair,
     simp,
     ucongr,
 end

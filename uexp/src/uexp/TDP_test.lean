@@ -44,8 +44,6 @@ end
 example {p} {R: Tuple p → usr} {b t: Tuple p}:
     R t * R b = (∑ (a: Tuple p), (a ≃ t) * R a * R b) :=
 begin
-  normalize_sig_body,
-  removal_step,
   apply ueq_symm,
   remove_dup_sigs,
   ac_refl,
@@ -55,7 +53,14 @@ example {r p} {R: Tuple r → usr} {k: Tuple (r++r)}:
   (∑ (a1 a2 a3: Tuple r) (b c: Tuple p), (k ≃ (pair a3 a2)) * (c ≃ b) * (R a1)) = 
   (∑ (a: Tuple r)(b: Tuple p),  R a) := 
 begin
-  normalize_sig_body,
   remove_dup_sigs,
   ac_refl
 end 
+
+example {r} {R: Tuple r → usr}:
+(∑ (a1: Tuple r), (∑ (a2: Tuple r), (a2 ≃ a1) * R a2) * R a1) = 
+(∑ (t: Tuple r), R t * R t) :=
+begin 
+  remove_dup_sigs,
+  sorry,
+end

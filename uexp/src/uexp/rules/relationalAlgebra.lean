@@ -2,6 +2,7 @@ import ..u_semiring
 import ..sql
 import ..tactics
 import ..ucongr
+import ..TDP
 
 set_option profiler true
 
@@ -33,6 +34,8 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    unfold pair,
+    simp,
     ac_refl
 end
 
@@ -90,6 +93,7 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    simp,
-    sorry
+    unfold pair,
+    simp, 
+    TDP,
 end

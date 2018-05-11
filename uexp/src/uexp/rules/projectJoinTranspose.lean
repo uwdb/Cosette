@@ -20,5 +20,8 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    sorry
+    remove_dup_sigs,
+    apply ueq_symm,
+    normalize_sig_body,
+    sorry, -- this is due to sig inside sig, need to normalize this case
 end
