@@ -2,6 +2,8 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
+import ..cosette_tactics
+
 
 open Expr
 open Proj
@@ -64,5 +66,10 @@ theorem rule :
                                              (right⋅left⋅itm_itemn))
                                     predicates.gt))) : SQL Γ _) :=
 begin
-    admit
+    intros,
+    unfold_all_denotations,
+    funext,
+    unfold pair,
+    simp,
+    sorry
 end

@@ -4,6 +4,8 @@ import ..u_semiring
 import ..extra_constants
 import ..ucongr
 import ..TDP
+import ..cosette_tactics
+
 
 -- NOTE: this one cannot solved by ucongr, need to be revisited
 

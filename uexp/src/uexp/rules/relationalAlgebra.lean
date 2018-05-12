@@ -6,9 +6,10 @@ import ..TDP
 
 set_option profiler true
 
-open SQL
-open Proj
 open Expr
+open Proj
+open Pred
+open SQL
 
 lemma commutativeSelect:
  forall Γ s a slct0 slct1,
@@ -95,5 +96,17 @@ begin
     funext,
     unfold pair,
     simp, 
+    TDP,
+end
+
+lemma conjunctSelect: 
+    forall Γ s a slct0 slct1,
+    denoteSQL ((SELECT * FROM1 a WHERE (and slct0 slct1)) : SQL Γ s ) =
+    denoteSQL ((SELECT * FROM1 (SELECT * FROM1 a WHERE slct0) WHERE slct1) : SQL Γ s) :=
+begin
+    intros,
+    unfold_all_denotations,
+    funext,
+    unfold pair,
     TDP,
 end

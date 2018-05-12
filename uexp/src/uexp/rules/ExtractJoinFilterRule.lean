@@ -4,6 +4,8 @@ import ..u_semiring
 import ..extra_constants
 import ..ucongr
 import ..TDP
+import ..cosette_tactics
+
 
 set_option profiler true
 

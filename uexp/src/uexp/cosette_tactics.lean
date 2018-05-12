@@ -397,4 +397,16 @@ meta def try_me : tactic unit := do
   ks ← find_keys,
   tactic.trace ks
 
+meta def unfold_all_denotations := `[
+    repeat { unfold denoteSQL
+            <|> unfold denotePred
+            <|> unfold denoteProj
+            <|> unfold denoteExpr
+            <|> unfold groupBy 
+            <|> unfold combineGroupByProj
+            <|> unfold pair
+            <|> unfold plainGroupByProj
+            <|> unfold aggregatorGroupByProj}
+]
+
 end cosette_tactics
