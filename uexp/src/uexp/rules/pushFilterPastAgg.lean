@@ -25,8 +25,6 @@ denoteSQL
  begin
     intros,
     unfold_all_denotations,
-    unfold combineGroupByProj,
-    repeat {unfold denoteProj},
     funext,
     simp,
     sorry

@@ -1,5 +1,4 @@
 import ..sql
-import ..tactics
 import ..u_semiring
 import ..extra_constants
 import ..ucongr
@@ -31,8 +30,8 @@ begin
     delta select2,
     delta projectCons,
     unfold_all_denotations,
-    unfold pair,
     simp,
+    funext,
     apply ueq_symm,
     remove_dup_sigs,
     dsimp,
@@ -41,5 +40,5 @@ begin
     remove_dup_sigs,
     canonize,
     remove_dup_sigs,
-    ac_refl
+    sorry
 end

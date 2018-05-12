@@ -3,6 +3,7 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 import ..cosette_tactics
+import ..TDP
 
 
 open Expr
@@ -69,7 +70,8 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    unfold pair,
     simp,
+    unify_sigs,
+    -- remove_dup_sigs, -- fail to unify here, need to abstract
     sorry
 end

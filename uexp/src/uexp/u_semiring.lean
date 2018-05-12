@@ -100,6 +100,8 @@ begin
     rewrite squash_time,
 end 
 
+axiom squash_add_one (x y : usr) :  ∥ 1 + x ∥ = 1 
+
 @[simp] axiom not_zero : usr.not 0 = 1
 @[simp] axiom not_time (x y : usr) : usr.not (x * y) =  ∥ usr.not x + usr.not y ∥ 
 @[simp] axiom not_plus (x y : usr) : usr.not (x + y) = usr.not x * usr.not y
@@ -122,6 +124,10 @@ axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
 -- TODO: the following could be a lemma
 @[simp] axiom eq_cancel {s: Schema} (t₁ t₂ : Tuple s):
     (t₁ ≃ t₂) * (t₁ ≃ t₂) = (t₁ ≃ t₂)
+@[simp] axiom eq_lem {s: Schema} (t₁ t₂ : Tuple s) : 
+    (t₁ ≃ t₂) + usr.not (t₁ ≃ t₂) = 1
+axiom eq_sqush {s: Schema} (t₁ t₂ : Tuple s) :
+    (t₁ ≃ t₂) = ∥ t₁ ≃ t₂ ∥
 
 -- lemmas
 lemma sig_eq_subst_r {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=

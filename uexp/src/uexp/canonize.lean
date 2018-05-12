@@ -1,4 +1,3 @@
-import tactic
 import .cosette_tactics .TDP 
 open tactic
 
