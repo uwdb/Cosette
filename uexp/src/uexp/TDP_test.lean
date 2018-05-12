@@ -1,6 +1,8 @@
 import .TDP
 import .cosette_tactics
 
+open list io
+
 example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
   : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)
   = (∑ (c : Tuple r) (a : Tuple p) (d : Tuple s) (b : Tuple q), f a b c d) :=
@@ -58,9 +60,8 @@ begin
 end 
 
 example {r} {R: Tuple r → usr}:
-(∑ (a1: Tuple r), (∑ (a2: Tuple r), (a2 ≃ a1) * R a2) * R a1) = 
+(∑ (a1), (∑ (a2: Tuple r), (a2 ≃ a1) * R a2 ) * R a1) = 
 (∑ (t: Tuple r), R t * R t) :=
 begin 
-  remove_dup_sigs,
-  sorry,
+  TDP
 end

@@ -5,6 +5,8 @@ import ..extra_constants
 import ..ucongr
 import ..TDP
 
+set_option profiler true
+
 open Expr
 open Proj
 open Pred
@@ -23,5 +25,6 @@ begin
     remove_dup_sigs,
     apply ueq_symm,
     normalize_sig_body,
-    sorry, -- this is due to sig inside sig, need to normalize this case
+    remove_dup_sigs,
+    TDP,
 end

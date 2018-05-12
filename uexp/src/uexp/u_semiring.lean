@@ -154,6 +154,8 @@ lemma eq_pair' {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂)
 begin
 unfold pair,
 rw eq_symm,
+rw (@eq_symm _ t₁),
+rw (@eq_symm _ t₂),
 apply eq_pair,
 end
 
@@ -162,6 +164,15 @@ lemma eq_pair1 {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂)
     (t ≃ (pair t₁ t₂)) = (t.1 ≃ t₁) * (t.2 ≃ t₂) := 
 begin
 unfold pair,
-simp,
 apply eq_pair,
+end
+
+@[simp] lemma sig_distr_time_r {s : Schema} (a: usr) (f: Tuple s → usr):
+    (∑ t, f t) * a = (∑ t, (f t) * a) :=
+begin
+    rw time_comm,
+    rw sig_distr_time,
+    apply congr_arg,
+    funext,
+    apply time_comm,
 end

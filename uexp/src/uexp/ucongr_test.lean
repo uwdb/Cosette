@@ -68,4 +68,5 @@ begin
     unfold pair,
     repeat {rw eq_pair'},
     simp,
+    ucongr,
 end

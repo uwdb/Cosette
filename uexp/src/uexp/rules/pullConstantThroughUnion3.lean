@@ -23,7 +23,7 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    sorry, -- sig inside sigs
+    UDP,
 end
    
   

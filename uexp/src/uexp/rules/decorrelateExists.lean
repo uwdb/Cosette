@@ -1,7 +1,9 @@
 import ..sql
 import ..tactics
 import ..u_semiring
+import ..cosette_lemmas
 import ..extra_constants
+import ..TDP
 
 open Expr
 open Proj
@@ -45,6 +47,9 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    unfold pair,
     simp,
+    apply ueq_symm,
+    --remove_dup_sigs,
     sorry
 end

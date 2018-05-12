@@ -133,14 +133,17 @@ meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × lis
 | ⟨schemas, body⟩ := do
   lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
                            do n ← tactic.mk_fresh_name,
-                              n' ← tactic.mk_fresh_name,
                               ty ← tactic.to_expr ``(Tuple %%t),
-                              let local_const := expr.local_const n n' binder_info.default ty,
+                              let local_const := expr.local_const n n binder_info.default ty,
                               return $ (local_const, n) :: lconsts)
                         []
                         $ list.reverse schemas,
   let ⟨lconsts', names⟩ := lconsts.unzip,
   return (expr.instantiate_vars body lconsts', names)
+
+meta def normalize_step (n: nat) : tactic unit := do 
+   repeat_n n $ tactic.applyc `congr_arg >> tactic.funext,
+   split_pairs
 
 -- normalize body of a sigma
 meta def normalize_sig_body : tactic unit := do
@@ -158,8 +161,7 @@ meta def normalize_sig_body : tactic unit := do
     eq_lemma ← tactic.to_expr ``(%%origin = %%new),
     lemma_name ← tactic.mk_fresh_name,
     tactic.assert lemma_name eq_lemma,
-    repeat_n lr.var_schemas.length $ tactic.applyc `congr_arg >> tactic.funext,
-    split_pairs,
+    tactic.focus1 $ normalize_step lr.var_schemas.length,
     tactic.try tactic.ac_refl,
     eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
     tactic.rewrite_target eq_lemma_name,
@@ -240,6 +242,67 @@ meta def remove_dup_sigs : tactic unit := do
   in repeat_if_progress loop s s,
   return ()
 
+meta def is_sig (e: expr) : bool :=
+match e with 
+| `(usr.sig _) := tt
+| _ := ff
+end
+
+/- step 1: move sigs inside front -/
+meta def unify_sigs_step_1: tactic unit := do
+  lr ← get_lhs_sigma_repr,
+  lr_body_closed ← sigma_repr_to_closed_body_expr lr,
+  match lr_body_closed with 
+  | ⟨body, names⟩ := do 
+    le ← product_to_repr body,
+    sl ← return $ list.qsort 
+                  (λ e1 e2, if is_sig e1 then tt else if is_sig e2 then ff else tt) 
+                  le,
+    body' ← repr_to_product sl,
+    origin ← get_lhs,
+    let abstracted := expr.abstract_locals body' (list.reverse names),
+    new ← sigma_repr_to_sigma_expr ⟨lr.var_schemas, abstracted⟩,
+    eq_lemma ← tactic.to_expr ``(%%origin = %%new),
+    lemma_name ← tactic.mk_fresh_name,
+    tactic.assert lemma_name eq_lemma,
+    repeat_n lr.var_schemas.length $ tactic.applyc `congr_arg >> tactic.funext,
+    tactic.try tactic.ac_refl,
+    eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+    tactic.rewrite_target eq_lemma_name,
+    tactic.clear eq_lemma_name
+  end 
+
+/- step 2: distribute sumation -/
+meta def unify_sigs_step_2: tactic unit := do 
+  lr ← get_lhs_sigma_repr,
+  lr_body_closed ← sigma_repr_to_closed_body_expr lr,
+  match lr_body_closed with 
+  | ⟨body, names⟩ := do 
+    le ← product_to_repr body,
+    h ←  return $ list.head le,
+    t ← return $ list.tail le,
+    if ¬ (is_sig h) then tactic.failed -- if there is no sig inside, terminate
+    else do
+    sr ← return $ sigma_expr_to_sigma_repr h,
+    (b, n) ← sigma_repr_to_closed_body_expr sr,
+    body' ← repr_to_product (b::t),
+    names' ← return $ (n ++ names),
+    let abstracted := expr.abstract_locals body' (list.reverse names'),
+    new ← sigma_repr_to_sigma_expr ⟨(lr.var_schemas) ++ (sr.var_schemas), abstracted⟩,
+    origin ← get_lhs,
+    eq_lemma ← tactic.to_expr ``(%%origin = %%new),
+    lemma_name ← tactic.mk_fresh_name,
+    tactic.assert lemma_name eq_lemma,
+    repeat_n lr.var_schemas.length $ tactic.applyc `congr_arg >> tactic.funext,
+    tactic.applyc `sig_distr_time_r,
+    eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+    tactic.rewrite_target eq_lemma_name,
+    tactic.clear eq_lemma_name
+  end
+
+meta def unify_sigs : tactic unit :=
+  tactic.repeat $ unify_sigs_step_1 >> unify_sigs_step_2
+
 meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
   let loop (iter_num : ℕ) (next_iter : tactic unit) : tactic unit :=
       next_iter <|> do
@@ -248,6 +311,7 @@ meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
       funext,
       easy_case_solver <|> TDP'
   in do
+    unify_sigs,
     remove_dup_sigs,
     applyc `ueq_symm,
     remove_dup_sigs,
