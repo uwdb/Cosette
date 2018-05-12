@@ -29,14 +29,7 @@ forall (Γ : Schema) s (a : relation s) C0 (value : Column C0 s) C1 (label: Colu
 begin
 intros,
 unfold_all_denotations,
-unfold combineGroupByProj,
-unfold denoteProj,
-unfold pair,
-unfold plainGroupByProj,
-funext,
-unfold denoteProj,
-unfold aggregatorGroupByProj,
-
 simp,
+funext,
 sorry
 end
