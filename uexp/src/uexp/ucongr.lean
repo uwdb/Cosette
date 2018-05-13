@@ -24,9 +24,6 @@ meta def unify_ueq : tactic unit := do
   | _ := failed
   end
 
-meta def remove_all_unit : tactic unit :=
-    `[repeat {rw time_one <|> rw time_one'}]
-
 -- collect ueq (equality predicate) from prod
 meta def collect_ueq : expr → tactic (list expr)
 | `(%%a * %%b) := 

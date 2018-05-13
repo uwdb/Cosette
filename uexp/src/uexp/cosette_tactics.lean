@@ -286,14 +286,25 @@ meta def sigma_repr_to_closed_body_expr : usr_sigma_repr → tactic (expr × lis
 | ⟨schemas, body⟩ := do
   lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
                            do n ← tactic.mk_fresh_name,
-                              n' ← tactic.mk_fresh_name,
                               ty ← tactic.to_expr ``(Tuple %%t),
-                              let local_const := expr.local_const n n' binder_info.default ty,
+                              let local_const := expr.local_const n n binder_info.default ty,
                               return $ (local_const, n) :: lconsts)
                         []
                         $ list.reverse schemas,
   let ⟨lconsts', names⟩ := lconsts.unzip,
   return (expr.instantiate_vars body lconsts', names)
+
+meta def sigma_repr_to_closed_body_expr' : usr_sigma_repr → tactic (expr × list (expr × name))
+| ⟨schemas, body⟩ := do
+  lconsts ← list.mfoldr (λ (t : expr) (lconsts : list (expr × name)),
+                           do n ← tactic.mk_fresh_name,
+                              ty ← tactic.to_expr ``(Tuple %%t),
+                              let local_const := expr.local_const n n binder_info.default ty,
+                              return $ (local_const, n) :: lconsts)
+                        []
+                        $ list.reverse schemas,
+  let ⟨lconsts', names⟩ := lconsts.unzip,
+  return (expr.instantiate_vars body lconsts', lconsts)
 
 private meta def get_types_of_local_consts
   (ns : list name) : expr → list (nat × expr)
@@ -408,5 +419,8 @@ meta def unfold_all_denotations := `[
             <|> unfold plainGroupByProj
             <|> unfold aggregatorGroupByProj}
 ]
+
+meta def remove_all_unit : tactic unit :=
+    `[repeat {rw time_one <|> rw time_one'}]
 
 end cosette_tactics
