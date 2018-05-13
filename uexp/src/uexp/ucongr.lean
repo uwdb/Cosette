@@ -181,7 +181,7 @@ meta def rw_trans : tactic unit :=
     | _ := fail "rw_trans fail"
     end
 
-meta def ucongr_step : tactic unit := do 
+meta def ucongr_step : tactic unit := do
     repr ← get_lhs_repr1,
     let l := list.length repr in
     let inner_loop : nat → tactic unit → tactic unit :=
@@ -194,9 +194,9 @@ meta def ucongr_step : tactic unit := do
           next_iter,
           forward_i_to_j_lhs iter_num 0,
           nat.repeat inner_loop (l-1) $ return ()
-    in do nat.repeat outter_loop l $ return ()
+    in do trace l, nat.repeat outter_loop l $ return ()
 
-meta def ucongr_lhs : tactic unit := do 
+meta def ucongr_lhs : tactic unit := do
     ucongr_step,
     new_ueq ← get_lhs_repr2,
     repeat $ applyc `move_ueq_between_com,

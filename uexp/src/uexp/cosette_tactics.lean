@@ -259,7 +259,7 @@ meta def forward_i_to_j (target: tactic expr) (i j: nat): tactic unit :=
     in nat.repeat loop (i - j) $ return ()
 
 meta def forward_i_to_j_lhs (i : nat) (j: nat) : tactic unit :=
-    forward_i_to_j get_lhs_expr3 i j
+    forward_i_to_j get_lhs_expr1 i j
 
 /- the first nat is the size of body, the second nat is iteration -/
 meta def repeat_if_progress (f: ℕ → ℕ → (tactic ℕ)) : 
