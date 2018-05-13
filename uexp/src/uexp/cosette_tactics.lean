@@ -423,4 +423,104 @@ meta def unfold_all_denotations := `[
 meta def remove_all_unit : tactic unit :=
     `[repeat {rw time_one <|> rw time_one'}]
 
+meta def swap_ith_sigma_forward (i : nat)
+  : usr_sigma_repr → tactic unit
+| ⟨xs, body⟩ := do
+  swapped_schemas ← list.swap_ith_forward i xs,
+  -- We have to subtract because the de Bruijn indices are inside-out
+  let num_free_vars := list.length xs,
+  let swapped_body := expr.swap_free_vars (num_free_vars - 1 - i) (num_free_vars - 1 - nat.succ i) body,
+  let swapped_repr := usr_sigma_repr.mk swapped_schemas swapped_body,
+  normal_expr ← sigma_repr_to_sigma_expr ⟨xs, body⟩,
+  swapped_expr ← sigma_repr_to_sigma_expr swapped_repr,
+  equality_lemma ← tactic.to_expr ``(%%normal_expr = %%swapped_expr),
+  eq_lemma_name ← tactic.mk_fresh_name,
+  tactic.assert eq_lemma_name equality_lemma,
+  repeat_n i $ tactic.applyc `congr_arg >> tactic.funext,
+  tactic.applyc `sig_commute,
+  eq_lemma ← tactic.resolve_name eq_lemma_name >>= tactic.to_expr,
+  tactic.rewrite_target eq_lemma,
+  tactic.clear eq_lemma
+
+meta def move_sig_once (i: nat) : tactic unit := do
+  lr ← get_lhs_sigma_repr,
+  swap_ith_sigma_forward i lr
+
+meta def move_sig_to_front (i : nat) : tactic unit :=
+  let loop : ℕ → tactic unit → tactic unit :=
+      λ iter_num next_iter, do
+        lr ← get_lhs_sigma_repr,
+        swap_ith_sigma_forward iter_num lr,
+        next_iter
+  in nat.repeat loop i $ return ()
+
+--move back i to j
+meta def move_sig_back (i: nat) (j: nat) :=
+  let loop: nat → tactic unit → tactic unit :=
+    λ num next, do 
+      next, 
+      move_sig_once (i+num)
+  in nat.repeat loop (j-i) $ return ()
+
+-- a single step removal
+meta def remove_sig_step (e: expr): tactic unit := do
+  lr ← return $ sigma_expr_to_sigma_repr e,
+  match lr with 
+  | ⟨xs, body⟩ := do 
+    le ← ra_product_to_repr body,
+    match list.head le with
+    | `(%%a ≃ %%b) := 
+      match a, b with
+      | (expr.var n), e := do 
+        let l := (list.length xs),
+        move_sig_back (l - 1 - n) (l - 1),
+        lr' ← get_lhs_sigma_repr,
+        match lr' with 
+        | ⟨xs', body'⟩ := do 
+          match body' with 
+          | `((%%c ≃ %%d) * %%f) := do
+            let sub_expr := expr.subst_var' c d f, 
+            let new_body := expr.lower_vars sub_expr 1 1,
+            old_expr ← sigma_repr_to_sigma_expr lr',
+            new_expr ←  sigma_repr_to_sigma_expr ⟨list.take (l-1) xs', new_body⟩, 
+            eq_lemma ← tactic.to_expr ``(%%old_expr = %%new_expr),
+            lemma_name ← tactic.mk_fresh_name,
+            tactic.assert lemma_name eq_lemma,
+            repeat_n (l-1) $ tactic.applyc `congr_arg >> tactic.funext,
+            tactic.applyc `sig_eq_subst_r,
+            eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+            tactic.rewrite_target eq_lemma_name,
+            tactic.clear eq_lemma_name
+          | _ := tactic.fail "fail in removal step"
+          end 
+        end
+      | e, (expr.var n) := do 
+        let l := (list.length xs),
+        move_sig_back (l - 1 - n) (l - 1),
+        lr' ← get_lhs_sigma_repr,
+        match lr' with 
+        | ⟨xs', body'⟩ := do 
+          match body' with 
+          | `((%%c ≃ %%d) * %%f) := do
+            let sub_expr := expr.subst_var' d c f, 
+            let new_body := expr.lower_vars sub_expr 1 1,
+            old_expr ← sigma_repr_to_sigma_expr lr',
+            new_expr ←  sigma_repr_to_sigma_expr ⟨list.take (l-1) xs', new_body⟩, 
+            eq_lemma ← tactic.to_expr ``(%%old_expr = %%new_expr),
+            lemma_name ← tactic.mk_fresh_name,
+            tactic.assert lemma_name eq_lemma,
+            repeat_n (l-1) $ tactic.applyc `congr_arg >> tactic.funext,
+            tactic.applyc `sig_eq_subst_l,
+            eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+            tactic.rewrite_target eq_lemma_name,
+            tactic.clear eq_lemma_name
+          | _ := tactic.fail "fail in removal step"
+          end 
+        end
+      | _, _ := return ()
+      end
+    | _ := return ()
+    end 
+  end
+
 end cosette_tactics

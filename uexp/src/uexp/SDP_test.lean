@@ -97,11 +97,44 @@ meta def split_lem : tactic unit := do
     tactic.rewrite_target eq_lemma_name,
     tactic.clear eq_lemma_name)
 
+meta def solve_distr_lem (n:nat) : tactic unit := do  
+    repeat_n (n - 1) `[rw ← sig_distr_plus, apply congr_arg, funext], 
+    tactic.applyc `sig_distr_plus
+
+meta def distr_lem : tactic unit := do 
+    lhs ← get_lhs,
+    le ← inside_squash lhs, -- orginal sig
+    lsr ← return $ sigma_expr_to_sigma_repr le,
+    ⟨body, binders⟩ ← sigma_repr_to_closed_body_expr' lsr,
+    binders' ← return $ list.reverse binders,
+    let (exprs, names) := binders'.unzip,
+    if not $ is_plus body then return () --do nothing
+    else do
+    (a, b) ← match body with 
+                | `(%%a + %%b) := return (a, b)
+                | _ := tactic.fail "spli_lem fail"
+                end,
+    a1 ← return $ expr.abstract_locals a names,
+    a2 ← return $ expr.abstract_locals b names,
+    new1 ← sigma_repr_to_sigma_expr ⟨lsr.var_schemas, a1⟩,
+    new2 ← sigma_repr_to_sigma_expr ⟨lsr.var_schemas, a2⟩,
+    eq_lemma ← tactic.to_expr ``(%%le = %%new1 + %%new2),
+    ng_before ← list.length <$> tactic.get_goals,
+    lemma_name ← tactic.mk_fresh_name,
+    tactic.assert lemma_name eq_lemma,
+    tactic.focus1 $ solve_distr_lem (list.length lsr.var_schemas), 
+    ng_after ← list.length <$> tactic.get_goals,
+    if ng_after > ng_before then tactic.fail "add_lem fail"
+    else (do
+    eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+    tactic.rewrite_target eq_lemma_name,
+    tactic.clear eq_lemma_name)
 
 meta def unify_binder_i_j (i j: nat) : tactic unit := do
     add_lem i j, -- add lem of i-th and j-th binders
-    -- distribute + in body
-    -- factorized two component
+    split_lem, -- split plus inside sig
+    distr_lem, -- distribute plus over sig
+    -- factorize
     -- reduce done
     return ()
 
@@ -111,14 +144,8 @@ example {Γ s : Schema} (a : relation s) (g : Tuple Γ) (t : Tuple s):
 begin
     add_lem 0 1,
     split_lem,
-    have h : ∥(∑ (t₁ t₂ : Tuple s), (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))) + usr.not (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥ = 
-    ∥(∑ (t₁ t₂ : Tuple s), (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁)))) + (∑ (t₁ t₂ : Tuple s), usr.not (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥,
-    focus {
-        rw sig2_distr_plus,
-    },
-    rw h,
-    clear h,
-    sorry
+    distr_lem,
+    sorry,
 end
 
 example {Γ s : Schema} {ty0 ty1 : datatype} (a : relation s) (c0 : Column ty0 s)
