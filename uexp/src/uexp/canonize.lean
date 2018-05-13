@@ -25,7 +25,10 @@ private meta definition rw_kc_in_prod_repr (kc : key_constraint) :
     then (λ congr' rel', congr' :: rel' :: terms)
          <$> to_expr ``(%%t₁ ≃ %%t'₁)
          <*> to_expr ``(denote_r %%R₁ %%t₁)
-    else rw_kc_in_prod_repr terms
+    else list.cons <$> to_expr ``(denoteProj %%k₁ %%t₁ ≃ denoteProj %%k₂ %%t'₁) <*>
+         (list.cons <$> to_expr ``(denote_r %%R₁ %%t₂) <*>
+         (list.cons <$> to_expr ``(denote_r %%R₂ %%t'₂) <*>
+          rw_kc_in_prod_repr terms))
 | (x :: terms) := list.cons x <$> rw_kc_in_prod_repr terms
 | [] := return []
 
@@ -42,7 +45,7 @@ meta definition canonize : tactic unit :=
       eq_lemma ← tactic.to_expr ``(%%e = %%rewritten_expr),
       lemma_name ← tactic.mk_fresh_name,
       tactic.assert lemma_name eq_lemma,
-      repeat_n lconsts.length $ `[apply congr_arg usr.sig, funext],
+      repeat_n lconsts.length `[apply congr_arg usr.sig, funext],
       rewrite_target kc.name,
       ac_refl,
       eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,

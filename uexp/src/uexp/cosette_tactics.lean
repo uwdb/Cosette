@@ -288,7 +288,7 @@ meta def sigma_repr_to_sigma_expr : usr_sigma_repr → tactic expr
 | ⟨[], body⟩ := return body
 | ⟨t::ts, body⟩ := do
   body' ← sigma_repr_to_sigma_expr ⟨ts, body⟩,
-  n ← tactic.get_unused_name `x,
+  n ← tactic.mk_fresh_name,
   ty ← tactic.to_expr ``(Tuple %%t),
   let lam : expr := expr.lam n binder_info.default ty body',
   tactic.to_expr ``(usr.sig %%lam)
@@ -355,7 +355,8 @@ meta def closed_sigma_repr_to_sigma_repr (body : expr) (names : list name)
             $ list.qsort (λ x y : nat × expr, x.fst ≥ y.fst)
             $ get_types_of_local_consts names body,
   return $ usr_sigma_repr.mk schemas
-         $ expr.abstract_locals body $ list.reverse names
+         $ expr.abstract_locals body
+         $ list.reverse names
 
 meta def forward_i_to_j_in_sig (target: tactic expr) (i: nat) (j: nat) : tactic unit := do 
   ex ← target,
