@@ -296,7 +296,7 @@ meta def sigma_repr_to_sigma_expr : usr_sigma_repr → tactic expr
 | ⟨[], body⟩ := return body
 | ⟨t::ts, body⟩ := do
   body' ← sigma_repr_to_sigma_expr ⟨ts, body⟩,
-  n ← tactic.mk_fresh_name,
+  n ← tactic.get_unused_name `x,
   ty ← tactic.to_expr ``(Tuple %%t),
   let lam : expr := expr.lam n binder_info.default ty body',
   tactic.to_expr ``(usr.sig %%lam)
@@ -496,7 +496,6 @@ meta def move_sig_back (target: tactic expr) (i: nat) (j: nat) :=
 meta def remove_sig_step (target: tactic expr): tactic unit := do
   ex ← target,
   lr ← return $ sigma_expr_to_sigma_repr ex,
-  tactic.trace "remove_sig_step",
   match lr with 
   | ⟨xs, body⟩ := do 
     le ← ra_product_to_repr body,
@@ -517,7 +516,6 @@ meta def remove_sig_step (target: tactic expr): tactic unit := do
             old_expr ← sigma_repr_to_sigma_expr lr',
             new_expr ←  sigma_repr_to_sigma_expr ⟨list.take (l-1) xs', new_body⟩, 
             eq_lemma ← tactic.to_expr ``(%%old_expr = %%new_expr),
-            tactic.trace eq_lemma,
             lemma_name ← tactic.mk_fresh_name,
             tactic.assert lemma_name eq_lemma,
             repeat_n (l-1) $ tactic.applyc `congr_arg >> tactic.funext,
@@ -542,7 +540,6 @@ meta def remove_sig_step (target: tactic expr): tactic unit := do
             old_expr ← sigma_repr_to_sigma_expr lr',
             new_expr ←  sigma_repr_to_sigma_expr ⟨list.take (l-1) xs', new_body⟩, 
             eq_lemma ← tactic.to_expr ``(%%old_expr = %%new_expr),
-            tactic.trace eq_lemma,
             lemma_name ← tactic.mk_fresh_name,
             tactic.assert lemma_name eq_lemma,
             repeat_n (l-1) $ tactic.applyc `congr_arg >> tactic.funext,

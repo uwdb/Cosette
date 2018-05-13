@@ -67,7 +67,6 @@ meta definition canonize : tactic unit :=
       to_expr ``(@eq.trans _ %%e %%intermediate_expr %%rewritten_expr) >>= apply,
       repeat_n lconsts.length `[apply congr_arg usr.sig, funext], ac_refl,
       repeat_n lconsts.length `[apply congr_arg usr.sig, funext],
-      target >>= tactic.trace,
       to_expr ``(isKey_times_const %%kc.column %%kc.table %%kc.name) >>= rewrite_target,
       ac_refl,
       eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
