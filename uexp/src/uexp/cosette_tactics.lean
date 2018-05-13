@@ -7,6 +7,14 @@ open list io
 
 section cosette_tactics
 
+def list.remove_first_of_each {α : Type} [decidable_eq α]
+  : list α → list α → list α
+| xs [] := xs
+| [] ys := []
+| (x::xs) (y::ys) := if x = y
+                       then list.remove_first_of_each xs ys
+                       else x :: list.remove_first_of_each xs (y::ys)
+
 def list.swap_ith_forward {α : Type} {f : Type → Type} [alternative f]
     : nat → list α → f (list α)
 | 0 (x::y::zs) := pure $ y :: x :: zs

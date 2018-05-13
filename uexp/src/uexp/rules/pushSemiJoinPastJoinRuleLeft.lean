@@ -4,7 +4,7 @@ import ..u_semiring
 import ..extra_constants
 
 import ..ucongr
-import ..TDP
+import ..TDP ..canonize
 
 open Expr
 open Proj
@@ -29,6 +29,6 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    try {ac_refl},
-    sorry
+    canonize,
+    
 end

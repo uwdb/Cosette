@@ -118,5 +118,17 @@ begin
     rewrite ← time_assoc,
     rewrite pred_cancel,
 end 
+#print isKey
+lemma isKey_times_const {s : Schema} {ty : datatype} {c : usr}
+    (k : Column ty s) (R : relation s) :
+    isKey k R →
+    ∀ (t t' : Tuple s), (denoteProj k t≃denoteProj k t') * (denote_r R t * (denote_r R t' * c)) =
+    (t≃t') * (denote_r R t * c) :=
+begin
+    intros ik t t',
+    transitivity (c * ((denoteProj k t≃denoteProj k t') * (denote_r R t * denote_r R t'))),
+    { simp, ac_refl },
+    transitivity (c * ((t≃t') * denote_r R t)),
+end
 
 end -- end section

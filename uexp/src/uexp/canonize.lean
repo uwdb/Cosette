@@ -15,22 +15,32 @@ meta def expr_to_canonize_term_repr (ex : expr)
             <$> sigma_repr_to_closed_body_expr repr
   end
 
-private meta definition rw_kc_in_prod_repr (kc : key_constraint) :
-  list expr → tactic (list expr)
-| (`(denoteProj %%k₁ %%t₁ ≃ denoteProj %%k₂ %%t'₁) ::
-   `(denote_r %%R₁ %%t₂) ::
-   `(denote_r %%R₂ %%t'₂) :: terms) :=
-  if k₁ = k₂ ∧ t₁ = t₂ ∧ t'₁ = t'₂ ∧ R₁ = R₂
-     ∧ k₁ = kc.column ∧ R₁ = kc.table
-    then (λ congr' rel', congr' :: rel' :: terms)
-         <$> to_expr ``(%%t₁ ≃ %%t'₁)
-         <*> to_expr ``(denote_r %%R₁ %%t₁)
-    else list.cons <$> to_expr ``(denoteProj %%k₁ %%t₁ ≃ denoteProj %%k₂ %%t'₁) <*>
-         (list.cons <$> to_expr ``(denote_r %%R₁ %%t₂) <*>
-         (list.cons <$> to_expr ``(denote_r %%R₂ %%t'₂) <*>
-          rw_kc_in_prod_repr terms))
-| (x :: terms) := list.cons x <$> rw_kc_in_prod_repr terms
-| [] := return []
+private meta definition rw_kc_in_prod_repr (kc : key_constraint) (assumptions : list expr)
+  : expr → tactic (expr × expr)
+| `(denoteProj %%k₁ %%t ≃ denoteProj %%k₂ %%t') := 
+  let is_denote_r (tup : expr) (e : expr) : bool :=
+      match e with
+      | `(denote_r %%R %%tup') := R = kc.table ∧ tup' = tup
+      | _ := ff
+      end in
+  if k₁ = k₂ ∧ k₁ = kc.column
+     ∧ assumptions.any (is_denote_r t)
+     ∧ assumptions.any (is_denote_r t')
+    then return (t, t')
+    else failed
+| _ := failed
+
+private meta def mk_key_lhs (kc : key_constraint) (t t' : expr)
+  : tactic (list expr) :=
+  monad.mapm to_expr
+             [ ``(denoteProj %%kc.column %%t ≃ denoteProj %%kc.column %%t')
+             , ``(denote_r %%kc.table %%t)
+             , ``(denote_r %%kc.table %%t')
+             ]
+
+private meta def mk_key_rhs (kc : key_constraint) (t t' : expr)
+  : tactic (list expr) :=
+  monad.mapm to_expr [``(%%t≃%%t'), ``(denote_r %%kc.table %%t)]
 
 meta definition canonize : tactic unit :=
   let rewrite_constraint_occurence (kc : key_constraint) (e : expr) : tactic unit := do
@@ -38,25 +48,46 @@ meta definition canonize : tactic unit :=
     match repr with
     | canonize_term_repr.sig body lconsts := do
       body_terms ← product_to_repr body,
-      body' ← rw_kc_in_prod_repr kc body_terms,
-      body'_expr ← repr_to_product body',
-      rewritten_sigma_repr ← closed_sigma_repr_to_sigma_repr body'_expr lconsts,
+      (t, t') ← list.foldr (<|>) failed
+                $ list.map (rw_kc_in_prod_repr kc body_terms) body_terms,
+      key_terms ← mk_key_lhs kc t t',
+      let non_key_terms := body_terms.remove_first_of_each key_terms,
+      let body' := key_terms ++ non_key_terms,
+      rewritten_key_terms ← mk_key_rhs kc t t',
+      let rewritten_body := rewritten_key_terms ++ non_key_terms,
+      intermediate_body_expr ← repr_to_product body',
+      rewritten_body_expr ← repr_to_product rewritten_body,
+      intermediate_sigma_repr ← closed_sigma_repr_to_sigma_repr intermediate_body_expr lconsts,
+      rewritten_sigma_repr ← closed_sigma_repr_to_sigma_repr rewritten_body_expr lconsts,
+      intermediate_expr ← sigma_repr_to_sigma_expr intermediate_sigma_repr,
       rewritten_expr ← sigma_repr_to_sigma_expr rewritten_sigma_repr,
       eq_lemma ← tactic.to_expr ``(%%e = %%rewritten_expr),
       lemma_name ← tactic.mk_fresh_name,
       tactic.assert lemma_name eq_lemma,
+      to_expr ``(@eq.trans _ %%e %%intermediate_expr %%rewritten_expr) >>= apply,
+      repeat_n lconsts.length `[apply congr_arg usr.sig, funext], ac_refl,
       repeat_n lconsts.length `[apply congr_arg usr.sig, funext],
-      rewrite_target kc.name,
+      target >>= tactic.trace,
+      to_expr ``(isKey_times_const %%kc.column %%kc.table %%kc.name) >>= rewrite_target,
       ac_refl,
       eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
       tactic.rewrite_target eq_lemma_name,
       tactic.clear eq_lemma_name
     | canonize_term_repr.prod terms := do
-      terms' ← rw_kc_in_prod_repr kc terms,
-      rewritten_expr ← repr_to_product terms',
+      (t, t') ← list.foldr (<|>) failed
+                $ list.map (rw_kc_in_prod_repr kc terms) terms,
+      key_terms ← mk_key_lhs kc t t',
+      let non_key_terms := terms.remove_first_of_each key_terms,
+      let body' := terms ++ non_key_terms,
+      rewritten_key_terms ← mk_key_rhs kc t t',
+      let rewritten_body := rewritten_key_terms ++ non_key_terms,
+      intermediate_expr ← repr_to_product body',
+      rewritten_expr ← repr_to_product rewritten_body,
       eq_lemma ← tactic.to_expr ``(%%e = %%rewritten_expr),
       lemma_name ← tactic.mk_fresh_name,
       tactic.assert lemma_name eq_lemma,
+      to_expr ``(@eq.trans _ %%e %%intermediate_expr %%rewritten_expr) >>= apply,
+      ac_refl,
       rewrite_target kc.name,
       ac_refl,
       eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,

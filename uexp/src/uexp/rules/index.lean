@@ -40,5 +40,5 @@ begin
     remove_dup_sigs_lhs,
     canonize,
     remove_dup_sigs_lhs,
-    sorry
+    refl
 end
