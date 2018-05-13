@@ -118,7 +118,7 @@ begin
     rewrite ← time_assoc,
     rewrite pred_cancel,
 end 
-#print isKey
+
 lemma isKey_times_const {s : Schema} {ty : datatype} {c : usr}
     (k : Column ty s) (R : relation s) :
     isKey k R →
@@ -129,6 +129,10 @@ begin
     transitivity (c * ((denoteProj k t≃denoteProj k t') * (denote_r R t * denote_r R t'))),
     { simp, ac_refl },
     transitivity (c * ((t≃t') * denote_r R t)),
+    { apply congr_arg, rw ik },
+    { rw ← time_assoc, rw time_comm c,
+      rw time_assoc, apply congr_arg,
+      rw time_comm }
 end
 
 end -- end section

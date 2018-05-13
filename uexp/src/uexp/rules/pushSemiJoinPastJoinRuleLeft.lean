@@ -30,5 +30,5 @@ begin
     funext,
     simp,
     canonize,
-    
+  
 end
