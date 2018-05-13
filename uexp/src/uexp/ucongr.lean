@@ -194,7 +194,7 @@ meta def ucongr_step : tactic unit := do
           next_iter,
           forward_i_to_j_lhs iter_num 0,
           nat.repeat inner_loop (l-1) $ return ()
-    in do trace l, nat.repeat outter_loop l $ return ()
+    in do nat.repeat outter_loop l $ return ()
 
 meta def ucongr_lhs : tactic unit := do
     ucongr_step,
