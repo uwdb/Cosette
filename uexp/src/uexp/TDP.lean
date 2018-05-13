@@ -90,7 +90,7 @@ meta def unify_sigs : tactic unit :=
 meta def TDP' (easy_case_solver : tactic unit) : tactic unit :=
   let loop (iter_num : ℕ) (next_iter : tactic unit) : tactic unit :=
       next_iter <|> do
-      move_sig_to_front iter_num,
+      move_sig_to_front get_lhs iter_num,
       to_expr ``(congr_arg usr.sig) >>= apply,
       funext,
       easy_case_solver <|> TDP'
