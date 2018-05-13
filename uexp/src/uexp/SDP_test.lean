@@ -46,19 +46,63 @@ meta def add_lem (i j: nat) : tactic unit := do
     abstracted ← return $ expr.abstract_locals new_body names, 
     new ← sigma_repr_to_sigma_expr ⟨lsr.var_schemas, abstracted⟩, 
     eq_lemma ← tactic.to_expr ``(%%le = %%new),
+    ng_before ← list.length <$> tactic.get_goals,
     lemma_name ← tactic.mk_fresh_name,
     tactic.assert lemma_name eq_lemma,
     tactic.focus1 $ solve_lem (list.length lsr.var_schemas), 
+    ng_after ← list.length <$> tactic.get_goals,
+    if ng_after > ng_before then tactic.fail "add_lem fail"
+    else (do
     eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
     tactic.rewrite_target eq_lemma_name,
-    tactic.clear eq_lemma_name
+    tactic.clear eq_lemma_name)
+
+meta def is_plus : expr → bool 
+| `(_ + _) := tt
+| _ := ff
+
+meta def solve_split_ins (n:nat) : tactic unit := do  
+    repeat_n n (tactic.applyc `congr_arg >> tactic.funext), 
+    `[rw time_distrib_r]
+
+/- split + introduced by lem -/
+meta def split_lem : tactic unit := do 
+    lhs ← get_lhs,
+    le ← inside_squash lhs, -- orginal sig
+    lsr ← return $ sigma_expr_to_sigma_repr le,
+    ⟨body, binders⟩ ← sigma_repr_to_closed_body_expr' lsr,
+    binders' ← return $ list.reverse binders,
+    let (exprs, names) := binders'.unzip,
+    lr ← product_to_repr body,
+    if not $ is_plus (list.head lr) then return () --do nothing
+    else do
+    (a, b) ← match (list.head lr) with 
+                | `(%%a + %%b) := return (a, b)
+                | _ := tactic.fail "spli_lem fail"
+                end,
+    b1 ← repr_to_product (a::(list.tail lr)),
+    b2 ← repr_to_product (b::(list.tail lr)),
+    new ← tactic.to_expr ``(%%b1 + %%b2),
+    abstracted ← return $ expr.abstract_locals new names,
+    new_ex ← sigma_repr_to_sigma_expr ⟨lsr.var_schemas, abstracted⟩,
+    eq_lemma ← tactic.to_expr ``(%%le = %%new_ex),
+    ng_before ← list.length <$> tactic.get_goals,
+    lemma_name ← tactic.mk_fresh_name,
+    tactic.assert lemma_name eq_lemma,
+    tactic.focus1 $ solve_split_ins (list.length lsr.var_schemas), 
+    ng_after ← list.length <$> tactic.get_goals,
+    if ng_after > ng_before then tactic.fail "add_lem fail"
+    else (do
+    eq_lemma_name ← tactic.resolve_name lemma_name >>= tactic.to_expr,
+    tactic.rewrite_target eq_lemma_name,
+    tactic.clear eq_lemma_name)
+
 
 meta def unify_binder_i_j (i j: nat) : tactic unit := do
-    lhs ← get_lhs,
-    le ← inside_squash lhs,
-    ⟨body, names⟩ ← return $ sigma_expr_to_sigma_repr le,
-    tactic.trace body,
+    add_lem i j, -- add lem of i-th and j-th binders
     -- distribute + in body
+    -- factorized two component
+    -- reduce done
     return ()
 
 example {Γ s : Schema} (a : relation s) (g : Tuple Γ) (t : Tuple s):
@@ -66,31 +110,7 @@ example {Γ s : Schema} (a : relation s) (g : Tuple Γ) (t : Tuple s):
     ∥(∑ (t_1 : Tuple s), denote_r a t_1 * (t≃t_1))∥ :=
 begin
     add_lem 0 1,
-    have h: ∥(∑ (t₁ t₂ : Tuple s), denote_r a t₁ * (denote_r a t₂ * (t≃t₁)))∥ = 
-            ∥(∑ (t₁ t₂ : Tuple s), ((t₁ ≃ t₂) + usr.not (t₁ ≃ t₂))*(denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥, 
-    focus {
-        apply congr_arg,
-        apply congr_arg,
-        funext,
-        apply congr_arg,
-        funext,
-        rw eq_lem,
-        remove_all_unit,
-    },
-    rw h,
-    clear h,
-    have h: ∥(∑ (t₁ t₂ : Tuple s), ((t₁ ≃ t₂) + usr.not (t₁ ≃ t₂))*(denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥ = 
-     ∥(∑ (t₁ t₂ : Tuple s), (t₁ ≃ t₂) *(denote_r a t₁ * (denote_r a t₂ * (t≃t₁))) + usr.not (t₁ ≃ t₂)*(denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥,
-     focus {
-        apply congr_arg,
-        apply congr_arg,
-        funext,
-        apply congr_arg,
-        funext,
-        rw time_distrib_r,
-    },
-    rw h,
-    clear h,
+    split_lem,
     have h : ∥(∑ (t₁ t₂ : Tuple s), (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))) + usr.not (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥ = 
     ∥(∑ (t₁ t₂ : Tuple s), (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁)))) + (∑ (t₁ t₂ : Tuple s), usr.not (t₁≃t₂) * (denote_r a t₁ * (denote_r a t₂ * (t≃t₁))))∥,
     focus {
