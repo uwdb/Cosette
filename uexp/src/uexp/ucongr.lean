@@ -187,12 +187,12 @@ meta def ucongr_step : tactic unit := do
     let inner_loop : nat → tactic unit → tactic unit :=
         λ iter_num next_iter, do 
           next_iter,
-          forward_i_to_j (1+iter_num) 1,
+          forward_i_to_j_lhs (1+iter_num) 1,
           rw_trans in 
     let outter_loop : nat → tactic unit → tactic unit :=
         λ iter_num next_iter, do 
           next_iter,
-          forward_i_to_j iter_num 0,
+          forward_i_to_j_lhs iter_num 0,
           nat.repeat inner_loop (l-1) $ return ()
     in do nat.repeat outter_loop l $ return ()
 
@@ -255,7 +255,7 @@ meta def subst_lhs : tactic unit := do
     let l := list.length repr in
     let loop : nat → tactic unit:=
         λ iter_num, do 
-            forward_i_to_j iter_num 0,
+            forward_i_to_j_lhs iter_num 0,
             subst_step in
     repeat_or_sol loop l
 

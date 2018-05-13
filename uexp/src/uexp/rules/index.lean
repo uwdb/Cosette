@@ -33,12 +33,12 @@ begin
     simp,
     funext,
     apply ueq_symm,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     dsimp,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     dsimp,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     canonize,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     sorry
 end

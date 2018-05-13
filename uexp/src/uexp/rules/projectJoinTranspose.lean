@@ -22,9 +22,9 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     apply ueq_symm,
     normalize_sig_body,
-    remove_dup_sigs,
+    remove_dup_sigs_lhs,
     TDP,
 end

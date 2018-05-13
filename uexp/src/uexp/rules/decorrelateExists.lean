@@ -52,6 +52,6 @@ begin
     unfold pair,
     simp,
     apply ueq_symm,
-    --remove_dup_sigs,
+    --remove_dup_sigs_lhs,
     sorry
 end

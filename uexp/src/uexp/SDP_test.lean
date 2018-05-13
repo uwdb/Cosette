@@ -130,13 +130,27 @@ meta def distr_lem : tactic unit := do
     tactic.rewrite_target eq_lemma_name,
     tactic.clear eq_lemma_name)
 
+-- get a from ∥ a + b ∥ 
+meta def first_in_squash (scope: tactic expr) : tactic expr := do
+    ex ← scope,
+    match ex with 
+     | `(usr.squash (%%a + %%b)) := return a
+     | _ := tactic.fail "no squashed union in scope"
+    end
+
 meta def unify_binder_i_j (i j: nat) : tactic unit := do
     add_lem i j, -- add lem of i-th and j-th binders
     split_lem, -- split plus inside sig
     distr_lem, -- distribute plus over sig
+    remove_dup_sigs (first_in_squash get_lhs),         -- remove dup sig on one side
+    
     -- factorize
     -- reduce done
     return ()
+
+meta def try_me1 : tactic unit := do
+    ex ← first_in_squash get_lhs,
+    tactic.trace ex
 
 example {Γ s : Schema} (a : relation s) (g : Tuple Γ) (t : Tuple s):
 ∥(∑ (t₁ t₂ : Tuple s), denote_r a t₁ * (denote_r a t₂ * (t≃t₁)))∥ =
@@ -145,6 +159,9 @@ begin
     add_lem 0 1,
     split_lem,
     distr_lem,
+    remove_dup_sigs $ first_in_squash get_lhs,
+    rw plus_comm,
+    remove_dup_sigs $ first_in_squash get_lhs,
     sorry,
 end
 

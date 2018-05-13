@@ -72,6 +72,6 @@ begin
     funext,
     simp,
     unify_sigs,
-    -- remove_dup_sigs, -- fail to unify here, need to abstract
+    -- remove_dup_sigs_lhs, -- fail to unify here, need to abstract
     sorry
 end
