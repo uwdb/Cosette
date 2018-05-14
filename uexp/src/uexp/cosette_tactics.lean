@@ -450,7 +450,7 @@ meta def unfold_all_denotations := `[
             <|> unfold semiJoin1}]
 
 meta def remove_all_unit : tactic unit :=
-    `[repeat {rw time_one <|> rw time_one'}]
+    `[repeat {rw time_one <|> rw time_one'}, try {refl}]
 
 meta def swap_ith_sigma_forward (i : nat)
   : usr_sigma_repr → tactic unit

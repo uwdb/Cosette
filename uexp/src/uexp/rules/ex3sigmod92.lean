@@ -46,6 +46,5 @@ theorem rule :
 begin
     intros,
     unfold isKey at *,
-    try_me,
     sorry
 end

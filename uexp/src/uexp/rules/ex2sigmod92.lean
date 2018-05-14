@@ -50,7 +50,6 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    unfold pair,
     simp,
     sorry
 end

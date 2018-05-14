@@ -49,9 +49,8 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    unfold pair,
     simp,
     apply ueq_symm,
-    --remove_dup_sigs_lhs,
+    -- remove_dup_sigs_lhs,
     sorry
 end
