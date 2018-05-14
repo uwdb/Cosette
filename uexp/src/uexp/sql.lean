@@ -196,6 +196,24 @@ noncomputable definition groupBy {Γ s s' C}
                           (ll_r ⋅ proj2c)
   in DISTINCT SELECT1 (gb_proj subquery) FROM1 query
 
+/- Semi-join with single equality predicate. -/
+noncomputable definition semiJoin1 {Γ s1 s2 ty} (a: SQL Γ s1)
+             (b: SQL Γ s2) (c1: Column ty s1)
+             (c2: Column ty s2) : SQL Γ s1 :=
+  SELECT * FROM1 a WHERE EXISTS 
+  (SELECT * FROM1 (castSQL left b) WHERE (Pred.equal (uvariable (left⋅right⋅c1)) (uvariable (right⋅c2))))
+
+
+ noncomputable definition semiJoin {Γ s1 s2} (a: SQL Γ s1) (b: SQL Γ s2) (slct: Pred (Γ ++ (s1 ++ s2))): SQL Γ s1 :=
+    SELECT * FROM1 a WHERE EXISTS 
+    (SELECT * FROM1 (castSQL left b) WHERE (Pred.castPred (combine (left⋅left) (combine (left⋅right) right)) slct))
+
+-- SEMI JOIN with single equality predicate
+notation a `SEMI_JOIN1` b `ON` `SEQ` c1 `,` c2  := (semiJoin1 a b c1 c2) 
+
+-- SEMI JOIN with predicate
+notation a `SEMI_JOIN` b `ON` slct := (semiJoin a b slct)
+
 notation `PLAIN` `(` e `)` := plainGroupByProj (e2p e)
 notation `SELECT` proj `FROM1`:1 a `GROUP` `BY` v := groupBy proj a v
 

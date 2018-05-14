@@ -85,22 +85,9 @@ axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
 @[simp] axiom squash_time (x y : usr) : ∥ x ∥ * ∥ y ∥ = ∥ x * y ∥ 
 @[simp] axiom squash_squared (x : usr) : ∥ x ∥ * ∥ x ∥  = ∥ x ∥ 
 @[simp] axiom squash_eq_if_square_eq (x : usr) : x * x = x → ∥ x ∥ = x
-@[simp] lemma squash_idempotent (x: usr): ∥ ∥ x ∥ ∥ = ∥ x ∥ :=
-begin
-    rewrite <- (@plus_zero (∥ x ∥)),
-    rewrite squash_add_squash,
-    rewrite plus_zero,
-    rewrite plus_zero,
-end
+@[simp] axiom time_squash_keeps (x: usr) : x * ∥ x ∥ = x 
 
-@[simp] lemma squash_time_squash (x y: usr): ∥ ∥ x ∥ * y ∥ = ∥ x * y ∥ :=
-begin
-    rewrite <- squash_time,
-    rewrite squash_idempotent,
-    rewrite squash_time,
-end 
-
-axiom squash_add_one (x y : usr) :  ∥ 1 + x ∥ = 1 
+axiom squash_add_one (x: usr) :  ∥ 1 + x ∥ = 1 
 
 @[simp] axiom not_zero : usr.not 0 = 1
 @[simp] axiom not_time (x y : usr) : usr.not (x * y) =  ∥ usr.not x + usr.not y ∥ 
@@ -129,7 +116,10 @@ axiom eq_trans {s: Schema} (t₁ t₂ t₃ : Tuple s):
 axiom eq_sqush {s: Schema} (t₁ t₂ : Tuple s) :
     (t₁ ≃ t₂) = ∥ t₁ ≃ t₂ ∥
 
--- lemmas
+attribute [irreducible]
+def pair {s1 s2: Schema} (t1 : Tuple s1) (t2:Tuple s2) : Tuple (s1 ++ s2) := (t1, t2)
+
+-- below are lemmas, thus not in the TCB
 lemma sig_eq_subst_r {s: Schema} (t': Tuple s) (R: Tuple s → usr): (∑ t, (t ≃ t') * (R t)) =  R t' :=
 begin
     have hq: (∑ t, ((t ≃  t') * (R t))) = (∑ t, (t ≃ t') * R t'),
@@ -150,9 +140,6 @@ begin
     rw hq,
     apply sig_eq_subst_r,
 end
-
-attribute [irreducible]
-def pair {s1 s2: Schema} (t1 : Tuple s1) (t2:Tuple s2) : Tuple (s1 ++ s2) := (t1, t2)
 
 lemma eq_pair' {s₁ s₂: Schema} (t₁: Tuple s₁) (t₂: Tuple s₂) 
 (t: Tuple (s₁ ++ s₂)) :
@@ -181,4 +168,49 @@ begin
     apply congr_arg,
     funext,
     apply time_comm,
+end
+
+@[simp] lemma squash_idempotent (x: usr): ∥ ∥ x ∥ ∥ = ∥ x ∥ :=
+begin
+    rewrite <- (@plus_zero (∥ x ∥)),
+    rewrite squash_add_squash,
+    rewrite plus_zero,
+    rewrite plus_zero,
+end
+
+@[simp] lemma squash_time_squash (x y: usr): ∥ ∥ x ∥ * y ∥ = ∥ x * y ∥ :=
+begin
+    rewrite <- squash_time,
+    rewrite squash_idempotent,
+    rewrite squash_time,
+end 
+
+lemma squash_cancel_right (a c: usr):
+    a * ∥ a + c ∥ = a :=
+begin 
+    have h: a * ∥ a + c ∥ = a * ∥ a ∥ * ∥ a + c ∥,
+    focus {
+        simp,
+    }, 
+    rewrite h,
+    clear h,
+    rw time_assoc,
+    rw squash_time,
+    rw time_distrib_l,
+    rw ← squash_add_squash,
+    rw ← squash_time,
+    rw squash_squared,
+    rw squash_add_squash,
+    have h: a * ∥a + a * c∥ = a * ∥a * 1 + a * c∥,
+    focus {
+        simp,
+    },
+    rw h,
+    clear h,
+    rw ← time_distrib_l,
+    rw ← squash_time,
+    rw ← time_assoc,
+    rw time_squash_keeps,
+    rw squash_add_one,
+    rw time_one,
 end

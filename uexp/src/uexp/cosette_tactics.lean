@@ -445,8 +445,9 @@ meta def unfold_all_denotations := `[
             <|> unfold combineGroupByProj
             <|> unfold pair
             <|> unfold plainGroupByProj
-            <|> unfold aggregatorGroupByProj}
-]
+            <|> unfold aggregatorGroupByProj
+            <|> unfold semiJoin
+            <|> unfold semiJoin1}]
 
 meta def remove_all_unit : tactic unit :=
     `[repeat {rw time_one <|> rw time_one'}]
