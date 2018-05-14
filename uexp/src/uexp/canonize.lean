@@ -17,7 +17,7 @@ meta def expr_to_canonize_term_repr (ex : expr)
 
 private meta definition rw_kc_in_prod_repr (kc : key_constraint) (assumptions : list expr)
   : expr → tactic (expr × expr)
-| `(denoteProj %%k₁ %%t ≃ denoteProj %%k₂ %%t') := 
+| `(denoteProj %%k₁ %%t ≃ denoteProj %%k₂ %%t') :=
   let is_denote_r (tup : expr) (e : expr) : bool :=
       match e with
       | `(denote_r %%R %%tup') := R = kc.table ∧ tup' = tup

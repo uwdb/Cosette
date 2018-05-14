@@ -2,7 +2,7 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..TDP
+import ..TDP ..canonize
 import ..ucongr
 import ..cosette_tactics
 
@@ -38,5 +38,17 @@ begin
     unfold_all_denotations,
     funext,
     simp,
-    admit
+    have assert₀
+        : (∑ (t₁ : Tuple scm_emp) (t₁_1 t₂ : Tuple scm_dept),
+            (denoteProj dept_deptno t₁_1≃denoteProj emp_deptno t₁) *
+                ((denoteProj dept_deptno t₂≃denoteProj emp_deptno t₁) *
+                    (denote_r rel_emp t₁ * (denote_r rel_dept t₁_1 * (denote_r rel_dept t₂ * (t'≃denote_c i))))))
+        = ∑ (t₁ : Tuple scm_emp) (t₁_1 t₂ : Tuple scm_dept),
+            (denoteProj dept_deptno t₁_1≃denoteProj dept_deptno t₂) *
+                ((denoteProj dept_deptno t₁_1≃denoteProj emp_deptno t₁) *
+                    ((denoteProj dept_deptno t₂≃denoteProj emp_deptno t₁) *
+                        (denote_r rel_emp t₁ * (denote_r rel_dept t₁_1 * (denote_r rel_dept t₂ * (t'≃denote_c i)))))),
+    { congr, funext, congr, funext, congr, funext, ucongr },
+    rw assert₀, clear assert₀,
+    canonize, TDP
 end
