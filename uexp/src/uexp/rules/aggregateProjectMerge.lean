@@ -21,23 +21,20 @@ theorem rule :
            (emp_sal : Column datatypes.int scm_emp)
            (emp_deptno : Column datatypes.int scm_emp)
            (emp_slacker : Column datatypes.int scm_emp),
-           let deptnoProj : Proj (Γ ++ scm_emp) _ := right⋅emp_deptno,
-               salProj : Proj (Γ ++ scm_emp) _ := right⋅emp_sal,
-               empnoProj : Proj (Γ ++ scm_emp) _ := right⋅emp_empno in
-           denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable deptnoProj)
-                                (combineGroupByProj SUM(uvariable salProj)
-                                                    PLAIN(uvariable empnoProj)))
+           denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable (right⋅emp_deptno))
+                                (combineGroupByProj SUM(uvariable (right⋅emp_sal))
+                                                    PLAIN(uvariable (right⋅emp_empno))))
                       FROM1 table rel_emp
-                      GROUP BY combine deptnoProj empnoProj : SQL Γ _) =
-           denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable deptnoProj)
-                                (combineGroupByProj SUM(uvariable salProj)
-                                                    PLAIN(uvariable empnoProj)))
+                      GROUP BY combine (right⋅emp_deptno) (right⋅emp_empno) : SQL Γ _) =
+           denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable (right⋅emp_deptno))
+                                (combineGroupByProj SUM(uvariable (right⋅emp_sal))
+                                                    PLAIN(uvariable (right⋅emp_empno))))
                       FROM1 table rel_emp
-                      GROUP BY combine empnoProj deptnoProj : SQL Γ _) :=
+                      GROUP BY combine (right⋅emp_empno) (right⋅emp_deptno) : SQL Γ _) :=
 begin
     intros,
     unfold_all_denotations,
     funext,
     simp,
-    sorry,
+    sorry
 end

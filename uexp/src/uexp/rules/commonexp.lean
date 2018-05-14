@@ -18,12 +18,10 @@ open binary_operators
 theorem rule :
     forall (Γ s1 : Schema) (a : relation s1)
            (x : Column datatypes.int s1) (y : Column datatypes.int s1),
-           let xVar : Expr (Γ ++ s1) _ := uvariable (right⋅x),
-               yVar : Expr (Γ ++ s1) _ := uvariable (right⋅y) in
-           denoteSQL (SELECT1 (e2p (binaryExpr add xVar xVar))
-                      FROM1 (table a WHERE (equal xVar yVar)) : SQL Γ _) =
-           denoteSQL (SELECT1 (e2p (binaryExpr add xVar yVar))
-                      FROM1 (table a WHERE (equal xVar yVar)) : SQL Γ _) :=
+           denoteSQL (SELECT1 (e2p (binaryExpr add_ (uvariable (right⋅x)) (uvariable (right⋅x))))
+                      FROM1 (table a WHERE (equal (uvariable (right⋅x)) (uvariable (right⋅y)))) : SQL Γ _) =
+           denoteSQL (SELECT1 (e2p (binaryExpr add_ (uvariable (right⋅x)) (uvariable (right⋅y))))
+                      FROM1 (table a WHERE (equal (uvariable (right⋅x)) (uvariable (right⋅y)))) : SQL Γ _) :=
 begin
     intros,
     funext,

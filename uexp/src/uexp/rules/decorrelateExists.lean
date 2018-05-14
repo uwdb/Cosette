@@ -26,16 +26,12 @@ theorem rule :
            (emp_sal : Column datatypes.int scm_emp)
            (emp_deptno : Column datatypes.int scm_emp)
            (emp_slacker : Column datatypes.int scm_emp),
-    let left_deptno : Expr ((Γ ++ scm_emp) ++ scm_emp) datatypes.int
-                    := uvariable (left⋅right⋅emp_deptno),
-        right_deptno : Expr ((Γ ++ scm_emp) ++ scm_emp) datatypes.int
-                    := uvariable (right⋅emp_deptno) in
     denoteSQL
     (SELECT *
      FROM1 (table rel_emp
             WHERE EXISTS (SELECT *
                            FROM1 table rel_emp
-                           WHERE (equal left_deptno right_deptno)))
+                           WHERE (equal (uvariable (left⋅right⋅emp_deptno)) (uvariable (right⋅emp_deptno)))))
     : SQL Γ _) =
     denoteSQL
     (SELECT1 (right⋅left⋅star)

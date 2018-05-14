@@ -27,23 +27,20 @@ theorem rule :
            (emp_sal : Column datatypes.int scm_emp)
            (emp_deptno : Column datatypes.int scm_emp)
            (emp_slacker : Column datatypes.int scm_emp),
-    let jobProj : Proj (Γ ++ scm_emp) _ := right⋅emp_job,
-        empnoProj : Proj (Γ ++ scm_emp) _ := right⋅emp_empno,
-        salProj : Proj (Γ ++ scm_emp) _ := right⋅emp_sal in
-    denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable jobProj)
-                        (combineGroupByProj PLAIN(uvariable empnoProj)
-                            (combineGroupByProj PLAIN(uvariable salProj)
-                                                SUM(uvariable salProj))))
+    denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable (right⋅emp_job))
+                        (combineGroupByProj PLAIN(uvariable (right⋅emp_empno))
+                            (combineGroupByProj PLAIN(uvariable (right⋅emp_sal))
+                                                SUM(uvariable (right⋅emp_sal)))))
                FROM1 (table rel_emp
-                      WHERE (Pred.equal (uvariable empnoProj) (constantExpr i)))
-               GROUP BY (combine jobProj (combine empnoProj salProj)) : SQL Γ _) =
-    denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable jobProj)
+                      WHERE (Pred.equal (uvariable (right⋅emp_empno)) (constantExpr i)))
+               GROUP BY (combine (right⋅emp_job) (combine (right⋅emp_empno) (right⋅emp_sal))) : SQL Γ _) =
+    denoteSQL (SELECT (combineGroupByProj PLAIN(uvariable (right⋅emp_job))
                         (combineGroupByProj PLAIN(uvariable (e2p (constantExpr i)))
-                            (combineGroupByProj PLAIN(uvariable salProj)
-                                                SUM(uvariable salProj))))
+                            (combineGroupByProj PLAIN(uvariable (right⋅emp_sal))
+                                                SUM(uvariable (right⋅emp_sal)))))
                FROM1 (table rel_emp
-                      WHERE (Pred.equal (uvariable empnoProj) (constantExpr i)))
-               GROUP BY (combine jobProj salProj) : SQL Γ _) :=
+                      WHERE (Pred.equal (uvariable (right⋅emp_empno)) (constantExpr i)))
+               GROUP BY (combine (right⋅emp_job) (right⋅emp_sal)) : SQL Γ _) :=
 begin
     intros,
     unfold_all_denotations,
