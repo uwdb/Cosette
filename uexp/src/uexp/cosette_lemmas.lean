@@ -156,4 +156,20 @@ begin
     simp,
 end  
 
+lemma squash_sig_union_factor {s: Schema} (a b: Tuple s →  usr):
+  ∥ (∑ t, a t *(1 + b t)) ∥ = ∥ (∑ t, a t) ∥ :=
+begin
+    rw squash_sig_squash,
+    have h: (∑ (t : Tuple s), ∥a t * (1 + b t)∥) = (∑ (t : Tuple s), ∥a t ∥),
+    focus {
+        apply congr_arg, funext, 
+        rw ← squash_time,
+        rw squash_add_one,
+        simp,
+    },
+    rw h,
+    clear h,
+    rw ←  squash_sig_squash,
+end  
+
 end -- end section

@@ -2,9 +2,10 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-
 import ..ucongr
 import ..TDP ..canonize
+
+set_option profiler true
 
 open Expr
 open Proj
@@ -29,6 +30,12 @@ begin
     unfold_all_denotations,
     funext,
     simp,
+    print_size,
     canonize,
-  
+    remove_dup_sigs get_lhs,
+    apply ueq_symm,
+    canonize,
+    remove_dup_sigs get_lhs,
+    canonize,
+    sorry
 end

@@ -18,7 +18,7 @@ end
 meta def inside_squash (e: expr) : tactic expr := 
     match e with 
     | `(usr.squash %%d) := tactic.to_expr ``(%%d)
-    | _ := do tactic.trace e, tactic.fail "no squash to match"
+    | _ := do tactic.fail "no squash to match"
     end 
 
 meta def add_sqush (e: expr) : tactic expr :=
@@ -136,6 +136,13 @@ meta def first_in_squash (scope: tactic expr) : tactic expr := do
     ex ← scope,
     match ex with 
      | `(usr.squash (%%a + %%b)) := return a
+     | _ := tactic.fail "no squashed union in scope"
+    end
+
+meta def snd_in_squash (scope: tactic expr) : tactic expr := do
+    ex ← scope,
+    match ex with 
+     | `(usr.squash (%%a + %%b)) := return b
      | _ := tactic.fail "no squashed union in scope"
     end
 

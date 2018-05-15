@@ -57,6 +57,7 @@ example {r p} {R: Tuple r → usr} {k: Tuple (r++r)}:
 begin
   unfold pair,
   remove_dup_sigs_lhs,
+  print_size,
   ac_refl
 end 
 

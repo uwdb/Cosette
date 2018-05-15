@@ -665,4 +665,17 @@ meta def remove_dup_sigs (target: tactic expr) : tactic unit := do
   in repeat_if_progress loop s s,
   return ()
 
+meta def expr.size : expr → ℕ 
+| (expr.var n) := 1
+| (expr.app f x) := (expr.size f) + (expr.size x)
+| (expr.lam n bi ty body) := (expr.size body)
+| (expr.pi n bi ty body) := (expr.size body)
+| (expr.elet n ty val body) :=  (expr.size body) 
+| ex := 1
+
+meta def print_size : tactic unit := do
+l ← get_lhs,
+r ← get_rhs,
+tactic.trace (expr.size l + expr.size r)
+
 end cosette_tactics

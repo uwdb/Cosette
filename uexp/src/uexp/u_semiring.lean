@@ -86,6 +86,8 @@ axiom sig_commute {s t: Schema} (f: Tuple s → Tuple t → usr):
 @[simp] axiom squash_squared (x : usr) : ∥ x ∥ * ∥ x ∥  = ∥ x ∥ 
 @[simp] axiom squash_eq_if_square_eq (x : usr) : x * x = x → ∥ x ∥ = x
 @[simp] axiom time_squash_keeps (x: usr) : x * ∥ x ∥ = x 
+axiom squash_sig_squash {s: Schema} (f: Tuple s → usr): 
+∥ (∑ t, f t) ∥ = ∥ (∑ t, ∥ f t ∥ ) ∥ 
 
 axiom squash_add_one (x: usr) :  ∥ 1 + x ∥ = 1 
 

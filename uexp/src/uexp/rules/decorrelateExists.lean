@@ -46,6 +46,7 @@ begin
     unfold_all_denotations,
     funext,
     simp,
+    print_size,
     apply ueq_symm,
     -- remove_dup_sigs_lhs,
     sorry

@@ -31,7 +31,6 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    unfold pair,
     simp,
     sorry
 end    
@@ -46,7 +45,6 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    unfold pair,
     simp,
     ucongr,
 end

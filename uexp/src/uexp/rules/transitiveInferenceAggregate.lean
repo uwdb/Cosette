@@ -35,12 +35,16 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    dsimp,
+    print_size,
     simp,
+    print_size,
     congr,
     funext,
     apply congr_arg _,
     funext,
     apply congr_arg _,
     funext,
+    congr,
     sorry -- TODO: here push predicate into squashed expressions and SDP is required  
 end

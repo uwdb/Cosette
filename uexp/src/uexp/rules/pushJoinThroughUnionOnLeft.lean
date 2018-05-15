@@ -22,6 +22,8 @@ begin
     intros,
     unfold_all_denotations,
     funext,
+    print_size,
     simp,
+    print_size,
     UDP,
 end

@@ -6,6 +6,7 @@ import ..TDP ..canonize
 import ..ucongr
 import ..cosette_tactics
 
+set_option profiler true
 
 variable i : const datatypes.int
 
@@ -38,6 +39,7 @@ begin
     unfold_all_denotations,
     funext,
     simp,
+    print_size,
     have assert₀
         : (∑ (t₁ : Tuple scm_emp) (t₁_1 t₂ : Tuple scm_dept),
             (denoteProj dept_deptno t₁_1≃denoteProj emp_deptno t₁) *

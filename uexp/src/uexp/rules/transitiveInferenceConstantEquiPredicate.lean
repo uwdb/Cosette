@@ -25,6 +25,7 @@ denoteSQL ((SELECT1 (e2p (constantExpr integer_1)) FROM1 (product (table rel_emp
 denoteSQL ((SELECT1 (e2p (constantExpr integer_1)) FROM1 (product (table rel_emp) (table rel_emp)) WHERE (equal (uvariable (right⋅left⋅emp_deptno)) (uvariable (right⋅right⋅emp_deptno)))) :SQL Γ _)  :=
 begin
   intros,
+  print_size,
   unfold_all_denotations,
   funext,
   try {simp},

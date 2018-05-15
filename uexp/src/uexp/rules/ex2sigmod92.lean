@@ -3,8 +3,10 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 import ..UDP
+import ..canonize
 import ..cosette_tactics
 
+set_option profiler true
 
 open Expr
 open Proj
@@ -50,6 +52,7 @@ begin
     intros,
     unfold_all_denotations,
     funext,
-    simp,
+    simp,  
+    canonize,
     sorry
 end

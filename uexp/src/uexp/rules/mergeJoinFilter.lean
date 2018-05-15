@@ -28,5 +28,6 @@ begin
   unfold_all_denotations,
   funext,
   simp,
+  print_size,
   TDP' ucongr,
 end

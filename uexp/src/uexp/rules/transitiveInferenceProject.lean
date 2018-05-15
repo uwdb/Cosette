@@ -31,6 +31,9 @@ begin
   intros,
   unfold_all_denotations,
   funext,
+  dsimp,
+  print_size,
   try {simp},
+  print_size,
   TDP,
 end

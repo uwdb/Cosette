@@ -29,6 +29,7 @@ denoteSQL ((SELECT1 (e2p (constantExpr integer_1)) FROM1 (product ((SELECT * FRO
 denoteSQL ((SELECT1 (e2p (constantExpr integer_1)) FROM1 (product ((SELECT * FROM1 (table rel_emp) WHERE (or (or (equal (uvariable (right⋅emp_deptno)) (constantExpr integer_7)) (equal (uvariable (right⋅emp_deptno)) (constantExpr integer_9))) (castPred (combine (right⋅emp_comm) (e2p (constantExpr integer_10)) ) predicates.gt)))) (table rel_emp)) WHERE (equal (uvariable (right⋅left⋅emp_deptno)) (uvariable (right⋅right⋅emp_deptno)))) :SQL Γ _)  :=
 begin
   intros,
+  print_size,
   unfold_all_denotations,
   funext,
   try {simp},

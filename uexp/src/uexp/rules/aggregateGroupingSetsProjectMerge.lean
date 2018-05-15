@@ -32,5 +32,6 @@ begin
     unfold_all_denotations,
     funext,
     simp,
+    print_size,
    sorry 
 end
