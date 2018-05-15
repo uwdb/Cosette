@@ -135,4 +135,25 @@ begin
       rw time_comm }
 end
 
+lemma dup_in_squashed_union (a b: usr) :
+    ∥ a * a + b ∥ = ∥ a + b ∥ :=
+begin
+    rw ← squash_add_squash,
+    rw ← squash_time,
+    rw squash_squared,
+    rw squash_add_squash,
+end
+
+lemma factor_plus (a b: usr): 
+    a + a * b = a * (1 + b) := by simp
+
+lemma squash_union_factor (a b: usr):
+  ∥ a + a * b ∥ = ∥ a ∥ :=
+begin
+    rw factor_plus,
+    rw ← squash_time,
+    rw squash_add_one,
+    simp,
+end  
+
 end -- end section

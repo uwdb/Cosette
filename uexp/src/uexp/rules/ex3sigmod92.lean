@@ -46,5 +46,8 @@ theorem rule :
 begin
     intros,
     unfold isKey at *,
+    unfold_all_denotations,
+    funext,
+    simp,
     sorry
 end

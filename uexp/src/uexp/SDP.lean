@@ -3,6 +3,7 @@ import .tactics
 import .u_semiring
 import .extra_constants
 import .cosette_tactics
+import .TDP
 
 -- assume there is only sig inside squash
 lemma sig2_distr_plus {s₁ s₂ : Schema} {f₁ f₂ : Tuple s₁ → Tuple s₂  → usr} :
@@ -138,6 +139,13 @@ meta def first_in_squash (scope: tactic expr) : tactic expr := do
      | _ := tactic.fail "no squashed union in scope"
     end
 
+meta def unwrap_squash (scope: tactic expr) : tactic expr := do
+    ex ← scope,
+    match ex with 
+    | `(usr.squash %%a) := return a
+    | _ := tactic.fail "no squash to unwrap"
+    end
+
 meta def is_one (e:expr) :bool :=
 match e with 
 | `(has_one.one usr) :=  true
@@ -175,12 +183,9 @@ meta def simplify_in_sig (target: tactic expr) (trans: list expr → tactic (lis
     abstracted ← return $ expr.abstract_locals new_body names, 
     new ← sigma_repr_to_sigma_expr ⟨lsr.var_schemas, abstracted⟩, 
     eq_lemma ← tactic.to_expr ``(%%old = %%new),
-    tactic.trace eq_lemma,
-    tactic.trace (list.length names),
     ng_before ← list.length <$> tactic.get_goals,
     lemma_name ← tactic.mk_fresh_name,
     tactic.assert lemma_name eq_lemma,
-    tactic.trace (list.length names),
     tactic.focus1 $ prove_in_sig (list.length names) solver, 
     ng_after ← list.length <$> tactic.get_goals,
     if ng_after > ng_before
@@ -197,8 +202,13 @@ meta def unify_binder_i_j (i j: nat) : tactic unit := do
     distr_lem, -- distribute plus over sig
     -- remove dup sig on one side
     remove_dup_sigs (first_in_squash get_lhs),
+    `[rw plus_comm],
+    remove_dup_sigs (first_in_squash get_lhs),
     -- simplify after remove_dup_sigs    
-     simplify_in_sig (first_in_squash get_lhs) unit_ueq_to_one `[repeat {rw eq_unit}, remove_all_unit],
+    simplify_in_sig (first_in_squash get_lhs) unit_ueq_to_one `[repeat {rw eq_unit}, remove_all_unit],
+    `[rw plus_comm],
+    simplify_in_sig (first_in_squash get_lhs) unit_ueq_to_one `[repeat {rw eq_unit}, remove_all_unit],
+    -- remove redundant relation 
     -- factorize
     -- reduce done
     return ()
@@ -207,13 +217,19 @@ example {Γ s : Schema} (a : relation s) (g : Tuple Γ) (t : Tuple s):
 ∥(∑ (t₁ t₂ : Tuple s), denote_r a t₁ * (denote_r a t₂ * (t≃t₁)))∥ =
     ∥(∑ (t_1 : Tuple s), denote_r a t_1 * (t≃t_1))∥ :=
 begin
-    add_lem 0 1,
-    split_lem,
-    distr_lem,
-    remove_dup_sigs $ first_in_squash get_lhs,
-    rw plus_comm,
-    remove_dup_sigs $ first_in_squash get_lhs,
-    sorry,
+    unify_binder_i_j 0 1,
+    rw dup_in_squashed_union,
+    have h: (∑ (x : Tuple s), denote_r a x * (denote_r a t * usr.not (t≃x))) = denote_r a t * (∑ (x : Tuple s), denote_r a x * usr.not (t≃x)),
+    focus{
+        simp,
+        TDP,
+    },
+    rewrite h,
+    clear h,
+    rw squash_union_factor,
+    apply ueq_symm,
+    remove_dup_sigs $ unwrap_squash get_lhs,
+    refl,
 end
 
 example {Γ s : Schema} {ty0 ty1 : datatype} (a : relation s) (c0 : Column ty0 s)
@@ -227,14 +243,7 @@ example {Γ s : Schema} {ty0 ty1 : datatype} (a : relation s) (c0 : Column ty0 s
                  ((denoteProj c1 t₁≃denoteProj c1 t₂) * (t≃(denoteProj c0 t₂, denoteProj c1 t₂))))))∥ =
     ∥(∑ (t_1 : Tuple s), denote_r a t_1 * (t≃(denoteProj c0 t_1, denoteProj c1 t_1)))∥ :=
 begin
-    add_lem 0 1,
-    split_lem,
-    distr_lem,
-    remove_dup_sigs $ first_in_squash get_lhs,
-    rw plus_comm,
-    remove_dup_sigs $ first_in_squash get_lhs,
-    rw plus_comm,
-    simplify_in_sig (first_in_squash get_lhs) unit_ueq_to_one `[repeat {rw eq_unit}, remove_all_unit],
+    unify_binder_i_j 0 1,
     sorry, 
 end
 
@@ -251,11 +260,6 @@ example {Γ s1 s2 : Schema} (a : SQL Γ s1) (b : SQL Γ s2)
               (denoteSQL a g t₁ * (denoteSQL b g t₂_1 * (denoteSQL a g t₂ * (t≃denoteProj x t₁))))))∥ :=
 begin
     apply ueq_symm,
-    add_lem 0 1,
-    split_lem,
-    distr_lem,
-    remove_dup_sigs $ first_in_squash get_lhs,
-    rw plus_comm,
-    remove_dup_sigs $ first_in_squash get_lhs,
+    unify_binder_i_j 0 1,
     sorry,
 end
