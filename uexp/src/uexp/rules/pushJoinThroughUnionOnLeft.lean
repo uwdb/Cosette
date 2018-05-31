@@ -2,7 +2,7 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..UDP
+import ..meta.UDP
 
 set_option profiler true
 

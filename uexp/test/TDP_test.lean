@@ -1,7 +1,7 @@
-import .TDP
-import .cosette_tactics
+import ..src.uexp.meta.TDP
+import ..src.uexp.meta.cosette_tactics
 
-open list io
+open list
 
 example {p q r s} {f : Tuple p → Tuple q → Tuple r → Tuple s → usr}
   : (∑ (a : Tuple p) (b : Tuple q) (c : Tuple r) (d : Tuple s), f a b c d)

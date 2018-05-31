@@ -1,10 +1,10 @@
 import ..sql
 import ..tactics
 import ..u_semiring
-import ..cosette_lemmas
+import ..meta.cosette_lemmas
 import ..extra_constants
-import ..TDP
-import ..cosette_tactics
+import ..meta.TDP
+import ..meta.cosette_tactics
 
 
 open Expr

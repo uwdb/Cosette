@@ -2,9 +2,9 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..ucongr
-import ..TDP
-import ..UDP
+import ..meta.ucongr
+import ..meta.TDP
+import ..meta.UDP
 
 open Expr
 open Proj

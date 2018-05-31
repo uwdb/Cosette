@@ -1,8 +1,8 @@
 import ..u_semiring
 import ..sql
 import ..tactics
-import ..ucongr
-import ..TDP
+import ..meta.ucongr
+import ..meta.TDP
 
 set_option profiler true
 

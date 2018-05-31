@@ -3,8 +3,8 @@ import ..tactics
 import ..u_semiring
 import ..extra_constants
 
-import ..ucongr
-import ..TDP
+import ..meta.ucongr
+import ..meta.TDP
 
 set_option profiler true
 open Expr

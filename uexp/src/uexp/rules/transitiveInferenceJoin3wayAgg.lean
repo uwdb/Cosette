@@ -2,8 +2,8 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..ucongr
-import ..TDP
+import ..meta.ucongr
+import ..meta.TDP
 
 open Expr
 open Proj

@@ -1,8 +1,8 @@
 import ..extra_constants
 import ..sql
 import ..u_semiring
-import ..cosette_tactics
-import ..TDP
+import ..meta.cosette_tactics
+import ..meta.TDP
 
 open SQL
 open Proj

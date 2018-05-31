@@ -1,8 +1,6 @@
-import .u_semiring
-import .cosette_tactics
-import .ucongr
-import .extra_constants
-import .sql
+import ..u_semiring ..sql ..extra_constants
+import .cosette_tactics .ucongr
+
 section TDP
 
 open tactic

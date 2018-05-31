@@ -1,5 +1,5 @@
-import .u_semiring
-import .extra_constants
+import ..u_semiring ..extra_constants
+
 /- lemmas used in congruence of u-semirings -/
 
 section

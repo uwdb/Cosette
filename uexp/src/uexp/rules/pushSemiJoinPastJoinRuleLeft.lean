@@ -2,8 +2,9 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..ucongr
-import ..TDP ..canonize
+
+import ..meta.ucongr
+import ..meta.TDP ..meta.canonize
 
 set_option profiler true
 

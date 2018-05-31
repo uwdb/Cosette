@@ -6,7 +6,7 @@
 import ..extra_constants
 import ..sql
 import ..u_semiring
-import ..cosette_tactics
+import ..meta.cosette_tactics
 
 open SQL
 open Proj

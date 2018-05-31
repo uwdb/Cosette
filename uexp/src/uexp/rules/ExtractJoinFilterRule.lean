@@ -2,9 +2,9 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..ucongr
-import ..TDP
-import ..cosette_tactics
+import ..meta.ucongr
+import ..meta.TDP
+import ..meta.cosette_tactics
 
 
 set_option profiler true

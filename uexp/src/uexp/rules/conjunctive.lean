@@ -1,6 +1,6 @@
 import ..u_semiring
 import ..sql
-import ..cosette_tactics
+import ..meta.cosette_tactics
 
 open SQL
 open Pred

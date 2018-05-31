@@ -1,9 +1,8 @@
-import system.io
-import .u_semiring
+import ..u_semiring
 import .cosette_lemmas
 
-open nat io
-open list io
+open nat
+open list
 
 section cosette_tactics
 

@@ -1,9 +1,5 @@
-import .sql
-import .tactics
-import .u_semiring
-import .extra_constants
-import .cosette_tactics
-import .TDP
+import ..sql ..u_semiring ..extra_constants
+import .cosette_tactics .TDP
 
 -- assume there is only sig inside squash
 lemma sig2_distr_plus {s₁ s₂ : Schema} {f₁ f₂ : Tuple s₁ → Tuple s₂  → usr} :

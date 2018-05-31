@@ -2,8 +2,8 @@ import ..sql
 import ..tactics
 import ..u_semiring
 import ..extra_constants
-import ..cosette_tactics
-import ..TDP
+import ..meta.cosette_tactics
+import ..meta.TDP
 
 
 open Expr

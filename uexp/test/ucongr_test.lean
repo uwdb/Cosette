@@ -1,4 +1,4 @@
-import .ucongr
+import ..src.uexp.meta.ucongr
 
 set_option profiler true
 

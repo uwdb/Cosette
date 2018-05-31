@@ -1,4 +1,5 @@
-import .cosette_tactics .TDP 
+import .cosette_tactics .TDP
+
 open tactic
 
 section canonize

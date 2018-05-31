@@ -1,6 +1,5 @@
-import .u_semiring
-import .cosette_lemmas
-import .cosette_tactics
+import ..u_semiring
+import .cosette_lemmas .cosette_tactics
 
 /- congruence procedure for u-semiring -/
 
