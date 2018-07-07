@@ -323,34 +323,49 @@ conflict_clause
     OR
 */
 expr
- : literal_value
- | BIND_PARAMETER
- | ( ( database_name '.' )? table_name '.' )? column_name
- | unary_operator expr
- | expr '||' expr
- | expr ( '*' | '/' | '%' ) expr
- | expr ( '+' | '-' ) expr
- | expr ( '<<' | '>>' | '&' | '|' ) expr
- | expr ( '<' | '<=' | '>' | '>=' ) expr
- | expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB | K_MATCH | K_REGEXP ) expr
- | expr K_AND expr
- | expr K_OR expr
- | function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
- | '(' expr ')'
- | K_CAST '(' expr K_AS type_name ')'
- | expr K_COLLATE collation_name
- | expr K_NOT? ( K_LIKE | K_GLOB | K_REGEXP | K_MATCH ) expr ( K_ESCAPE expr )?
- | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )
- | expr K_IS K_NOT? expr
- | expr K_NOT? K_BETWEEN expr K_AND expr
+ : literal_value                                    # literal
+ //| BIND_PARAMETER
+
+ //| ( ( database_name '.' )? table_name '.' )? column_name
+ | ( table_name '.' )? column_name                  # column
+
+ | unary_operator expr                              # unaryExpr
+ | expr '||' expr                                   # binaryExpr
+ | expr ( '*' | '/' | '%' ) expr                    # binaryExpr
+ | expr ( '+' | '-' ) expr                          # binaryExpr
+ | expr ( '<<' | '>>' | '&' | '|' ) expr            # binaryExpr
+ | expr ( '<' | '<=' | '>' | '>=' ) expr            # binaryExpr
+
+ //| expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB | K_MATCH | K_REGEXP ) expr
+ | expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE ) expr       # binaryExpr
+
+ | expr K_AND expr                                  # binaryExpr
+ | expr K_OR expr                                   # binaryExpr
+
+ //| function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
+ | '(' expr ')'                                     # parenExpr
+
+ //| K_CAST '(' expr K_AS type_name ')'
+ //| expr K_COLLATE collation_name
+
+ //| expr K_NOT? ( K_LIKE | K_GLOB | K_REGEXP | K_MATCH ) expr ( K_ESCAPE expr )?
+ | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )     # unaryExpr
+
+ | expr K_IS K_NOT? expr                            # binaryExpr
+
+ //| expr K_NOT? K_BETWEEN expr K_AND expr
+
  | expr K_NOT? K_IN ( '(' ( select_stmt
                           | expr ( ',' expr )*
                           )? 
                       ')'
-                    | ( database_name '.' )? table_name )
- | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'
- | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END
- | raise_function
+                    //| ( database_name '.' )? table_name )
+                    | table_name )                  # inExpr
+
+ | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'     # existsExpr
+ | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END     # caseExpr
+
+ //| raise_function
  ;
 
 foreign_key_clause
@@ -366,11 +381,11 @@ foreign_key_clause
    ( K_NOT? K_DEFERRABLE ( K_INITIALLY K_DEFERRED | K_INITIALLY K_IMMEDIATE )? )?
  ;
 
-raise_function
- : K_RAISE '(' ( K_IGNORE 
-               | ( K_ROLLBACK | K_ABORT | K_FAIL ) ',' error_message )
-           ')'
- ;
+//raise_function
+// : K_RAISE '(' ( K_IGNORE
+//               | ( K_ROLLBACK | K_ABORT | K_FAIL ) ',' error_message )
+//           ')'
+// ;
 
 indexed_column
  : column_name ( K_COLLATE collation_name )? ( K_ASC | K_DESC )?
@@ -397,11 +412,11 @@ ordering_term
  : expr ( K_COLLATE collation_name )? ( K_ASC | K_DESC )?
  ;
 
-pragma_value
- : signed_number
- | name
- | STRING_LITERAL
- ;
+//pragma_value
+// : signed_number
+// | name
+// | STRING_LITERAL
+// ;
 
 common_table_expression
  : table_name ( '(' column_name ( ',' column_name )* ')' )? K_AS '(' select_stmt ')'
@@ -463,7 +478,7 @@ signed_number
 literal_value
  : NUMERIC_LITERAL
  | STRING_LITERAL
- | BLOB_LITERAL
+ //| BLOB_LITERAL
  | K_NULL
  | K_CURRENT_TIME
  | K_CURRENT_DATE
@@ -477,9 +492,9 @@ unary_operator
  | K_NOT
  ;
 
-error_message
- : STRING_LITERAL
- ;
+//error_message
+// : STRING_LITERAL
+// ;
 
 module_argument // TODO check what exactly is permitted here
  : expr

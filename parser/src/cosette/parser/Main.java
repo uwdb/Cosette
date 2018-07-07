@@ -1,7 +1,7 @@
 package cosette.parser;
 
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
+import cosette.ast.Typed;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -17,18 +17,36 @@ public class Main
     final List<String> functionNames = new ArrayList<String>();
 
     // The select-statement to be parsed.
+    String sql = "SELECT * from R";
+    /*
     String sql = "SELECT log AS x FROM t1 \n" +
             "GROUP BY x\n" +
             "HAVING count(*) >= 4 \n" +
             "ORDER BY max(n) + 0";
+            */
 
     // Create a lexer and parser for the input.
     CosetteLexer lexer = new CosetteLexer(CharStreams.fromString(sql));
     CosetteParser parser = new CosetteParser(new CommonTokenStream(lexer));
 
+    parser.addErrorListener(new BaseErrorListener()
+    {
+      public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line,
+                              int charPositionInLine, String msg, RecognitionException e)
+      { throw new RuntimeException(e); }
+    });
+
     // Invoke the `select_stmt` production.
     ParseTree tree = parser.select_stmt();
 
+    // show tree in text form
+    System.out.println("parse tree:" + tree.toStringTree(parser));
+
+    Typed t = new BuildASTVisitor().visit(tree);
+
+    System.out.println("got: " + t.toString());
+
+    /*
     // Walk the `select_stmt` production and listen when the parser
     // enters the `expr` production.
     ParseTreeWalker.DEFAULT.walk(new cosette.parser.CosetteBaseListener()
@@ -49,5 +67,6 @@ public class Main
 
     // Print the parsed functions.
     System.out.println("functionNames=" + functionNames);
+    */
   }
 }
