@@ -3,11 +3,11 @@ package cosette.ast;
 /**
  * Created by akcheung on 7/6/18.
  */
-public class DatetimeLiteral extends Typed implements Literal
+public class DatetimeLiteral extends Literal
 {
   protected Kind kind;
 
-  enum Kind
+  public enum Kind
   {
     CurrentTime("CURRENT TIME"), CurrentDate("CURRENT DATE"), CurrentTimestamp("CURRENT TIMESTAMP");
 

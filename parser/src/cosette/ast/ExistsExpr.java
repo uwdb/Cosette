@@ -3,7 +3,14 @@ package cosette.ast;
 /**
  * Created by akcheung on 7/6/18.
  */
-public class ExistsExpr extends Typed implements Expr
+public class ExistsExpr extends Expr
 {
-  protected Relation relation;
+  protected Expr expr;
+
+  public ExistsExpr (Expr expr)
+  {
+    this.expr = expr;
+  }
+
+  @Override public String toString () { return "EXISTS " + expr; }
 }

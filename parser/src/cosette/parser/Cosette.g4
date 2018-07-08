@@ -330,17 +330,17 @@ expr
  | ( table_name '.' )? column_name                  # column
 
  | unary_operator expr                              # unaryExpr
- | expr '||' expr                                   # binaryExpr
- | expr ( '*' | '/' | '%' ) expr                    # binaryExpr
- | expr ( '+' | '-' ) expr                          # binaryExpr
- | expr ( '<<' | '>>' | '&' | '|' ) expr            # binaryExpr
- | expr ( '<' | '<=' | '>' | '>=' ) expr            # binaryExpr
+ | expr op='||' expr                                   # binaryExpr
+ | expr op=( '*' | '/' | '%' ) expr                    # binaryExpr
+ | expr op=( '+' | '-' ) expr                          # binaryExpr
+ | expr op=( '<<' | '>>' | '&' | '|' ) expr            # binaryExpr
+ | expr op=( '<' | '<=' | '>' | '>=' ) expr            # binaryExpr
 
  //| expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE | K_GLOB | K_MATCH | K_REGEXP ) expr
- | expr ( '=' | '==' | '!=' | '<>' | K_IS | K_IS K_NOT | K_IN | K_LIKE ) expr       # binaryExpr
+ | expr ( op='=' | op='==' | op='!=' | op='<>' | op=K_IS | K_IS op=K_NOT | op=K_IN | op=K_LIKE ) expr       # binaryExpr
 
- | expr K_AND expr                                  # binaryExpr
- | expr K_OR expr                                   # binaryExpr
+ | expr op=K_AND expr                                  # binaryExpr
+ | expr op=K_OR expr                                   # binaryExpr
 
  //| function_name '(' ( K_DISTINCT? expr ( ',' expr )* | '*' )? ')'
  | '(' expr ')'                                     # parenExpr
@@ -349,9 +349,9 @@ expr
  //| expr K_COLLATE collation_name
 
  //| expr K_NOT? ( K_LIKE | K_GLOB | K_REGEXP | K_MATCH ) expr ( K_ESCAPE expr )?
- | expr ( K_ISNULL | K_NOTNULL | K_NOT K_NULL )     # unaryExpr
+ | expr ( op=K_ISNULL | op=K_NOTNULL | K_NOT op=K_NULL )     # unaryExpr
 
- | expr K_IS K_NOT? expr                            # binaryExpr
+ | expr op=K_IS K_NOT? expr                            # binaryExpr
 
  //| expr K_NOT? K_BETWEEN expr K_AND expr
 

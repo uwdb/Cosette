@@ -51,6 +51,8 @@ public class Query extends Relation
     List<String> tables = from.stream().map(t -> t.toString()).collect(Collectors.toList());
     sb.append(String.join(", ", tables));
 
+    if (where != null)
+      sb.append(" WHERE " + where.toString());
 
     return sb.toString();
   }

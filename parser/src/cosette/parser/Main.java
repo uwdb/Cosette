@@ -17,7 +17,7 @@ public class Main
     final List<String> functionNames = new ArrayList<String>();
 
     // The select-statement to be parsed.
-    String sql = "SELECT * from R";
+    String sql = "SELECT * from R where R.a = 'asdf'";
     /*
     String sql = "SELECT log AS x FROM t1 \n" +
             "GROUP BY x\n" +
