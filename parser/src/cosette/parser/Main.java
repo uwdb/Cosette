@@ -69,4 +69,27 @@ public class Main
     System.out.println("functionNames=" + functionNames);
     */
   }
+
+  /**
+   * To be called by the test harness
+   */
+  public static String testMain(String sql) throws Exception
+  {
+    // Create a lexer and parser for the input.
+    CosetteLexer lexer = new CosetteLexer(CharStreams.fromString(sql));
+    CosetteParser parser = new CosetteParser(new CommonTokenStream(lexer));
+
+    parser.addErrorListener(new BaseErrorListener()
+    {
+      public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line,
+                              int charPositionInLine, String msg, RecognitionException e)
+      { throw new RuntimeException(e); }
+    });
+
+    ParseTree tree = parser.select_stmt();
+
+    System.out.println("parse tree:" + tree.toStringTree(parser));
+
+    return new BuildASTVisitor().visit(tree).toString();
+  }
 }
