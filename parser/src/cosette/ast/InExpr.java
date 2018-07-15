@@ -1,7 +1,5 @@
 package cosette.ast;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,6 +56,8 @@ public class InExpr extends Expr
     StringBuffer sb = new StringBuffer();
     sb.append(left);
 
+    System.out.println("table: " + table + " query " + query);
+
     if (hasNot)
       sb.append(" NOT IN ");
     else
@@ -68,7 +68,10 @@ public class InExpr extends Expr
     else if (exprs != null)
       sb.append("(" + String.join(", ", exprs.stream().map(e -> e.toString()).collect(Collectors.toList())) + ")");
     else if (table != null)
+    {
+      System.out.println("table is: " + table);
       sb.append(table);
+    }
 
     return sb.toString();
   }

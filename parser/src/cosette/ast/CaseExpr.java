@@ -24,8 +24,10 @@ public class CaseExpr extends Expr
   public String toString ()
   {
     StringBuffer sb = new StringBuffer();
+    sb.append("CASE");
+
     if (caseExpr != null)
-      sb.append("CASE " + caseExpr);
+      sb.append(" " + caseExpr);
 
     for (int i = 0; i < when.size(); ++i)
       sb.append(" WHEN " + when.get(i) + " THEN " + then.get(i));

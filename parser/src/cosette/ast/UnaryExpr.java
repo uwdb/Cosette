@@ -1,5 +1,7 @@
 package cosette.ast;
 
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+
 /**
  * Created by akcheung on 7/6/18.
  */
@@ -26,9 +28,13 @@ public class UnaryExpr extends Expr
 
   @Override public String toString ()
   {
-    if (op != Op.ISNULL && op != Op.ISNOTNULL)
+    if (op == Op.NEG || op == Op.POS || op == Op.BITNOT)
+      return op + "" + base;
+    else if (op == Op.NOT)
       return op + " " + base;
-    else
+    else if (op == Op.ISNULL || op == Op.ISNOTNULL)
       return base + " " + op;
+    else
+      throw new ParseCancellationException("NYI: " + op);
   }
 }

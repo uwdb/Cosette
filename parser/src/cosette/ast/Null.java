@@ -5,4 +5,5 @@ package cosette.ast;
  */
 public class Null extends Literal
 {
+  @Override public String toString () { return "NULL"; }
 }

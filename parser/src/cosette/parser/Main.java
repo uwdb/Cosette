@@ -36,7 +36,6 @@ public class Main
       { throw new RuntimeException(e); }
     });
 
-    // Invoke the `select_stmt` production.
     ParseTree tree = parser.select_stmt();
 
     // show tree in text form
@@ -86,7 +85,7 @@ public class Main
       { throw new RuntimeException(e); }
     });
 
-    ParseTree tree = parser.select_stmt();
+    ParseTree tree = parser.parse();
 
     System.out.println("parse tree:" + tree.toStringTree(parser));
 

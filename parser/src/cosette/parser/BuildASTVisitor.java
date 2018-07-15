@@ -16,6 +16,37 @@ import static cosette.parser.CosetteParser.*;
  */
 public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
 {
+  // line 41
+  @Override
+  public Query visitParse(ParseContext ctx)
+  {
+    return (Query)visit(ctx.sql_stmt());
+  }
+
+  // line 57
+  @Override
+  public Query visitSql_stmt(Sql_stmtContext ctx)
+  {
+    if (ctx.factored_select_stmt() != null)
+      return (Query)visit(ctx.factored_select_stmt());
+
+    else if (ctx.simple_select_stmt() != null)
+      return (Query)visit(ctx.simple_select_stmt());
+
+    else
+      throw new ParseCancellationException("NYI: " + ctx.getText());
+  }
+
+  // line 191
+  @Override
+  public Query visitFactored_select_stmt(Factored_select_stmtContext ctx)
+  {
+    if (ctx.select_core() != null && ctx.select_core().size() == 1)
+      return (Query)visit(ctx.select_core(0));
+    else
+      throw new ParseCancellationException("NYI: " + ctx.getText());
+  }
+
   // line 235
   @Override
   public Query visitSimple_select_stmt(Simple_select_stmtContext ctx)
@@ -41,56 +72,97 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
   @Override
   public Expr visitUnaryExpr(UnaryExprContext ctx)
   {
-     String op = ctx.op.getText();
-     UnaryExpr.Op uop;
-     if (op.equals("-")) uop = UnaryExpr.Op.NEG;
-     else if (op.equals("+")) uop = UnaryExpr.Op.POS;
-     else if (op.equals("~")) uop = UnaryExpr.Op.BITNOT;
-     else if (op.equals(K_NOT)) uop = UnaryExpr.Op.NOT;
-     else if (op.equals(K_ISNULL)) uop = UnaryExpr.Op.ISNULL;
-     else if (op.equals(K_NOTNULL)) uop = UnaryExpr.Op.ISNOTNULL;
-     else if (op.equals(K_NULL)) uop = UnaryExpr.Op.ISNOTNULL;
-     else throw new ParseCancellationException("NYI: " + ctx.getText());
+     String opStr = ctx.op.getText();
+     UnaryExpr.Op uop = null;
 
-     return new UnaryExpr(uop, (Expr)visit(ctx.expr()));
+     if (opStr.equals("-")) uop = UnaryExpr.Op.NEG;
+     else if (opStr.equals("+")) uop = UnaryExpr.Op.POS;
+     else if (opStr.equals("~")) uop = UnaryExpr.Op.BITNOT;
+
+     int op = ctx.op.getType();
+     switch(op)
+     {
+     case K_NOT: { uop = UnaryExpr.Op.NOT; break; }
+     case K_ISNULL: { uop = UnaryExpr.Op.ISNULL; break; }
+     case K_NOTNULL: { uop = UnaryExpr.Op.ISNOTNULL; break; }
+     case K_NULL: { uop = UnaryExpr.Op.ISNOTNULL; break; }
+     }
+
+        /*
+     else if (op.equals(ctx.K_NOT().getText())) uop = UnaryExpr.Op.NOT;
+     else if (op.equals(ctx.K_ISNULL().getText())) uop = UnaryExpr.Op.ISNULL;
+     else if (op.equals(ctx.K_NOTNULL().getText())) uop = UnaryExpr.Op.ISNOTNULL;
+     else if (op.equals(ctx.K_NULL().getText())) uop = UnaryExpr.Op.ISNOTNULL;
+     else throw new ParseCancellationException("NYI: " + ctx.getText());
+        */
+
+    if (uop == null)
+      throw new ParseCancellationException("NYI: " + ctx.getText());
+
+    return new UnaryExpr(uop, (Expr)visit(ctx.expr()));
   }
 
   @Override
   public Expr visitBinaryExpr(BinaryExprContext ctx)
   {
-    String op = ctx.op.getText();
-    BinaryExpr.Op binop;
+    String opStr = ctx.op.getText();
+    BinaryExpr.Op binop = null;
 
-    if (op.equals("||")) binop = BinaryExpr.Op.OR;
-    else if (op.equals("*")) binop = BinaryExpr.Op.MULT;
-    else if (op.equals("/")) binop = BinaryExpr.Op.DIV;
-    else if (op.equals("%")) binop = BinaryExpr.Op.MOD;
-    else if (op.equals("+")) binop = BinaryExpr.Op.ADD;
-    else if (op.equals("-")) binop = BinaryExpr.Op.SUB;
-    else if (op.equals("<<")) binop = BinaryExpr.Op.SHL;
-    else if (op.equals(">>")) binop = BinaryExpr.Op.SHR;
-    else if (op.equals("&")) binop = BinaryExpr.Op.BITAND;
-    else if (op.equals("|")) binop = BinaryExpr.Op.BITOR;
-    else if (op.equals("<")) binop = BinaryExpr.Op.LT;
-    else if (op.equals("<=")) binop = BinaryExpr.Op.LE;
-    else if (op.equals(">")) binop = BinaryExpr.Op.GT;
-    else if (op.equals(">=")) binop = BinaryExpr.Op.GE;
-    else if (op.equals("=")) binop = BinaryExpr.Op.EQ;
-    else if (op.equals("==")) binop = BinaryExpr.Op.EQ;
-    else if (op.equals("!=")) binop = BinaryExpr.Op.NEQ;
-    else if (op.equals("<>")) binop = BinaryExpr.Op.NEQ;
-    else if (op.equals(K_IS)) binop = BinaryExpr.Op.IS;
-    else if (op.equals(K_NOT)) binop = BinaryExpr.Op.ISNOT; // it's really IS NOT
+    if (opStr.equals("||")) binop = BinaryExpr.Op.OR;
+    else if (opStr.equals("*")) binop = BinaryExpr.Op.MULT;
+    else if (opStr.equals("/")) binop = BinaryExpr.Op.DIV;
+    else if (opStr.equals("%")) binop = BinaryExpr.Op.MOD;
+    else if (opStr.equals("+")) binop = BinaryExpr.Op.ADD;
+    else if (opStr.equals("-")) binop = BinaryExpr.Op.SUB;
+    else if (opStr.equals("<<")) binop = BinaryExpr.Op.SHL;
+    else if (opStr.equals(">>")) binop = BinaryExpr.Op.SHR;
+    else if (opStr.equals("&")) binop = BinaryExpr.Op.BITAND;
+    else if (opStr.equals("|")) binop = BinaryExpr.Op.BITOR;
+    else if (opStr.equals("<")) binop = BinaryExpr.Op.LT;
+    else if (opStr.equals("<=")) binop = BinaryExpr.Op.LE;
+    else if (opStr.equals(">")) binop = BinaryExpr.Op.GT;
+    else if (opStr.equals(">=")) binop = BinaryExpr.Op.GE;
+    else if (opStr.equals("=")) binop = BinaryExpr.Op.EQ;
+    else if (opStr.equals("==")) binop = BinaryExpr.Op.EQ;
+    else if (opStr.equals("!=")) binop = BinaryExpr.Op.NEQ;
+    else if (opStr.equals("<>")) binop = BinaryExpr.Op.NEQ;
 
-    else if (op.equals(K_IN))
-      return new InExpr((Expr)visit(ctx.expr().get(0)), Collections.singletonList((Expr)visit(ctx.expr().get(1))), false);
 
-    else if (op.equals(K_LIKE)) throw new ParseCancellationException("NYI: " + ctx.getText());
-    else if (op.equals(K_AND)) binop = BinaryExpr.Op.AND;
-    else if (op.equals(K_OR)) binop = BinaryExpr.Op.OR;
-    else throw new ParseCancellationException("NYI: " + ctx.getText());
+    int op = ctx.op.getType();
+    // ctx.K_IS() actually returns null for some reason, has to resort to comparing token types
+
+    switch (op)
+    {
+      case K_IS: { binop = BinaryExpr.Op.IS; break; }
+      case K_NOT: { binop = BinaryExpr.Op.ISNOT; break; }// it's really IS NOT
+      case K_IN:
+        return new InExpr((Expr)visit(ctx.expr().get(0)), Collections.singletonList((Expr)visit(ctx.expr().get(1))), false);
+
+      case K_LIKE: throw new ParseCancellationException("NYI: " + ctx.getText());
+
+      case K_AND: { binop = BinaryExpr.Op.AND; break; }
+      case K_OR: { binop = BinaryExpr.Op.OR; break; }
+    }
+
+    if (binop == null) // not matched
+      throw new ParseCancellationException("NYI: " + op + " in: " + ctx.getText() + " op " + op);
 
     return new BinaryExpr((Expr)visit(ctx.expr().get(0)), binop, (Expr)visit(ctx.expr().get(1)));
+
+    /*
+    else if (op.equals(ctx.K_IS().getText())) binop = BinaryExpr.Op.IS;
+    else if (op.equals(ctx.K_NOT().getText())) binop = BinaryExpr.Op.ISNOT; // it's really IS NOT
+
+    else if (op.equals(ctx.K_IN().getText()))
+      return new InExpr((Expr)visit(ctx.expr().get(0)), Collections.singletonList((Expr)visit(ctx.expr().get(1))), false);
+
+    else if (op.equals(ctx.K_LIKE().getText())) throw new ParseCancellationException("NYI: " + ctx.getText());
+    else if (op.equals(ctx.K_AND().getText())) binop = BinaryExpr.Op.AND;
+    else if (op.equals(ctx.K_OR().getText())) binop = BinaryExpr.Op.OR;
+    else throw new ParseCancellationException("NYI: " + op + " in: " + ctx.getText() + " op " + op);
+
+    return new BinaryExpr((Expr)visit(ctx.expr().get(0)), binop, (Expr)visit(ctx.expr().get(1)));
+    */
   }
 
   @Override
@@ -143,7 +215,7 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
   @Override
   public Expr visitCaseExpr(CaseExprContext ctx)
   {
-    Expr caseExpr = (ctx.K_CASE() != null) ? (Expr)visit(ctx.expr().get(0)) : null;
+    Expr caseExpr = (ctx.caseExpr != null) ? (Expr)visit(ctx.expr().get(0)) : null;
     Expr elseExpr = (ctx.K_ELSE() != null) ? (Expr)visit(ctx.expr().get(ctx.expr().size() - 1)) : null;
 
     List<Expr> when = new ArrayList<>();

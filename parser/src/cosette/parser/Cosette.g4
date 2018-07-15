@@ -39,7 +39,8 @@ package cosette.parser;
 */
 
 parse
- : ( sql_stmt_list | error )* EOF
+ //: ( sql_stmt_list | error )* EOF
+ : sql_stmt EOF // parse one statement for now
  ;
 
 error
@@ -329,7 +330,9 @@ expr
  //| ( ( database_name '.' )? table_name '.' )? column_name
  | ( table_name '.' )? column_name                  # column
 
- | unary_operator expr                              # unaryExpr
+ //| unary_operator expr
+  | op=( '-'  | '+' | '~' | K_NOT ) expr               # unaryExpr
+
  | expr op='||' expr                                   # binaryExpr
  | expr op=( '*' | '/' | '%' ) expr                    # binaryExpr
  | expr op=( '+' | '-' ) expr                          # binaryExpr
@@ -363,7 +366,7 @@ expr
                     | table_name )                  # inExpr
 
  | ( ( K_NOT )? K_EXISTS )? '(' select_stmt ')'     # existsExpr
- | K_CASE expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END     # caseExpr
+ | K_CASE caseExpr=expr? ( K_WHEN expr K_THEN expr )+ ( K_ELSE expr )? K_END     # caseExpr
 
  //| raise_function
  ;
@@ -485,12 +488,13 @@ literal_value
  | K_CURRENT_TIMESTAMP
  ;
 
-unary_operator
- : '-'
- | '+'
- | '~'
- | K_NOT
- ;
+// inlined into expr
+//unary_operator
+// : '-'
+// | '+'
+// | '~'
+// | K_NOT
+// ;
 
 //error_message
 // : STRING_LITERAL
