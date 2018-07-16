@@ -1,5 +1,7 @@
 package cosette.ast;
 
+import org.antlr.v4.runtime.misc.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,8 +15,7 @@ public class Query extends Relation
   protected List<Relation> from;
   protected Expr where;
 
-  protected List<Expr> orderBy;
-  protected List<Boolean> order;
+  protected List<Pair<Expr, Boolean>> orders;
 
   protected Expr limit;
   protected Expr offset;
@@ -38,6 +39,11 @@ public class Query extends Relation
 
   public String name () { return name; }
 
+  public void orders (List<Pair<Expr, Boolean>> orders)
+  {
+    this.orders = orders;
+  }
+
   @Override
   public String toString ()
   {
@@ -53,6 +59,21 @@ public class Query extends Relation
 
     if (where != null)
       sb.append(" WHERE " + where.toString());
+
+    if (orders != null)
+    {
+      sb.append(" ORDER BY ");
+      for (int i = 0; i < orders.size(); ++i)
+      {
+        Pair<Expr, Boolean> o = orders.get(i);
+        sb.append(o.a);
+        if (o.b) // is descending?
+          sb.append(" DESC"); // ascending by default
+
+        if (i < orders.size() - 1)
+          sb.append(", ");
+      }
+    }
 
     return sb.toString();
   }

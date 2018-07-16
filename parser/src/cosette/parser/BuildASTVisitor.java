@@ -1,6 +1,7 @@
 package cosette.parser;
 
 import cosette.ast.*;
+import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -14,7 +15,7 @@ import static cosette.parser.CosetteParser.*;
 /**
  * Created by akcheung on 7/6/18.
  */
-public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
+public class BuildASTVisitor extends CosetteBaseVisitor<Object>
 {
   // line 41
   @Override
@@ -42,7 +43,18 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
   public Query visitFactored_select_stmt(Factored_select_stmtContext ctx)
   {
     if (ctx.select_core() != null && ctx.select_core().size() == 1)
-      return (Query)visit(ctx.select_core(0));
+    {
+      Query core = (Query)visit(ctx.select_core(0));
+
+      if (ctx.ordering_term().size() > 0)
+      {
+        List<Pair<Expr, Boolean>> orders =
+                ctx.ordering_term().stream().map(o -> (Pair<Expr, Boolean>)visit(o)).collect(Collectors.toList());
+        core.orders(orders);
+      }
+
+      return core;
+    }
     else
       throw new ParseCancellationException("NYI: " + ctx.getText());
   }
@@ -51,7 +63,16 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
   @Override
   public Query visitSimple_select_stmt(Simple_select_stmtContext ctx)
   {
-    return (Query)visit(ctx.select_core());
+    Query core = (Query)visit(ctx.select_core());
+
+    if (ctx.ordering_term().size() > 0)
+    {
+      List<Pair<Expr, Boolean>> orders =
+              ctx.ordering_term().stream().map(o -> (Pair<Expr, Boolean>)visit(o)).collect(Collectors.toList());
+      core.orders(orders);
+    }
+
+    return core;
   }
 
   // line 241
@@ -229,6 +250,15 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Typed>
     }
 
     return new CaseExpr(caseExpr, when, then, elseExpr);
+  }
+
+  // line 414
+  @Override
+  public Pair<Expr, Boolean> visitOrdering_term(Ordering_termContext ctx)
+  {
+    Expr e = (Expr)visit(ctx.expr());
+    boolean isDescending = (ctx.K_DESC() != null); // ascending default
+    return new Pair<>(e, isDescending);
   }
 
   // line 425

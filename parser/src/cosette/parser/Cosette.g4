@@ -412,7 +412,8 @@ qualified_table_name
  ;
 
 ordering_term
- : expr ( K_COLLATE collation_name )? ( K_ASC | K_DESC )?
+ //: expr ( K_COLLATE collation_name )? ( K_ASC | K_DESC )?
+ : expr ( K_ASC | K_DESC )?
  ;
 
 //pragma_value

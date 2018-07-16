@@ -1,5 +1,6 @@
 package cosette.parser;
 
+import cosette.ast.Query;
 import cosette.ast.Typed;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -41,7 +42,7 @@ public class Main
     // show tree in text form
     System.out.println("parse tree:" + tree.toStringTree(parser));
 
-    Typed t = new BuildASTVisitor().visit(tree);
+    Query t = (Query)new BuildASTVisitor().visit(tree);
 
     System.out.println("got: " + t.toString());
 
