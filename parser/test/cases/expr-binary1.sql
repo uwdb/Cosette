@@ -1,0 +1,1 @@
+select * from R where 1 || R.a = 42

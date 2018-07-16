@@ -1,0 +1,1 @@
+select * from R where R.a % R.b AND R.a < 10

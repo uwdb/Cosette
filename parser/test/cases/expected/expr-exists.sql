@@ -1,0 +1,1 @@
+select * from R where not exists (select * from S)

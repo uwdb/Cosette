@@ -1,0 +1,1 @@
+select * from R where R.a not in (select * from R)

@@ -1,0 +1,1 @@
+select * from R where case when R.a > 10 then 1 when R.a > 20 then 2 else 3
