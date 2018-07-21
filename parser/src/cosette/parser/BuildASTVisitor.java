@@ -42,54 +42,38 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
   @Override
   public Query visitFactored_select_stmt(Factored_select_stmtContext ctx)
   {
+    // XXX: parse the rest of select cores and CTEs
     if (ctx.select_core() != null && ctx.select_core().size() == 1)
     {
-      Query core = (Query)visit(ctx.select_core(0));
-
-      if (ctx.ordering_term().size() > 0)
-      {
-        List<Pair<Expr, Boolean>> orders =
-                ctx.ordering_term().stream().map(o -> (Pair<Expr, Boolean>)visit(o)).collect(Collectors.toList());
-        core.orders(orders);
-      }
-
-      return core;
+      Query q = (Query)visit(ctx.select_core(0));
+      parseOrderLimitOffset(ctx.ordering_term(), ctx.K_LIMIT() != null, ctx.K_OFFSET() != null, ctx.expr(), q);
+      return q;
     }
     else
       throw new ParseCancellationException("NYI: " + ctx.getText());
   }
 
-  // line 235
+  // line 236
   @Override
   public Query visitSimple_select_stmt(Simple_select_stmtContext ctx)
   {
-    Query core = (Query)visit(ctx.select_core());
-
-    if (ctx.ordering_term().size() > 0)
-    {
-      List<Pair<Expr, Boolean>> orders =
-              ctx.ordering_term().stream().map(o -> (Pair<Expr, Boolean>)visit(o)).collect(Collectors.toList());
-      core.orders(orders);
-    }
-
-    return core;
+    // XXX: parse the rest of select cores and CTEs
+    Query q = (Query)visit(ctx.select_core());
+    parseOrderLimitOffset(ctx.ordering_term(), ctx.K_LIMIT() != null, ctx.K_OFFSET() != null, ctx.expr(), q);
+    return q;
   }
 
-  // line 241
+  // line 243
   @Override
   public Query visitSelect_stmt(Select_stmtContext ctx)
   {
-    return (Query)visit(ctx.select_or_values(0));
+    // XXX: parse the rest of select cores and CTEs
+    Query q = (Query)visit(ctx.select_core(0));
+    parseOrderLimitOffset(ctx.ordering_term(), ctx.K_LIMIT() != null, ctx.K_OFFSET() != null, ctx.expr(), q);
+    return q;
   }
 
-  // line 248
-  @Override
-  public Query visitSelect_or_values(Select_or_valuesContext ctx)
-  {
-    return parseQuery(ctx.result_column(), ctx.table_or_subquery(), ctx.K_WHERE() == null, ctx.expr());
-  }
-
-  // line 325 -- parse Expr
+  // line 329 -- parse Expr
   @Override
   public Expr visitUnaryExpr(UnaryExprContext ctx)
   {
@@ -108,14 +92,6 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
      case K_NOTNULL: { uop = UnaryExpr.Op.ISNOTNULL; break; }
      case K_NULL: { uop = UnaryExpr.Op.ISNOTNULL; break; }
      }
-
-        /*
-     else if (op.equals(ctx.K_NOT().getText())) uop = UnaryExpr.Op.NOT;
-     else if (op.equals(ctx.K_ISNULL().getText())) uop = UnaryExpr.Op.ISNULL;
-     else if (op.equals(ctx.K_NOTNULL().getText())) uop = UnaryExpr.Op.ISNOTNULL;
-     else if (op.equals(ctx.K_NULL().getText())) uop = UnaryExpr.Op.ISNOTNULL;
-     else throw new ParseCancellationException("NYI: " + ctx.getText());
-        */
 
     if (uop == null)
       throw new ParseCancellationException("NYI: " + ctx.getText());
@@ -150,7 +126,6 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
 
 
     int op = ctx.op.getType();
-    // ctx.K_IS() actually returns null for some reason, has to resort to comparing token types
 
     switch (op)
     {
@@ -169,21 +144,6 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
       throw new ParseCancellationException("NYI: " + op + " in: " + ctx.getText() + " op " + op);
 
     return new BinaryExpr((Expr)visit(ctx.expr().get(0)), binop, (Expr)visit(ctx.expr().get(1)));
-
-    /*
-    else if (op.equals(ctx.K_IS().getText())) binop = BinaryExpr.Op.IS;
-    else if (op.equals(ctx.K_NOT().getText())) binop = BinaryExpr.Op.ISNOT; // it's really IS NOT
-
-    else if (op.equals(ctx.K_IN().getText()))
-      return new InExpr((Expr)visit(ctx.expr().get(0)), Collections.singletonList((Expr)visit(ctx.expr().get(1))), false);
-
-    else if (op.equals(ctx.K_LIKE().getText())) throw new ParseCancellationException("NYI: " + ctx.getText());
-    else if (op.equals(ctx.K_AND().getText())) binop = BinaryExpr.Op.AND;
-    else if (op.equals(ctx.K_OR().getText())) binop = BinaryExpr.Op.OR;
-    else throw new ParseCancellationException("NYI: " + op + " in: " + ctx.getText() + " op " + op);
-
-    return new BinaryExpr((Expr)visit(ctx.expr().get(0)), binop, (Expr)visit(ctx.expr().get(1)));
-    */
   }
 
   @Override
@@ -278,28 +238,58 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
     return new BaseTable(ctx.table_name().getText());
   }
 
-  // line 455
+  // line 459
   @Override
   public Query visitSelect_core(Select_coreContext ctx)
   {
-    return parseQuery(ctx.result_column(), ctx.table_or_subquery(), ctx.K_WHERE() == null, ctx.expr());
+    return parseQuery(ctx.result_column(), ctx.table_or_subquery(), ctx.K_WHERE() != null, ctx.expr());
   }
 
-  protected Query parseQuery (List<CosetteParser.Result_columnContext> cols,
-                              List<CosetteParser.Table_or_subqueryContext> tables,
+  protected Query parseQuery (List<Result_columnContext> cols, List<Table_or_subqueryContext> tables,
                               boolean hasWhere, List<CosetteParser.ExprContext> exprs)
   {
-    List<Column> select = new ArrayList<>();
-    for (CosetteParser.Result_columnContext c : cols)
-      select.add((Column)visit(c));
+//    List<Column> select = new ArrayList<>();
+//    for (Result_columnContext c : cols)
+//      select.add((Column)visit(c));
 
-    List<Relation> from = new ArrayList<>();
-    for (CosetteParser.Table_or_subqueryContext c : tables)
-      from.add((Relation)visit(c));
+    List<Column> select = cols.stream().map(c -> (Column)visit(c)).collect(Collectors.toList());
 
-    Expr where = hasWhere ? null : (Expr)visit(exprs.get(0));
+//    List<Relation> from = new ArrayList<>();
+//    for (Table_or_subqueryContext c : tables)
+//      from.add((Relation)visit(c));
+
+    List<Relation> from = tables.stream().map(f -> (Relation)visit(f)).collect(Collectors.toList());
+
+    Expr where = hasWhere ? (Expr)visit(exprs.get(0)) : null;
 
     return new Query(select, from, where);
+  }
+
+  protected void parseOrderLimitOffset (List<Ordering_termContext> orders, boolean hasLimit, boolean hasOffset,
+                                        List<CosetteParser.ExprContext> exprs, Query q)
+  {
+    if (orders != null && orders.size() > 0)
+    {
+      List<Pair<Expr, Boolean>> o = orders.stream().map(x -> (Pair<Expr, Boolean>)visit(x)).collect(Collectors.toList());
+      q.orders(o);
+    }
+
+    ExprContext limit = null;
+    ExprContext offset = null;
+
+    if (hasLimit)
+    {
+      if (hasOffset)
+      {
+        offset = exprs.get(exprs.size() - 1);
+        limit = exprs.get(exprs.size() - 2);
+      }
+      else
+        limit = exprs.get(exprs.size() - 1);
+    }
+
+    if (limit != null) q.limit((Expr)visit(limit));
+    if (offset != null) q.offset((Expr)visit(offset));
   }
 
   // line 871

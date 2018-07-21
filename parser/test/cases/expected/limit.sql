@@ -1,0 +1,1 @@
+select * from R limit 1

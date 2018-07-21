@@ -1,0 +1,1 @@
+select * from R limit 1 offset 10

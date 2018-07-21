@@ -44,6 +44,16 @@ public class Query extends Relation
     this.orders = orders;
   }
 
+  public void limit (Expr limit)
+  {
+    this.limit = limit;
+  }
+
+  public void offset (Expr offset)
+  {
+    this.offset = offset;
+  }
+
   @Override
   public String toString ()
   {
@@ -74,6 +84,12 @@ public class Query extends Relation
           sb.append(", ");
       }
     }
+
+    if (limit != null)
+      sb.append(" LIMIT " + limit);
+
+    if (offset != null)
+      sb.append(" OFFSET " + offset);
 
     return sb.toString();
   }

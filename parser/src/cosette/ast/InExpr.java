@@ -56,8 +56,6 @@ public class InExpr extends Expr
     StringBuffer sb = new StringBuffer();
     sb.append(left);
 
-    System.out.println("table: " + table + " query " + query);
-
     if (hasNot)
       sb.append(" NOT IN ");
     else
