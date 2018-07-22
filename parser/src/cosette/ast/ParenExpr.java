@@ -12,19 +12,20 @@ public class ParenExpr extends Expr
   protected Expr expr;
   protected Query query;
 
-  public ParenExpr (Expr base)
+  public ParenExpr(Expr base)
   {
     this.expr = base;
     this.query = null;
   }
 
-  public ParenExpr (Query base)
+  public ParenExpr(Query base)
   {
     this.expr = null;
     this.query = base;
   }
 
-  @Override public String toString ()
+  @Override
+  public String toString()
   {
     if (expr != null)
       return "(" + expr + ")";

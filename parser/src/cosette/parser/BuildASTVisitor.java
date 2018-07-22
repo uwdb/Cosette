@@ -57,7 +57,7 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
   @Override
   public Query visitSimple_select_stmt(Simple_select_stmtContext ctx)
   {
-    // XXX: parse the rest of select cores and CTEs
+    // XXX: parse CTEs
     Query q = (Query)visit(ctx.select_core());
     parseOrderLimitOffset(ctx.ordering_term(), ctx.K_LIMIT() != null, ctx.K_OFFSET() != null, ctx.expr(), q);
     return q;
@@ -144,6 +144,12 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
       throw new ParseCancellationException("NYI: " + op + " in: " + ctx.getText() + " op " + op);
 
     return new BinaryExpr((Expr)visit(ctx.expr().get(0)), binop, (Expr)visit(ctx.expr().get(1)));
+  }
+
+  @Override
+  public Expr visitParenExpr(ParenExprContext ctx)
+  {
+    return new ParenExpr((Expr)visit(ctx.expr()));
   }
 
   @Override
@@ -242,27 +248,36 @@ public class BuildASTVisitor extends CosetteBaseVisitor<Object>
   @Override
   public Query visitSelect_core(Select_coreContext ctx)
   {
-    return parseQuery(ctx.result_column(), ctx.table_or_subquery(), ctx.K_WHERE() != null, ctx.expr());
+    return parseQuery(ctx.result_column(), ctx.table_or_subquery(), ctx.K_WHERE() != null,
+                      ctx.K_GROUP() != null, ctx.K_HAVING() != null, ctx.expr());
   }
 
   protected Query parseQuery (List<Result_columnContext> cols, List<Table_or_subqueryContext> tables,
-                              boolean hasWhere, List<CosetteParser.ExprContext> exprs)
+                              boolean hasWhere, boolean hasGroupby, boolean hasHaving, List<CosetteParser.ExprContext> exprs)
   {
-//    List<Column> select = new ArrayList<>();
-//    for (Result_columnContext c : cols)
-//      select.add((Column)visit(c));
-
     List<Column> select = cols.stream().map(c -> (Column)visit(c)).collect(Collectors.toList());
-
-//    List<Relation> from = new ArrayList<>();
-//    for (Table_or_subqueryContext c : tables)
-//      from.add((Relation)visit(c));
-
     List<Relation> from = tables.stream().map(f -> (Relation)visit(f)).collect(Collectors.toList());
+
+    // exprs:
+    // [where] [one or more group by] [having]
 
     Expr where = hasWhere ? (Expr)visit(exprs.get(0)) : null;
 
-    return new Query(select, from, where);
+    List<Expr> groupby = null;
+
+    if (hasGroupby)
+    {
+      int start = hasWhere ? 1 : 0;
+      int end = hasHaving ? exprs.size() - 1 : exprs.size();
+
+      groupby = new ArrayList<>();
+      for (int i = start; i < end; ++i)
+        groupby.add((Expr)visit(exprs.get(i)));
+    }
+
+    Expr having = hasHaving ? (Expr)visit(exprs.get(exprs.size() - 1)) : null;
+
+    return new Query(select, from, where, groupby, having);
   }
 
   protected void parseOrderLimitOffset (List<Ordering_termContext> orders, boolean hasLimit, boolean hasOffset,

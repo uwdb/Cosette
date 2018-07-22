@@ -14,6 +14,8 @@ public class Query extends Relation
   protected List<Column> select;
   protected List<Relation> from;
   protected Expr where;
+  protected List<Expr> groupby;
+  protected Expr having;
 
   protected List<Pair<Expr, Boolean>> orders;
 
@@ -29,12 +31,14 @@ public class Query extends Relation
     this.where = where;
   }
 
-  public Query (List<Column> select, List<Relation> from, Expr where)
+  public Query (List<Column> select, List<Relation> from, Expr where, List<Expr> groupby, Expr having)
   {
     super("");
     this.select = select;
     this.from  = from;
     this.where = where;
+    this.groupby = groupby;
+    this.having = having;
   }
 
   public String name () { return name; }
@@ -69,6 +73,15 @@ public class Query extends Relation
 
     if (where != null)
       sb.append(" WHERE " + where.toString());
+
+    if (groupby != null)
+    {
+      sb.append(" GROUP BY ");
+      sb.append(String.join(", ", groupby.stream().map(o -> o.toString()).collect(Collectors.toList())));
+    }
+
+    if (having != null)
+      sb.append(" HAVING " + having);
 
     if (orders != null)
     {

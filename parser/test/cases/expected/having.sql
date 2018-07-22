@@ -1,0 +1,1 @@
+select * from R group by R.a, R.b having R.a > 10
