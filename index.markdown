@@ -38,6 +38,7 @@ Cosette compiles input queries to constraints over symbolic relations and calls 
 </div>
 
 ### Publications
+*  Axiomatic Foundations and Algorithms for Deciding Semantic Equivalences of SQL Queries \[ [paper](http://www.vldb.org/pvldb/vol11/p1482-chu.pdf) \] *VLDB 2018*.
 *  Demonstration of the Cosette Automated SQL Prover. \[ [paper](https://github.com/stechu/stechu.github.io/raw/master/papers/cosette-demo.pdf) \] *SIGMOD 2017 <span style="color:red">(best demo award)</span>*
 *  Cosette: An Automated Prover For SQL. \[ [paper](http://cidrdb.org/cidr2017/papers/p51-chu-cidr17.pdf) \]  *CIDR 2017*.
 *  HoTTSQL: Proving Query Rewrites with Univalent SQL Semantics. \[ [paper](https://homes.cs.washington.edu/~chushumo/files/cosette_pldi17.pdf) \] \[ [full version](https://homes.cs.washington.edu/~chushumo/files/cosette_pldi_full.pdf) \] \[ [artifact](http://cosette.cs.washington.edu) \] \[ [video](https://www.youtube.com/watch?v=b_1PUhrP1JU&list=PLMTm6Ln7vQZZv6sQ0I4R7iaIjvSVhHXod&index=26) \] *PLDI 2017*.
