@@ -4,6 +4,8 @@
 Cosette
 =======
 
+Note: we are busy developing Cosette 2.0, any feature request on Cosette 1.0 will not be considered.
+
 Cosette is a language, and an automated solver for reasoning SQL equivalences. 
 
 * Read [Introducing Cosette](https://medium.com/@uwdb/introducing-cosette-527898504bd6) 
