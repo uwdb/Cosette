@@ -2,7 +2,7 @@ FROM konne/cosette
 
 ####### Install Dependencies #######################
 RUN apt-get -y update
-RUN apt-get -y install build-essential curl zlib1g-dev libgmp3-dev libedit2 python
+RUN apt-get -y install build-essential curl zlib1g-dev libgmp3-dev libedit2 python libpangocairo-1.0-0 libjpeg62
 
 ############## install haskell #####################
 RUN curl -O https://downloads.haskell.org/~ghc/8.0.2/ghc-8.0.2-x86_64-deb7-linux.tar.xz
@@ -24,7 +24,7 @@ ENV PATH /usr/racket/bin:/root/.cabal/bin/:$PATH
 ENV LANG C.UTF-8
 
 ############# install rosette ######################
-RUN raco pkg install rosette; exit 0
+RUN raco pkg install --batch --auto rosette;
 
 ############# pull cosette #########################
 RUN git clone https://github.com/uwdb/Cosette.git
