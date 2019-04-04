@@ -171,6 +171,7 @@
                     [q1 (fq1 tables)]
                     [q2 (fq2 tables)])
                (cosette-solve q1 q2 tables)))])
+    (displayln initial-size)
     (define (rec-wrapper table-size-list)
       (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
         (cond [(eq? (car sol) "NEQ") (messenger sol)]
@@ -208,9 +209,14 @@
   (letrec ([used-table-info-one
           (lambda (qtf) 
             (cond
-              [(query-select? qtf) (used-table-info-one (query-select-from-query qtf))]
-              [(query-select-distinct? qtf) 
-               (used-table-info-one (query-select-distinct-from-query qtf))]
+              [(query-select? qtf) 
+               (append
+                  (used-table-info-one (query-select-from-query qtf))
+                  (used-table-info-one (query-select-where-filter qtf)))]
+              [(query-select-distinct? qtf)
+                (append 
+                  (used-table-info-one (query-select-distinct-from-query qtf))
+                  (used-table-info-one (query-select-distinct-where-filter qtf)))]
               [(query-join? qtf)
                (append (used-table-info-one (query-join-query1 qtf)) 
                        (used-table-info-one (query-join-query2 qtf)))]
@@ -224,9 +230,21 @@
               [(query-union-all? qtf) 
                (append (used-table-info-one (query-union-all-query1 qtf))
                        (used-table-info-one (query-union-all-query2 qtf)))]
-              [(query-aggr-general? qtf) (used-table-info-one (query-aggr-general-query qtf))]
-              [else (error "[Error] not  query construct")]))])
+              [(query-aggr-general? qtf) 
+               (append
+                 (used-table-info-one (query-aggr-general-query qtf))
+                 (append (used-table-info-one (query-aggr-general-where-filter qtf))
+                         (used-table-info-one (query-aggr-general-having-filter qtf))))]
+              [(filter-exists? qtf) 
+               (used-table-info-one (filter-exists-query qtf))]
+              [(filter-conj? qtf) 
+               (append (used-table-info-one (filter-conj-f1 qtf))
+                       (used-table-info-one (filter-conj-f2 qtf)))]
+              [(filter-disj? qtf) 
+               (append (used-table-info-one (filter-disj-f1 qtf))
+                       (used-table-info-one (filter-disj-f2 qtf)))]
+              [(filter-not? qtf) 
+               (used-table-info-one (filter-not-f1 qtf))]
+              [else '()]))])
     (list->set (foldl append (list)
                       (map (lambda (fq) (used-table-info-one (fq table-info-list))) fq-list)))))
-
-
