@@ -171,7 +171,6 @@
                     [q1 (fq1 tables)]
                     [q2 (fq2 tables)])
                (cosette-solve q1 q2 tables)))])
-    (displayln initial-size)
     (define (rec-wrapper table-size-list)
       (let ([sol (try-solve fq1 fq2 table-info-list table-size-list)])
         (cond [(eq? (car sol) "NEQ") (messenger sol)]
