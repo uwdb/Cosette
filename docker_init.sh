@@ -2,8 +2,7 @@
 
 DIR="/Cosette-Dev"
 # the command to build and test solver
-CMD="cd dsl; cabal install HUnit; cabal install Parsec; cabal build; cd .." #; python solver_test.py"
-NAME="cosette-test"
+NAME="cosette-minimal"
 
 # uncomment the following command if not exist
 # docker pull shumo/cosette-frontend

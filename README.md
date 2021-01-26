@@ -4,6 +4,8 @@
 Cosette
 =======
 
+This branch is a minimal Cosette designed for grading.
+
 Note: we are busy developing Cosette 2.0, any feature request on Cosette 1.0 will not be considered.
 
 Cosette is a language, and an automated solver for reasoning SQL equivalences. 

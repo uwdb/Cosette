@@ -6,8 +6,10 @@ BUILD=generated
 
 FILE="$1"
 
-UUID=$(head /dev/urandom | tr -dc A-Za-z | head -c 13 )
+filename=$(basename "$FILE")
+filename="${filename%.*}"
 
+UUID="tmp_"$filename
 
 mkdir -p rosette/$BUILD
 mkdir -p .compiled/
@@ -15,4 +17,7 @@ mkdir -p .compiled/
 cp $FILE rosette/$BUILD/$UUID.rkt
 cp rosette/$BUILD/$UUID.rkt .compiled/
 cd rosette
-racket server.rkt $BUILD/$UUID.rkt
+
+#echo "[OK] solving "$BUILD/$UUID.rkt
+
+racket test-server.rkt $BUILD/$UUID.rkt "$2" "$3" "$4" "$5"

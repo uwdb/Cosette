@@ -1,8 +1,0 @@
-schema dept(deptno:int, name:int);
-table dept(dept);
-
-query q1 `SELECT t.NAME FROM (SELECT * FROM DEPT AS DEPT WHERE DEPT.DEPTNO = 10) AS t WHERE t.DEPTNO = 10`;
-
-query q2 `SELECT DEPT0.NAME FROM DEPT AS DEPT0 WHERE DEPT0.DEPTNO = 10`;
-
-verify q1 q2;

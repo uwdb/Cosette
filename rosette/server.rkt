@@ -13,12 +13,12 @@
 ;; get the commandline arguments
 (define args (current-command-line-arguments))
 
-(unless (equal? (vector-length args) 1) (error "require a single filename"))
+(unless (equal? (vector-length args) 2) (error "require two arguments: filename and max running time"))
 
 (define rosfile (vector-ref args 0))
 
 ;; max allowed solver time
-(define max-time 3)
+(define max-time (string->number (vector-ref args 1)))
 
 ;; the channel that the main thread receives, the message could either be an
 ;; counter example, or a timeout message from the timing threads

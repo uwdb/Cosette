@@ -1,9 +1,0 @@
-
-schema emp(empno:int, ename:int, job:int, mgr:int, hiredate:int, comm:int, sal:int, deptno:int, slacker:int);
-table emp(emp);
-
-query q1 `SELECT EMP.JOB, EMP.EMPNO, EMP.SAL, SUM(EMP.SAL) AS S FROM EMP AS EMP WHERE EMP.EMPNO = 10 GROUP BY EMP.JOB, EMP.EMPNO, EMP.SAL`;
-
-query q2 `SELECT EMP0.JOB, 10 AS EMPNO, EMP0.SAL, SUM(EMP0.SAL) AS S FROM EMP AS EMP0 WHERE EMP0.EMPNO = 10 GROUP BY EMP0.JOB, EMP0.SAL`;
-
-verify q1 q2;

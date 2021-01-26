@@ -1,8 +1,0 @@
-schema dept(deptno:int, name:int);
-table dept(dept);
-
-query q1 `SELECT DEPT.NAME AS DNAME, COUNT(*) AS C FROM DEPT AS DEPT GROUP BY DEPT.NAME HAVING DEPT.NAME = 10`;
-
-query q2 `SELECT t2.DNAME, COUNT(*) AS C FROM (SELECT DEPT0.NAME AS DNAME FROM DEPT AS DEPT0) AS t2 WHERE t2.DNAME = 10 GROUP BY t2.DNAME`;
-
-verify q1 q2;
