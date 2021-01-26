@@ -4,7 +4,9 @@ NAME=Cosette
 
 BUILD=generated
 
+# by default only takes in file and time as input argument
 FILE="$1"
+TIME="$2"
 
 filename=$(basename "$FILE")
 filename="${filename%.*}"
@@ -19,5 +21,4 @@ cp rosette/$BUILD/$UUID.rkt .compiled/
 cd rosette
 
 #echo "[OK] solving "$BUILD/$UUID.rkt
-
-racket test-server.rkt $BUILD/$UUID.rkt "$2" "$3" "$4" "$5"
+racket test-server.rkt $BUILD/$UUID.rkt $TIME "--symbreak" #"$3" "$4" "$5"

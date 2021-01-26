@@ -30,7 +30,7 @@
         (display (to-str mconstr))
         (displayln (format "[query size] ~a ~a" (query-size qt1) (query-size qt2)))
         (displayln (format "[query aggr] ~a ~a" (query-contain-aggr qt1) (query-contain-aggr qt2)))
-        (displayln "--------------------")
+        (displayln "[[testing start]] --------------------")
         (car mconstr))))
   (define (test-now instance table-size-list)
       (let* ([tables (init-sym-tables-from-func table-info-list table-size-list table-init-func)]
@@ -42,13 +42,12 @@
     (let*-values ([(sol t-cpu t-real t-gc) 
                    (time-apply test-func (list ros-instance table-size-list))])
       (cond [(eq? (car (car sol)) "NEQ")
-             (displayln "[NEQ]")
-             (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
-             (pretty-display (cdr (car sol)))
-             (displayln "")
+             (displayln (format "[NEQ] [table size] ~a [real time] ~a ms" table-size-list t-real))
+             ;(pretty-display (cdr (car sol)))
+             (displayln (format "~a" (cosette-sol->json (car sol))))
              (flush-output)]
             [else 
-             (displayln (format "[table size] ~a [real time] ~a ms" table-size-list t-real))
+             (displayln (format "[EQ] [table size] ~a [real time] ~a ms" table-size-list t-real))
              (flush-output)
              (test-loop (inc-table-size-list table-size-list) test-func)])))
   (test-loop initial-table-size-list test-now))

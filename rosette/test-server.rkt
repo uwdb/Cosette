@@ -26,6 +26,9 @@
 ;; counter example, or a timeout message from the timing threads
 (define main-channel (make-channel))
 
+(displayln "iodsfjiojwoefhiwefwef")
+(displayln max-time)
+
 ;; the timing thread, will send timeout message to report thread
 (define timing-thread
   (thread (lambda ()

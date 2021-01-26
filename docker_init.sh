@@ -5,7 +5,7 @@ DIR="/Cosette-Dev"
 NAME="cosette-minimal-container"
 
 # uncomment the following command if not exist
-# docker pull shumo/cosette-frontend
+# docker build -t cosette-minimal .
 
 echo "[0] starting container with name $NAME ..."
 docker run -v $(pwd)/:$DIR -w $DIR --name=$NAME -it cosette-minimal bash #-c "$CMD"
