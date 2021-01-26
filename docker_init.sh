@@ -2,13 +2,13 @@
 
 DIR="/Cosette-Dev"
 # the command to build and test solver
-NAME="cosette-minimal"
+NAME="cosette-minimal-container"
 
 # uncomment the following command if not exist
 # docker pull shumo/cosette-frontend
 
 echo "[0] starting container with name $NAME ..."
-docker run -v $(pwd)/:$DIR -w $DIR --name=$NAME -it shumo/cosette-frontend bash #-c "$CMD"
+docker run -v $(pwd)/:$DIR -w $DIR --name=$NAME -it cosette-minimal bash #-c "$CMD"
 
 #echo "[2] removing the container ..."
 #docker rm $NAME

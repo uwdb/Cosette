@@ -20,8 +20,8 @@ RUN apt-get update && \
       fish
 
 ############# install racket #######################
-RUN wget https://mirror.racket-lang.org/installers/6.8/racket-6.8-x86_64-linux.sh
-RUN echo -ne "\n\n" | sh racket-6.8-x86_64-linux.sh
+RUN wget https://mirror.racket-lang.org/installers/7.9/racket-7.9-x86_64-linux.sh
+RUN echo -ne "\n\n" | sh racket-7.9-x86_64-linux.sh
 
 ############# add to the path ######################
 ENV PATH /usr/racket/bin:$PATH
