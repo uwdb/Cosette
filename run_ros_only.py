@@ -10,7 +10,6 @@ from pprint import pprint
 
 import sys
 
-
 def run_equiv_check(rosette_file, cosette_dir, time_limit, log_file=None):
     """ Run counter example search on the given rosette file
     Args:
@@ -25,19 +24,30 @@ def run_equiv_check(rosette_file, cosette_dir, time_limit, log_file=None):
 
     proc = Popen(cmd_ros, shell=True, stdout=PIPE, stderr=PIPE)
 
-    result = ""
+    raw_output = ""
     while True:
         retcode = proc.poll()
         if retcode is not None:
-            result = proc.stdout.read() + proc.stderr.read()
+            raw_output = proc.stdout.read() + proc.stderr.read()
             break
         else:
             time.sleep(.1)
             continue
 
-    result = [l.strip() for l in result.decode("utf-8").split("\n") if l.strip() != ""]
-    result = "\n".join(result[result.index("[[testing start]] --------------------"):])
-    return result
+    raw_output = raw_output.decode("utf-8") 
+    result = [l.strip() for l in raw_output.split("\n") if l.strip() != ""]
+    result = result[result.index("[[testing start]] --------------------")+1:]
+
+    if all([l.startswith("[EQ]") for l in result]):
+        return json.dumps({"status": "EQ", "test_log": raw_output})
+    elif result[-2].startswith("[NEQ]"):
+        res = json.loads(result[-1])
+        res["test_log"] = raw_output
+        return json.dumps(res)
+    else:
+        return json.dumps({"status": "ERROR", "test_log": raw_output})
+    
+    #return result
 
 if __name__ == '__main__':
     input_files = ["rosette/oopsla-benchmarks/cex-benchmarks/CA1.rkt"]
