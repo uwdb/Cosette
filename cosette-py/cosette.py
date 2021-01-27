@@ -52,6 +52,6 @@ def run_equiv_check(rosette_file, cosette_dir, time_limit, log_file=None):
 if __name__ == '__main__':
     input_files = ["rosette/oopsla-benchmarks/cex-benchmarks/CA1.rkt"]
     for infile in input_files:
-        result = run_equiv_check(infile, ".", 10)
+        result = run_equiv_check(infile, "..", 10)
 
         print(result)
