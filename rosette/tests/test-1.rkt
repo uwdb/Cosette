@@ -1,0 +1,38 @@
+#lang rosette 
+ 
+(require "../cosette.rkt" "../sql.rkt" "../evaluator.rkt" "../syntax.rkt") 
+ 
+(provide ros-instance)
+ 
+(current-bitwidth #f)
+(define indiv_sample_nyc-info (table-info "indiv_sample_nyc" (list "cmte_id" "transaction_amt" "name")))
+(define comm-info (table-info "comm" (list "cmte_id" "cmte_nm" "cand_id")))
+(define cand-info (table-info "cand" (list "cand_name" "cand_id")))
+(define all-tables (list indiv_sample_nyc-info comm-info cand-info))
+(define (q1 tables)
+
+(AS (SELECT (VALS "t_2.cand_name" "t_2.cmte_nm")
+FROM (AS (SELECT (VALS "t.cand_name" "t.cand_id" "t.cmte_id" "t.cmte_nm" "t.cand_id_2")
+FROM (AS (JOIN (AS (NAMED (list-ref tables 2))
+["c1" (list "cand_name" "cand_id")]) (AS (NAMED (list-ref tables 1))
+["c2" (list "cmte_id" "cmte_nm" "cand_id")]) )
+["t" (list "cand_name" "cand_id" "cmte_id" "cmte_nm" "cand_id_2")])
+WHERE (BINOP "t.cand_id" = "t.cand_id_2")  )
+["t_2" (list "cand_name" "cand_id" "cmte_id" "cmte_nm" "cand_id_2")])
+WHERE (TRUE)  )
+["t_3" (list "cand_name" "cmte_nm")])
+)
+(define (q2 tables)
+
+(AS (SELECT (VALS "t_2.cand_name" "t_2.cmte_nm")
+FROM (AS (SELECT (VALS "t.cand_name" "t.cand_id" "t.cmte_id" "t.cmte_nm" "t.cand_id_2")
+FROM (AS (JOIN (AS (NAMED (list-ref tables 2))
+["c1" (list "cand_name" "cand_id")]) (AS (NAMED (list-ref tables 1))
+["c2" (list "cmte_id" "cmte_nm" "cand_id")]) )
+["t" (list "cand_name" "cand_id" "cmte_id" "cmte_nm" "cand_id_2")])
+WHERE (BINOP "t.cand_id" = "t.cand_id_2")  )
+["t_2" (list "cand_name" "cand_id" "cmte_id" "cmte_nm" "cand_id_2")])
+WHERE (TRUE)  )
+["t_3" (list "cand_name" "cmte_nm")])
+)
+(define ros-instance (list q1 q2 all-tables))
