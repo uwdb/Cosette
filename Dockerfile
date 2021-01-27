@@ -34,3 +34,5 @@ ENV LANG C.UTF-8
 RUN raco pkg install --batch --auto rosette;
 
 RUN git clone -b minimal-grader https://github.com/uwdb/Cosette.git
+
+RUN pip3 install antlr4-python3-runtime
