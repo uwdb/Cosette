@@ -1,4 +1,4 @@
-FROM ubuntu:14.04.2
+FROM ubuntu:14.04
 MAINTAINER Konstantin Weitz <konstantin.weitz@gmail.com>
 
 RUN apt-get update && \
