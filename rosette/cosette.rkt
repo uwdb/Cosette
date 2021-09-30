@@ -9,6 +9,7 @@
 (provide cosette-sol->json 
          cosette-solve
          cosette-check-output-prop
+         clean-ret-table
          table-info
          solve-queries
          solve-queries-symbreak
