@@ -4,7 +4,7 @@
 Cosette
 =======
 
-Note: we are busy developing Cosette 2.0, any feature request on Cosette 1.0 will not be considered.
+Note: this repo is now deprecated. Check out our new [QED](https://github.com/qed-solver/) solver!
 
 Cosette is a language, and an automated solver for reasoning SQL equivalences. 
 
